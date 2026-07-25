@@ -1,5 +1,4 @@
 export interface CustomLink {
-    label: string;
     url: string;
 }
 
@@ -7,25 +6,25 @@ export interface Experience {
     role: string;
     company: string;
     date: string;
-    achievements: string[];
+    description: string;
 }
 
 export interface Project {
     name: string;
     date: string;
-    achievements: string[];
+    description: string;
 }
 
 export interface Education {
     degree: string;
     institution: string;
     date: string;
-    gpa: string;
+    description: string;
 }
 
 export interface SkillCategory {
-    category: string; // e.g., "Languages", "Frameworks"
-    items: string; // e.g., "JavaScript, TypeScript, Python"
+    category: string;
+    items: string;
 }
 
 export interface Certification {
@@ -36,15 +35,16 @@ export interface Certification {
 
 export interface CVData {
     name: string;
-    jobTitle: string; // Added Job Title
+    jobTitle: string;
     email: string;
     phone: string;
-    links: CustomLink[]; // Replaces the single hardcoded LinkedIn string
-    summary: string; // Added Summary
+    domicile: string;
+    links: CustomLink[];
+    summary: string;
     experience: Experience[];
     projects: Project[];
     education: Education[];
-    skills: SkillCategory[]; // Updated to categorized skills
+    skills: SkillCategory[];
     certifications: Certification[];
 }
 
@@ -53,7 +53,8 @@ export const initialCVState: CVData = {
     jobTitle: '',
     email: '',
     phone: '',
-    links: [{ label: 'LinkedIn', url: '' }],
+    domicile: '',
+    links: [],
     summary: '',
     experience: [],
     projects: [],

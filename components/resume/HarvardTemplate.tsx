@@ -6,27 +6,43 @@ interface TemplateProps {
 }
 
 export const HarvardTemplate = forwardRef<HTMLDivElement, TemplateProps>(({ cvData }, ref) => {
+    const renderBullets = (text: string) => {
+        if (!text) return null;
+
+        const lines = text.split('\n').filter((line) => line.trim() !== '');
+        if (lines.length === 0) return null;
+
+        return (
+            <ul className='list-disc list-outside ml-5 mt-1 text-[11pt]'>
+                {lines.map((line, i) => (
+                    <li key={i} className='pl-1 mb-0.5'>
+                        {line.trim().replace(/^[-•*]\s*/, '')}
+                    </li>
+                ))}
+            </ul>
+        );
+    };
+
     return (
         <div
             ref={ref}
-            className='font-serif bg-white text-black text-[11pt] p-[1in] w-[8.5in] min-h-[11in] mx-auto shadow-2xl box-border leading-snug'>
-            {/* HEADER: Name, Job Title, Contact Info */}
+            className='font-serif bg-white text-black text-[11pt] p-[2cm] w-[210mm] min-h-[297mm] mx-auto shadow-2xl box-border leading-snug'>
             <div className='text-center mb-4'>
-                <h1 className='text-3xl font-bold uppercase tracking-wider mb-1'>{cvData.name || 'Your Name'}</h1>
-                {cvData.jobTitle && <div className='text-lg mb-1'>{cvData.jobTitle}</div>}
+                <h1 className='text-2xl font-bold uppercase tracking-wider mb-1'>{cvData.name || 'Your Name'}</h1>
+                {cvData.jobTitle && <div className='mb-1'>{cvData.jobTitle}</div>}
 
-                <div className='flex flex-wrap justify-center gap-x-2 text-[10pt] mt-1'>
+                <div className='flex flex-wrap justify-center gap-x-1 text-[9pt] mt-1'>
                     {cvData.email && <span>{cvData.email}</span>}
-                    {cvData.email && cvData.phone && <span>|</span>}
-                    {cvData.phone && <span>{cvData.phone}</span>}
+                    {cvData.phone && <span> • {cvData.phone}</span>}
+                    {cvData.domicile && <span> • {cvData.domicile}</span>}
 
                     {cvData.links.map(
                         (link, idx) =>
                             link.url && (
                                 <React.Fragment key={idx}>
-                                    <span>|</span>
-                                    <a href={link.url} className='hover:underline'>
-                                        {link.label}: {link.url.replace(/^https?:\/\//, '')}
+                                    <span>•</span>
+                                    <a href={'https://' + link.url} target='_blank' className='hover:underline'>
+                                        {link.url}
                                     </a>
                                 </React.Fragment>
                             ),
@@ -47,7 +63,7 @@ export const HarvardTemplate = forwardRef<HTMLDivElement, TemplateProps>(({ cvDa
                 <div className='mb-4'>
                     <h2 className='text-[12pt] font-bold uppercase border-b border-black mb-2 pb-0.5'>Experience</h2>
                     {cvData.experience.map((exp, index) => (
-                        <div key={index} className='mb-3 break-inside-avoid'>
+                        <div key={exp.id || index} className='mb-3 break-inside-avoid'>
                             <div className='flex justify-between font-bold text-[11pt]'>
                                 <span>
                                     {exp.role}{' '}
@@ -55,15 +71,7 @@ export const HarvardTemplate = forwardRef<HTMLDivElement, TemplateProps>(({ cvDa
                                 </span>
                                 <span>{exp.date}</span>
                             </div>
-                            <ul className='list-disc list-outside ml-5 mt-1 text-[11pt]'>
-                                {exp.achievements.map((ach, i) =>
-                                    ach.trim() ? (
-                                        <li key={i} className='pl-1'>
-                                            {ach}
-                                        </li>
-                                    ) : null,
-                                )}
-                            </ul>
+                            {renderBullets(exp.description)}
                         </div>
                     ))}
                 </div>
@@ -74,20 +82,12 @@ export const HarvardTemplate = forwardRef<HTMLDivElement, TemplateProps>(({ cvDa
                 <div className='mb-4'>
                     <h2 className='text-[12pt] font-bold uppercase border-b border-black mb-2 pb-0.5'>Projects</h2>
                     {cvData.projects.map((proj, index) => (
-                        <div key={index} className='mb-3 break-inside-avoid'>
+                        <div key={proj.id || index} className='mb-3 break-inside-avoid'>
                             <div className='flex justify-between font-bold text-[11pt]'>
                                 <span>{proj.name}</span>
                                 <span>{proj.date}</span>
                             </div>
-                            <ul className='list-disc list-outside ml-5 mt-1 text-[11pt]'>
-                                {proj.achievements.map((ach, i) =>
-                                    ach.trim() ? (
-                                        <li key={i} className='pl-1'>
-                                            {ach}
-                                        </li>
-                                    ) : null,
-                                )}
-                            </ul>
+                            {renderBullets(proj.description)}
                         </div>
                     ))}
                 </div>
@@ -105,8 +105,8 @@ export const HarvardTemplate = forwardRef<HTMLDivElement, TemplateProps>(({ cvDa
                             </div>
                             <div className='flex justify-between italic text-[11pt]'>
                                 <span>{edu.degree}</span>
-                                <span>{edu.gpa}</span>
                             </div>
+                            {renderBullets(edu.description)}
                         </div>
                     ))}
                 </div>
