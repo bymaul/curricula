@@ -28,7 +28,6 @@
     "devDependencies": {
         "@tailwindcss/postcss": "^4",
         "@types/node": "^20",
-        "@types/pdfjs-dist": "^2.10.378",
         "@types/react": "^19",
         "@types/react-dom": "^19",
         "eslint": "^9",
