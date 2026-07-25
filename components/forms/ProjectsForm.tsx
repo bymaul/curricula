@@ -1,20 +1,18 @@
+import { CVData } from '@/lib/schema';
 import { closestCenter, DndContext, KeyboardSensor, PointerSensor, useSensor, useSensors } from '@dnd-kit/core';
 import {
-    arrayMove,
     SortableContext,
     sortableKeyboardCoordinates,
     useSortable,
     verticalListSortingStrategy,
 } from '@dnd-kit/sortable';
 import { CSS } from '@dnd-kit/utilities';
+import { useFieldArray, useFormContext } from 'react-hook-form';
 
-const SortableProjectItem = ({ proj, index, updateArrayItem, removeArrayItem }: any) => {
-    const { attributes, listeners, setNodeRef, transform, transition } = useSortable({ id: proj.id });
-
-    const style = {
-        transform: CSS.Transform.toString(transform),
-        transition,
-    };
+const SortableProjectItem = ({ id, index, remove }: { id: string; index: number; remove: (index: number) => void }) => {
+    const { register } = useFormContext<CVData>();
+    const { attributes, listeners, setNodeRef, transform, transition } = useSortable({ id });
+    const style = { transform: CSS.Transform.toString(transform), transition };
 
     return (
         <div
@@ -29,7 +27,7 @@ const SortableProjectItem = ({ proj, index, updateArrayItem, removeArrayItem }: 
             </div>
             <button
                 type='button'
-                onClick={() => removeArrayItem('projects', index)}
+                onClick={() => remove(index)}
                 className='absolute top-4 right-4 text-red-500 text-xs font-bold hover:underline'>
                 Remove
             </button>
@@ -37,20 +35,16 @@ const SortableProjectItem = ({ proj, index, updateArrayItem, removeArrayItem }: 
             <div className='pl-6'>
                 <div className='grid grid-cols-1 sm:grid-cols-2 gap-3 mb-3'>
                     <div>
-                        <label className='text-xs font-bold text-gray-500 uppercase'>Project Name *</label>
+                        <label className='text-xs font-bold text-gray-500 uppercase'>Project Name</label>
                         <input
-                            required
-                            value={proj.name}
-                            onChange={(e) => updateArrayItem('projects', index, 'name', e.target.value)}
+                            {...register(`projects.${index}.name` as const)}
                             className='w-full border-b p-1 focus:outline-none focus:border-blue-500'
                         />
                     </div>
                     <div>
-                        <label className='text-xs font-bold text-gray-500 uppercase'>Dates *</label>
+                        <label className='text-xs font-bold text-gray-500 uppercase'>Dates</label>
                         <input
-                            required
-                            value={proj.date}
-                            onChange={(e) => updateArrayItem('projects', index, 'date', e.target.value)}
+                            {...register(`projects.${index}.date` as const)}
                             className='w-full border-b p-1 focus:outline-none focus:border-blue-500'
                         />
                     </div>
@@ -58,9 +52,8 @@ const SortableProjectItem = ({ proj, index, updateArrayItem, removeArrayItem }: 
 
                 <label className='text-xs font-bold text-gray-500 uppercase'>Description / Bullet Points</label>
                 <textarea
-                    value={proj.description}
-                    onChange={(e) => updateArrayItem('projects', index, 'description', e.target.value)}
-                    placeholder='Paste your bullet points here. Use dashes (-) or new lines to separate them.'
+                    {...register(`projects.${index}.description` as const)}
+                    placeholder='Use dashes (-) or new lines to separate bullets.'
                     className='w-full border p-2 rounded text-sm h-32 bg-gray-50 focus:bg-white resize-y mt-1'
                 />
             </div>
@@ -68,16 +61,9 @@ const SortableProjectItem = ({ proj, index, updateArrayItem, removeArrayItem }: 
     );
 };
 
-export const ProjectsForm = ({
-    cvData,
-    setCvData,
-    addArrayItem,
-    updateArrayItem,
-    removeArrayItem,
-    updateAchievement,
-    addAchievement,
-    removeAchievement,
-}: any) => {
+export const ProjectsForm = () => {
+    const { control } = useFormContext<CVData>();
+    const { fields, append, remove, move } = useFieldArray({ control, name: 'projects' });
     const sensors = useSensors(
         useSensor(PointerSensor),
         useSensor(KeyboardSensor, { coordinateGetter: sortableKeyboardCoordinates }),
@@ -86,9 +72,9 @@ export const ProjectsForm = ({
     const handleDragEnd = (event: any) => {
         const { active, over } = event;
         if (active.id !== over.id) {
-            const oldIndex = cvData.projects.findIndex((item: any) => item.id === active.id);
-            const newIndex = cvData.projects.findIndex((item: any) => item.id === over.id);
-            setCvData({ ...cvData, projects: arrayMove(cvData.projects, oldIndex, newIndex) });
+            const oldIndex = fields.findIndex((item) => item.id === active.id);
+            const newIndex = fields.findIndex((item) => item.id === over.id);
+            move(oldIndex, newIndex);
         }
     };
 
@@ -98,27 +84,16 @@ export const ProjectsForm = ({
             <p className='text-sm text-gray-500 mb-6'>Drag the handles (⣿) to reorder your projects.</p>
 
             <DndContext sensors={sensors} collisionDetection={closestCenter} onDragEnd={handleDragEnd}>
-                <SortableContext items={cvData.projects.map((p: any) => p.id)} strategy={verticalListSortingStrategy}>
-                    {cvData.projects.map((proj: any, index: number) => (
-                        <SortableProjectItem
-                            key={proj.id}
-                            proj={proj}
-                            index={index}
-                            updateArrayItem={updateArrayItem}
-                            removeArrayItem={removeArrayItem}
-                            updateAchievement={updateAchievement}
-                            addAchievement={addAchievement}
-                            removeAchievement={removeAchievement}
-                        />
+                <SortableContext items={fields.map((f) => f.id)} strategy={verticalListSortingStrategy}>
+                    {fields.map((field, index) => (
+                        <SortableProjectItem key={field.id} id={field.id} index={index} remove={remove} />
                     ))}
                 </SortableContext>
             </DndContext>
 
             <button
                 type='button'
-                onClick={() =>
-                    addArrayItem('projects', { id: `proj-${Date.now()}`, name: '', date: '', achievements: [''] })
-                }
+                onClick={() => append({ name: '', date: '', description: '' })}
                 className='w-full bg-black text-white p-3 rounded-lg font-bold hover:bg-gray-800 transition'>
                 + Add New Project
             </button>

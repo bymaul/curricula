@@ -1,15 +1,17 @@
+import { CVData } from '@/lib/schema';
 import { closestCenter, DndContext, KeyboardSensor, PointerSensor, useSensor, useSensors } from '@dnd-kit/core';
 import {
-    arrayMove,
     SortableContext,
     sortableKeyboardCoordinates,
     useSortable,
     verticalListSortingStrategy,
 } from '@dnd-kit/sortable';
 import { CSS } from '@dnd-kit/utilities';
+import { useFieldArray, useFormContext } from 'react-hook-form';
 
-const SortableCertItem = ({ cert, index, updateArrayItem, removeArrayItem }: any) => {
-    const { attributes, listeners, setNodeRef, transform, transition } = useSortable({ id: cert.id });
+const SortableCertItem = ({ id, index, remove }: { id: string; index: number; remove: (index: number) => void }) => {
+    const { register } = useFormContext<CVData>();
+    const { attributes, listeners, setNodeRef, transform, transition } = useSortable({ id });
     const style = { transform: CSS.Transform.toString(transform), transition };
 
     return (
@@ -21,37 +23,31 @@ const SortableCertItem = ({ cert, index, updateArrayItem, removeArrayItem }: any
                 ⣿
             </div>
 
-            <div className='flex-1 min-w-[150px]'>
-                <label className='text-xs font-bold text-gray-500 uppercase'>Name *</label>
+            <div className='flex-1 min-w-37.5'>
+                <label className='text-xs font-bold text-gray-500 uppercase'>Name</label>
                 <input
-                    required
-                    value={cert.name}
-                    onChange={(e) => updateArrayItem('certifications', index, 'name', e.target.value)}
+                    {...register(`certifications.${index}.name` as const)}
                     className='w-full border-b p-1 focus:outline-none focus:border-blue-500'
                 />
             </div>
-            <div className='flex-1 min-w-[150px]'>
-                <label className='text-xs font-bold text-gray-500 uppercase'>Issuer *</label>
+            <div className='flex-1 min-w-37.5'>
+                <label className='text-xs font-bold text-gray-500 uppercase'>Issuer</label>
                 <input
-                    required
-                    value={cert.issuer}
-                    onChange={(e) => updateArrayItem('certifications', index, 'issuer', e.target.value)}
+                    {...register(`certifications.${index}.issuer` as const)}
                     className='w-full border-b p-1 focus:outline-none focus:border-blue-500'
                 />
             </div>
-            <div className='w-full sm:w-1/4 min-w-[100px]'>
-                <label className='text-xs font-bold text-gray-500 uppercase'>Date *</label>
+            <div className='w-full sm:w-1/4 min-w-25'>
+                <label className='text-xs font-bold text-gray-500 uppercase'>Date</label>
                 <input
-                    required
-                    value={cert.date}
-                    onChange={(e) => updateArrayItem('certifications', index, 'date', e.target.value)}
+                    {...register(`certifications.${index}.date` as const)}
                     className='w-full border-b p-1 focus:outline-none focus:border-blue-500'
                 />
             </div>
 
             <button
                 type='button'
-                onClick={() => removeArrayItem('certifications', index)}
+                onClick={() => remove(index)}
                 className='text-gray-400 hover:text-red-500 font-bold mt-4'>
                 ✕
             </button>
@@ -59,7 +55,9 @@ const SortableCertItem = ({ cert, index, updateArrayItem, removeArrayItem }: any
     );
 };
 
-export const CertificationsForm = ({ cvData, setCvData, addArrayItem, updateArrayItem, removeArrayItem }: any) => {
+export const CertificationsForm = () => {
+    const { control } = useFormContext<CVData>();
+    const { fields, append, remove, move } = useFieldArray({ control, name: 'certifications' });
     const sensors = useSensors(
         useSensor(PointerSensor),
         useSensor(KeyboardSensor, { coordinateGetter: sortableKeyboardCoordinates }),
@@ -68,9 +66,9 @@ export const CertificationsForm = ({ cvData, setCvData, addArrayItem, updateArra
     const handleDragEnd = (event: any) => {
         const { active, over } = event;
         if (active.id !== over.id) {
-            const oldIndex = cvData.certifications.findIndex((item: any) => item.id === active.id);
-            const newIndex = cvData.certifications.findIndex((item: any) => item.id === over.id);
-            setCvData({ ...cvData, certifications: arrayMove(cvData.certifications, oldIndex, newIndex) });
+            const oldIndex = fields.findIndex((item) => item.id === active.id);
+            const newIndex = fields.findIndex((item) => item.id === over.id);
+            move(oldIndex, newIndex);
         }
     };
 
@@ -80,26 +78,16 @@ export const CertificationsForm = ({ cvData, setCvData, addArrayItem, updateArra
             <p className='text-sm text-gray-500 mb-6'>Drag the handles (⣿) to reorder your certifications.</p>
 
             <DndContext sensors={sensors} collisionDetection={closestCenter} onDragEnd={handleDragEnd}>
-                <SortableContext
-                    items={cvData.certifications.map((c: any) => c.id)}
-                    strategy={verticalListSortingStrategy}>
-                    {cvData.certifications.map((cert: any, index: number) => (
-                        <SortableCertItem
-                            key={cert.id}
-                            cert={cert}
-                            index={index}
-                            updateArrayItem={updateArrayItem}
-                            removeArrayItem={removeArrayItem}
-                        />
+                <SortableContext items={fields.map((f) => f.id)} strategy={verticalListSortingStrategy}>
+                    {fields.map((field, index) => (
+                        <SortableCertItem key={field.id} id={field.id} index={index} remove={remove} />
                     ))}
                 </SortableContext>
             </DndContext>
 
             <button
                 type='button'
-                onClick={() =>
-                    addArrayItem('certifications', { id: `cert-${Date.now()}`, name: '', issuer: '', date: '' })
-                }
+                onClick={() => append({ name: '', issuer: '', date: '' })}
                 className='w-full bg-black text-white p-3 rounded-lg font-bold hover:bg-gray-800 transition'>
                 + Add Certification
             </button>

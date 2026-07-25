@@ -1,15 +1,17 @@
+import { CVData } from '@/lib/schema';
 import { closestCenter, DndContext, KeyboardSensor, PointerSensor, useSensor, useSensors } from '@dnd-kit/core';
 import {
-    arrayMove,
     SortableContext,
     sortableKeyboardCoordinates,
     useSortable,
     verticalListSortingStrategy,
 } from '@dnd-kit/sortable';
 import { CSS } from '@dnd-kit/utilities';
+import { useFieldArray, useFormContext } from 'react-hook-form';
 
-const SortableSkillItem = ({ skill, index, updateArrayItem, removeArrayItem }: any) => {
-    const { attributes, listeners, setNodeRef, transform, transition } = useSortable({ id: skill.id });
+const SortableSkillItem = ({ id, index, remove }: { id: string; index: number; remove: (index: number) => void }) => {
+    const { register } = useFormContext<CVData>();
+    const { attributes, listeners, setNodeRef, transform, transition } = useSortable({ id });
     const style = { transform: CSS.Transform.toString(transform), transition };
 
     return (
@@ -22,29 +24,25 @@ const SortableSkillItem = ({ skill, index, updateArrayItem, removeArrayItem }: a
             </div>
 
             <div className='w-1/3'>
-                <label className='text-xs font-bold text-gray-500 uppercase'>Category *</label>
+                <label className='text-xs font-bold text-gray-500 uppercase'>Category</label>
                 <input
-                    required
+                    {...register(`skills.${index}.category` as const)}
                     placeholder='e.g., Languages'
-                    value={skill.category}
-                    onChange={(e) => updateArrayItem('skills', index, 'category', e.target.value)}
                     className='w-full border-b p-1 focus:outline-none focus:border-blue-500'
                 />
             </div>
             <div className='flex-1'>
-                <label className='text-xs font-bold text-gray-500 uppercase'>Skills (Comma Separated) *</label>
+                <label className='text-xs font-bold text-gray-500 uppercase'>Skills</label>
                 <input
-                    required
+                    {...register(`skills.${index}.items` as const)}
                     placeholder='React, TypeScript, Next.js...'
-                    value={skill.items}
-                    onChange={(e) => updateArrayItem('skills', index, 'items', e.target.value)}
                     className='w-full border-b p-1 focus:outline-none focus:border-blue-500'
                 />
             </div>
 
             <button
                 type='button'
-                onClick={() => removeArrayItem('skills', index)}
+                onClick={() => remove(index)}
                 className='text-gray-400 hover:text-red-500 font-bold mt-4'>
                 ✕
             </button>
@@ -52,7 +50,9 @@ const SortableSkillItem = ({ skill, index, updateArrayItem, removeArrayItem }: a
     );
 };
 
-export const SkillsForm = ({ cvData, setCvData, addArrayItem, updateArrayItem, removeArrayItem }: any) => {
+export const SkillsForm = () => {
+    const { control } = useFormContext<CVData>();
+    const { fields, append, remove, move } = useFieldArray({ control, name: 'skills' });
     const sensors = useSensors(
         useSensor(PointerSensor),
         useSensor(KeyboardSensor, { coordinateGetter: sortableKeyboardCoordinates }),
@@ -61,9 +61,9 @@ export const SkillsForm = ({ cvData, setCvData, addArrayItem, updateArrayItem, r
     const handleDragEnd = (event: any) => {
         const { active, over } = event;
         if (active.id !== over.id) {
-            const oldIndex = cvData.skills.findIndex((item: any) => item.id === active.id);
-            const newIndex = cvData.skills.findIndex((item: any) => item.id === over.id);
-            setCvData({ ...cvData, skills: arrayMove(cvData.skills, oldIndex, newIndex) });
+            const oldIndex = fields.findIndex((item) => item.id === active.id);
+            const newIndex = fields.findIndex((item) => item.id === over.id);
+            move(oldIndex, newIndex);
         }
     };
 
@@ -73,22 +73,16 @@ export const SkillsForm = ({ cvData, setCvData, addArrayItem, updateArrayItem, r
             <p className='text-sm text-gray-500 mb-6'>Group your skills by category for ATS readability.</p>
 
             <DndContext sensors={sensors} collisionDetection={closestCenter} onDragEnd={handleDragEnd}>
-                <SortableContext items={cvData.skills.map((s: any) => s.id)} strategy={verticalListSortingStrategy}>
-                    {cvData.skills.map((skill: any, index: number) => (
-                        <SortableSkillItem
-                            key={skill.id}
-                            skill={skill}
-                            index={index}
-                            updateArrayItem={updateArrayItem}
-                            removeArrayItem={removeArrayItem}
-                        />
+                <SortableContext items={fields.map((f) => f.id)} strategy={verticalListSortingStrategy}>
+                    {fields.map((field, index) => (
+                        <SortableSkillItem key={field.id} id={field.id} index={index} remove={remove} />
                     ))}
                 </SortableContext>
             </DndContext>
 
             <button
                 type='button'
-                onClick={() => addArrayItem('skills', { id: `skill-${Date.now()}`, category: '', items: '' })}
+                onClick={() => append({ category: '', items: '' })}
                 className='w-full bg-black text-white p-3 rounded-lg font-bold hover:bg-gray-800 transition'>
                 + Add Skill Category
             </button>
