@@ -1,5 +1,9 @@
 'use client';
 
+import { useState } from 'react';
+import { FormProvider, useForm } from 'react-hook-form';
+import { zodResolver } from '@hookform/resolvers/zod';
+
 import { CertificationsForm } from '@/components/forms/CertificationsForm';
 import { EducationForm } from '@/components/forms/EducationForm';
 import { ExperienceForm } from '@/components/forms/ExperienceForm';
@@ -7,17 +11,16 @@ import { PersonalForm } from '@/components/forms/PersonalForm';
 import { ProjectsForm } from '@/components/forms/ProjectsForm';
 import { SkillsForm } from '@/components/forms/SkillsForm';
 import { HarvardTemplate } from '@/components/resume/HarvardTemplate';
+
 import { CVData, cvSchema, initialCVState } from '@/lib/schema';
-import { zodResolver } from '@hookform/resolvers/zod';
-import { useEffect, useRef, useState } from 'react';
-import { FormProvider, useForm } from 'react-hook-form';
-import { useReactToPrint } from 'react-to-print';
+import { useCVAutoSave } from '@/hooks/useCVAutoSave';
+import { useCVImportExport } from '@/hooks/useCVImportExport';
+import { useCVPrint } from '@/hooks/useCVPrint';
 
 const TABS = ['Personal', 'Experience', 'Projects', 'Education', 'Skills', 'Certifications'];
 
 export default function Home() {
     const [activeTab, setActiveTab] = useState('Personal');
-    const [mounted, setMounted] = useState(false);
 
     const methods = useForm<CVData>({
         resolver: zodResolver(cvSchema),
@@ -25,71 +28,9 @@ export default function Home() {
         mode: 'onChange',
     });
 
-    const { watch, reset, trigger } = methods;
-    const cvData = watch();
-
-    useEffect(() => {
-        const savedData = localStorage.getItem('cv-builder-data');
-        if (savedData) {
-            try {
-                reset(JSON.parse(savedData));
-            } catch (e) {
-                console.error('Failed to parse local storage', e);
-            }
-        }
-        setMounted(true);
-    }, [reset]);
-
-    useEffect(() => {
-        if (mounted) {
-            localStorage.setItem('cv-builder-data', JSON.stringify(cvData));
-        }
-    }, [cvData, mounted]);
-
-    const handleExportData = () => {
-        const dataStr = JSON.stringify(cvData, null, 2);
-        const blob = new Blob([dataStr], { type: 'application/json' });
-        const url = URL.createObjectURL(blob);
-        const link = document.createElement('a');
-        link.href = url;
-        link.download = `${cvData.name ? cvData.name.replace(/\s+/g, '_') : 'My'}_CV_Data.json`;
-        link.click();
-        URL.revokeObjectURL(url);
-    };
-
-    const fileInputRef = useRef<HTMLInputElement>(null);
-    const handleImportData = (e: React.ChangeEvent<HTMLInputElement>) => {
-        const file = e.target.files?.[0];
-        if (!file) return;
-
-        const reader = new FileReader();
-        reader.onload = (event) => {
-            try {
-                const importedData = JSON.parse(event.target?.result as string);
-                reset(importedData);
-                alert('CV Data imported successfully!');
-            } catch (error) {
-                alert('Invalid JSON file. Please upload a valid CV Data backup.');
-            }
-        };
-        reader.readAsText(file);
-    };
-
-    const printRef = useRef<HTMLDivElement>(null);
-
-    const handlePrintClick = async () => {
-        const isValid = await trigger();
-        if (!isValid) {
-            alert('Please fill out all required fields before generating the PDF.');
-            return;
-        }
-        handlePrint();
-    };
-
-    const handlePrint = useReactToPrint({
-        contentRef: printRef,
-        documentTitle: `${cvData.name || 'My'}_CV`,
-    });
+    const { mounted, cvData } = useCVAutoSave(methods);
+    const { fileInputRef, handleExportData, handleImportData } = useCVImportExport(cvData, methods.reset);
+    const { printRef, handlePrintClick } = useCVPrint(cvData, methods.trigger, setActiveTab);
 
     if (!mounted) return null;
 
@@ -112,7 +53,7 @@ export default function Home() {
                         </button>
                     ))}
 
-                    <div>
+                    <div className='mt-4'>
                         <h3 className='text-xs font-bold text-gray-400 uppercase tracking-wider mb-3'>
                             Data Management
                         </h3>
@@ -149,7 +90,7 @@ export default function Home() {
 
                 <section className='hidden xl:flex w-212.5 bg-gray-200 p-8 flex-col items-center overflow-y-auto h-screen border-l border-gray-300 shadow-inner'>
                     <button
-                        onClick={handlePrint}
+                        onClick={handlePrintClick}
                         className='mb-6 bg-blue-600 text-white px-8 py-3 rounded-full font-bold shadow-xl hover:bg-blue-700 transition w-full max-w-[210mm]'>
                         Print / Download PDF
                     </button>
