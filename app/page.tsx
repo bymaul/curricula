@@ -7,7 +7,6 @@ import { PersonalForm } from '@/components/forms/PersonalForm';
 import { ProjectsForm } from '@/components/forms/ProjectsForm';
 import { SkillsForm } from '@/components/forms/SkillsForm';
 import { HarvardTemplate } from '@/components/resume/HarvardTemplate';
-import { useLocalStorage } from '@/hooks/useLocalStorage';
 import { CVData, cvSchema, initialCVState } from '@/lib/schema';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { useEffect, useRef, useState } from 'react';
@@ -23,9 +22,10 @@ export default function Home() {
     const methods = useForm<CVData>({
         resolver: zodResolver(cvSchema),
         defaultValues: initialCVState,
+        mode: 'onChange',
     });
 
-    const { watch, reset } = methods;
+    const { watch, reset, trigger } = methods;
     const cvData = watch();
 
     useEffect(() => {
@@ -46,11 +46,49 @@ export default function Home() {
         }
     }, [cvData, mounted]);
 
-    // Print setup
+    const handleExportData = () => {
+        const dataStr = JSON.stringify(cvData, null, 2);
+        const blob = new Blob([dataStr], { type: 'application/json' });
+        const url = URL.createObjectURL(blob);
+        const link = document.createElement('a');
+        link.href = url;
+        link.download = `${cvData.name ? cvData.name.replace(/\s+/g, '_') : 'My'}_CV_Data.json`;
+        link.click();
+        URL.revokeObjectURL(url);
+    };
+
+    const fileInputRef = useRef<HTMLInputElement>(null);
+    const handleImportData = (e: React.ChangeEvent<HTMLInputElement>) => {
+        const file = e.target.files?.[0];
+        if (!file) return;
+
+        const reader = new FileReader();
+        reader.onload = (event) => {
+            try {
+                const importedData = JSON.parse(event.target?.result as string);
+                reset(importedData);
+                alert('CV Data imported successfully!');
+            } catch (error) {
+                alert('Invalid JSON file. Please upload a valid CV Data backup.');
+            }
+        };
+        reader.readAsText(file);
+    };
+
     const printRef = useRef<HTMLDivElement>(null);
+
+    const handlePrintClick = async () => {
+        const isValid = await trigger();
+        if (!isValid) {
+            alert('Please fill out all required fields before generating the PDF.');
+            return;
+        }
+        handlePrint();
+    };
+
     const handlePrint = useReactToPrint({
         contentRef: printRef,
-        documentTitle: `${cvData.name || 'My'}_Harvard_CV`,
+        documentTitle: `${cvData.name || 'My'}_CV`,
     });
 
     if (!mounted) return null;
@@ -73,6 +111,29 @@ export default function Home() {
                             {tab}
                         </button>
                     ))}
+
+                    <div>
+                        <h3 className='text-xs font-bold text-gray-400 uppercase tracking-wider mb-3'>
+                            Data Management
+                        </h3>
+                        <button
+                            onClick={handleExportData}
+                            className='w-full text-left px-4 py-2 text-sm text-gray-700 hover:bg-gray-100 rounded-md mb-2'>
+                            ↓ Export JSON Backup
+                        </button>
+                        <button
+                            onClick={() => fileInputRef.current?.click()}
+                            className='w-full text-left px-4 py-2 text-sm text-gray-700 hover:bg-gray-100 rounded-md'>
+                            ↑ Import JSON Backup
+                        </button>
+                        <input
+                            type='file'
+                            accept='.json'
+                            ref={fileInputRef}
+                            onChange={handleImportData}
+                            className='hidden'
+                        />
+                    </div>
                 </aside>
 
                 <section className='flex-1 max-w-3xl p-8 overflow-y-auto h-screen custom-scrollbar'>
