@@ -1,8 +1,30 @@
 'use client';
 
+import { zodResolver } from '@hookform/resolvers/zod';
 import { useState } from 'react';
 import { FormProvider, useForm } from 'react-hook-form';
-import { zodResolver } from '@hookform/resolvers/zod';
+
+import { Button } from '@/components/ui/button';
+import {
+    DropdownMenu,
+    DropdownMenuContent,
+    DropdownMenuItem,
+    DropdownMenuTrigger,
+} from '@/components/ui/dropdown-menu';
+import { ScrollArea } from '@/components/ui/scroll-area';
+import {
+    Award,
+    Briefcase,
+    CheckCircle2,
+    ChevronDown,
+    Download,
+    FolderGit2,
+    GraduationCap,
+    Printer,
+    Upload,
+    User,
+    Wrench,
+} from 'lucide-react';
 
 import { CertificationsForm } from '@/components/forms/CertificationsForm';
 import { EducationForm } from '@/components/forms/EducationForm';
@@ -12,12 +34,20 @@ import { ProjectsForm } from '@/components/forms/ProjectsForm';
 import { SkillsForm } from '@/components/forms/SkillsForm';
 import { HarvardTemplate } from '@/components/resume/HarvardTemplate';
 
-import { CVData, cvSchema, initialCVState } from '@/lib/schema';
+import { Tooltip, TooltipContent, TooltipTrigger } from '@/components/ui/tooltip';
 import { useCVAutoSave } from '@/hooks/useCVAutoSave';
 import { useCVImportExport } from '@/hooks/useCVImportExport';
 import { useCVPrint } from '@/hooks/useCVPrint';
+import { CVData, cvSchema, initialCVState } from '@/lib/schema';
 
-const TABS = ['Personal', 'Experience', 'Projects', 'Education', 'Skills', 'Certifications'];
+const SECTIONS = [
+    { name: 'Personal', icon: User },
+    { name: 'Experience', icon: Briefcase },
+    { name: 'Projects', icon: FolderGit2 },
+    { name: 'Education', icon: GraduationCap },
+    { name: 'Skills', icon: Wrench },
+    { name: 'Certifications', icon: Award },
+];
 
 export default function Home() {
     const [activeTab, setActiveTab] = useState('Personal');
@@ -36,67 +66,117 @@ export default function Home() {
 
     return (
         <FormProvider {...methods}>
-            <main className='min-h-screen bg-gray-50 text-gray-900 flex flex-col md:flex-row'>
-                <aside className='w-full md:w-64 bg-white border-r border-gray-200 p-6 flex flex-col gap-2 shadow-sm z-10'>
-                    <div className='mb-6'>
-                        <h1 className='text-xl font-black tracking-tight'>CV Builder.</h1>
-                        <p className='text-xs text-green-600 font-semibold mt-1'>● Auto-saving</p>
-                    </div>
-                    {TABS.map((tab) => (
-                        <button
-                            key={tab}
-                            onClick={() => setActiveTab(tab)}
-                            className={`text-left px-4 py-3 rounded-lg text-sm font-medium transition-all ${
-                                activeTab === tab ? 'bg-blue-50 text-blue-700' : 'text-gray-600 hover:bg-gray-100'
-                            }`}>
-                            {tab}
-                        </button>
-                    ))}
+            <main className='h-screen w-full bg-background text-foreground p-4 lg:p-6 flex flex-col lg:flex-row gap-4 lg:gap-6 overflow-hidden'>
+                <section className='w-full lg:w-[35%] xl:w-[30%] flex flex-col h-full border border-border bg-card rounded-xl shadow-lg overflow-hidden shrink-0'>
+                    <header className='px-5 py-4 border-b border-border flex items-center justify-between shrink-0 bg-muted/30 z-10'>
+                        <h1 className='text-lg font-bold tracking-tight'>CV Builder</h1>
 
-                    <div className='mt-4'>
-                        <h3 className='text-xs font-bold text-gray-400 uppercase tracking-wider mb-3'>
-                            Data Management
-                        </h3>
-                        <button
-                            onClick={handleExportData}
-                            className='w-full text-left px-4 py-2 text-sm text-gray-700 hover:bg-gray-100 rounded-md mb-2'>
-                            ↓ Export JSON Backup
-                        </button>
-                        <button
-                            onClick={() => fileInputRef.current?.click()}
-                            className='w-full text-left px-4 py-2 text-sm text-gray-700 hover:bg-gray-100 rounded-md'>
-                            ↑ Import JSON Backup
-                        </button>
-                        <input
-                            type='file'
-                            accept='.json'
-                            ref={fileInputRef}
-                            onChange={handleImportData}
-                            className='hidden'
-                        />
-                    </div>
-                </aside>
+                        <DropdownMenu>
+                            <DropdownMenuTrigger
+                                render={
+                                    <Button
+                                        variant='outline'
+                                        size='sm'
+                                        className='h-8 text-xs font-semibold gap-2 bg-background'>
+                                        {activeTab}
+                                        <ChevronDown className='w-3.5 h-3.5 text-muted-foreground' />
+                                    </Button>
+                                }
+                            />
+                            <DropdownMenuContent align='end' className='w-56 p-1.5'>
+                                {SECTIONS.map(({ name, icon: Icon }) => (
+                                    <DropdownMenuItem
+                                        key={name}
+                                        onClick={() => setActiveTab(name)}
+                                        className='gap-3 py-2 px-3 text-sm cursor-pointer rounded-md'>
+                                        <Icon className='w-4 h-4 text-muted-foreground' />
+                                        <span className={activeTab === name ? 'font-bold' : ''}>{name}</span>
+                                    </DropdownMenuItem>
+                                ))}
+                            </DropdownMenuContent>
+                        </DropdownMenu>
+                    </header>
 
-                <section className='flex-1 max-w-3xl p-8 overflow-y-auto h-screen custom-scrollbar'>
-                    <form onSubmit={(e) => e.preventDefault()}>
-                        {activeTab === 'Personal' && <PersonalForm />}
-                        {activeTab === 'Experience' && <ExperienceForm />}
-                        {activeTab === 'Projects' && <ProjectsForm />}
-                        {activeTab === 'Education' && <EducationForm />}
-                        {activeTab === 'Skills' && <SkillsForm />}
-                        {activeTab === 'Certifications' && <CertificationsForm />}
-                    </form>
+                    <div className='flex-1 min-h-0'>
+                        <ScrollArea className='h-full px-6 py-6'>
+                            <form onSubmit={(e) => e.preventDefault()} className='space-y-6 pb-6'>
+                                {activeTab === 'Personal' && <PersonalForm />}
+                                {activeTab === 'Experience' && <ExperienceForm />}
+                                {activeTab === 'Projects' && <ProjectsForm />}
+                                {activeTab === 'Education' && <EducationForm />}
+                                {activeTab === 'Skills' && <SkillsForm />}
+                                {activeTab === 'Certifications' && <CertificationsForm />}
+                            </form>
+                        </ScrollArea>
+                    </div>
+
+                    <footer className='px-5 py-4 border-t border-border bg-muted/30 flex items-center justify-between shrink-0 z-10'>
+                        <div className='flex items-center gap-2'>
+                            <CheckCircle2 className='w-4 h-4 text-green-500' />
+                            <span className='text-[10px] text-muted-foreground font-medium uppercase tracking-wider'>
+                                Saved
+                            </span>
+                        </div>
+
+                        <div className='flex items-center gap-2'>
+                            <input
+                                type='file'
+                                accept='.json'
+                                ref={fileInputRef}
+                                onChange={handleImportData}
+                                className='hidden'
+                            />
+
+                            <Tooltip>
+                                <TooltipTrigger>
+                                    <Button
+                                        variant='ghost'
+                                        size='icon'
+                                        className='h-8 w-8'
+                                        onClick={() => fileInputRef.current?.click()}>
+                                        <Upload className='w-4 h-4' />
+                                    </Button>
+                                </TooltipTrigger>
+                                <TooltipContent>
+                                    <p>Import JSON</p>
+                                </TooltipContent>
+                            </Tooltip>
+
+                            <Tooltip>
+                                <TooltipTrigger>
+                                    <Button
+                                        variant='ghost'
+                                        size='icon'
+                                        className='h-8 w-8 mr-1'
+                                        onClick={handleExportData}
+                                        title=''>
+                                        <Download className='w-4 h-4' />
+                                    </Button>
+                                </TooltipTrigger>
+                                <TooltipContent>
+                                    <p>Export JSON</p>
+                                </TooltipContent>
+                            </Tooltip>
+
+                            <Button
+                                onClick={handlePrintClick}
+                                className='h-8 text-xs font-bold gap-2 bg-primary text-primary-foreground hover:bg-primary/90'>
+                                <Printer className='w-3.5 h-3.5' />
+                                Print / PDF
+                            </Button>
+                        </div>
+                    </footer>
                 </section>
 
-                <section className='hidden xl:flex w-212.5 bg-gray-200 p-8 flex-col items-center overflow-y-auto h-screen border-l border-gray-300 shadow-inner'>
-                    <button
-                        onClick={handlePrintClick}
-                        className='mb-6 bg-blue-600 text-white px-8 py-3 rounded-full font-bold shadow-xl hover:bg-blue-700 transition w-full max-w-[210mm]'>
-                        Print / Download PDF
-                    </button>
-
-                    <div className='w-[210mm] pb-24'>
-                        <HarvardTemplate ref={printRef} cvData={cvData} />
+                <section className='flex-1 w-full bg-muted/20 border border-border rounded-xl shadow-inner flex flex-col h-full relative overflow-hidden'>
+                    <div className='flex-1 min-h-0'>
+                        <ScrollArea className='h-full w-full'>
+                            <div className='flex items-center justify-center min-h-full p-8 py-16'>
+                                <div className='bg-white text-black shadow-2xl w-[210mm] transition-all overflow-hidden'>
+                                    <HarvardTemplate ref={printRef} cvData={cvData} />
+                                </div>
+                            </div>
+                        </ScrollArea>
                     </div>
                 </section>
             </main>

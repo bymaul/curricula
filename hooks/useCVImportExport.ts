@@ -1,6 +1,7 @@
 import { useRef } from 'react';
 import { UseFormReset } from 'react-hook-form';
 import { CVData } from '@/lib/schema';
+import { toast } from '@/components/ui/toast';
 
 export function useCVImportExport(cvData: CVData, reset: UseFormReset<CVData>) {
     const fileInputRef = useRef<HTMLInputElement>(null);
@@ -26,9 +27,16 @@ export function useCVImportExport(cvData: CVData, reset: UseFormReset<CVData>) {
                 const importedData = JSON.parse(event.target?.result as string);
                 reset(importedData);
 
-                alert('CV Data imported successfully!');
+                toast.add({
+                    type: 'success',
+                    description: 'CV Data imported successfully!',
+                });
             } catch (error) {
-                alert('Invalid JSON file. Please upload a valid CV Data backup.');
+                toast.add({
+                    type: 'error',
+                    description: 'Invalid JSON file. Please upload a valid CV Data backup.',
+                    priority: 'high',
+                });
             }
 
             if (fileInputRef.current) {

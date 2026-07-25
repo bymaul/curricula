@@ -1,5 +1,5 @@
 import React, { forwardRef } from 'react';
-import { CVData } from '@/lib/types';
+import { CVData } from '@/lib/schema';
 
 interface TemplateProps {
     cvData: CVData;
@@ -9,18 +9,45 @@ export const HarvardTemplate = forwardRef<HTMLDivElement, TemplateProps>(({ cvDa
     const renderBullets = (text: string) => {
         if (!text) return null;
 
-        const lines = text.split('\n').filter((line) => line.trim() !== '');
-        if (lines.length === 0) return null;
+        const lines = text.split('\n');
+        const elements: React.ReactNode[] = [];
+        let currentBullets: string[] = [];
 
-        return (
-            <ul className='list-disc list-outside ml-5 mt-1 text-[11pt]'>
-                {lines.map((line, i) => (
-                    <li key={i} className='pl-1 mb-0.5'>
-                        {line.trim().replace(/^[-•*]\s*/, '')}
-                    </li>
-                ))}
-            </ul>
-        );
+        const flushBullets = (key: number) => {
+            if (currentBullets.length > 0) {
+                elements.push(
+                    <ul key={`ul-${key}`} className='list-disc list-outside ml-5 mt-1 text-[11pt]'>
+                        {currentBullets.map((bullet, idx) => (
+                            <li key={idx} className='pl-1 mb-0.5'>
+                                {bullet}
+                            </li>
+                        ))}
+                    </ul>,
+                );
+                currentBullets = [];
+            }
+        };
+
+        lines.forEach((line, i) => {
+            const trimmed = line.trim();
+            if (!trimmed) return;
+
+            if (trimmed.startsWith('-')) {
+                const bulletText = trimmed.replace(/^-\s*/, '');
+                currentBullets.push(bulletText);
+            } else {
+                flushBullets(i);
+                elements.push(
+                    <p key={`p-${i}`} className='mt-1 text-[11pt] text-justify'>
+                        {trimmed}
+                    </p>,
+                );
+            }
+        });
+
+        flushBullets(lines.length);
+
+        return <div className='mt-1'>{elements}</div>;
     };
 
     return (
@@ -59,14 +86,14 @@ export const HarvardTemplate = forwardRef<HTMLDivElement, TemplateProps>(({ cvDa
 
                                 <div className='flex flex-wrap justify-center gap-x-1 text-[9pt] mt-1'>
                                     {cvData.email && <span>{cvData.email}</span>}
-                                    {cvData.phone && <span> • {cvData.phone}</span>}
-                                    {cvData.domicile && <span> • {cvData.domicile}</span>}
+                                    {cvData.phone && <span> | {cvData.phone}</span>}
+                                    {cvData.domicile && <span> | {cvData.domicile}</span>}
 
                                     {cvData.links.map(
                                         (link, idx) =>
                                             link.url && (
                                                 <React.Fragment key={idx}>
-                                                    <span>•</span>
+                                                    <span>|</span>
                                                     <a
                                                         href={'https://' + link.url}
                                                         target='_blank'

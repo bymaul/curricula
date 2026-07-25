@@ -1,3 +1,5 @@
+import { Button } from '@/components/ui/button';
+import { Input } from '@/components/ui/input';
 import { CVData } from '@/lib/schema';
 import { closestCenter, DndContext, KeyboardSensor, PointerSensor, useSensor, useSensors } from '@dnd-kit/core';
 import {
@@ -7,45 +9,67 @@ import {
     verticalListSortingStrategy,
 } from '@dnd-kit/sortable';
 import { CSS } from '@dnd-kit/utilities';
+import { GripVertical, Plus, Trash2 } from 'lucide-react';
 import { useFieldArray, useFormContext } from 'react-hook-form';
 
 const SortableSkillItem = ({ id, index, remove }: { id: string; index: number; remove: (index: number) => void }) => {
-    const { register } = useFormContext<CVData>();
+    const {
+        register,
+        formState: { errors },
+    } = useFormContext<CVData>();
     const { attributes, listeners, setNodeRef, transform, transition } = useSortable({ id });
     const style = { transform: CSS.Transform.toString(transform), transition };
+
+    const itemErrors = errors.skills?.[index];
 
     return (
         <div
             ref={setNodeRef}
             style={style}
-            className='mb-4 p-4 border border-gray-200 rounded-lg bg-white shadow-sm relative flex items-center gap-4'>
-            <div {...attributes} {...listeners} className='cursor-grab text-gray-400 hover:text-black'>
-                ⣿
+            className='mb-3 p-3.5 border border-border rounded-xl bg-card shadow-sm relative flex items-end gap-3'>
+            <div
+                {...attributes}
+                {...listeners}
+                className='cursor-grab text-muted-foreground hover:text-foreground p-1 mb-2'>
+                <GripVertical className='w-4 h-4' />
             </div>
 
-            <div className='w-1/3'>
-                <label className='text-xs font-bold text-gray-500 uppercase'>Category</label>
-                <input
+            <div className='w-1/3 space-y-1.5'>
+                <label className='text-[10px] font-semibold text-muted-foreground uppercase tracking-wider block'>
+                    Category
+                </label>
+                <Input
                     {...register(`skills.${index}.category` as const)}
-                    placeholder='e.g., Languages'
-                    className='w-full border-b p-1 focus:outline-none focus:border-blue-500'
+                    placeholder='Languages'
+                    className={itemErrors?.category ? 'border-destructive' : ''}
                 />
+                {itemErrors?.category && (
+                    <p className='text-destructive text-[11px] font-medium'>{itemErrors.category.message}</p>
+                )}
             </div>
-            <div className='flex-1'>
-                <label className='text-xs font-bold text-gray-500 uppercase'>Skills</label>
-                <input
+            <div className='flex-1 space-y-1.5'>
+                <label className='text-[10px] font-semibold text-muted-foreground uppercase tracking-wider block'>
+                    Skills
+                </label>
+                <Input
                     {...register(`skills.${index}.items` as const)}
-                    placeholder='React, TypeScript, Next.js...'
-                    className='w-full border-b p-1 focus:outline-none focus:border-blue-500'
+                    placeholder='TypeScript, Python, SQL...'
+                    className={itemErrors?.items ? 'border-destructive' : ''}
                 />
+                {itemErrors?.items && (
+                    <p className='text-destructive text-[11px] font-medium'>{itemErrors.items.message}</p>
+                )}
             </div>
 
-            <button
+            <Button
                 type='button'
+                variant='ghost'
+                size='icon'
                 onClick={() => remove(index)}
-                className='text-gray-400 hover:text-red-500 font-bold mt-4'>
-                ✕
-            </button>
+                className='text-muted-foreground hover:text-destructive hover:bg-destructive/10 h-10 w-10 shrink-0 mb-0.5 rounded-lg transition-colors'
+                title='Remove Skill Category'>
+                <Trash2 className='w-4 h-4' />
+            </Button>
         </div>
     );
 };
@@ -60,7 +84,7 @@ export const SkillsForm = () => {
 
     const handleDragEnd = (event: any) => {
         const { active, over } = event;
-        if (active.id !== over.id) {
+        if (over && active.id !== over.id) {
             const oldIndex = fields.findIndex((item) => item.id === active.id);
             const newIndex = fields.findIndex((item) => item.id === over.id);
             move(oldIndex, newIndex);
@@ -68,9 +92,13 @@ export const SkillsForm = () => {
     };
 
     return (
-        <div className='animate-fade-in'>
-            <h2 className='text-2xl font-bold mb-1'>Skills</h2>
-            <p className='text-sm text-gray-500 mb-6'>Group your skills by category for ATS readability.</p>
+        <div className='animate-fade-in space-y-4'>
+            <div>
+                <h2 className='text-xl font-bold tracking-tight'>Skills</h2>
+                <p className='text-xs text-muted-foreground mt-1'>
+                    Group your technical and soft skills by category for ATS readability.
+                </p>
+            </div>
 
             <DndContext sensors={sensors} collisionDetection={closestCenter} onDragEnd={handleDragEnd}>
                 <SortableContext items={fields.map((f) => f.id)} strategy={verticalListSortingStrategy}>
@@ -80,12 +108,13 @@ export const SkillsForm = () => {
                 </SortableContext>
             </DndContext>
 
-            <button
+            <Button
                 type='button'
+                variant='outline'
                 onClick={() => append({ category: '', items: '' })}
-                className='w-full bg-black text-white p-3 rounded-lg font-bold hover:bg-gray-800 transition'>
-                + Add Skill Category
-            </button>
+                className='w-full border-dashed gap-2 py-5'>
+                <Plus className='w-4 h-4' /> Add Skill Category
+            </Button>
         </div>
     );
 };

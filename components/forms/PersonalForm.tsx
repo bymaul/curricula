@@ -1,4 +1,8 @@
+import { Button } from '@/components/ui/button';
+import { Input } from '@/components/ui/input';
+import { Textarea } from '@/components/ui/textarea';
 import { CVData } from '@/lib/schema';
+import { Plus, Trash2 } from 'lucide-react';
 import { useFieldArray, useFormContext } from 'react-hook-form';
 
 export const PersonalForm = () => {
@@ -14,105 +18,134 @@ export const PersonalForm = () => {
     });
 
     return (
-        <div className='animate-fade-in'>
-            <h2 className='text-2xl font-bold mb-6'>Personal Details</h2>
+        <div className='animate-fade-in space-y-6'>
+            <div>
+                <h2 className='text-xl font-bold tracking-tight'>Personal Details</h2>
+                <p className='text-xs text-muted-foreground mt-1'>
+                    Get started with your contact information and summary.
+                </p>
+            </div>
 
-            <div className='grid grid-cols-1 sm:grid-cols-2 gap-4 mb-6'>
+            <div className='grid grid-cols-1 sm:grid-cols-2 gap-4'>
                 <div>
-                    <label className='text-xs font-bold text-gray-500 uppercase'>Full Name</label>
-                    <input
+                    <label className='text-xs font-semibold text-muted-foreground uppercase tracking-wider mb-1.5 block'>
+                        Full Name
+                    </label>
+                    <Input
                         {...register('name')}
-                        className={`w-full border-b p-2 focus:outline-none bg-transparent ${errors.name ? 'border-red-500' : 'focus:border-blue-500'}`}
+                        placeholder='e.g. Alex Johnson'
+                        className={errors.name ? 'border-destructive focus-visible:ring-destructive' : ''}
                     />
                     {errors.name && (
-                        <p className='text-red-500 text-[10px] mt-1 font-semibold'>{errors.name.message}</p>
+                        <p className='text-destructive text-[11px] mt-1 font-medium'>{errors.name.message}</p>
                     )}
                 </div>
                 <div>
-                    <label className='text-xs font-bold text-gray-500 uppercase'>Target Job Title</label>
-                    <input
+                    <label className='text-xs font-semibold text-muted-foreground uppercase tracking-wider mb-1.5 block'>
+                        Job Title
+                    </label>
+                    <Input
                         {...register('jobTitle')}
-                        className={`w-full border-b p-2 focus:outline-none bg-transparent ${errors.jobTitle ? 'border-red-500' : 'focus:border-blue-500'}`}
+                        placeholder='e.g. Senior Software Engineer'
+                        className={errors.jobTitle ? 'border-destructive focus-visible:ring-destructive' : ''}
                     />
                     {errors.jobTitle && (
-                        <p className='text-red-500 text-[10px] mt-1 font-semibold'>{errors.jobTitle.message}</p>
+                        <p className='text-destructive text-[11px] mt-1 font-medium'>{errors.jobTitle.message}</p>
                     )}
                 </div>
                 <div>
-                    <label className='text-xs font-bold text-gray-500 uppercase'>Email Address</label>
-                    <input
+                    <label className='text-xs font-semibold text-muted-foreground uppercase tracking-wider mb-1.5 block'>
+                        Email Address
+                    </label>
+                    <Input
                         type='email'
                         {...register('email')}
-                        className={`w-full border-b p-2 focus:outline-none bg-transparent ${errors.email ? 'border-red-500' : 'focus:border-blue-500'}`}
+                        placeholder='alex@example.com'
+                        className={errors.email ? 'border-destructive focus-visible:ring-destructive' : ''}
                     />
                     {errors.email && (
-                        <p className='text-red-500 text-[10px] mt-1 font-semibold'>{errors.email.message}</p>
+                        <p className='text-destructive text-[11px] mt-1 font-medium'>{errors.email.message}</p>
                     )}
                 </div>
                 <div>
-                    <label className='text-xs font-bold text-gray-500 uppercase'>Phone Number</label>
-                    <input
+                    <label className='text-xs font-semibold text-muted-foreground uppercase tracking-wider mb-1.5 block'>
+                        Phone Number
+                    </label>
+                    <Input
                         {...register('phone')}
-                        className={`w-full border-b p-2 focus:outline-none bg-transparent ${errors.phone ? 'border-red-500' : 'focus:border-blue-500'}`}
+                        placeholder='+1 (555) 000-0000'
+                        className={errors.phone ? 'border-destructive focus-visible:ring-destructive' : ''}
                     />
                     {errors.phone && (
-                        <p className='text-red-500 text-[10px] mt-1 font-semibold'>{errors.phone.message}</p>
+                        <p className='text-destructive text-[11px] mt-1 font-medium'>{errors.phone.message}</p>
                     )}
                 </div>
                 <div className='sm:col-span-2'>
-                    <label className='text-xs font-bold text-gray-500 uppercase'>Domicile / Location (Optional)</label>
-                    <input
-                        {...register('domicile')}
-                        className='w-full border-b p-2 focus:outline-none focus:border-blue-500 bg-transparent'
-                    />
+                    <label className='text-xs font-semibold text-muted-foreground uppercase tracking-wider mb-1.5 block'>
+                        Domicile / Location (Optional)
+                    </label>
+                    <Input {...register('domicile')} placeholder='e.g. San Francisco, CA' />
                 </div>
             </div>
 
-            <div className='mb-8'>
-                <h3 className='text-sm font-bold text-gray-700 uppercase mb-3'>Custom Links</h3>
+            <div className='space-y-4 pt-2 border-t border-border'>
+                <div className='flex items-center justify-between'>
+                    <h3 className='text-xs font-bold text-muted-foreground uppercase tracking-wider'>Custom Links</h3>
+                </div>
                 {fields.map((field, index) => (
-                    <div key={field.id} className='flex flex-col mb-3'>
+                    <div
+                        key={field.id}
+                        className='flex flex-col space-y-1.5 bg-muted/20 p-3 rounded-xl border border-border relative'>
                         <div className='flex gap-3 items-end'>
                             <div className='flex-1'>
-                                <label className='text-xs font-bold text-gray-500 uppercase'>
+                                <label className='text-[10px] font-semibold text-muted-foreground uppercase tracking-wider mb-1 block'>
                                     URL (e.g., github.com/username)
                                 </label>
-                                <input
+                                <Input
                                     {...register(`links.${index}.url` as const)}
-                                    className={`w-full border-b p-2 focus:outline-none bg-transparent ${errors.links?.[index]?.url ? 'border-red-500' : 'focus:border-blue-500'}`}
+                                    placeholder='github.com/username'
+                                    className={errors.links?.[index]?.url ? 'border-destructive' : ''}
                                 />
                             </div>
-                            <button
+                            {/* Unified Delete Button */}
+                            <Button
                                 type='button'
+                                variant='ghost'
+                                size='icon'
                                 onClick={() => remove(index)}
-                                className='text-gray-400 hover:text-red-500 pb-2 font-bold'>
-                                ✕
-                            </button>
+                                className='text-muted-foreground hover:text-destructive hover:bg-destructive/10 h-10 w-10 shrink-0 rounded-lg transition-colors'
+                                title='Remove Link'>
+                                <Trash2 className='w-4 h-4' />
+                            </Button>
                         </div>
                         {errors.links?.[index]?.url && (
-                            <p className='text-red-500 text-[10px] mt-1 font-semibold'>
+                            <p className='text-destructive text-[11px] font-medium'>
                                 {errors.links[index]?.url?.message}
                             </p>
                         )}
                     </div>
                 ))}
-                <button
+                <Button
                     type='button'
+                    variant='outline'
+                    size='sm'
                     onClick={() => append({ url: '' })}
-                    className='text-xs font-bold text-blue-600 mt-1 hover:underline'>
-                    + Add Link
-                </button>
+                    className='w-full border-dashed gap-2'>
+                    <Plus className='w-4 h-4' /> Add Link
+                </Button>
             </div>
 
-            <div>
-                <h3 className='text-sm font-bold text-gray-700 uppercase mb-2'>Professional Summary</h3>
-                <textarea
+            <div className='pt-2 border-t border-border'>
+                <h3 className='text-xs font-bold text-muted-foreground uppercase tracking-wider mb-2'>
+                    Professional Summary
+                </h3>
+                <Textarea
                     {...register('summary')}
-                    placeholder='A brief overview of your professional background...'
-                    className={`w-full border p-3 rounded-lg focus:outline-none min-h-[120px] bg-gray-50 focus:bg-white transition-colors ${errors.summary ? 'border-red-500' : 'focus:border-blue-500'}`}
+                    placeholder='A brief overview of your professional background, key achievements, and core strengths...'
+                    className={`min-h-30 resize-y ${errors.summary ? 'border-destructive' : ''}`}
                 />
                 {errors.summary && (
-                    <p className='text-red-500 text-[10px] mt-1 font-semibold'>{errors.summary.message}</p>
+                    <p className='text-destructive text-[11px] mt-1 font-medium'>{errors.summary.message}</p>
                 )}
             </div>
         </div>

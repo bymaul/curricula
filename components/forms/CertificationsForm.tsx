@@ -1,3 +1,5 @@
+import { Button } from '@/components/ui/button';
+import { Input } from '@/components/ui/input';
 import { CVData } from '@/lib/schema';
 import { closestCenter, DndContext, KeyboardSensor, PointerSensor, useSensor, useSensors } from '@dnd-kit/core';
 import {
@@ -7,50 +9,80 @@ import {
     verticalListSortingStrategy,
 } from '@dnd-kit/sortable';
 import { CSS } from '@dnd-kit/utilities';
+import { GripVertical, Plus, Trash2 } from 'lucide-react';
 import { useFieldArray, useFormContext } from 'react-hook-form';
 
 const SortableCertItem = ({ id, index, remove }: { id: string; index: number; remove: (index: number) => void }) => {
-    const { register } = useFormContext<CVData>();
+    const {
+        register,
+        formState: { errors },
+    } = useFormContext<CVData>();
     const { attributes, listeners, setNodeRef, transform, transition } = useSortable({ id });
     const style = { transform: CSS.Transform.toString(transform), transition };
+
+    const itemErrors = errors.certifications?.[index];
 
     return (
         <div
             ref={setNodeRef}
             style={style}
-            className='mb-4 p-4 border border-gray-200 rounded-lg bg-white shadow-sm relative flex items-center gap-4 flex-wrap sm:flex-nowrap'>
-            <div {...attributes} {...listeners} className='cursor-grab text-gray-400 hover:text-black'>
-                ⣿
+            className='mb-3 p-4 border border-border rounded-xl bg-card shadow-sm relative flex items-end gap-3'>
+            <div
+                {...attributes}
+                {...listeners}
+                className='cursor-grab text-muted-foreground hover:text-foreground p-1 mb-2'>
+                <GripVertical className='w-4 h-4' />
             </div>
 
-            <div className='flex-1 min-w-37.5'>
-                <label className='text-xs font-bold text-gray-500 uppercase'>Name</label>
-                <input
+            <div className='flex-1 space-y-1.5'>
+                <label className='text-[10px] font-semibold text-muted-foreground uppercase tracking-wider block'>
+                    Name
+                </label>
+                <Input
                     {...register(`certifications.${index}.name` as const)}
-                    className='w-full border-b p-1 focus:outline-none focus:border-blue-500'
+                    placeholder='AWS Certified Developer'
+                    className={itemErrors?.name ? 'border-destructive' : ''}
                 />
+                {itemErrors?.name && (
+                    <p className='text-destructive text-[11px] font-medium'>{itemErrors.name.message}</p>
+                )}
             </div>
-            <div className='flex-1 min-w-37.5'>
-                <label className='text-xs font-bold text-gray-500 uppercase'>Issuer</label>
-                <input
+            <div className='flex-1 space-y-1.5'>
+                <label className='text-[10px] font-semibold text-muted-foreground uppercase tracking-wider block'>
+                    Issuer
+                </label>
+                <Input
                     {...register(`certifications.${index}.issuer` as const)}
-                    className='w-full border-b p-1 focus:outline-none focus:border-blue-500'
+                    placeholder='Amazon Web Services'
+                    className={itemErrors?.issuer ? 'border-destructive' : ''}
                 />
+                {itemErrors?.issuer && (
+                    <p className='text-destructive text-[11px] font-medium'>{itemErrors.issuer.message}</p>
+                )}
             </div>
-            <div className='w-full sm:w-1/4 min-w-25'>
-                <label className='text-xs font-bold text-gray-500 uppercase'>Date</label>
-                <input
+            <div className='w-1/4 space-y-1.5'>
+                <label className='text-[10px] font-semibold text-muted-foreground uppercase tracking-wider block'>
+                    Date
+                </label>
+                <Input
                     {...register(`certifications.${index}.date` as const)}
-                    className='w-full border-b p-1 focus:outline-none focus:border-blue-500'
+                    placeholder='2024'
+                    className={itemErrors?.date ? 'border-destructive' : ''}
                 />
+                {itemErrors?.date && (
+                    <p className='text-destructive text-[11px] font-medium'>{itemErrors.date.message}</p>
+                )}
             </div>
 
-            <button
+            <Button
                 type='button'
+                variant='ghost'
+                size='icon'
                 onClick={() => remove(index)}
-                className='text-gray-400 hover:text-red-500 font-bold mt-4'>
-                ✕
-            </button>
+                className='text-muted-foreground hover:text-destructive hover:bg-destructive/10 h-10 w-10 shrink-0 mb-0.5 rounded-lg transition-colors'
+                title='Remove Certification'>
+                <Trash2 className='w-4 h-4' />
+            </Button>
         </div>
     );
 };
@@ -65,7 +97,7 @@ export const CertificationsForm = () => {
 
     const handleDragEnd = (event: any) => {
         const { active, over } = event;
-        if (active.id !== over.id) {
+        if (over && active.id !== over.id) {
             const oldIndex = fields.findIndex((item) => item.id === active.id);
             const newIndex = fields.findIndex((item) => item.id === over.id);
             move(oldIndex, newIndex);
@@ -73,9 +105,11 @@ export const CertificationsForm = () => {
     };
 
     return (
-        <div className='animate-fade-in'>
-            <h2 className='text-2xl font-bold mb-1'>Certifications</h2>
-            <p className='text-sm text-gray-500 mb-6'>Drag the handles (⣿) to reorder your certifications.</p>
+        <div className='animate-fade-in space-y-4'>
+            <div>
+                <h2 className='text-xl font-bold tracking-tight'>Certifications</h2>
+                <p className='text-xs text-muted-foreground mt-1'>Add professional credentials and certifications.</p>
+            </div>
 
             <DndContext sensors={sensors} collisionDetection={closestCenter} onDragEnd={handleDragEnd}>
                 <SortableContext items={fields.map((f) => f.id)} strategy={verticalListSortingStrategy}>
@@ -85,12 +119,13 @@ export const CertificationsForm = () => {
                 </SortableContext>
             </DndContext>
 
-            <button
+            <Button
                 type='button'
+                variant='outline'
                 onClick={() => append({ name: '', issuer: '', date: '' })}
-                className='w-full bg-black text-white p-3 rounded-lg font-bold hover:bg-gray-800 transition'>
-                + Add Certification
-            </button>
+                className='w-full border-dashed gap-2 py-5'>
+                <Plus className='w-4 h-4' /> Add Certification
+            </Button>
         </div>
     );
 };
