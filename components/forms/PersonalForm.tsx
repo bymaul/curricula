@@ -82,9 +82,9 @@ export const PersonalForm = () => {
                 </div>
                 <div className='sm:col-span-2'>
                     <label className='text-xs font-semibold text-muted-foreground uppercase tracking-wider mb-1.5 block'>
-                        Domicile / Location (Optional)
+                        Location (Optional)
                     </label>
-                    <Input {...register('domicile')} placeholder='e.g. San Francisco, CA' />
+                    <Input {...register('location')} placeholder='e.g. San Francisco, CA' />
                 </div>
             </div>
 
