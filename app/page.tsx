@@ -66,8 +66,8 @@ export default function Home() {
 
     return (
         <FormProvider {...methods}>
-            <main className='h-dvh w-full bg-background text-foreground p-4 lg:p-6 flex flex-col lg:flex-row gap-4 lg:gap-6 overflow-hidden'>
-                <section className='w-full lg:w-[35%] xl:w-[30%] flex flex-col h-full border border-border bg-card rounded-xl shadow-lg overflow-hidden shrink-0'>
+            <main className='h-dvh w-full bg-background text-foreground p-4 lg:p-6 flex flex-col lg:flex-row gap-4 lg:gap-6 overflow-hidden print:h-auto print:block print:p-0 print:overflow-visible print:bg-white'>
+                <section className='w-full lg:w-[35%] xl:w-[30%] flex flex-col h-full border border-border bg-card rounded-xl shadow-lg overflow-hidden shrink-0 print:hidden'>
                     <header className='px-5 py-4 border-b border-border flex items-center justify-between shrink-0 bg-muted/30 z-10'>
                         <h1 className='text-lg font-bold tracking-tight'>CV Builder</h1>
 
@@ -172,11 +172,11 @@ export default function Home() {
                     </footer>
                 </section>
 
-                <section className='flex-1 w-full bg-muted/20 border border-border rounded-xl shadow-inner flex flex-col h-full relative overflow-hidden'>
-                    <div className='flex-1 min-h-0'>
-                        <ScrollArea className='h-full w-full'>
-                            <div className='flex items-center justify-center min-h-full p-8 py-16'>
-                                <div className='bg-white text-black shadow-2xl w-[210mm] transition-all overflow-hidden'>
+                <section className='flex-1 w-full bg-muted/20 border border-border rounded-xl shadow-inner flex flex-col h-full relative overflow-hidden print:border-none print:shadow-none print:bg-transparent print:overflow-visible'>
+                    <div className='flex-1 min-h-0 print:overflow-visible'>
+                        <ScrollArea className='h-full w-full print:h-auto print:overflow-visible'>
+                            <div className='flex items-center justify-center min-h-full p-8 py-16 print:p-0 print:py-0 print:block'>
+                                <div className='bg-white text-black shadow-2xl w-[210mm] transition-all overflow-hidden print:shadow-none print:w-full'>
                                     <HarvardTemplate ref={printRef} cvData={cvData} />
                                 </div>
                             </div>
