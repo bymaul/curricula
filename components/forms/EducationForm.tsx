@@ -137,7 +137,7 @@ export const EducationForm = () => {
     };
 
     return (
-        <div className='animate-fade-in space-y-4'>
+        <div className='animate-fade-in space-y-4 p-2'>
             <div>
                 <h2 className='text-xl font-bold tracking-tight'>Education</h2>
                 <p className='text-xs text-muted-foreground mt-1'>Add your academic background and credentials.</p>

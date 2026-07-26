@@ -105,7 +105,7 @@ export const CertificationsForm = () => {
     };
 
     return (
-        <div className='animate-fade-in space-y-4'>
+        <div className='animate-fade-in space-y-4 p-2'>
             <div>
                 <h2 className='text-xl font-bold tracking-tight'>Certifications</h2>
                 <p className='text-xs text-muted-foreground mt-1'>Add professional credentials and certifications.</p>

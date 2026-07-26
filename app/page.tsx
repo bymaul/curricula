@@ -98,7 +98,7 @@ export default function Home() {
                     </header>
 
                     <div className='flex-1 min-h-0'>
-                        <ScrollArea className='h-full px-6 py-6'>
+                        <ScrollArea className='h-full p-2'>
                             <form onSubmit={(e) => e.preventDefault()} className='space-y-6 pb-6'>
                                 {activeTab === 'Personal' && <PersonalForm />}
                                 {activeTab === 'Experience' && <ExperienceForm />}

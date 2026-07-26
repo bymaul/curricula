@@ -18,7 +18,7 @@ export const PersonalForm = () => {
     });
 
     return (
-        <div className='animate-fade-in space-y-6'>
+        <div className='animate-fade-in space-y-6 p-2'>
             <div>
                 <h2 className='text-xl font-bold tracking-tight'>Personal Details</h2>
                 <p className='text-xs text-muted-foreground mt-1'>
