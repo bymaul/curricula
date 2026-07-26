@@ -30,7 +30,7 @@ const SortableCertItem = ({ id, index, remove }: { id: string; index: number; re
             <div
                 {...attributes}
                 {...listeners}
-                className='cursor-grab text-muted-foreground hover:text-foreground p-1 mb-2'>
+                className='cursor-grab touch-none text-muted-foreground hover:text-foreground p-1 mb-2'>
                 <GripVertical className='w-4 h-4' />
             </div>
 

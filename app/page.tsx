@@ -12,19 +12,7 @@ import {
     DropdownMenuTrigger,
 } from '@/components/ui/dropdown-menu';
 import { ScrollArea } from '@/components/ui/scroll-area';
-import {
-    Award,
-    Briefcase,
-    CheckCircle2,
-    ChevronDown,
-    Download,
-    FolderGit2,
-    GraduationCap,
-    Printer,
-    Upload,
-    User,
-    Wrench,
-} from 'lucide-react';
+import { CheckCircle2, ChevronDown, Download, Printer, Upload } from 'lucide-react';
 
 import { CertificationsForm } from '@/components/forms/CertificationsForm';
 import { EducationForm } from '@/components/forms/EducationForm';
@@ -38,16 +26,8 @@ import { Tooltip, TooltipContent, TooltipTrigger } from '@/components/ui/tooltip
 import { useCVAutoSave } from '@/hooks/useCVAutoSave';
 import { useCVImportExport } from '@/hooks/useCVImportExport';
 import { useCVPrint } from '@/hooks/useCVPrint';
+import { SECTIONS } from '@/lib/consts';
 import { CVData, cvSchema, initialCVState } from '@/lib/schema';
-
-const SECTIONS = [
-    { name: 'Personal', icon: User },
-    { name: 'Experience', icon: Briefcase },
-    { name: 'Projects', icon: FolderGit2 },
-    { name: 'Education', icon: GraduationCap },
-    { name: 'Skills', icon: Wrench },
-    { name: 'Certifications', icon: Award },
-];
 
 export default function Home() {
     const [activeTab, setActiveTab] = useState('Personal');
@@ -60,7 +40,7 @@ export default function Home() {
 
     const { mounted, cvData } = useCVAutoSave(methods);
     const { fileInputRef, handleExportData, handleImportData } = useCVImportExport(cvData, methods.reset);
-    const { printRef, handlePrintClick } = useCVPrint(cvData, methods.trigger, setActiveTab);
+    const { printRef, handlePrintClick } = useCVPrint(cvData, methods, setActiveTab);
 
     if (!mounted) return null;
 

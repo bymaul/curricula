@@ -50,7 +50,7 @@ const SortableEducationItem = ({
                 <div
                     {...attributes}
                     {...listeners}
-                    className='cursor-grab text-muted-foreground hover:text-foreground p-1'>
+                    className='cursor-grab touch-none text-muted-foreground hover:text-foreground p-1'>
                     <GripVertical className='w-4 h-4' />
                 </div>
                 <span className='text-xs font-bold text-muted-foreground uppercase tracking-wider'>
