@@ -66,7 +66,7 @@ export default function Home() {
 
     return (
         <FormProvider {...methods}>
-            <main className='h-screen w-full bg-background text-foreground p-4 lg:p-6 flex flex-col lg:flex-row gap-4 lg:gap-6 overflow-hidden'>
+            <main className='h-dvh w-full bg-background text-foreground p-4 lg:p-6 flex flex-col lg:flex-row gap-4 lg:gap-6 overflow-hidden'>
                 <section className='w-full lg:w-[35%] xl:w-[30%] flex flex-col h-full border border-border bg-card rounded-xl shadow-lg overflow-hidden shrink-0'>
                     <header className='px-5 py-4 border-b border-border flex items-center justify-between shrink-0 bg-muted/30 z-10'>
                         <h1 className='text-lg font-bold tracking-tight'>CV Builder</h1>
