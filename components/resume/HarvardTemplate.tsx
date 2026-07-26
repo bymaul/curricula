@@ -6,17 +6,15 @@ interface TemplateProps {
 }
 
 const FONT = {
-    name: 20,
-    jobTitle: 13,
-    contact: 10,
-    sectionTitle: 13,
-    itemTitle: 11,
-    itemSubtitle: 10.5,
-    itemMeta: 10,
-    body: 10.5,
+    name: 'text-[20pt]',
+    jobTitle: 'text-[13pt]',
+    contact: 'text-[10pt]',
+    sectionTitle: 'text-[13pt]',
+    itemTitle: 'text-[11pt]',
+    itemSubtitle: 'text-[10.5pt]',
+    itemMeta: 'text-[10pt]',
+    body: 'text-[10.5pt]',
 } as const;
-
-const pt = (size: number) => `text-[${size}pt]`;
 
 export const HarvardTemplate = forwardRef<HTMLDivElement, TemplateProps>(({ cvData }, ref) => {
     const renderBullets = (text: string) => {
@@ -29,7 +27,7 @@ export const HarvardTemplate = forwardRef<HTMLDivElement, TemplateProps>(({ cvDa
         const flushBullets = (key: number) => {
             if (currentBullets.length > 0) {
                 elements.push(
-                    <ul key={`ul-${key}`} className={`list-disc list-outside ml-5 mt-1 ${pt(FONT.body)}`}>
+                    <ul key={`ul-${key}`} className={`list-disc list-outside ml-5 mt-1 ${FONT.body}`}>
                         {currentBullets.map((bullet, idx) => (
                             <li key={idx} className='pl-1 mb-0.5'>
                                 {bullet}
@@ -51,7 +49,7 @@ export const HarvardTemplate = forwardRef<HTMLDivElement, TemplateProps>(({ cvDa
             } else {
                 flushBullets(i);
                 elements.push(
-                    <p key={`p-${i}`} className={`mt-1 text-justify ${pt(FONT.body)}`}>
+                    <p key={`p-${i}`} className={`mt-1 text-justify ${FONT.body}`}>
                         {trimmed}
                     </p>,
                 );
@@ -63,11 +61,11 @@ export const HarvardTemplate = forwardRef<HTMLDivElement, TemplateProps>(({ cvDa
         return <div className='mt-1'>{elements}</div>;
     };
 
-    const sectionTitle = `mb-2 border-b border-black pb-0.5 ${pt(FONT.sectionTitle)} font-bold uppercase break-after-avoid`;
-    const itemTitle = `flex justify-between ${pt(FONT.itemTitle)} font-bold`;
-    const itemMeta = `${pt(FONT.itemMeta)} font-normal`;
-    const itemSubtitle = `flex justify-between ${pt(FONT.itemSubtitle)} italic`;
-    const bodyText = pt(FONT.body);
+    const sectionTitle = `mb-2 border-b border-black pb-0.5 ${FONT.sectionTitle} font-bold uppercase break-after-avoid`;
+    const itemTitle = `flex justify-between ${FONT.itemTitle} font-bold`;
+    const itemMeta = `${FONT.itemMeta} font-normal`;
+    const itemSubtitle = `flex justify-between ${FONT.itemSubtitle} italic`;
+    const bodyText = FONT.body;
     const section = 'mb-4';
     const avoidBreak = 'break-inside-avoid';
 
@@ -100,15 +98,15 @@ export const HarvardTemplate = forwardRef<HTMLDivElement, TemplateProps>(({ cvDa
                     <tr>
                         <td className='px-[2cm] align-top font-serif text-black text-[11pt] leading-snug'>
                             <div className='text-center mb-4'>
-                                <h1 className={`${pt(FONT.name)} font-bold uppercase tracking-wider mb-1`}>
+                                <h1 className={`${FONT.name} font-bold uppercase tracking-wider mb-1`}>
                                     {cvData.name || 'Your Name'}
                                 </h1>
 
                                 {cvData.jobTitle && (
-                                    <div className={`${pt(FONT.jobTitle)} font-medium`}>{cvData.jobTitle}</div>
+                                    <div className={`${FONT.jobTitle} font-medium`}>{cvData.jobTitle}</div>
                                 )}
 
-                                <div className={`mt-1 flex flex-wrap justify-center gap-x-1 ${pt(FONT.contact)}`}>
+                                <div className={`mt-1 flex flex-wrap justify-center gap-x-1 ${FONT.contact}`}>
                                     {cvData.email && <span>{cvData.email}</span>}
                                     {cvData.phone && <span> | {cvData.phone}</span>}
                                     {cvData.location && <span> | {cvData.location}</span>}
@@ -220,14 +218,14 @@ export const HarvardTemplate = forwardRef<HTMLDivElement, TemplateProps>(({ cvDa
                                     <h2 className={sectionTitle}>Certifications</h2>
 
                                     {cvData.certifications.map((cert, index) => (
-                                        <div key={index} className={`mb-1 flex justify-between ${pt(FONT.body)}`}>
+                                        <div key={index} className={`mb-1 flex justify-between ${FONT.body}`}>
                                             <span>
                                                 <span className='font-semibold'>{cert.name}</span>
 
                                                 {cert.issuer && ` | ${cert.issuer}`}
                                             </span>
 
-                                            <span className={pt(FONT.itemMeta)}>{cert.date}</span>
+                                            <span className={FONT.itemMeta}>{cert.date}</span>
                                         </div>
                                     ))}
                                 </section>

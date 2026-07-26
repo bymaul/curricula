@@ -128,31 +128,35 @@ export default function Home() {
                             />
 
                             <Tooltip>
-                                <TooltipTrigger>
-                                    <Button
-                                        variant='ghost'
-                                        size='icon'
-                                        className='h-8 w-8'
-                                        onClick={() => fileInputRef.current?.click()}>
-                                        <Upload className='w-4 h-4' />
-                                    </Button>
-                                </TooltipTrigger>
+                                <TooltipTrigger
+                                    render={
+                                        <Button
+                                            variant='ghost'
+                                            size='icon'
+                                            className='h-8 w-8'
+                                            onClick={() => fileInputRef.current?.click()}>
+                                            <Upload className='w-4 h-4' />
+                                        </Button>
+                                    }
+                                />
                                 <TooltipContent>
                                     <p>Import JSON</p>
                                 </TooltipContent>
                             </Tooltip>
 
                             <Tooltip>
-                                <TooltipTrigger>
-                                    <Button
-                                        variant='ghost'
-                                        size='icon'
-                                        className='h-8 w-8 mr-1'
-                                        onClick={handleExportData}
-                                        title=''>
-                                        <Download className='w-4 h-4' />
-                                    </Button>
-                                </TooltipTrigger>
+                                <TooltipTrigger
+                                    render={
+                                        <Button
+                                            variant='ghost'
+                                            size='icon'
+                                            className='h-8 w-8 mr-1'
+                                            onClick={handleExportData}
+                                            title=''>
+                                            <Download className='w-4 h-4' />
+                                        </Button>
+                                    }
+                                />
                                 <TooltipContent>
                                     <p>Export JSON</p>
                                 </TooltipContent>

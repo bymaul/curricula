@@ -1,4 +1,4 @@
-import type { Metadata } from 'next';
+import type { Metadata, Viewport } from 'next';
 import { Geist, Geist_Mono, Inter } from 'next/font/google';
 import './globals.css';
 import { cn } from '@/lib/utils';
@@ -19,7 +19,18 @@ const geistMono = Geist_Mono({
 
 export const metadata: Metadata = {
     title: 'CV Builder',
-    description: 'ATS-Friendly Harvard style CV Builder',
+    description: 'A modern, offline-capable CV Builder',
+    manifest: '/manifest.json',
+    icons: {
+        apple: '/apple-touch-icon.png',
+    },
+};
+
+export const viewport: Viewport = {
+    themeColor: '#09090b',
+    width: 'device-width',
+    initialScale: 1,
+    maximumScale: 1,
 };
 
 export default function RootLayout({

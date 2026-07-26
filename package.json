@@ -3,10 +3,10 @@
     "version": "0.1.0",
     "private": true,
     "scripts": {
-        "dev": "next dev",
-        "build": "next build",
+        "dev": "next dev --webpack",
+        "build": "next build --webpack",
         "start": "next start",
-        "lint": "eslint"
+        "lint": "next lint"
     },
     "dependencies": {
         "@ai-sdk/anthropic": "^4.0.18",
@@ -17,6 +17,7 @@
         "@dnd-kit/sortable": "^10.0.0",
         "@dnd-kit/utilities": "^3.2.2",
         "@hookform/resolvers": "^5.4.0",
+        "@serwist/next": "^9.5.12",
         "ai": "^7.0.35",
         "class-variance-authority": "^0.7.1",
         "clsx": "^2.1.1",
@@ -40,6 +41,7 @@
         "@types/react-dom": "^19",
         "eslint": "^9",
         "eslint-config-next": "16.2.11",
+        "serwist": "^9.5.12",
         "tailwindcss": "^4",
         "typescript": "^5"
     }
