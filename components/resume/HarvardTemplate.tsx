@@ -1,22 +1,14 @@
-import React, { forwardRef } from 'react';
+import { Box } from '@/components/universal/Box';
+import { Text } from '@/components/universal/Text';
 import { CVData } from '@/lib/schema';
+import { Fragment } from 'react/jsx-runtime';
 
 interface TemplateProps {
     cvData: CVData;
+    isPdf?: boolean;
 }
 
-const FONT = {
-    name: 'text-[20pt]',
-    jobTitle: 'text-[13pt]',
-    contact: 'text-[10pt]',
-    sectionTitle: 'text-[13pt]',
-    itemTitle: 'text-[11pt]',
-    itemSubtitle: 'text-[10.5pt]',
-    itemMeta: 'text-[10pt]',
-    body: 'text-[10.5pt]',
-} as const;
-
-export const HarvardTemplate = forwardRef<HTMLDivElement, TemplateProps>(({ cvData }, ref) => {
+export const HarvardTemplate = ({ cvData, isPdf = false }: TemplateProps) => {
     const renderBullets = (text: string) => {
         if (!text) return null;
 
@@ -27,13 +19,18 @@ export const HarvardTemplate = forwardRef<HTMLDivElement, TemplateProps>(({ cvDa
         const flushBullets = (key: number) => {
             if (currentBullets.length > 0) {
                 elements.push(
-                    <ul key={`ul-${key}`} className={`list-disc list-outside ml-5 mt-1 ${FONT.body}`}>
+                    <Box isPdf={isPdf} key={`ul-${key}`} className='text-[10pt]'>
                         {currentBullets.map((bullet, idx) => (
-                            <li key={idx} className='pl-1 mb-0.5'>
-                                {bullet}
-                            </li>
+                            <Box isPdf={isPdf} key={idx} className='flex flex-row mb-[1pt]'>
+                                <Text isPdf={isPdf} className='mr-1'>
+                                    •
+                                </Text>
+                                <Text isPdf={isPdf} className='flex-1'>
+                                    {bullet}
+                                </Text>
+                            </Box>
                         ))}
-                    </ul>,
+                    </Box>,
                 );
                 currentBullets = [];
             }
@@ -44,206 +41,197 @@ export const HarvardTemplate = forwardRef<HTMLDivElement, TemplateProps>(({ cvDa
             if (!trimmed) return;
 
             if (trimmed.startsWith('-')) {
-                const bulletText = trimmed.replace(/^-\s*/, '');
-                currentBullets.push(bulletText);
+                currentBullets.push(trimmed.replace(/^-\s*/, ''));
             } else {
                 flushBullets(i);
                 elements.push(
-                    <p key={`p-${i}`} className={`mt-1 text-justify ${FONT.body}`}>
-                        {trimmed}
-                    </p>,
+                    <Box isPdf={isPdf} key={`p-${i}`} className='mt-1'>
+                        <Text isPdf={isPdf} className='text-justify text-[10pt]'>
+                            {trimmed}
+                        </Text>
+                    </Box>,
                 );
             }
         });
 
         flushBullets(lines.length);
 
-        return <div className='mt-1'>{elements}</div>;
+        return (
+            <Box isPdf={isPdf} className='mt-1'>
+                {elements}
+            </Box>
+        );
     };
 
-    const sectionTitle = `mb-2 border-b border-black pb-0.5 ${FONT.sectionTitle} font-bold uppercase break-after-avoid`;
-    const itemTitle = `flex justify-between ${FONT.itemTitle} font-bold`;
-    const itemMeta = `${FONT.itemMeta} font-normal`;
-    const itemSubtitle = `flex justify-between ${FONT.itemSubtitle} italic`;
-    const bodyText = FONT.body;
-    const section = 'mb-4';
-    const avoidBreak = 'break-inside-avoid';
+    const sectionTitle = 'mb-1.5 border-b border-black pb-0.5 text-[12pt] font-bold uppercase';
+    const itemTitle = 'flex flex-row justify-between text-[10.5pt] font-bold';
+    const itemMeta = 'text-[9.5pt] font-normal';
+    const itemSubtitle = 'flex flex-row justify-between text-[10pt] italic';
+    const sectionClass = 'mb-3';
 
     return (
-        <div ref={ref} className='mx-auto shadow-2xl print:shadow-none bg-white'>
-            <style type='text/css' media='print'>
-                {`
-                  @page { 
-                    size: A4;
-                    margin: 0mm;
-                  }
-                  
-                  thead { display: table-header-group; }
-                  tfoot { display: table-footer-group; }
-                  
-                  div { background-image: none !important; }
-                `}
-            </style>
+        <Box isPdf={isPdf} className={`mx-auto bg-white text-black ${!isPdf ? 'font-serif p-[2cm]' : ''}`}>
+            {/* --- HEADER SECTION --- */}
+            <Box isPdf={isPdf} className='text-center mb-4'>
+                <Text isPdf={isPdf} block className='text-[20pt] font-bold uppercase tracking-wider mb-1'>
+                    {cvData.name || 'Your Name'}
+                </Text>
 
-            <table className='w-full border-collapse'>
-                <thead>
-                    <tr>
-                        <td>
-                            <div className='h-[2cm] w-full'></div>
-                        </td>
-                    </tr>
-                </thead>
+                {cvData.jobTitle && (
+                    <Text isPdf={isPdf} block className='text-[13pt] font-medium'>
+                        {cvData.jobTitle}
+                    </Text>
+                )}
 
-                <tbody>
-                    <tr>
-                        <td className='px-[2cm] align-top font-serif text-black text-[11pt] leading-snug'>
-                            <div className='text-center mb-4'>
-                                <h1 className={`${FONT.name} font-bold uppercase tracking-wider mb-1`}>
-                                    {cvData.name || 'Your Name'}
-                                </h1>
+                <Box isPdf={isPdf} className='mt-1 flex flex-row flex-wrap justify-center gap-x-1 text-[10pt]'>
+                    {cvData.email && <Text isPdf={isPdf}>{cvData.email}</Text>}
+                    {cvData.phone && <Text isPdf={isPdf}> | {cvData.phone}</Text>}
+                    {cvData.location && <Text isPdf={isPdf}> | {cvData.location}</Text>}
 
-                                {cvData.jobTitle && (
-                                    <div className={`${FONT.jobTitle} font-medium`}>{cvData.jobTitle}</div>
-                                )}
+                    {cvData.links.map(
+                        (link, idx) =>
+                            link.url && (
+                                <Fragment key={idx}>
+                                    <Text isPdf={isPdf}> | </Text>
+                                    <Text isPdf={isPdf}>{link.url}</Text>
+                                </Fragment>
+                            ),
+                    )}
+                </Box>
+            </Box>
 
-                                <div className={`mt-1 flex flex-wrap justify-center gap-x-1 ${FONT.contact}`}>
-                                    {cvData.email && <span>{cvData.email}</span>}
-                                    {cvData.phone && <span> | {cvData.phone}</span>}
-                                    {cvData.location && <span> | {cvData.location}</span>}
+            {/* --- SUMMARY SECTION --- */}
+            {cvData.summary && (
+                <Box isPdf={isPdf} className={sectionClass}>
+                    {/* summary */}
+                    <Text isPdf={isPdf} block className={sectionTitle}>
+                        Summary
+                    </Text>
+                    <Text isPdf={isPdf} block className='text-[10.5pt] text-justify'>
+                        {cvData.summary}
+                    </Text>
+                </Box>
+            )}
 
-                                    {cvData.links.map(
-                                        (link, idx) =>
-                                            link.url && (
-                                                <React.Fragment key={idx}>
-                                                    <span>|</span>
-                                                    <a
-                                                        href={'https://' + link.url}
-                                                        target='_blank'
-                                                        className='hover:underline'>
-                                                        {link.url}
-                                                    </a>
-                                                </React.Fragment>
-                                            ),
-                                    )}
-                                </div>
-                            </div>
+            {/* --- EXPERIENCE SECTION --- */}
+            {cvData.experience.length > 0 && (
+                <Box isPdf={isPdf} className={sectionClass}>
+                    <Text isPdf={isPdf} block className={sectionTitle}>
+                        Experience
+                    </Text>
 
-                            {cvData.summary && (
-                                <section className={section}>
-                                    <h2 className={sectionTitle}>Summary</h2>
+                    {cvData.experience.map((exp, index) => (
+                        <Box isPdf={isPdf} key={index} className='mb-2' wrap={false}>
+                            <Box isPdf={isPdf} className={itemTitle}>
+                                <Text isPdf={isPdf}>{exp.role}</Text>
+                                <Text isPdf={isPdf} className={itemMeta}>
+                                    {exp.date}
+                                </Text>
+                            </Box>
 
-                                    <p className={`${bodyText} text-justify`}>{cvData.summary}</p>
-                                </section>
-                            )}
+                            <Box isPdf={isPdf} className={itemSubtitle}>
+                                <Text isPdf={isPdf}>{exp.company}</Text>
+                                <Text isPdf={isPdf}>{exp.location}</Text>
+                            </Box>
 
-                            {cvData.experience.length > 0 && (
-                                <section className={section}>
-                                    <h2 className={sectionTitle}>Experience</h2>
+                            {renderBullets(exp.description)}
+                        </Box>
+                    ))}
+                </Box>
+            )}
 
-                                    {cvData.experience.map((exp, index) => (
-                                        <div key={index} className={`mb-3 ${avoidBreak}`}>
-                                            <div className={itemTitle}>
-                                                <span>{exp.role}</span>
-                                                <span className={itemMeta}>{exp.date}</span>
-                                            </div>
+            {/* --- PROJECTS SECTION --- */}
+            {cvData.projects.length > 0 && (
+                <Box isPdf={isPdf} className={sectionClass}>
+                    <Text isPdf={isPdf} block className={sectionTitle}>
+                        Projects
+                    </Text>
 
-                                            <div className={itemSubtitle}>
-                                                <span>{exp.company}</span>
-                                                <span>{exp.location}</span>
-                                            </div>
+                    {cvData.projects.map((proj, index) => (
+                        <Box isPdf={isPdf} key={index} className='mb-2' wrap={false}>
+                            <Box isPdf={isPdf} className={itemTitle}>
+                                <Text isPdf={isPdf}>{proj.name}</Text>
+                                <Text isPdf={isPdf} className={itemMeta}>
+                                    {proj.date}
+                                </Text>
+                            </Box>
 
-                                            {renderBullets(exp.description)}
-                                        </div>
-                                    ))}
-                                </section>
-                            )}
+                            {renderBullets(proj.description)}
+                        </Box>
+                    ))}
+                </Box>
+            )}
 
-                            {cvData.projects.length > 0 && (
-                                <section className={section}>
-                                    <h2 className={sectionTitle}>Projects</h2>
+            {/* --- EDUCATION SECTION --- */}
+            {cvData.education.length > 0 && (
+                <Box isPdf={isPdf} className={sectionClass}>
+                    <Text isPdf={isPdf} block className={sectionTitle}>
+                        Education
+                    </Text>
 
-                                    {cvData.projects.map((proj, index) => (
-                                        <div key={index} className={`mb-3 ${avoidBreak}`}>
-                                            <div className={itemTitle}>
-                                                <span>{proj.name}</span>
+                    {cvData.education.map((edu, index) => (
+                        <Box isPdf={isPdf} key={index} className='mb-2' wrap={false}>
+                            <Box isPdf={isPdf} className={itemTitle}>
+                                <Text isPdf={isPdf}>{edu.institution}</Text>
+                                <Text isPdf={isPdf} className={itemMeta}>
+                                    {edu.date}
+                                </Text>
+                            </Box>
 
-                                                <span className={itemMeta}>{proj.date}</span>
-                                            </div>
+                            <Box isPdf={isPdf} className={itemSubtitle}>
+                                <Text isPdf={isPdf}>{edu.degree}</Text>
+                                <Text isPdf={isPdf}>{edu.location}</Text>
+                            </Box>
 
-                                            {renderBullets(proj.description)}
-                                        </div>
-                                    ))}
-                                </section>
-                            )}
+                            {renderBullets(edu.description)}
+                        </Box>
+                    ))}
+                </Box>
+            )}
 
-                            {cvData.education.length > 0 && (
-                                <section className={section}>
-                                    <h2 className={sectionTitle}>Education</h2>
+            {/* --- SKILLS SECTION --- */}
+            {cvData.skills.length > 0 && (
+                <Box isPdf={isPdf} className={sectionClass} wrap={false}>
+                    <Text isPdf={isPdf} block className={sectionTitle}>
+                        Skills
+                    </Text>
 
-                                    {cvData.education.map((edu, index) => (
-                                        <div key={index} className={`mb-2 ${avoidBreak}`}>
-                                            <div className={itemTitle}>
-                                                <span>{edu.institution}</span>
+                    <Box isPdf={isPdf} className='text-[10.5pt]'>
+                        {cvData.skills.map((skill, index) => (
+                            <Text isPdf={isPdf} key={index} block className='mb-1'>
+                                <Text isPdf={isPdf} className='font-semibold'>
+                                    {skill.category}:{' '}
+                                </Text>
+                                {skill.items}
+                            </Text>
+                        ))}
+                    </Box>
+                </Box>
+            )}
 
-                                                <span className={itemMeta}>{edu.date}</span>
-                                            </div>
+            {/* --- CERTIFICATIONS SECTION --- */}
+            {cvData.certifications.length > 0 && (
+                <Box isPdf={isPdf} className={sectionClass} wrap={false}>
+                    <Text isPdf={isPdf} block className={sectionTitle}>
+                        Certifications
+                    </Text>
 
-                                            <div className={itemSubtitle}>
-                                                <span>{edu.degree}</span>
-                                                <span>{edu.location}</span>
-                                            </div>
+                    {cvData.certifications.map((cert, index) => (
+                        <Box isPdf={isPdf} key={index} className='mb-1 flex flex-row justify-between text-[10.5pt]'>
+                            <Text isPdf={isPdf} className='flex-1 mr-2'>
+                                <Text isPdf={isPdf} className='font-semibold'>
+                                    {cert.name}
+                                </Text>
+                                {cert.issuer && ` | ${cert.issuer}`}
+                            </Text>
 
-                                            {renderBullets(edu.description)}
-                                        </div>
-                                    ))}
-                                </section>
-                            )}
-
-                            {cvData.skills.length > 0 && (
-                                <section className={`${section} ${avoidBreak}`}>
-                                    <h2 className={sectionTitle}>Skills</h2>
-
-                                    <div className={bodyText}>
-                                        {cvData.skills.map((skill, index) => (
-                                            <div key={index} className='mb-1'>
-                                                <span className='font-semibold'>{skill.category}:</span> {skill.items}
-                                            </div>
-                                        ))}
-                                    </div>
-                                </section>
-                            )}
-
-                            {cvData.certifications.length > 0 && (
-                                <section className={`${section} ${avoidBreak}`}>
-                                    <h2 className={sectionTitle}>Certifications</h2>
-
-                                    {cvData.certifications.map((cert, index) => (
-                                        <div key={index} className={`mb-1 flex justify-between ${FONT.body}`}>
-                                            <span>
-                                                <span className='font-semibold'>{cert.name}</span>
-
-                                                {cert.issuer && ` | ${cert.issuer}`}
-                                            </span>
-
-                                            <span className={FONT.itemMeta}>{cert.date}</span>
-                                        </div>
-                                    ))}
-                                </section>
-                            )}
-                        </td>
-                    </tr>
-                </tbody>
-
-                <tfoot>
-                    <tr>
-                        <td>
-                            <div className='h-[2cm] w-full'></div>
-                        </td>
-                    </tr>
-                </tfoot>
-            </table>
-        </div>
+                            <Text isPdf={isPdf} className={`${itemMeta} shrink-0`}>
+                                {cert.date}
+                            </Text>
+                        </Box>
+                    ))}
+                </Box>
+            )}
+        </Box>
     );
-});
-
-HarvardTemplate.displayName = 'HarvardTemplate';
+};
