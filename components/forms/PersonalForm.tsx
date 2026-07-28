@@ -96,7 +96,7 @@ export const PersonalForm = () => {
                                         onClick={() => remove(index)}
                                         className='text-muted-foreground hover:text-destructive hover:bg-destructive/10 transition-colors'
                                         title='Remove Link'>
-                                        <Trash2 />
+                                        <Trash2 className='w-4 h-4' />
                                     </Button>
                                 </div>
                             </div>
@@ -108,7 +108,7 @@ export const PersonalForm = () => {
                             size='sm'
                             onClick={() => append({ url: '' })}
                             className='w-full border-dashed gap-2'>
-                            <Plus /> Add Link
+                            <Plus className='w-4 h-4' /> Add Link
                         </Button>
                     </FieldGroup>
                 </FieldSet>

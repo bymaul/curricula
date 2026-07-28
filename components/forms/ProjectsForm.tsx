@@ -42,7 +42,7 @@ const SortableProjectItem = ({ id, index, remove }: { id: string; index: number;
                 onClick={() => remove(index)}
                 className='absolute top-3 right-3 h-7 w-7 text-muted-foreground hover:text-destructive hover:bg-destructive/10 rounded-md transition-colors'
                 title='Remove Project'>
-                <Trash2 />
+                <Trash2 className='w-4 h-4' />
             </Button>
 
             <div className='flex items-center gap-2 border-b border-border pb-3 pr-10'>
@@ -50,7 +50,7 @@ const SortableProjectItem = ({ id, index, remove }: { id: string; index: number;
                     {...attributes}
                     {...listeners}
                     className='cursor-grab touch-none text-muted-foreground hover:text-foreground p-1'>
-                    <GripVertical />
+                    <GripVertical className='w-4 h-4' />
                 </div>
                 <span className='text-xs font-bold text-muted-foreground uppercase tracking-wider'>
                     Project #{index + 1}
@@ -105,7 +105,7 @@ export const ProjectsForm = () => {
     };
 
     return (
-        <div className='animate-fade-in space-y-4 p-2'>
+        <div className='space-y-4 p-2'>
             <div>
                 <h2 className='text-xl font-bold tracking-tight'>Projects</h2>
                 <p className='text-xs text-muted-foreground mt-1'>Highlight side projects or open-source work.</p>
@@ -124,7 +124,7 @@ export const ProjectsForm = () => {
                 variant='outline'
                 onClick={() => append({ name: '', date: '', description: '' })}
                 className='w-full border-dashed gap-2 py-5'>
-                <Plus /> Add New Project
+                <Plus className='w-4 h-4' /> Add New Project
             </Button>
         </div>
     );

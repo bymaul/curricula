@@ -39,7 +39,7 @@ const SortableCertItem = ({ id, index, remove }: { id: string; index: number; re
                 {...attributes}
                 {...listeners}
                 className='cursor-grab touch-none text-muted-foreground hover:text-foreground p-1 mb-2'>
-                <GripVertical />
+                <GripVertical className='w-4 h-4' />
             </div>
 
             <FormField
@@ -74,7 +74,7 @@ const SortableCertItem = ({ id, index, remove }: { id: string; index: number; re
                 onClick={() => remove(index)}
                 className='text-muted-foreground hover:text-destructive hover:bg-destructive/10 transition-colors'
                 title='Remove Certification'>
-                <Trash2 />
+                <Trash2 className='w-4 h-4' />
             </Button>
         </div>
     );
@@ -98,7 +98,7 @@ export const CertificationsForm = () => {
     };
 
     return (
-        <div className='animate-fade-in space-y-4 p-2'>
+        <div className='space-y-4 p-2'>
             <div>
                 <h2 className='text-xl font-bold tracking-tight'>Certifications</h2>
                 <p className='text-xs text-muted-foreground mt-1'>Add professional credentials and certifications.</p>
@@ -117,7 +117,7 @@ export const CertificationsForm = () => {
                 variant='outline'
                 onClick={() => append({ name: '', issuer: '', date: '' })}
                 className='w-full border-dashed gap-2 py-5'>
-                <Plus /> Add Certification
+                <Plus className='w-4 h-4' /> Add Certification
             </Button>
         </div>
     );

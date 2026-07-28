@@ -1,4 +1,5 @@
 import { SECTIONS } from '@/lib/consts';
+import { cn } from '@/lib/utils';
 import { useUIStore } from '@/store/useUIStore';
 import { CheckCircle2, ChevronDown, Download, Printer, Upload } from 'lucide-react';
 import { CertificationsForm } from '../forms/CertificationsForm';
@@ -12,11 +13,15 @@ import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigge
 import { ScrollArea } from '../ui/scroll-area';
 import { Tooltip, TooltipContent, TooltipTrigger } from '../ui/tooltip';
 
-export function EditorSidebar({ fileInputRef, handleImportData, handleExportData, handlePrintClick }: any) {
+export function EditorSidebar({ className, fileInputRef, handleImportData, handleExportData, handlePrintClick }: any) {
     const { activeTab, setActiveTab } = useUIStore();
 
     return (
-        <section className='w-full lg:w-[35%] xl:w-[30%] flex flex-col h-full border border-border bg-card rounded-xl shadow-lg overflow-hidden shrink-0 print:hidden'>
+        <section
+            className={cn(
+                'w-full lg:w-[35%] xl:w-[30%] flex-col border border-border bg-card rounded-xl shadow-lg overflow-hidden shrink-0 print:hidden',
+                className,
+            )}>
             <header className='px-5 py-4 border-b border-border flex items-center justify-between shrink-0 bg-muted/30 z-10'>
                 <h1 className='text-lg font-bold tracking-tight'>CV Builder</h1>
 
@@ -26,7 +31,7 @@ export function EditorSidebar({ fileInputRef, handleImportData, handleExportData
                             <Button
                                 variant='outline'
                                 size='sm'
-                                className='h-8 text-xs font-semibold gap-2 bg-background'>
+                                className='h-9 lg:h-8 text-xs font-semibold gap-2 bg-background'>
                                 {activeTab}
                                 <ChevronDown className='w-3.5 h-3.5 text-muted-foreground' />
                             </Button>
@@ -37,7 +42,7 @@ export function EditorSidebar({ fileInputRef, handleImportData, handleExportData
                             <DropdownMenuItem
                                 key={name}
                                 onClick={() => setActiveTab(name)}
-                                className='gap-3 py-2 px-3 text-sm cursor-pointer rounded-md'>
+                                className='gap-3 py-2.5 px-3 text-sm cursor-pointer rounded-md'>
                                 <Icon className='w-4 h-4 text-muted-foreground' />
                                 <span className={activeTab === name ? 'font-bold' : ''}>{name}</span>
                             </DropdownMenuItem>
@@ -73,6 +78,7 @@ export function EditorSidebar({ fileInputRef, handleImportData, handleExportData
                         accept='.json'
                         ref={fileInputRef}
                         onChange={handleImportData}
+                        aria-label='Import CV data (JSON file)'
                         className='hidden'
                     />
 
@@ -82,9 +88,9 @@ export function EditorSidebar({ fileInputRef, handleImportData, handleExportData
                                 <Button
                                     variant='ghost'
                                     size='icon'
-                                    className='h-8 w-8'
+                                    className='h-10 w-10 lg:h-8 lg:w-8'
                                     onClick={() => fileInputRef.current?.click()}>
-                                    <Upload />
+                                    <Upload className='w-4 h-4' />
                                 </Button>
                             }
                         />
@@ -99,10 +105,9 @@ export function EditorSidebar({ fileInputRef, handleImportData, handleExportData
                                 <Button
                                     variant='ghost'
                                     size='icon'
-                                    className='h-8 w-8 mr-1'
-                                    onClick={handleExportData}
-                                    title=''>
-                                    <Download />
+                                    className='h-10 w-10 lg:h-8 lg:w-8 mr-1'
+                                    onClick={handleExportData}>
+                                    <Download className='w-4 h-4' />
                                 </Button>
                             }
                         />
@@ -113,7 +118,7 @@ export function EditorSidebar({ fileInputRef, handleImportData, handleExportData
 
                     <Button
                         onClick={handlePrintClick}
-                        className='h-8 text-xs font-bold gap-2 bg-primary text-primary-foreground hover:bg-primary/90'>
+                        className='h-10 lg:h-8 text-xs font-bold gap-2 bg-primary text-primary-foreground hover:bg-primary/90'>
                         <Printer className='w-3.5 h-3.5' />
                         Print / PDF
                     </Button>

@@ -39,7 +39,7 @@ const SortableSkillItem = ({ id, index, remove }: { id: string; index: number; r
                 {...attributes}
                 {...listeners}
                 className='cursor-grab touch-none text-muted-foreground hover:text-foreground p-1 mb-2'>
-                <GripVertical />
+                <GripVertical className='w-4 h-4' />
             </div>
 
             <FormField
@@ -67,7 +67,7 @@ const SortableSkillItem = ({ id, index, remove }: { id: string; index: number; r
                 onClick={() => remove(index)}
                 className='text-muted-foreground hover:text-destructive hover:bg-destructive/10 transition-colors'
                 title='Remove Skill Category'>
-                <Trash2 />
+                <Trash2 className='w-4 h-4' />
             </Button>
         </div>
     );
@@ -91,7 +91,7 @@ export const SkillsForm = () => {
     };
 
     return (
-        <div className='animate-fade-in space-y-4 p-2'>
+        <div className='space-y-4 p-2'>
             <div>
                 <h2 className='text-xl font-bold tracking-tight'>Skills</h2>
                 <p className='text-xs text-muted-foreground mt-1'>
@@ -112,7 +112,7 @@ export const SkillsForm = () => {
                 variant='outline'
                 onClick={() => append({ category: '', items: '' })}
                 className='w-full border-dashed gap-2 py-5'>
-                <Plus /> Add Skill Category
+                <Plus className='w-4 h-4' /> Add Skill Category
             </Button>
         </div>
     );

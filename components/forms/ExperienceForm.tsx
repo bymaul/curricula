@@ -42,7 +42,7 @@ const SortableExperienceItem = ({
                 onClick={() => remove(index)}
                 className='absolute top-3 right-3 h-7 w-7 text-muted-foreground hover:text-destructive hover:bg-destructive/10 rounded-md transition-colors'
                 title='Remove Experience'>
-                <Trash2 />
+                <Trash2 className='w-4 h-4' />
             </Button>
 
             <div className='flex items-center gap-2 border-b border-border pb-3 pr-10'>
@@ -50,7 +50,7 @@ const SortableExperienceItem = ({
                     {...attributes}
                     {...listeners}
                     className='cursor-grab touch-none text-muted-foreground hover:text-foreground p-1'>
-                    <GripVertical />
+                    <GripVertical className='w-4 h-4' />
                 </div>
                 <span className='text-xs font-bold text-muted-foreground uppercase tracking-wider'>
                     Experience #{index + 1}
@@ -138,7 +138,7 @@ export const ExperienceForm = () => {
                 variant='outline'
                 onClick={() => append({ role: '', company: '', date: '', location: '', description: '' })}
                 className='w-full border-dashed gap-2 py-5'>
-                <Plus /> Add New Experience
+                <Plus className='w-4 h-4' /> Add New Experience
             </Button>
         </div>
     );
