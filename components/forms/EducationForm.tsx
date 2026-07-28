@@ -1,6 +1,4 @@
 import { Button } from '@/components/ui/button';
-import { Input } from '@/components/ui/input';
-import { Textarea } from '@/components/ui/textarea';
 import { CVData } from '@/lib/schema';
 import { closestCenter, DndContext, KeyboardSensor, PointerSensor, useSensor, useSensors } from '@dnd-kit/core';
 import {
@@ -12,6 +10,7 @@ import {
 import { CSS } from '@dnd-kit/utilities';
 import { GripVertical, Plus, Trash2 } from 'lucide-react';
 import { useFieldArray, useFormContext } from 'react-hook-form';
+import { FormField } from '../ui/form-field';
 
 const SortableEducationItem = ({
     id,
@@ -43,7 +42,7 @@ const SortableEducationItem = ({
                 onClick={() => remove(index)}
                 className='absolute top-3 right-3 h-7 w-7 text-muted-foreground hover:text-destructive hover:bg-destructive/10 rounded-md transition-colors'
                 title='Remove Education'>
-                <Trash2 className='w-4 h-4' />
+                <Trash2 />
             </Button>
 
             <div className='flex items-center gap-2 border-b border-border pb-3 pr-10'>
@@ -51,7 +50,7 @@ const SortableEducationItem = ({
                     {...attributes}
                     {...listeners}
                     className='cursor-grab touch-none text-muted-foreground hover:text-foreground p-1'>
-                    <GripVertical className='w-4 h-4' />
+                    <GripVertical />
                 </div>
                 <span className='text-xs font-bold text-muted-foreground uppercase tracking-wider'>
                     Education #{index + 1}
@@ -59,61 +58,44 @@ const SortableEducationItem = ({
             </div>
 
             <div className='grid grid-cols-1 sm:grid-cols-2 gap-3'>
-                <div className='space-y-1.5'>
-                    <label className='text-[10px] font-semibold text-muted-foreground uppercase tracking-wider block'>
-                        Institution
-                    </label>
-                    <Input
-                        {...register(`education.${index}.institution` as const)}
-                        placeholder='University of California'
-                        className={itemErrors?.institution ? 'border-destructive' : ''}
-                    />
-                    {itemErrors?.institution && (
-                        <p className='text-destructive text-[11px] font-medium'>{itemErrors.institution.message}</p>
-                    )}
-                </div>
-                <div className='space-y-1.5'>
-                    <label className='text-[10px] font-semibold text-muted-foreground uppercase tracking-wider block'>
-                        Degree / Major
-                    </label>
-                    <Input
-                        {...register(`education.${index}.degree` as const)}
-                        placeholder='B.S. in Computer Science'
-                        className={itemErrors?.degree ? 'border-destructive' : ''}
-                    />
-                    {itemErrors?.degree && (
-                        <p className='text-destructive text-[11px] font-medium'>{itemErrors.degree.message}</p>
-                    )}
-                </div>
-                <div className='space-y-1.5'>
-                    <label className='text-[10px] font-semibold text-muted-foreground uppercase tracking-wider block'>
-                        Location
-                    </label>
-                    <Input {...register(`education.${index}.location` as const)} placeholder='Berkeley, CA' />
-                </div>
-                <div className='space-y-1.5'>
-                    <label className='text-[10px] font-semibold text-muted-foreground uppercase tracking-wider block'>
-                        Dates
-                    </label>
-                    <Input
-                        {...register(`education.${index}.date` as const)}
-                        placeholder='2018 - 2022'
-                        className={itemErrors?.date ? 'border-destructive' : ''}
-                    />
-                    {itemErrors?.date && (
-                        <p className='text-destructive text-[11px] font-medium'>{itemErrors.date.message}</p>
-                    )}
-                </div>
-                <div className='sm:col-span-2 space-y-1.5'>
-                    <label className='text-[10px] font-semibold text-muted-foreground uppercase tracking-wider block'>
-                        Summary / Highlights
-                    </label>
-                    <Textarea
-                        {...register(`education.${index}.description` as const)}
-                        placeholder='GPA: 3.8 / Dean’s List / Relevant Coursework...'
-                        className='h-24'
-                    />
-                </div>
+                <FormField
+                    name={`education.${index}.institution` as const}
+                    label='Institution'
+                    placeholder='University of California'
+                    register={register}
+                    error={itemErrors?.institution?.message}
+                />
+                <FormField
+                    name={`education.${index}.degree` as const}
+                    label='Degree / Major'
+                    placeholder='B.S. in Computer Science'
+                    register={register}
+                    error={itemErrors?.degree?.message}
+                />
+                <FormField
+                    name={`education.${index}.location` as const}
+                    label='Location'
+                    placeholder='Berkeley, CA'
+                    register={register}
+                    error={itemErrors?.location?.message}
+                />
+                <FormField
+                    name={`education.${index}.date` as const}
+                    label='Dates'
+                    placeholder='2018 - 2022'
+                    register={register}
+                    error={itemErrors?.date?.message}
+                />
+                <FormField
+                    as='textarea'
+                    className='sm:col-span-2'
+                    name={`education.${index}.description` as const}
+                    label='Summary / Highlights'
+                    placeholder='GPA: 3.8 / Dean’s List...'
+                    register={register}
+                    error={itemErrors?.description?.message}
+                    textareaClassName='h-24'
+                />
             </div>
         </div>
     );
@@ -129,15 +111,15 @@ export const EducationForm = () => {
 
     const handleDragEnd = (event: any) => {
         const { active, over } = event;
-        if (over && active.id !== over.id) {
-            const oldIndex = fields.findIndex((item) => item.id === active.id);
-            const newIndex = fields.findIndex((item) => item.id === over.id);
-            move(oldIndex, newIndex);
-        }
+        if (over && active.id !== over.id)
+            move(
+                fields.findIndex((i) => i.id === active.id),
+                fields.findIndex((i) => i.id === over.id),
+            );
     };
 
     return (
-        <div className='animate-fade-in space-y-4 p-2'>
+        <div className='space-y-4 p-2'>
             <div>
                 <h2 className='text-xl font-bold tracking-tight'>Education</h2>
                 <p className='text-xs text-muted-foreground mt-1'>Add your academic background and credentials.</p>
@@ -156,7 +138,7 @@ export const EducationForm = () => {
                 variant='outline'
                 onClick={() => append({ institution: '', degree: '', date: '', location: '', description: '' })}
                 className='w-full border-dashed gap-2 py-5'>
-                <Plus className='w-4 h-4' /> Add Education
+                <Plus /> Add Education
             </Button>
         </div>
     );

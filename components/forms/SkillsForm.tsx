@@ -1,7 +1,14 @@
 import { Button } from '@/components/ui/button';
-import { Input } from '@/components/ui/input';
 import { CVData } from '@/lib/schema';
-import { closestCenter, DndContext, KeyboardSensor, PointerSensor, useSensor, useSensors } from '@dnd-kit/core';
+import {
+    closestCenter,
+    DndContext,
+    DragEndEvent,
+    KeyboardSensor,
+    PointerSensor,
+    useSensor,
+    useSensors,
+} from '@dnd-kit/core';
 import {
     SortableContext,
     sortableKeyboardCoordinates,
@@ -11,6 +18,7 @@ import {
 import { CSS } from '@dnd-kit/utilities';
 import { GripVertical, Plus, Trash2 } from 'lucide-react';
 import { useFieldArray, useFormContext } from 'react-hook-form';
+import { FormField } from '../ui/form-field';
 
 const SortableSkillItem = ({ id, index, remove }: { id: string; index: number; remove: (index: number) => void }) => {
     const {
@@ -31,44 +39,35 @@ const SortableSkillItem = ({ id, index, remove }: { id: string; index: number; r
                 {...attributes}
                 {...listeners}
                 className='cursor-grab touch-none text-muted-foreground hover:text-foreground p-1 mb-2'>
-                <GripVertical className='w-4 h-4' />
+                <GripVertical />
             </div>
 
-            <div className='w-1/3 space-y-1.5'>
-                <label className='text-[10px] font-semibold text-muted-foreground uppercase tracking-wider block'>
-                    Category
-                </label>
-                <Input
-                    {...register(`skills.${index}.category` as const)}
-                    placeholder='Languages'
-                    className={itemErrors?.category ? 'border-destructive' : ''}
-                />
-                {itemErrors?.category && (
-                    <p className='text-destructive text-[11px] font-medium'>{itemErrors.category.message}</p>
-                )}
-            </div>
-            <div className='flex-1 space-y-1.5'>
-                <label className='text-[10px] font-semibold text-muted-foreground uppercase tracking-wider block'>
-                    Skills
-                </label>
-                <Input
-                    {...register(`skills.${index}.items` as const)}
-                    placeholder='TypeScript, Python, SQL...'
-                    className={itemErrors?.items ? 'border-destructive' : ''}
-                />
-                {itemErrors?.items && (
-                    <p className='text-destructive text-[11px] font-medium'>{itemErrors.items.message}</p>
-                )}
-            </div>
+            <FormField
+                className='w-1/3'
+                name={`skills.${index}.category` as const}
+                label='Category'
+                placeholder='Languages'
+                register={register}
+                error={itemErrors?.category?.message}
+            />
+
+            <FormField
+                className='flex-1'
+                name={`skills.${index}.items` as const}
+                label='Skills'
+                placeholder='TypeScript, Python, SQL...'
+                register={register}
+                error={itemErrors?.items?.message}
+            />
 
             <Button
                 type='button'
                 variant='ghost'
                 size='icon'
                 onClick={() => remove(index)}
-                className='text-muted-foreground hover:text-destructive hover:bg-destructive/10 h-10 w-10 shrink-0 mb-0.5 rounded-lg transition-colors'
+                className='text-muted-foreground hover:text-destructive hover:bg-destructive/10 transition-colors'
                 title='Remove Skill Category'>
-                <Trash2 className='w-4 h-4' />
+                <Trash2 />
             </Button>
         </div>
     );
@@ -82,13 +81,13 @@ export const SkillsForm = () => {
         useSensor(KeyboardSensor, { coordinateGetter: sortableKeyboardCoordinates }),
     );
 
-    const handleDragEnd = (event: any) => {
+    const handleDragEnd = (event: DragEndEvent) => {
         const { active, over } = event;
-        if (over && active.id !== over.id) {
-            const oldIndex = fields.findIndex((item) => item.id === active.id);
-            const newIndex = fields.findIndex((item) => item.id === over.id);
-            move(oldIndex, newIndex);
-        }
+        if (over && active.id !== over.id)
+            move(
+                fields.findIndex((i) => i.id === active.id),
+                fields.findIndex((i) => i.id === over.id),
+            );
     };
 
     return (
@@ -113,7 +112,7 @@ export const SkillsForm = () => {
                 variant='outline'
                 onClick={() => append({ category: '', items: '' })}
                 className='w-full border-dashed gap-2 py-5'>
-                <Plus className='w-4 h-4' /> Add Skill Category
+                <Plus /> Add Skill Category
             </Button>
         </div>
     );

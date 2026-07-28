@@ -84,7 +84,7 @@ export function EditorSidebar({ fileInputRef, handleImportData, handleExportData
                                     size='icon'
                                     className='h-8 w-8'
                                     onClick={() => fileInputRef.current?.click()}>
-                                    <Upload className='w-4 h-4' />
+                                    <Upload />
                                 </Button>
                             }
                         />
@@ -102,7 +102,7 @@ export function EditorSidebar({ fileInputRef, handleImportData, handleExportData
                                     className='h-8 w-8 mr-1'
                                     onClick={handleExportData}
                                     title=''>
-                                    <Download className='w-4 h-4' />
+                                    <Download />
                                 </Button>
                             }
                         />

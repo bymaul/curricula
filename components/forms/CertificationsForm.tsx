@@ -1,7 +1,14 @@
 import { Button } from '@/components/ui/button';
-import { Input } from '@/components/ui/input';
 import { CVData } from '@/lib/schema';
-import { closestCenter, DndContext, KeyboardSensor, PointerSensor, useSensor, useSensors } from '@dnd-kit/core';
+import {
+    closestCenter,
+    DndContext,
+    DragEndEvent,
+    KeyboardSensor,
+    PointerSensor,
+    useSensor,
+    useSensors,
+} from '@dnd-kit/core';
 import {
     SortableContext,
     sortableKeyboardCoordinates,
@@ -11,6 +18,7 @@ import {
 import { CSS } from '@dnd-kit/utilities';
 import { GripVertical, Plus, Trash2 } from 'lucide-react';
 import { useFieldArray, useFormContext } from 'react-hook-form';
+import { FormField } from '../ui/form-field';
 
 const SortableCertItem = ({ id, index, remove }: { id: string; index: number; remove: (index: number) => void }) => {
     const {
@@ -31,57 +39,42 @@ const SortableCertItem = ({ id, index, remove }: { id: string; index: number; re
                 {...attributes}
                 {...listeners}
                 className='cursor-grab touch-none text-muted-foreground hover:text-foreground p-1 mb-2'>
-                <GripVertical className='w-4 h-4' />
+                <GripVertical />
             </div>
 
-            <div className='flex-1 space-y-1.5'>
-                <label className='text-[10px] font-semibold text-muted-foreground uppercase tracking-wider block'>
-                    Name
-                </label>
-                <Input
-                    {...register(`certifications.${index}.name` as const)}
-                    placeholder='AWS Certified Developer'
-                    className={itemErrors?.name ? 'border-destructive' : ''}
-                />
-                {itemErrors?.name && (
-                    <p className='text-destructive text-[11px] font-medium'>{itemErrors.name.message}</p>
-                )}
-            </div>
-            <div className='flex-1 space-y-1.5'>
-                <label className='text-[10px] font-semibold text-muted-foreground uppercase tracking-wider block'>
-                    Issuer
-                </label>
-                <Input
-                    {...register(`certifications.${index}.issuer` as const)}
-                    placeholder='Amazon Web Services'
-                    className={itemErrors?.issuer ? 'border-destructive' : ''}
-                />
-                {itemErrors?.issuer && (
-                    <p className='text-destructive text-[11px] font-medium'>{itemErrors.issuer.message}</p>
-                )}
-            </div>
-            <div className='w-1/4 space-y-1.5'>
-                <label className='text-[10px] font-semibold text-muted-foreground uppercase tracking-wider block'>
-                    Date
-                </label>
-                <Input
-                    {...register(`certifications.${index}.date` as const)}
-                    placeholder='2024'
-                    className={itemErrors?.date ? 'border-destructive' : ''}
-                />
-                {itemErrors?.date && (
-                    <p className='text-destructive text-[11px] font-medium'>{itemErrors.date.message}</p>
-                )}
-            </div>
+            <FormField
+                className='flex-1'
+                name={`certifications.${index}.name` as const}
+                label='Name'
+                placeholder='AWS Certified Developer'
+                register={register}
+                error={itemErrors?.name?.message}
+            />
+            <FormField
+                className='flex-1'
+                name={`certifications.${index}.issuer` as const}
+                label='Issuer'
+                placeholder='Amazon Web Services'
+                register={register}
+                error={itemErrors?.issuer?.message}
+            />
+            <FormField
+                className='w-1/4'
+                name={`certifications.${index}.date` as const}
+                label='Date'
+                placeholder='2024'
+                register={register}
+                error={itemErrors?.date?.message}
+            />
 
             <Button
                 type='button'
                 variant='ghost'
                 size='icon'
                 onClick={() => remove(index)}
-                className='text-muted-foreground hover:text-destructive hover:bg-destructive/10 h-10 w-10 shrink-0 mb-0.5 rounded-lg transition-colors'
+                className='text-muted-foreground hover:text-destructive hover:bg-destructive/10 transition-colors'
                 title='Remove Certification'>
-                <Trash2 className='w-4 h-4' />
+                <Trash2 />
             </Button>
         </div>
     );
@@ -95,13 +88,13 @@ export const CertificationsForm = () => {
         useSensor(KeyboardSensor, { coordinateGetter: sortableKeyboardCoordinates }),
     );
 
-    const handleDragEnd = (event: any) => {
+    const handleDragEnd = (event: DragEndEvent) => {
         const { active, over } = event;
-        if (over && active.id !== over.id) {
-            const oldIndex = fields.findIndex((item) => item.id === active.id);
-            const newIndex = fields.findIndex((item) => item.id === over.id);
-            move(oldIndex, newIndex);
-        }
+        if (over && active.id !== over.id)
+            move(
+                fields.findIndex((i) => i.id === active.id),
+                fields.findIndex((i) => i.id === over.id),
+            );
     };
 
     return (
@@ -124,7 +117,7 @@ export const CertificationsForm = () => {
                 variant='outline'
                 onClick={() => append({ name: '', issuer: '', date: '' })}
                 className='w-full border-dashed gap-2 py-5'>
-                <Plus className='w-4 h-4' /> Add Certification
+                <Plus /> Add Certification
             </Button>
         </div>
     );

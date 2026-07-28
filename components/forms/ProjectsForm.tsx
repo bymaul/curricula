@@ -1,8 +1,14 @@
 import { Button } from '@/components/ui/button';
-import { Input } from '@/components/ui/input';
-import { Textarea } from '@/components/ui/textarea';
 import { CVData } from '@/lib/schema';
-import { closestCenter, DndContext, KeyboardSensor, PointerSensor, useSensor, useSensors } from '@dnd-kit/core';
+import {
+    closestCenter,
+    DndContext,
+    DragEndEvent,
+    KeyboardSensor,
+    PointerSensor,
+    useSensor,
+    useSensors,
+} from '@dnd-kit/core';
 import {
     SortableContext,
     sortableKeyboardCoordinates,
@@ -12,6 +18,7 @@ import {
 import { CSS } from '@dnd-kit/utilities';
 import { GripVertical, Plus, Trash2 } from 'lucide-react';
 import { useFieldArray, useFormContext } from 'react-hook-form';
+import { FormField } from '../ui/form-field';
 
 const SortableProjectItem = ({ id, index, remove }: { id: string; index: number; remove: (index: number) => void }) => {
     const {
@@ -35,7 +42,7 @@ const SortableProjectItem = ({ id, index, remove }: { id: string; index: number;
                 onClick={() => remove(index)}
                 className='absolute top-3 right-3 h-7 w-7 text-muted-foreground hover:text-destructive hover:bg-destructive/10 rounded-md transition-colors'
                 title='Remove Project'>
-                <Trash2 className='w-4 h-4' />
+                <Trash2 />
             </Button>
 
             <div className='flex items-center gap-2 border-b border-border pb-3 pr-10'>
@@ -43,7 +50,7 @@ const SortableProjectItem = ({ id, index, remove }: { id: string; index: number;
                     {...attributes}
                     {...listeners}
                     className='cursor-grab touch-none text-muted-foreground hover:text-foreground p-1'>
-                    <GripVertical className='w-4 h-4' />
+                    <GripVertical />
                 </div>
                 <span className='text-xs font-bold text-muted-foreground uppercase tracking-wider'>
                     Project #{index + 1}
@@ -51,44 +58,31 @@ const SortableProjectItem = ({ id, index, remove }: { id: string; index: number;
             </div>
 
             <div className='grid grid-cols-1 sm:grid-cols-2 gap-3'>
-                <div className='space-y-1.5'>
-                    <label className='text-[10px] font-semibold text-muted-foreground uppercase tracking-wider block'>
-                        Project Name
-                    </label>
-                    <Input
-                        {...register(`projects.${index}.name` as const)}
-                        placeholder='E-Commerce SaaS Platform'
-                        className={itemErrors?.name ? 'border-destructive' : ''}
-                    />
-                    {itemErrors?.name && (
-                        <p className='text-destructive text-[11px] font-medium'>{itemErrors.name.message}</p>
-                    )}
-                </div>
-                <div className='space-y-1.5'>
-                    <label className='text-[10px] font-semibold text-muted-foreground uppercase tracking-wider block'>
-                        Dates
-                    </label>
-                    <Input
-                        {...register(`projects.${index}.date` as const)}
-                        placeholder='2023 - Present'
-                        className={itemErrors?.date ? 'border-destructive' : ''}
-                    />
-                    {itemErrors?.date && (
-                        <p className='text-destructive text-[11px] font-medium'>{itemErrors.date.message}</p>
-                    )}
-                </div>
-            </div>
-
-            <div className='space-y-1.5'>
-                <label className='text-[10px] font-semibold text-muted-foreground uppercase tracking-wider block'>
-                    Description / Bullet Points
-                </label>
-                <Textarea
-                    {...register(`projects.${index}.description` as const)}
-                    placeholder='- Built with Next.js, Tailwind, and PostgreSQL&#10;- Integrated Stripe checkout workflow'
-                    className='h-32 font-mono text-xs'
+                <FormField
+                    name={`projects.${index}.name` as const}
+                    label='Project Name'
+                    placeholder='E-Commerce SaaS Platform'
+                    register={register}
+                    error={itemErrors?.name?.message}
+                />
+                <FormField
+                    name={`projects.${index}.date` as const}
+                    label='Dates'
+                    placeholder='2023 - Present'
+                    register={register}
+                    error={itemErrors?.date?.message}
                 />
             </div>
+
+            <FormField
+                as='textarea'
+                name={`projects.${index}.description` as const}
+                label='Description / Bullet Points'
+                placeholder='- Built with Next.js, Tailwind, and PostgreSQL...'
+                register={register}
+                error={itemErrors?.description?.message}
+                textareaClassName='h-32 font-mono text-xs'
+            />
         </div>
     );
 };
@@ -101,13 +95,13 @@ export const ProjectsForm = () => {
         useSensor(KeyboardSensor, { coordinateGetter: sortableKeyboardCoordinates }),
     );
 
-    const handleDragEnd = (event: any) => {
+    const handleDragEnd = (event: DragEndEvent) => {
         const { active, over } = event;
-        if (over && active.id !== over.id) {
-            const oldIndex = fields.findIndex((item) => item.id === active.id);
-            const newIndex = fields.findIndex((item) => item.id === over.id);
-            move(oldIndex, newIndex);
-        }
+        if (over && active.id !== over.id)
+            move(
+                fields.findIndex((i) => i.id === active.id),
+                fields.findIndex((i) => i.id === over.id),
+            );
     };
 
     return (
@@ -130,7 +124,7 @@ export const ProjectsForm = () => {
                 variant='outline'
                 onClick={() => append({ name: '', date: '', description: '' })}
                 className='w-full border-dashed gap-2 py-5'>
-                <Plus className='w-4 h-4' /> Add New Project
+                <Plus /> Add New Project
             </Button>
         </div>
     );

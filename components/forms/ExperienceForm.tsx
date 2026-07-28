@@ -1,6 +1,4 @@
 import { Button } from '@/components/ui/button';
-import { Input } from '@/components/ui/input';
-import { Textarea } from '@/components/ui/textarea';
 import { CVData } from '@/lib/schema';
 import { closestCenter, DndContext, KeyboardSensor, PointerSensor, useSensor, useSensors } from '@dnd-kit/core';
 import {
@@ -12,6 +10,7 @@ import {
 import { CSS } from '@dnd-kit/utilities';
 import { GripVertical, Plus, Trash2 } from 'lucide-react';
 import { useFieldArray, useFormContext } from 'react-hook-form';
+import { FormField } from '../ui/form-field';
 
 const SortableExperienceItem = ({
     id,
@@ -43,7 +42,7 @@ const SortableExperienceItem = ({
                 onClick={() => remove(index)}
                 className='absolute top-3 right-3 h-7 w-7 text-muted-foreground hover:text-destructive hover:bg-destructive/10 rounded-md transition-colors'
                 title='Remove Experience'>
-                <Trash2 className='w-4 h-4' />
+                <Trash2 />
             </Button>
 
             <div className='flex items-center gap-2 border-b border-border pb-3 pr-10'>
@@ -51,7 +50,7 @@ const SortableExperienceItem = ({
                     {...attributes}
                     {...listeners}
                     className='cursor-grab touch-none text-muted-foreground hover:text-foreground p-1'>
-                    <GripVertical className='w-4 h-4' />
+                    <GripVertical />
                 </div>
                 <span className='text-xs font-bold text-muted-foreground uppercase tracking-wider'>
                     Experience #{index + 1}
@@ -59,63 +58,45 @@ const SortableExperienceItem = ({
             </div>
 
             <div className='grid grid-cols-1 sm:grid-cols-2 gap-3'>
-                <div className='space-y-1.5'>
-                    <label className='text-[10px] font-semibold text-muted-foreground uppercase tracking-wider block'>
-                        Job Title
-                    </label>
-                    <Input
-                        {...register(`experience.${index}.role` as const)}
-                        placeholder='Software Engineer'
-                        className={itemErrors?.role ? 'border-destructive' : ''}
-                    />
-                    {itemErrors?.role && (
-                        <p className='text-destructive text-[11px] font-medium'>{itemErrors.role.message}</p>
-                    )}
-                </div>
-                <div className='space-y-1.5'>
-                    <label className='text-[10px] font-semibold text-muted-foreground uppercase tracking-wider block'>
-                        Company
-                    </label>
-                    <Input
-                        {...register(`experience.${index}.company` as const)}
-                        placeholder='Acme Inc.'
-                        className={itemErrors?.company ? 'border-destructive' : ''}
-                    />
-                    {itemErrors?.company && (
-                        <p className='text-destructive text-[11px] font-medium'>{itemErrors.company.message}</p>
-                    )}
-                </div>
-                <div className='space-y-1.5'>
-                    <label className='text-[10px] font-semibold text-muted-foreground uppercase tracking-wider block'>
-                        Location
-                    </label>
-                    <Input {...register(`experience.${index}.location` as const)} placeholder='Remote / New York' />
-                </div>
-                <div className='space-y-1.5'>
-                    <label className='text-[10px] font-semibold text-muted-foreground uppercase tracking-wider block'>
-                        Dates
-                    </label>
-                    <Input
-                        {...register(`experience.${index}.date` as const)}
-                        placeholder='Jan 2022 - Present'
-                        className={itemErrors?.date ? 'border-destructive' : ''}
-                    />
-                    {itemErrors?.date && (
-                        <p className='text-destructive text-[11px] font-medium'>{itemErrors.date.message}</p>
-                    )}
-                </div>
-            </div>
-
-            <div className='space-y-1.5'>
-                <label className='text-[10px] font-semibold text-muted-foreground uppercase tracking-wider block'>
-                    Description / Bullet Points
-                </label>
-                <Textarea
-                    {...register(`experience.${index}.description` as const)}
-                    placeholder='- Spearheaded migration to Next.js&#10;- Improved load speeds by 40%'
-                    className='h-32 font-mono text-xs'
+                <FormField
+                    name={`experience.${index}.role` as const}
+                    label='Job Title'
+                    placeholder='Software Engineer'
+                    register={register}
+                    error={itemErrors?.role?.message}
+                />
+                <FormField
+                    name={`experience.${index}.company` as const}
+                    label='Company'
+                    placeholder='Acme Inc.'
+                    register={register}
+                    error={itemErrors?.company?.message}
+                />
+                <FormField
+                    name={`experience.${index}.location` as const}
+                    label='Location'
+                    placeholder='Remote / New York'
+                    register={register}
+                    error={itemErrors?.location?.message}
+                />
+                <FormField
+                    name={`experience.${index}.date` as const}
+                    label='Dates'
+                    placeholder='Jan 2022 - Present'
+                    register={register}
+                    error={itemErrors?.date?.message}
                 />
             </div>
+
+            <FormField
+                as='textarea'
+                name={`experience.${index}.description` as const}
+                label='Description / Bullet Points'
+                placeholder={`- Spearheaded migration to Next.js\n- Improved load speeds by 40%`}
+                register={register}
+                error={itemErrors?.description?.message}
+                textareaClassName='h-32 font-mono text-xs'
+            />
         </div>
     );
 };
@@ -130,22 +111,21 @@ export const ExperienceForm = () => {
 
     const handleDragEnd = (event: any) => {
         const { active, over } = event;
-        if (over && active.id !== over.id) {
-            const oldIndex = fields.findIndex((item) => item.id === active.id);
-            const newIndex = fields.findIndex((item) => item.id === over.id);
-            move(oldIndex, newIndex);
-        }
+        if (over && active.id !== over.id)
+            move(
+                fields.findIndex((i) => i.id === active.id),
+                fields.findIndex((i) => i.id === over.id),
+            );
     };
 
     return (
-        <div className='animate-fade-in space-y-4 p-2'>
+        <div className='space-y-4 p-2'>
             <div>
                 <h2 className='text-xl font-bold tracking-tight'>Work Experience</h2>
                 <p className='text-xs text-muted-foreground mt-1'>
                     Drag items using the handle to reorder your job history.
                 </p>
             </div>
-
             <DndContext sensors={sensors} collisionDetection={closestCenter} onDragEnd={handleDragEnd}>
                 <SortableContext items={fields.map((f) => f.id)} strategy={verticalListSortingStrategy}>
                     {fields.map((field, index) => (
@@ -153,13 +133,12 @@ export const ExperienceForm = () => {
                     ))}
                 </SortableContext>
             </DndContext>
-
             <Button
                 type='button'
                 variant='outline'
                 onClick={() => append({ role: '', company: '', date: '', location: '', description: '' })}
                 className='w-full border-dashed gap-2 py-5'>
-                <Plus className='w-4 h-4' /> Add New Experience
+                <Plus /> Add New Experience
             </Button>
         </div>
     );

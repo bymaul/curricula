@@ -1,6 +1,6 @@
 import { useRef } from 'react';
 import { UseFormReset } from 'react-hook-form';
-import { CVData } from '@/lib/schema';
+import { CVData, cvSchema } from '@/lib/schema';
 import { toast } from '@/components/ui/toast';
 
 export function useCVImportExport(cvData: CVData, reset: UseFormReset<CVData>) {
@@ -24,8 +24,20 @@ export function useCVImportExport(cvData: CVData, reset: UseFormReset<CVData>) {
         const reader = new FileReader();
         reader.onload = (event) => {
             try {
-                const importedData = JSON.parse(event.target?.result as string);
-                reset(importedData);
+                const parsedJson = JSON.parse(event.target?.result as string);
+                const validationResult = cvSchema.safeParse(parsedJson);
+
+                if (!validationResult.success) {
+                    console.error('Validation errors:', validationResult.error);
+                    toast.add({
+                        type: 'error',
+                        description: 'Invalid CV format. The file is corrupted or from an older version.',
+                        priority: 'high',
+                    });
+                    return;
+                }
+
+                reset(validationResult.data);
 
                 toast.add({
                     type: 'success',
@@ -34,13 +46,13 @@ export function useCVImportExport(cvData: CVData, reset: UseFormReset<CVData>) {
             } catch (error) {
                 toast.add({
                     type: 'error',
-                    description: 'Invalid JSON file. Please upload a valid CV Data backup.',
+                    description: 'Could not read file. Please upload a valid JSON backup.',
                     priority: 'high',
                 });
-            }
-
-            if (fileInputRef.current) {
-                fileInputRef.current.value = '';
+            } finally {
+                if (fileInputRef.current) {
+                    fileInputRef.current.value = '';
+                }
             }
         };
         reader.readAsText(file);
