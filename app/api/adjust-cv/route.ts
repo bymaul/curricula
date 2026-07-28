@@ -2,25 +2,9 @@ import { generateText, Output } from 'ai';
 import { createOpenAI } from '@ai-sdk/openai';
 import { createAnthropic } from '@ai-sdk/anthropic';
 import { createGoogleGenerativeAI } from '@ai-sdk/google';
-import { z } from 'zod';
+import { cvSchema } from '@/lib/schema';
 
 export const runtime = 'edge';
-
-const cvSchema = z.object({
-    name: z.string(),
-    email: z.string(),
-    phone: z.string(),
-    linkedin: z.string().optional(),
-    experience: z.array(
-        z.object({
-            role: z.string(),
-            company: z.string(),
-            date: z.string(),
-            achievements: z.array(z.string()),
-        }),
-    ),
-    skills: z.array(z.string()),
-});
 
 export async function POST(req: Request) {
     try {

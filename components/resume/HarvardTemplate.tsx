@@ -5,82 +5,135 @@ interface TemplateProps {
     cvData: CVData;
 }
 
-const FONT = {
-    name: 'text-[20pt]',
-    jobTitle: 'text-[13pt]',
-    contact: 'text-[10pt]',
-    sectionTitle: 'text-[13pt]',
-    itemTitle: 'text-[11pt]',
-    itemSubtitle: 'text-[10.5pt]',
-    itemMeta: 'text-[10pt]',
-    body: 'text-[10.5pt]',
+/**
+ * Single source of truth for the Harvard template's type scale and spacing.
+ * Change a value here instead of hunting through the JSX.
+ *
+ * Sizes follow the classic "Harvard resume" convention:
+ * - Name is the only large element on the page.
+ * - Everything else sits in a tight 9.5-11pt band so the page reads as one
+ *   voice rather than a mix of headings.
+ */
+const TYPE = {
+    name: 'text-[16pt] font-bold uppercase tracking-wide',
+    jobTitle: 'text-[11pt] font-medium',
+    contact: 'text-[9.5pt]',
+    sectionTitle: 'text-[11pt] font-bold uppercase',
+    itemTitle: 'text-[10.5pt] font-bold',
+    itemMeta: 'text-[10pt] font-normal',
+    itemSubtitle: 'text-[10pt] italic',
+    body: 'text-[10pt]',
+    bullet: 'text-[10pt]',
 } as const;
 
-export const HarvardTemplate = forwardRef<HTMLDivElement, TemplateProps>(({ cvData }, ref) => {
-    const renderBullets = (text: string) => {
-        if (!text) return null;
+const SPACE = {
+    pageMargin: 'px-[2cm]',
+    pageCap: 'h-[1.5cm]',
+    sectionGap: 'mb-[10pt]',
+    itemGap: 'mb-[7pt]',
+    sectionTitleGap: 'mb-[3pt] pb-[1pt]',
+} as const;
 
-        const lines = text.split('\n');
-        const elements: React.ReactNode[] = [];
-        let currentBullets: string[] = [];
+/**
+ * Parses a free-text field into paragraphs and "- " bullet groups.
+ * Defined outside the component so it isn't re-created on every render.
+ */
+function renderFormattedText(text: string) {
+    if (!text) return null;
 
-        const flushBullets = (key: number) => {
-            if (currentBullets.length > 0) {
-                elements.push(
-                    <ul key={`ul-${key}`} className={`list-disc list-outside ml-5 mt-1 ${FONT.body}`}>
-                        {currentBullets.map((bullet, idx) => (
-                            <li key={idx} className='pl-1 mb-0.5'>
-                                {bullet}
-                            </li>
-                        ))}
-                    </ul>,
-                );
-                currentBullets = [];
-            }
-        };
+    const lines = text.split('\n');
+    const elements: React.ReactNode[] = [];
+    let currentBullets: string[] = [];
 
-        lines.forEach((line, i) => {
-            const trimmed = line.trim();
-            if (!trimmed) return;
-
-            if (trimmed.startsWith('-')) {
-                const bulletText = trimmed.replace(/^-\s*/, '');
-                currentBullets.push(bulletText);
-            } else {
-                flushBullets(i);
-                elements.push(
-                    <p key={`p-${i}`} className={`mt-1 text-justify ${FONT.body}`}>
-                        {trimmed}
-                    </p>,
-                );
-            }
-        });
-
-        flushBullets(lines.length);
-
-        return <div className='mt-1'>{elements}</div>;
+    const flushBullets = (key: number) => {
+        if (currentBullets.length === 0) return;
+        elements.push(
+            <ul key={`ul-${key}`} className={`list-disc list-outside ml-5 mt-1 ${TYPE.bullet}`}>
+                {currentBullets.map((bullet, idx) => (
+                    <li key={idx} className='pl-1 mb-0.5'>
+                        {bullet}
+                    </li>
+                ))}
+            </ul>,
+        );
+        currentBullets = [];
     };
 
-    const sectionTitle = `mb-2 border-b border-black pb-0.5 ${FONT.sectionTitle} font-bold uppercase break-after-avoid`;
-    const itemTitle = `flex justify-between ${FONT.itemTitle} font-bold`;
-    const itemMeta = `${FONT.itemMeta} font-normal`;
-    const itemSubtitle = `flex justify-between ${FONT.itemSubtitle} italic`;
-    const bodyText = FONT.body;
-    const section = 'mb-4';
-    const avoidBreak = 'break-inside-avoid';
+    lines.forEach((line, i) => {
+        const trimmed = line.trim();
+        if (!trimmed) return;
 
+        if (trimmed.startsWith('-')) {
+            currentBullets.push(trimmed.replace(/^-\s*/, ''));
+        } else {
+            flushBullets(i);
+            elements.push(
+                <p key={`p-${i}`} className={`mt-1 text-justify ${TYPE.body}`}>
+                    {trimmed}
+                </p>,
+            );
+        }
+    });
+
+    flushBullets(lines.length);
+
+    return <div>{elements}</div>;
+}
+
+/** Section wrapper: heading + underline, consistent across the page. */
+function Section({
+    title,
+    avoidBreakAfter,
+    children,
+}: {
+    title: string;
+    avoidBreakAfter?: boolean;
+    children: React.ReactNode;
+}) {
+    return (
+        <section className={`${SPACE.sectionGap} ${avoidBreakAfter ? 'break-after-avoid' : ''}`}>
+            <h2 className={`${TYPE.sectionTitle} border-b border-black ${SPACE.sectionTitleGap} break-after-avoid`}>
+                {title}
+            </h2>
+            {children}
+        </section>
+    );
+}
+
+/** Bold title on the left, meta (usually a date) on the right. */
+function EntryHeader({ title, meta }: { title: string; meta?: string }) {
+    return (
+        <div className={`flex justify-between ${TYPE.itemTitle}`}>
+            <span>{title}</span>
+            {meta && <span className={TYPE.itemMeta}>{meta}</span>}
+        </div>
+    );
+}
+
+/** Italic subtitle row, e.g. company/location or degree/location. */
+function EntrySubheader({ left, right }: { left?: string; right?: string }) {
+    if (!left && !right) return null;
+    return (
+        <div className={`flex justify-between ${TYPE.itemSubtitle} mb-[2pt]`}>
+            <span>{left}</span>
+            <span>{right}</span>
+        </div>
+    );
+}
+
+export const HarvardTemplate = forwardRef<HTMLDivElement, TemplateProps>(({ cvData }, ref) => {
     return (
         <div ref={ref} className='mx-auto shadow-2xl print:shadow-none bg-white'>
             <style type='text/css' media='print'>
                 {`
-                  @page { 
+                  @page {
                     size: A4;
                     margin: 0mm;
                   }
-                  
+
                   thead { display: table-header-group; }
                   tfoot { display: table-footer-group; }
-                  
+
                   div { background-image: none !important; }
                 `}
             </style>
@@ -89,24 +142,21 @@ export const HarvardTemplate = forwardRef<HTMLDivElement, TemplateProps>(({ cvDa
                 <thead>
                     <tr>
                         <td>
-                            <div className='h-[2cm] w-full'></div>
+                            <div className={`${SPACE.pageCap} w-full`}></div>
                         </td>
                     </tr>
                 </thead>
 
                 <tbody>
                     <tr>
-                        <td className='px-[2cm] align-top font-serif text-black text-[11pt] leading-snug'>
+                        <td className={`${SPACE.pageMargin} align-top font-serif text-black leading-snug`}>
+                            {/* --- HEADER SECTION --- */}
                             <div className='text-center mb-4'>
-                                <h1 className={`${FONT.name} font-bold uppercase tracking-wider mb-1`}>
-                                    {cvData.name || 'Your Name'}
-                                </h1>
+                                <h1 className={`${TYPE.name} mb-1`}>{cvData.name || 'Your Name'}</h1>
 
-                                {cvData.jobTitle && (
-                                    <div className={`${FONT.jobTitle} font-medium`}>{cvData.jobTitle}</div>
-                                )}
+                                {cvData.jobTitle && <div className={TYPE.jobTitle}>{cvData.jobTitle}</div>}
 
-                                <div className={`mt-1 flex flex-wrap justify-center gap-x-1 ${FONT.contact}`}>
+                                <div className={`mt-1 flex flex-wrap justify-center gap-x-1 ${TYPE.contact}`}>
                                     {cvData.email && <span>{cvData.email}</span>}
                                     {cvData.phone && <span> | {cvData.phone}</span>}
                                     {cvData.location && <span> | {cvData.location}</span>}
@@ -119,6 +169,7 @@ export const HarvardTemplate = forwardRef<HTMLDivElement, TemplateProps>(({ cvDa
                                                     <a
                                                         href={'https://' + link.url}
                                                         target='_blank'
+                                                        rel='noreferrer'
                                                         className='hover:underline'>
                                                         {link.url}
                                                     </a>
@@ -128,107 +179,75 @@ export const HarvardTemplate = forwardRef<HTMLDivElement, TemplateProps>(({ cvDa
                                 </div>
                             </div>
 
+                            {/* --- SUMMARY SECTION --- */}
                             {cvData.summary && (
-                                <section className={section}>
-                                    <h2 className={sectionTitle}>Summary</h2>
-
-                                    <p className={`${bodyText} text-justify`}>{cvData.summary}</p>
-                                </section>
+                                <Section title='Summary'>
+                                    <p className={`text-justify ${TYPE.body}`}>{cvData.summary}</p>
+                                </Section>
                             )}
 
+                            {/* --- EXPERIENCE SECTION --- */}
                             {cvData.experience.length > 0 && (
-                                <section className={section}>
-                                    <h2 className={sectionTitle}>Experience</h2>
-
+                                <Section title='Experience'>
                                     {cvData.experience.map((exp, index) => (
-                                        <div key={index} className={`mb-3 ${avoidBreak}`}>
-                                            <div className={itemTitle}>
-                                                <span>{exp.role}</span>
-                                                <span className={itemMeta}>{exp.date}</span>
-                                            </div>
-
-                                            <div className={itemSubtitle}>
-                                                <span>{exp.company}</span>
-                                                <span>{exp.location}</span>
-                                            </div>
-
-                                            {renderBullets(exp.description)}
+                                        <div key={index} className={`${SPACE.itemGap} break-inside-avoid`}>
+                                            <EntryHeader title={exp.role} meta={exp.date} />
+                                            <EntrySubheader left={exp.company} right={exp.location} />
+                                            {renderFormattedText(exp.description)}
                                         </div>
                                     ))}
-                                </section>
+                                </Section>
                             )}
 
+                            {/* --- PROJECTS SECTION --- */}
                             {cvData.projects.length > 0 && (
-                                <section className={section}>
-                                    <h2 className={sectionTitle}>Projects</h2>
-
+                                <Section title='Projects'>
                                     {cvData.projects.map((proj, index) => (
-                                        <div key={index} className={`mb-3 ${avoidBreak}`}>
-                                            <div className={itemTitle}>
-                                                <span>{proj.name}</span>
-
-                                                <span className={itemMeta}>{proj.date}</span>
-                                            </div>
-
-                                            {renderBullets(proj.description)}
+                                        <div key={index} className={`${SPACE.itemGap} break-inside-avoid`}>
+                                            <EntryHeader title={proj.name} meta={proj.date} />
+                                            {renderFormattedText(proj.description)}
                                         </div>
                                     ))}
-                                </section>
+                                </Section>
                             )}
 
+                            {/* --- EDUCATION SECTION --- */}
                             {cvData.education.length > 0 && (
-                                <section className={section}>
-                                    <h2 className={sectionTitle}>Education</h2>
-
+                                <Section title='Education'>
                                     {cvData.education.map((edu, index) => (
-                                        <div key={index} className={`mb-2 ${avoidBreak}`}>
-                                            <div className={itemTitle}>
-                                                <span>{edu.institution}</span>
-
-                                                <span className={itemMeta}>{edu.date}</span>
-                                            </div>
-
-                                            <div className={itemSubtitle}>
-                                                <span>{edu.degree}</span>
-                                                <span>{edu.location}</span>
-                                            </div>
-
-                                            {renderBullets(edu.description)}
+                                        <div key={index} className={`${SPACE.itemGap} break-inside-avoid`}>
+                                            <EntryHeader title={edu.institution} meta={edu.date} />
+                                            <EntrySubheader left={edu.degree} right={edu.location} />
+                                            {renderFormattedText(edu.description)}
                                         </div>
                                     ))}
-                                </section>
+                                </Section>
                             )}
 
+                            {/* --- SKILLS SECTION --- */}
                             {cvData.skills.length > 0 && (
-                                <section className={`${section} ${avoidBreak}`}>
-                                    <h2 className={sectionTitle}>Skills</h2>
-
-                                    <div className={bodyText}>
-                                        {cvData.skills.map((skill, index) => (
-                                            <div key={index} className='mb-1'>
-                                                <span className='font-semibold'>{skill.category}:</span> {skill.items}
-                                            </div>
-                                        ))}
-                                    </div>
-                                </section>
+                                <Section title='Skills' avoidBreakAfter>
+                                    {cvData.skills.map((skill, index) => (
+                                        <div key={index} className='mb-1 text-[10.5pt]'>
+                                            <span className='font-semibold'>{skill.category}:</span> {skill.items}
+                                        </div>
+                                    ))}
+                                </Section>
                             )}
 
+                            {/* --- CERTIFICATIONS SECTION --- */}
                             {cvData.certifications.length > 0 && (
-                                <section className={`${section} ${avoidBreak}`}>
-                                    <h2 className={sectionTitle}>Certifications</h2>
-
+                                <Section title='Certifications' avoidBreakAfter>
                                     {cvData.certifications.map((cert, index) => (
-                                        <div key={index} className={`mb-1 flex justify-between ${FONT.body}`}>
+                                        <div key={index} className={`mb-1 flex justify-between text-[10.5pt]`}>
                                             <span>
                                                 <span className='font-semibold'>{cert.name}</span>
-
                                                 {cert.issuer && ` | ${cert.issuer}`}
                                             </span>
-
-                                            <span className={FONT.itemMeta}>{cert.date}</span>
+                                            <span className={TYPE.itemMeta}>{cert.date}</span>
                                         </div>
                                     ))}
-                                </section>
+                                </Section>
                             )}
                         </td>
                     </tr>
@@ -237,7 +256,7 @@ export const HarvardTemplate = forwardRef<HTMLDivElement, TemplateProps>(({ cvDa
                 <tfoot>
                     <tr>
                         <td>
-                            <div className='h-[2cm] w-full'></div>
+                            <div className={`${SPACE.pageCap} w-full`}></div>
                         </td>
                     </tr>
                 </tfoot>
