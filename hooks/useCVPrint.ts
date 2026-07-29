@@ -9,22 +9,10 @@ import { useReactToPrint } from 'react-to-print';
 export function useCVPrint(cvData: CVData, methods: UseFormReturn<CVData>) {
     const setActiveTab = useUIStore((state) => state.setActiveTab);
     const printRef = useRef<HTMLDivElement>(null);
-    const printDeferredRef = useRef<{
-        resolve: (value: unknown) => void;
-        reject: (reason?: unknown) => void;
-    } | null>(null);
 
     const executePrint = useReactToPrint({
         contentRef: printRef,
         documentTitle: `${cvData.name || 'My'} - ${cvData.jobTitle} - CV`,
-        onAfterPrint: () => {
-            printDeferredRef.current?.resolve('Printed successfully');
-            printDeferredRef.current = null;
-        },
-        onPrintError: (error) => {
-            printDeferredRef.current?.reject(error);
-            printDeferredRef.current = null;
-        },
     });
 
     const focusFirstInvalidSection = () => {
@@ -54,20 +42,7 @@ export function useCVPrint(cvData: CVData, methods: UseFormReturn<CVData>) {
             return;
         }
 
-        const printPromise = new Promise((resolve, reject) => {
-            printDeferredRef.current = { resolve, reject };
-            try {
-                executePrint();
-            } catch (err) {
-                reject(err);
-            }
-        });
-
-        toast.promise(printPromise, {
-            loading: 'Preparing document for printing...',
-            success: 'Print dialog handled!',
-            error: 'Failed to print the document.',
-        });
+        executePrint();
     };
 
     return { printRef, handlePrintClick };

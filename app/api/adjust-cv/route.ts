@@ -8,24 +8,24 @@ export const runtime = 'edge';
 
 export async function POST(req: Request) {
     try {
-        const { cvData, jobDescription, provider, apiKey } = await req.json();
+        const { cvData, jobDescription, provider, modelName, apiKey } = await req.json();
 
         if (!apiKey) {
-            return new Response('API Key is required', { status: 401 });
+            return new Response(JSON.stringify({ error: 'API Key is required' }), { status: 401 });
         }
 
         let model;
 
         switch (provider) {
             case 'anthropic':
-                model = createAnthropic({ apiKey })('claude-3-5-sonnet-latest');
+                model = createAnthropic({ apiKey })(modelName || 'claude-3-5-sonnet-latest');
                 break;
             case 'google':
-                model = createGoogleGenerativeAI({ apiKey })('gemini-2.0-flash');
+                model = createGoogleGenerativeAI({ apiKey })(modelName || 'gemini-2.5-flash');
                 break;
             case 'openai':
             default:
-                model = createOpenAI({ apiKey })('gpt-4o');
+                model = createOpenAI({ apiKey })(modelName || 'gpt-4o-mini');
                 break;
         }
 
@@ -34,14 +34,24 @@ export async function POST(req: Request) {
         const { output } = await generateText({
             model,
             system: systemPrompt,
-            prompt: `CV Data: ${cvData}\n\nJob Description: ${jobDescription}`,
+            prompt: `CV Data: ${JSON.stringify(cvData)}\n\nJob Description: ${jobDescription}`,
             output: Output.object({ schema: cvSchema }),
             maxRetries: 0,
         });
 
         return Response.json(output);
-    } catch (error) {
+    } catch (error: any) {
         console.error('AI Error:', error);
-        return new Response('Error processing AI request', { status: 500 });
+
+        if (error?.statusCode === 429 || error?.message?.includes('429')) {
+            return new Response(
+                JSON.stringify({
+                    error: 'Rate limit exceeded for this free API key. Please wait a moment and try again.',
+                }),
+                { status: 429 },
+            );
+        }
+
+        return new Response(JSON.stringify({ error: error.message || 'Error processing AI request' }), { status: 500 });
     }
 }
