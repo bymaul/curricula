@@ -13,7 +13,21 @@ import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigge
 import { ScrollArea } from '../ui/scroll-area';
 import { Tooltip, TooltipContent, TooltipTrigger } from '../ui/tooltip';
 
-export function EditorSidebar({ className, fileInputRef, handleImportData, handleExportData, handlePrintClick }: any) {
+interface EditorSidebarProps {
+    className?: string;
+    fileInputRef: React.RefObject<HTMLInputElement | null>;
+    handleImportData: (e: React.ChangeEvent<HTMLInputElement>) => void;
+    handleExportData: () => void;
+    handlePrintClick: () => void;
+}
+
+export function EditorSidebar({
+    className,
+    fileInputRef,
+    handleImportData,
+    handleExportData,
+    handlePrintClick,
+}: EditorSidebarProps) {
     const { activeTab, setActiveTab } = useUIStore();
 
     return (
