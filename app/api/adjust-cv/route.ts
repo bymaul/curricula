@@ -3,16 +3,25 @@ import { createOpenAI } from '@ai-sdk/openai';
 import { createAnthropic } from '@ai-sdk/anthropic';
 import { createGoogleGenerativeAI } from '@ai-sdk/google';
 import { cvSchema } from '@/lib/schema';
+import z from 'zod';
 
 export const runtime = 'edge';
 
+const requestSchema = z.object({
+    cvData: cvSchema,
+    jobDescription: z.string().max(10000, 'Job description too long'),
+    provider: z.enum(['openai', 'anthropic', 'google']).default('openai'),
+    modelName: z.string().optional(),
+    apiKey: z.string().min(10, 'Invalid API Key'),
+});
+
 export async function POST(req: Request) {
     try {
-        const { cvData, jobDescription, provider, modelName, apiKey } = await req.json();
-
-        if (!apiKey) {
-            return new Response(JSON.stringify({ error: 'API Key is required' }), { status: 401 });
+        const parsedBody = requestSchema.safeParse(await req.json());
+        if (!parsedBody.success) {
+            return Response.json({ error: 'Invalid payload', details: parsedBody.error }, { status: 400 });
         }
+        const { cvData, jobDescription, provider, modelName, apiKey } = parsedBody.data;
 
         let model;
 
@@ -40,10 +49,14 @@ export async function POST(req: Request) {
         });
 
         return Response.json(output);
-    } catch (error: any) {
+    } catch (error: unknown) {
+        const err = error as {
+            statusCode?: number;
+            message?: string;
+        };
         console.error('AI Error:', error);
 
-        if (error?.statusCode === 429 || error?.message?.includes('429')) {
+        if (err?.statusCode === 429 || err?.message?.includes('429')) {
             return new Response(
                 JSON.stringify({
                     error: 'Rate limit exceeded for this free API key. Please wait a moment and try again.',
@@ -52,6 +65,6 @@ export async function POST(req: Request) {
             );
         }
 
-        return new Response(JSON.stringify({ error: error.message || 'Error processing AI request' }), { status: 500 });
+        return new Response(JSON.stringify({ error: err.message || 'Error processing AI request' }), { status: 500 });
     }
 }
