@@ -80,6 +80,11 @@ function renderFormattedText(text: string) {
     return <div>{elements}</div>;
 }
 
+const formatUrl = (url: string) => {
+    if (/^https?:\/\//i.test(url)) return url;
+    return `https://${url}`;
+};
+
 /** Section wrapper: heading + underline, consistent across the page. */
 function Section({
     title,
@@ -167,7 +172,7 @@ export const HarvardTemplate = forwardRef<HTMLDivElement, TemplateProps>(({ cvDa
                                                 <React.Fragment key={idx}>
                                                     <span>|</span>
                                                     <a
-                                                        href={'https://' + link.url}
+                                                        href={formatUrl(link.url)}
                                                         target='_blank'
                                                         rel='noreferrer'
                                                         className='hover:underline'>
