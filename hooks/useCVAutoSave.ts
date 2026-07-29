@@ -1,6 +1,6 @@
+import { CVData, cvSchema } from '@/lib/schema';
 import { useEffect, useState } from 'react';
 import { UseFormReturn } from 'react-hook-form';
-import { CVData } from '@/lib/schema';
 
 export function useCVAutoSave(methods: UseFormReturn<CVData>) {
     const [mounted, setMounted] = useState(false);
@@ -12,7 +12,13 @@ export function useCVAutoSave(methods: UseFormReturn<CVData>) {
         const savedData = localStorage.getItem('cv-builder-data');
         if (savedData) {
             try {
-                reset(JSON.parse(savedData));
+                const parsed = JSON.parse(savedData);
+                const validationResult = cvSchema.safeParse(parsed);
+                if (validationResult.success) {
+                    reset(validationResult.data);
+                } else {
+                    console.warn('Stored CV data schema mismatch, falling back to initial state.');
+                }
             } catch (e) {
                 console.error('Failed to parse local storage', e);
             }
