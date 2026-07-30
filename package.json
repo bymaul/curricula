@@ -1,7 +1,17 @@
 {
-    "name": "cv-builder",
-    "version": "0.1.0",
+    "name": "curricula",
+    "version": "1.0.0",
+    "description": "An offline-first PWA resume builder featuring immaculate classic Harvard table-layout typography for clean print and PDF layouts.",
     "private": true,
+    "keywords": [
+        "nextjs",
+        "react",
+        "pwa",
+        "resume-builder",
+        "cv-builder",
+        "harvard-template",
+        "offline-first"
+    ],
     "scripts": {
         "dev": "next dev --webpack",
         "build": "next build --webpack",

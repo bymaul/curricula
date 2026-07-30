@@ -37,7 +37,7 @@ export function EditorSidebar({
                 className,
             )}>
             <header className='px-5 py-4 border-b border-border flex items-center justify-between shrink-0 bg-muted/30 z-10'>
-                <h1 className='text-lg font-bold tracking-tight'>CV Builder</h1>
+                <h1 className='text-lg font-bold tracking-tight'>Curricula</h1>
 
                 <DropdownMenu>
                     <DropdownMenuTrigger

@@ -9,7 +9,7 @@ export function useCVAutoSave(methods: UseFormReturn<CVData>) {
     const cvData = watch();
 
     useEffect(() => {
-        const savedData = localStorage.getItem('cv-builder-data');
+        const savedData = localStorage.getItem('curricula-data');
         if (savedData) {
             try {
                 const parsed = JSON.parse(savedData);
@@ -28,7 +28,7 @@ export function useCVAutoSave(methods: UseFormReturn<CVData>) {
 
     useEffect(() => {
         if (mounted) {
-            localStorage.setItem('cv-builder-data', JSON.stringify(cvData));
+            localStorage.setItem('curricula-data', JSON.stringify(cvData));
         }
     }, [cvData, mounted]);
 

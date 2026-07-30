@@ -13,7 +13,7 @@ export const useUIStore = create<UIState>()(
             setActiveTab: (tab) => set({ activeTab: tab }),
         }),
         {
-            name: 'cv-builder-ui-state',
+            name: 'curricula-ui-state',
         },
     ),
 );

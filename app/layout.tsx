@@ -17,20 +17,41 @@ const geistMono = Geist_Mono({
     subsets: ['latin'],
 });
 
-export const metadata: Metadata = {
-    title: 'CV Builder',
-    description: 'A modern, offline-capable CV Builder',
-    manifest: '/manifest.json',
-    icons: {
-        apple: '/apple-touch-icon.png',
-    },
-};
-
 export const viewport: Viewport = {
     themeColor: '#09090b',
     width: 'device-width',
     initialScale: 1,
     maximumScale: 1,
+};
+
+export const metadata: Metadata = {
+    title: 'Curricula',
+    description:
+        'An offline-first, client-side CV builder featuring an immaculate classic Harvard table-layout typography for clean print and PDF generation.',
+    applicationName: 'Curricula',
+    keywords: [
+        'CV builder',
+        'resume builder',
+        'Harvard CV template',
+        'offline CV editor',
+        'PWA resume builder',
+        'print-safe CV',
+    ],
+    authors: [{ name: 'Curricula Team' }],
+    manifest: '/manifest.json',
+    openGraph: {
+        title: 'Curricula',
+        description:
+            'Create perfectly aligned, professional Harvard-style resumes with clean pagination and offline-ready editing.',
+        type: 'website',
+        siteName: 'Curricula',
+    },
+    twitter: {
+        card: 'summary_large_image',
+        title: 'Curricula',
+        description:
+            'Create perfectly aligned, professional Harvard-style resumes with clean pagination and offline-ready editing.',
+    },
 };
 
 export default function RootLayout({
