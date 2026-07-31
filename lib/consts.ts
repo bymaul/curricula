@@ -15,6 +15,11 @@ export const AI_PROVIDERS = [
     { value: 'google', label: 'Google', defaultModel: 'gemini-3-flash-preview' },
 ] as const;
 
+export const AI_API_KEY_STORAGE_KEY = 'curricula-ai-api-key';
+
+export const getStoredAIAPIKey = () =>
+    sessionStorage.getItem(AI_API_KEY_STORAGE_KEY)?.trim() || '';
+
 export type AIProvider = (typeof AI_PROVIDERS)[number]['value'];
 
 export const SECTIONS: { name: string; icon: LucideIcon; fields: (keyof CVData)[] }[] = [

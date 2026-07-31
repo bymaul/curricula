@@ -1,10 +1,21 @@
-import { SECTIONS } from '@/lib/consts';
+import { getStoredAIAPIKey, SECTIONS } from '@/lib/consts';
 import { CVData } from '@/lib/schema';
 import { cn } from '@/lib/utils';
 import { useUIStore } from '@/store/useUIStore';
-import { CheckCircle2, ChevronDown, Download, Printer, Sparkles, Upload } from 'lucide-react';
+import {
+  CheckCircle2,
+  ChevronDown,
+  Download,
+  FileText,
+  FileJson,
+  Printer,
+  Sparkles,
+  Upload,
+} from 'lucide-react';
 import { useState } from 'react';
 import { AIAdjustDialog } from '../ai/AIAdjustDialog';
+import { AISettingsDialog } from '../ai/AISettingsDialog';
+import { CVImportPreviewDialog } from '../import/CVImportPreviewDialog';
 import { CertificationsForm } from '../forms/CertificationsForm';
 import { EducationForm } from '../forms/EducationForm';
 import { ExperienceForm } from '../forms/ExperienceForm';
@@ -23,25 +34,45 @@ import { Tooltip, TooltipContent, TooltipTrigger } from '../ui/tooltip';
 
 interface EditorSidebarProps {
   className?: string;
-  fileInputRef: React.RefObject<HTMLInputElement | null>;
-  handleImportData: (e: React.ChangeEvent<HTMLInputElement>) => void;
+  jsonInputRef: React.RefObject<HTMLInputElement | null>;
+  pdfInputRef: React.RefObject<HTMLInputElement | null>;
+  handleImportJSON: (e: React.ChangeEvent<HTMLInputElement>) => void;
+  handleImportPDF: (e: React.ChangeEvent<HTMLInputElement>) => void;
   handleExportData: () => void;
   handlePrintClick: () => void;
   cvData: CVData;
   onApplyCVData: (data: CVData) => void;
+  pendingImport: CVData | null;
+  onDiscardImport: () => void;
+  aiSettingsOpen: boolean;
+  onAISettingsOpenChange: (open: boolean) => void;
 }
 
 export function EditorSidebar({
   className,
-  fileInputRef,
-  handleImportData,
+  jsonInputRef,
+  pdfInputRef,
+  handleImportJSON,
+  handleImportPDF,
   handleExportData,
   handlePrintClick,
   cvData,
   onApplyCVData,
+  pendingImport,
+  onDiscardImport,
+  aiSettingsOpen,
+  onAISettingsOpenChange,
 }: EditorSidebarProps) {
   const { activeTab, setActiveTab } = useUIStore();
   const [isAIDialogOpen, setIsAIDialogOpen] = useState(false);
+
+  const handleImportPDFClick = () => {
+    if (!getStoredAIAPIKey()) {
+      onAISettingsOpenChange(true);
+      return;
+    }
+    pdfInputRef.current?.click();
+  };
 
   return (
     <section
@@ -126,56 +157,67 @@ export function EditorSidebar({
         <div className="flex items-center gap-2">
           <input
             type="file"
-            accept=".json"
-            ref={fileInputRef}
-            onChange={handleImportData}
+            accept=".json,application/json"
+            ref={jsonInputRef}
+            onChange={handleImportJSON}
             aria-label="Import CV data (JSON file)"
             className="hidden"
           />
+          <input
+            type="file"
+            accept=".pdf,application/pdf"
+            ref={pdfInputRef}
+            onChange={handleImportPDF}
+            aria-label="Import CV data (PDF file)"
+            className="hidden"
+          />
 
-          <Tooltip>
-            <TooltipTrigger
+          <DropdownMenu>
+            <DropdownMenuTrigger
               render={
                 <Button
-                  variant="ghost"
-                  size="icon"
-                  className="h-10 w-10 lg:h-8 lg:w-8"
-                  onClick={() => fileInputRef.current?.click()}
+                  variant="outline"
+                  size="sm"
+                  className="h-9 lg:h-8 text-xs font-semibold gap-2 bg-background"
+                  aria-label="File actions"
                 >
-                  <Upload className="w-4 h-4" />
+                  <FileText className="w-3.5 h-3.5 text-muted-foreground" />
+                  File
+                  <ChevronDown className="w-3.5 h-3.5 text-muted-foreground" />
                 </Button>
               }
             />
-            <TooltipContent>
-              <p>Import JSON</p>
-            </TooltipContent>
-          </Tooltip>
-
-          <Tooltip>
-            <TooltipTrigger
-              render={
-                <Button
-                  variant="ghost"
-                  size="icon"
-                  className="h-10 w-10 lg:h-8 lg:w-8 mr-1"
-                  onClick={handleExportData}
-                >
-                  <Download className="w-4 h-4" />
-                </Button>
-              }
-            />
-            <TooltipContent>
-              <p>Export JSON</p>
-            </TooltipContent>
-          </Tooltip>
-
-          <Button
-            onClick={handlePrintClick}
-            className="h-10 lg:h-8 text-xs font-bold gap-2 bg-primary text-primary-foreground hover:bg-primary/90"
-          >
-            <Printer className="w-3.5 h-3.5" />
-            Print / PDF
-          </Button>
+            <DropdownMenuContent align="end" className="w-48 p-1.5">
+              <DropdownMenuItem
+                onClick={() => jsonInputRef.current?.click()}
+                className="gap-3 py-2.5 px-3 text-sm cursor-pointer rounded-md"
+              >
+                <FileJson className="w-4 h-4 text-muted-foreground" />
+                Import JSON
+              </DropdownMenuItem>
+              <DropdownMenuItem
+                onClick={handleImportPDFClick}
+                className="gap-3 py-2.5 px-3 text-sm cursor-pointer rounded-md"
+              >
+                <Upload className="w-4 h-4 text-muted-foreground" />
+                Import PDF (AI)
+              </DropdownMenuItem>
+              <DropdownMenuItem
+                onClick={handleExportData}
+                className="gap-3 py-2.5 px-3 text-sm cursor-pointer rounded-md"
+              >
+                <Download className="w-4 h-4 text-muted-foreground" />
+                Export JSON
+              </DropdownMenuItem>
+              <DropdownMenuItem
+                onClick={handlePrintClick}
+                className="gap-3 py-2.5 px-3 text-sm cursor-pointer rounded-md"
+              >
+                <Printer className="w-4 h-4 text-muted-foreground" />
+                Print / PDF
+              </DropdownMenuItem>
+            </DropdownMenuContent>
+          </DropdownMenu>
         </div>
       </footer>
 
@@ -184,6 +226,19 @@ export function EditorSidebar({
         onOpenChange={setIsAIDialogOpen}
         cvData={cvData}
         onApply={onApplyCVData}
+      />
+
+      <AISettingsDialog open={aiSettingsOpen} onOpenChange={onAISettingsOpenChange} />
+
+      <CVImportPreviewDialog
+        cvData={pendingImport}
+        onApply={() => {
+          if (pendingImport) {
+            onApplyCVData(pendingImport);
+            onDiscardImport();
+          }
+        }}
+        onDiscard={onDiscardImport}
       />
     </section>
   );

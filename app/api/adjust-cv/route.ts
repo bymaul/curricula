@@ -1,8 +1,6 @@
 import { generateText, Output } from 'ai';
-import { createOpenAI } from '@ai-sdk/openai';
-import { createAnthropic } from '@ai-sdk/anthropic';
-import { createGoogleGenerativeAI } from '@ai-sdk/google';
 import { cvSchema } from '@/lib/schema';
+import { aiErrorResponse, createAIModel } from '@/lib/ai';
 import z from 'zod';
 
 export const runtime = 'edge';
@@ -23,20 +21,7 @@ export async function POST(req: Request) {
         }
         const { cvData, jobDescription, provider, modelName, apiKey } = parsedBody.data;
 
-        let model;
-
-        switch (provider) {
-            case 'anthropic':
-                model = createAnthropic({ apiKey })(modelName || 'claude-haiku-4-5');
-                break;
-            case 'google':
-                model = createGoogleGenerativeAI({ apiKey })(modelName || 'gemini-3-flash-preview');
-                break;
-            case 'openai':
-            default:
-                model = createOpenAI({ apiKey })(modelName || 'gpt-5.6-luna');
-                break;
-        }
+        const model = createAIModel(provider, apiKey, modelName);
 
         const systemPrompt = `You are an expert ATS (Applicant Tracking System) resume writer. Rewrite the provided CV to align strictly with the Job Description while remaining honest to the candidate's original information.
 
@@ -62,21 +47,6 @@ CRITICAL RULES:
 
         return Response.json(output);
     } catch (error: unknown) {
-        const err = error as {
-            statusCode?: number;
-            message?: string;
-        };
-        console.error('AI Error:', error);
-
-        if (err?.statusCode === 429 || err?.message?.includes('429')) {
-            return new Response(
-                JSON.stringify({
-                    error: 'Rate limit exceeded for this free API key. Please wait a moment and try again.',
-                }),
-                { status: 429 },
-            );
-        }
-
-        return new Response(JSON.stringify({ error: err.message || 'Error processing AI request' }), { status: 500 });
+        return aiErrorResponse(error);
     }
 }
