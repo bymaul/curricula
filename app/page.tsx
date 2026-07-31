@@ -42,6 +42,8 @@ export default function Home() {
                         handleExportData={handleExportData}
                         handleImportData={handleImportData}
                         handlePrintClick={handlePrintClick}
+                        cvData={cvData}
+                        onApplyCVData={(data) => methods.reset(data)}
                     />
 
                     <ResumePreview
