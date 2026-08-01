@@ -1,3 +1,5 @@
+'use client';
+
 import { AISettingsFields } from '@/components/ai/AISettingsFields';
 import { Button } from '@/components/ui/button';
 import {
