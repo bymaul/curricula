@@ -1,3 +1,5 @@
+'use client';
+
 import { SectionFieldArray } from './shared';
 
 export const CertificationsForm = () => (

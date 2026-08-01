@@ -1,7 +1,7 @@
 import { CVData } from '@/lib/schema';
 import { AIProvider } from '@/lib/consts';
 import { stripInvisibleChars } from '@/lib/cleanText';
-import { CVImagePart } from '@/lib/cvParsing';
+import type { CVImagePart } from '@/lib/cvParsing';
 import { parseResponseJSON } from '@/lib/request';
 import type { PDFDocumentProxy } from 'pdfjs-dist';
 

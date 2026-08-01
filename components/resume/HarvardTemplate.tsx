@@ -1,3 +1,5 @@
+'use client';
+
 import React, { forwardRef } from 'react';
 import { DEFAULT_SECTION_ORDER, SectionId } from '@/lib/consts';
 import { CVData } from '@/lib/schema';

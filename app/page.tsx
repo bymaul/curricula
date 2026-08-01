@@ -1,11 +1,9 @@
 'use client';
 
-import { AIAdjustDialog } from '@/components/ai/AIAdjustDialog';
-import { AISettingsDialog } from '@/components/ai/AISettingsDialog';
+import dynamic from 'next/dynamic';
 import { Button } from '@/components/ui/button';
 import { EditorSidebar } from '@/components/editor/EditorSidebar';
 import { MobileTopBar } from '@/components/editor/MobileTopBar';
-import { ResumesDialog } from '@/components/editor/ResumesDialog';
 import { ResumePreview } from '@/components/editor/ResumePreview';
 import { useCVAutoSave } from '@/hooks/useCVAutoSave';
 import { useCVImportExport } from '@/hooks/useCVImportExport';
@@ -18,6 +16,23 @@ import { ChevronsUpDown, FileText } from 'lucide-react';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { useState } from 'react';
 import { FormProvider, useForm } from 'react-hook-form';
+
+const AIAdjustDialog = dynamic(
+  () => import('@/components/ai/AIAdjustDialog').then((m) => m.AIAdjustDialog),
+  { ssr: false },
+);
+
+const AISettingsDialog = dynamic(
+  () =>
+    import('@/components/ai/AISettingsDialog').then((m) => m.AISettingsDialog),
+  { ssr: false },
+);
+
+const ResumesDialog = dynamic(
+  () =>
+    import('@/components/editor/ResumesDialog').then((m) => m.ResumesDialog),
+  { ssr: false },
+);
 
 export default function Home() {
   const methods = useForm<CVData>({

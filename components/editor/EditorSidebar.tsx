@@ -1,3 +1,5 @@
+'use client';
+
 import { DEFAULT_SECTION_ORDER, RENDERABLE_SECTIONS } from '@/lib/consts';
 import { CVData } from '@/lib/schema';
 import { cn } from '@/lib/utils';
