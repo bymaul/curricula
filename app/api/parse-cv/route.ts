@@ -7,6 +7,7 @@ import {
   resolveAIModel,
 } from '@/lib/ai';
 import { clientIP, rateLimitResponse, rateLimitStatus } from '@/lib/rateLimit';
+import { stripInvisibleChars } from '@/lib/cleanText';
 import z from 'zod';
 
 export const runtime = 'nodejs';
@@ -33,6 +34,8 @@ export async function POST(req: Request) {
       );
     }
     const { cvText, provider, apiKey } = parsedBody.data;
+
+    const cleanCVText = stripInvisibleChars(cvText);
 
     const key = resolveAIKey(apiKey);
     if (!key) {
@@ -65,7 +68,7 @@ CRITICAL RULES:
     const { output } = await generateText({
       model,
       system: systemPrompt,
-      prompt: `Resume text to parse:\n\n${cvText}`,
+      prompt: `Resume text to parse:\n\n${cleanCVText}`,
       output: Output.object({ schema: cvSchema }),
       maxRetries: 0,
     });
