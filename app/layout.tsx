@@ -34,6 +34,10 @@ export const metadata: Metadata = {
   ],
   authors: [{ name: 'Curricula Team' }],
   manifest: '/manifest.json',
+  icons: {
+    icon: [{ url: '/icon-192x192.png' }, { url: '/icon-512x512.png' }],
+    apple: '/apple-touch-icon.png',
+  },
   openGraph: {
     title: 'Curricula',
     description:

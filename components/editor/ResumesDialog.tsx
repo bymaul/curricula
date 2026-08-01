@@ -12,24 +12,13 @@ import {
 import { Input } from '@/components/ui/input';
 import { ScrollArea } from '@/components/ui/scroll-area';
 import { useResumeStore } from '@/store/useResumeStore';
-import { cn } from '@/lib/utils';
+import { cn, formatRelativeTime } from '@/lib/utils';
 import { Check, Copy, FileText, Pencil, Plus, Trash2 } from 'lucide-react';
 import { useState } from 'react';
 
 interface ResumesDialogProps {
   open: boolean;
   onOpenChange: (open: boolean) => void;
-}
-
-function formatRelativeTime(timestamp: number): string {
-  const seconds = Math.max(0, Math.floor((Date.now() - timestamp) / 1000));
-  if (seconds < 5) return 'just now';
-  if (seconds < 60) return `${seconds}s ago`;
-  const minutes = Math.floor(seconds / 60);
-  if (minutes < 60) return `${minutes}m ago`;
-  const hours = Math.floor(minutes / 60);
-  if (hours < 24) return `${hours}h ago`;
-  return `${Math.floor(hours / 24)}d ago`;
 }
 
 const ACTION_CLASSNAME =
