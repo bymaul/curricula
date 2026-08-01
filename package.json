@@ -1,6 +1,7 @@
 {
   "name": "curricula",
   "version": "1.0.0",
+  "packageManager": "pnpm@11.14.0",
   "description": "An offline-first PWA resume builder featuring immaculate classic Harvard table-layout typography for clean print and PDF layouts.",
   "private": true,
   "keywords": [
@@ -16,7 +17,7 @@
     "dev": "next dev",
     "build": "next build",
     "start": "next start",
-    "lint": "next lint",
+    "lint": "eslint .",
     "format": "prettier --write .",
     "format:check": "prettier --check ."
   },
@@ -55,6 +56,7 @@
     "esbuild": "^0.28.1",
     "eslint": "^9",
     "eslint-config-next": "16.2.11",
+    "prettier": "^3.9.6",
     "serwist": "^9.5.12",
     "tailwindcss": "^4",
     "typescript": "^5"
