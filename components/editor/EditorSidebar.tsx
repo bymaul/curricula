@@ -126,7 +126,10 @@ export function EditorSidebar({
     >
       <div className="flex-1 min-h-0">
         <ScrollArea className="h-full px-2">
-          <form onSubmit={(e) => e.preventDefault()} className="space-y-6 pb-6">
+          <form
+            onSubmit={(e) => e.preventDefault()}
+            className="space-y-6 pt-4 pb-6"
+          >
             {activeTab === "Personal" && <PersonalForm />}
             {activeTab === "Experience" && <ExperienceForm />}
             {activeTab === "Projects" && <ProjectsForm />}
@@ -154,7 +157,7 @@ export function EditorSidebar({
                   className={cn(
                     "shrink-0 h-9 px-2.5 rounded-md text-sm font-semibold transition-colors",
                     active
-                      ? "text-foreground border-border border"
+                      ? "text-foreground font-semibold"
                       : "text-muted-foreground hover:text-foreground",
                   )}
                 >
