@@ -46,6 +46,7 @@ export function usePageScale({ frameWidthPx, isVisible }: UsePageScaleOptions) {
         frameRef,
         scale,
         frameHeight,
+        zoomTo: (next: number) => setScale(Math.min(MAX_SCALE, Math.max(MIN_SCALE, +(next).toFixed(2)))),
         zoomIn: () => setScale((s) => Math.min(MAX_SCALE, +(s + 0.1).toFixed(2))),
         zoomOut: () => setScale((s) => Math.max(MIN_SCALE, +(s - 0.1).toFixed(2))),
         zoomReset: fitToWidth,

@@ -1,9 +1,8 @@
-import { Button } from '@/components/ui/button';
 import { FieldGroup, FieldLegend, FieldSeparator, FieldSet } from '@/components/ui/field';
 import { CVData } from '@/lib/schema';
-import { Plus, Trash2 } from 'lucide-react';
 import { useFieldArray, useFormContext } from 'react-hook-form';
 import { FormField } from '../ui/form-field';
+import { AddItemButton, ItemRemoveButton, SectionHeading } from './shared';
 
 export const PersonalForm = () => {
     const {
@@ -20,10 +19,10 @@ export const PersonalForm = () => {
     return (
         <div className='p-2'>
             <div className='mb-4'>
-                <h2 className='text-xl font-bold tracking-tight'>Personal Details</h2>
-                <p className='text-xs text-muted-foreground mt-1'>
-                    Get started with your contact information and summary.
-                </p>
+                <SectionHeading
+                    title='Personal Details'
+                    description='Get started with your contact information and summary.'
+                />
             </div>
 
             <FieldGroup>
@@ -89,27 +88,14 @@ export const PersonalForm = () => {
                                         className='flex-1'
                                     />
 
-                                    <Button
-                                        type='button'
-                                        variant='ghost'
-                                        size='icon'
-                                        onClick={() => remove(index)}
-                                        className='text-muted-foreground hover:text-destructive hover:bg-destructive/10 transition-colors'
-                                        title='Remove Link'>
-                                        <Trash2 className='w-4 h-4' />
-                                    </Button>
+                                    <ItemRemoveButton onClick={() => remove(index)} title='Remove Link' />
                                 </div>
                             </div>
                         ))}
 
-                        <Button
-                            type='button'
-                            variant='outline'
-                            size='sm'
-                            onClick={() => append({ url: '' })}
-                            className='w-full border-dashed gap-2'>
-                            <Plus className='w-4 h-4' /> Add Link
-                        </Button>
+                        <AddItemButton size='sm' onClick={() => append({ url: '' })}>
+                            Add Link
+                        </AddItemButton>
                     </FieldGroup>
                 </FieldSet>
 

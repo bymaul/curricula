@@ -1,12 +1,3 @@
-import {
-  Award,
-  Briefcase,
-  FolderGit2,
-  GraduationCap,
-  LucideIcon,
-  User,
-  Wrench,
-} from 'lucide-react';
 import { CVData } from './schema';
 
 export const AI_PROVIDERS = [
@@ -22,15 +13,33 @@ export const getStoredAIAPIKey = () =>
 
 export type AIProvider = (typeof AI_PROVIDERS)[number]['value'];
 
-export const SECTIONS: { name: string; icon: LucideIcon; fields: (keyof CVData)[] }[] = [
+export type SectionId =
+    | 'summary'
+    | 'experience'
+    | 'projects'
+    | 'education'
+    | 'skills'
+    | 'certifications';
+
+export const RENDERABLE_SECTIONS: { id: SectionId; title: string }[] = [
+    { id: 'summary', title: 'Summary' },
+    { id: 'experience', title: 'Experience' },
+    { id: 'projects', title: 'Projects' },
+    { id: 'education', title: 'Education' },
+    { id: 'skills', title: 'Skills' },
+    { id: 'certifications', title: 'Certifications' },
+];
+
+export const DEFAULT_SECTION_ORDER: SectionId[] = RENDERABLE_SECTIONS.map((s) => s.id);
+
+export const SECTIONS: { name: string; fields: (keyof CVData)[] }[] = [
   {
     name: 'Personal',
-    icon: User,
     fields: ['name', 'jobTitle', 'email', 'phone', 'location', 'links', 'summary'],
   },
-  { name: 'Experience', icon: Briefcase, fields: ['experience'] },
-  { name: 'Projects', icon: FolderGit2, fields: ['projects'] },
-  { name: 'Education', icon: GraduationCap, fields: ['education'] },
-  { name: 'Skills', icon: Wrench, fields: ['skills'] },
-  { name: 'Certifications', icon: Award, fields: ['certifications'] },
+  { name: 'Experience', fields: ['experience'] },
+  { name: 'Projects', fields: ['projects'] },
+  { name: 'Education', fields: ['education'] },
+  { name: 'Skills', fields: ['skills'] },
+  { name: 'Certifications', fields: ['certifications'] },
 ];
