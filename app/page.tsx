@@ -2,6 +2,7 @@
 
 import { AIAdjustDialog } from '@/components/ai/AIAdjustDialog';
 import { AISettingsDialog } from '@/components/ai/AISettingsDialog';
+import { Button } from '@/components/ui/button';
 import { EditorSidebar } from '@/components/editor/EditorSidebar';
 import { MobileTopBar } from '@/components/editor/MobileTopBar';
 import { ResumesDialog } from '@/components/editor/ResumesDialog';
@@ -63,15 +64,16 @@ export default function Home() {
             Curricula
           </h1>
 
-          <button
+          <Button
+            variant="ghost"
             type="button"
             onClick={() => setIsResumesDialogOpen(true)}
-            className="hidden lg:flex items-center gap-1.5 min-w-0 max-w-[50%] rounded-md px-2 py-1 text-sm font-semibold text-muted-foreground hover:text-foreground hover:bg-muted transition-colors"
+            className="hidden lg:flex"
           >
-            <FileText className="w-4 h-4 shrink-0" />
+            <FileText className="w-4 h-4" data-icon="inline-start" />
             <span className="truncate">{activeResumeTitle}</span>
-            <ChevronsUpDown className="w-4 h-4 shrink-0" />
-          </button>
+            <ChevronsUpDown className="w-4 h-4" data-icon="inline-end" />
+          </Button>
         </header>
 
         <div className="flex-1 min-h-0 w-full flex flex-col lg:flex-row gap-4 lg:gap-6 px-4 pb-4 lg:px-0 lg:pb-0 print:p-0 print:block">
