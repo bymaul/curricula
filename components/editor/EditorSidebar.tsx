@@ -2,7 +2,7 @@
 
 import { DEFAULT_SECTION_ORDER, RENDERABLE_SECTIONS } from '@/lib/consts';
 import { CVData } from '@/lib/schema';
-import { cn } from '@/lib/utils';
+import { cn, formatRelativeTime } from '@/lib/utils';
 import { useResumeStore } from '@/store/useResumeStore';
 import { useUIStore } from '@/store/useUIStore';
 import { CheckCircle2, ListOrdered, Loader2 } from 'lucide-react';
@@ -39,15 +39,6 @@ interface EditorSidebarProps {
   onOpenAIAdjust: () => void;
   onAISettingsOpenChange: (open: boolean) => void;
   onOpenResumes?: () => void;
-}
-
-function formatRelativeTime(timestamp: number, now: number): string {
-  const seconds = Math.max(0, Math.floor((now - timestamp) / 1000));
-  if (seconds < 5) return 'just now';
-  if (seconds < 60) return `${seconds}s ago`;
-  const minutes = Math.floor(seconds / 60);
-  if (minutes < 60) return `${minutes}m ago`;
-  return `${Math.floor(minutes / 60)}h ago`;
 }
 
 function SaveStatus({

@@ -1,10 +1,13 @@
 {
   "name": "Curricula",
   "short_name": "Curricula",
+  "id": "/",
   "description": "An offline-first PWA for crafting professional Harvard-style resumes with precision print and PDF layouts.",
   "start_url": "/",
+  "scope": "/",
   "display": "standalone",
   "orientation": "portrait-primary",
+  "categories": ["productivity", "education"],
   "background_color": "#09090b",
   "theme_color": "#09090b",
   "icons": [
