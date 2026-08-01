@@ -14,7 +14,7 @@ const OPTIONS = [
 
 export function MobileTopBar({ value, onChange }: MobileTopBarProps) {
   return (
-    <header className="lg:hidden shrink-0 px-4 pt-4 pb-2 print:hidden">
+    <header className="lg:hidden shrink-0 p-4 print:hidden">
       <div className="flex items-center justify-between gap-3">
         <h1 className="text-lg font-bold tracking-tight shrink-0">Curricula</h1>
 

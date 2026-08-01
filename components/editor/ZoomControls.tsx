@@ -20,7 +20,7 @@ export function ZoomControls({
   onReset,
 }: ZoomControlsProps) {
   return (
-    <div className="absolute top-3 right-3 z-20 flex items-center gap-0.5 bg-card border border-border rounded-lg shadow-md p-1 print:hidden">
+    <div className="absolute bottom-3 right-3 z-20 flex items-center gap-0.5 bg-card border border-border rounded-lg shadow-md p-1 print:hidden">
       <button
         type="button"
         onClick={onZoomOut}
