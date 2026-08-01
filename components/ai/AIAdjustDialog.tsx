@@ -17,6 +17,7 @@ import {
 import { Textarea } from '@/components/ui/textarea';
 import { toast } from '@/components/ui/toast';
 import { useAIAdjustCV } from '@/hooks/useAIAdjustCV';
+import { stripInvisibleChars } from '@/lib/cleanText';
 import { getStoredAIAPIKey } from '@/lib/consts';
 import { CVChangeSummary, summarizeCVChanges } from '@/lib/cvDiff';
 import { CVData } from '@/lib/schema';
@@ -71,7 +72,7 @@ export function AIAdjustDialog({
 
     const result = await adjustCV({
       cvData,
-      jobDescription: jobDescription.trim(),
+      jobDescription: stripInvisibleChars(jobDescription.trim()),
       provider: aiProvider,
       modelName: aiModel.trim() || undefined,
       apiKey,
