@@ -52,12 +52,7 @@ export function AIAdjustDialog({
       return;
     }
 
-    const apiKey = getStoredAIAPIKey();
-
-    if (!apiKey) {
-      setLocalError('Add your API key in AI Settings first.');
-      return;
-    }
+    const apiKey = getStoredAIAPIKey() || undefined;
 
     const result = await adjustCV({
       cvData,

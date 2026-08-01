@@ -1,6 +1,12 @@
 import { generateText, Output } from 'ai';
 import { cvSchema } from '@/lib/schema';
-import { aiErrorResponse, createAIModel } from '@/lib/ai';
+import {
+  aiErrorResponse,
+  createAIModel,
+  resolveAIKey,
+  resolveAIModel,
+} from '@/lib/ai';
+import { clientIP, rateLimitResponse, rateLimitStatus } from '@/lib/rateLimit';
 import z from 'zod';
 
 export const runtime = 'nodejs';
@@ -8,13 +14,17 @@ export const maxDuration = 60;
 
 const requestSchema = z.object({
   cvText: z.string().min(1, 'Resume text is empty'),
-  provider: z.enum(['openai', 'anthropic', 'google']).default('openai'),
+  provider: z.enum(['openai', 'anthropic', 'google']).default('google'),
   modelName: z.string().optional(),
-  apiKey: z.string().min(10, 'Invalid API Key'),
+  apiKey: z.string().min(10, 'Invalid API Key').optional(),
 });
 
 export async function POST(req: Request) {
   try {
+    const ip = clientIP(req);
+    const { limited, retryAfterSeconds } = rateLimitStatus(ip);
+    if (limited) return rateLimitResponse(retryAfterSeconds);
+
     const parsedBody = requestSchema.safeParse(await req.json());
     if (!parsedBody.success) {
       return Response.json(
@@ -22,9 +32,21 @@ export async function POST(req: Request) {
         { status: 400 },
       );
     }
-    const { cvText, provider, modelName, apiKey } = parsedBody.data;
+    const { cvText, provider, apiKey } = parsedBody.data;
 
-    const model = createAIModel(provider, apiKey, modelName);
+    const key = resolveAIKey(apiKey);
+    if (!key) {
+      return Response.json(
+        { error: 'AI is not configured. Add an API key in AI Settings.' },
+        { status: 400 },
+      );
+    }
+
+    const model = createAIModel(
+      provider,
+      key,
+      resolveAIModel(parsedBody.data.modelName),
+    );
 
     const systemPrompt = `You are an expert resume parser. Extract structured data from the provided resume text and return it as a single valid JSON object matching the requested schema.
 

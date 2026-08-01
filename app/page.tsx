@@ -41,7 +41,6 @@ export default function Home() {
     handleImportPDF,
   } = useCVImportExport(cvData, methods.reset, {
     onPDFImported: setPendingImport,
-    onMissingAPIKey: () => setIsAISettingsOpen(true),
   });
   const { printRef, handlePrintClick } = useCVPrint(cvData, methods);
 

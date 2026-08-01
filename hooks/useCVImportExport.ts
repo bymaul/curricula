@@ -12,7 +12,6 @@ import { useUIStore } from '@/store/useUIStore';
 
 interface UseCVImportExportOptions {
   onPDFImported: (data: CVData) => void;
-  onMissingAPIKey: () => void;
 }
 
 interface PDFImportErrorInfo {
@@ -121,15 +120,10 @@ export function useCVImportExport(
 
     const apiKey = getStoredAIAPIKey();
 
-    if (!apiKey) {
-      options.onMissingAPIKey();
-      return;
-    }
-
-    void runPDFImport(file, apiKey);
+    void runPDFImport(file, apiKey || undefined);
   };
 
-  const runPDFImport = async (file: File, apiKey: string) => {
+  const runPDFImport = async (file: File, apiKey?: string) => {
     const loadingToast = toast.add({
       type: 'loading',
       title: 'Importing PDF',

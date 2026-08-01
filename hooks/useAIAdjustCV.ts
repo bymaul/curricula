@@ -8,7 +8,7 @@ interface AIAdjustParams {
   jobDescription: string;
   provider: AIProvider;
   modelName?: string;
-  apiKey: string;
+  apiKey?: string;
 }
 
 export function useAIAdjustCV() {
