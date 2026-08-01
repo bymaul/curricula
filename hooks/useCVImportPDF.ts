@@ -1,5 +1,6 @@
 import { CVData } from '@/lib/schema';
 import { AIProvider } from '@/lib/consts';
+import { stripInvisibleChars } from '@/lib/cleanText';
 import { parseResponseJSON } from '@/lib/request';
 
 let pdfjsPromise: Promise<typeof import('pdfjs-dist')> | null = null;
@@ -65,7 +66,7 @@ export async function parseCVTextWithAI(
   const response = await fetch('/api/parse-cv', {
     method: 'POST',
     headers: { 'Content-Type': 'application/json' },
-    body: JSON.stringify({ cvText, ...params }),
+    body: JSON.stringify({ cvText: stripInvisibleChars(cvText), ...params }),
   });
 
   return parseResponseJSON<CVData>(response);
