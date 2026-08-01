@@ -83,10 +83,12 @@ export default function Home() {
             )}
             jsonInputRef={jsonInputRef}
             pdfInputRef={pdfInputRef}
-            handleExportData={handleExportData}
-            handlePrintClick={handlePrintClick}
-            onImportJSON={handleImportJSON}
-            onImportPDF={handleImportPDF}
+            fileActions={{
+              handleExportData,
+              handlePrintClick,
+              onImportJSON: handleImportJSON,
+              onImportPDF: handleImportPDF,
+            }}
             onApplyCVData={(data) => methods.reset(data)}
             saveStatus={saveStatus}
             lastSavedAt={lastSavedAt}

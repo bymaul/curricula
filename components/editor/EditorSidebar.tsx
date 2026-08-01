@@ -17,14 +17,18 @@ import { Tooltip, TooltipContent, TooltipTrigger } from "../ui/tooltip";
 import { ActionsDropdown } from "./ActionsDropdown";
 import { SectionsOrderDialog } from "./SectionsOrderDialog";
 
-interface EditorSidebarProps {
-  className?: string;
-  jsonInputRef: React.RefObject<HTMLInputElement | null>;
-  pdfInputRef: React.RefObject<HTMLInputElement | null>;
+export interface EditorFileActions {
   handleExportData: () => void;
   handlePrintClick: () => void;
   onImportJSON: (e: React.ChangeEvent<HTMLInputElement>) => void;
   onImportPDF: (e: React.ChangeEvent<HTMLInputElement>) => void;
+}
+
+interface EditorSidebarProps {
+  className?: string;
+  jsonInputRef: React.RefObject<HTMLInputElement | null>;
+  pdfInputRef: React.RefObject<HTMLInputElement | null>;
+  fileActions: EditorFileActions;
   onApplyCVData: (data: CVData) => void;
   saveStatus: "saving" | "saved";
   lastSavedAt: number | null;
@@ -84,10 +88,7 @@ export function EditorSidebar({
   className,
   jsonInputRef,
   pdfInputRef,
-  handleExportData,
-  handlePrintClick,
-  onImportJSON,
-  onImportPDF,
+  fileActions,
   onApplyCVData,
   saveStatus,
   lastSavedAt,
@@ -191,7 +192,7 @@ export function EditorSidebar({
             type="file"
             accept=".json,application/json"
             ref={jsonInputRef}
-            onChange={onImportJSON}
+            onChange={fileActions.onImportJSON}
             aria-label="Import CV data (JSON file)"
             className="hidden"
           />
@@ -199,7 +200,7 @@ export function EditorSidebar({
             type="file"
             accept=".pdf,application/pdf"
             ref={pdfInputRef}
-            onChange={onImportPDF}
+            onChange={fileActions.onImportPDF}
             aria-label="Import CV data (PDF file)"
             className="hidden"
           />
@@ -207,8 +208,8 @@ export function EditorSidebar({
           <ActionsDropdown
             jsonInputRef={jsonInputRef}
             pdfInputRef={pdfInputRef}
-            handleExportData={handleExportData}
-            handlePrintClick={handlePrintClick}
+            handleExportData={fileActions.handleExportData}
+            handlePrintClick={fileActions.handlePrintClick}
             onOpenAIAdjust={onOpenAIAdjust}
             onOpenAISettings={() => onAISettingsOpenChange(true)}
             onOpenResumes={onOpenResumes}

@@ -9,7 +9,7 @@ export const AI_PROVIDERS = [
 export const AI_API_KEY_STORAGE_KEY = 'curricula-ai-api-key';
 
 export const getStoredAIAPIKey = () =>
-    sessionStorage.getItem(AI_API_KEY_STORAGE_KEY)?.trim() || '';
+    localStorage.getItem(AI_API_KEY_STORAGE_KEY)?.trim() || '';
 
 export type AIProvider = (typeof AI_PROVIDERS)[number]['value'];
 

@@ -1,6 +1,6 @@
 import { CVData } from '@/lib/schema';
 import { useResumeStore } from '@/store/useResumeStore';
-import { useEffect, useState, useSyncExternalStore } from 'react';
+import { useEffect, useRef, useState, useSyncExternalStore } from 'react';
 import { UseFormReturn } from 'react-hook-form';
 
 const SAVE_DEBOUNCE_MS = 600;
@@ -33,12 +33,13 @@ export function useCVAutoSave(methods: UseFormReturn<CVData>) {
 
   const cvData = watch();
   const snapshot = JSON.stringify(cvData);
-  const [prevSnapshot, setPrevSnapshot] = useState(snapshot);
+  const prevSnapshotRef = useRef(snapshot);
 
-  if (prevSnapshot !== snapshot) {
-    setPrevSnapshot(snapshot);
+  useEffect(() => {
+    if (prevSnapshotRef.current === snapshot) return;
+    prevSnapshotRef.current = snapshot;
     setSaveStatus('saving');
-  }
+  }, [snapshot]);
 
   useEffect(() => {
     if (saveStatus !== 'saving' || !activeId) return;
