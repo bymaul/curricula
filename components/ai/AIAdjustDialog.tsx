@@ -18,9 +18,10 @@ import { Textarea } from '@/components/ui/textarea';
 import { toast } from '@/components/ui/toast';
 import { useAIAdjustCV } from '@/hooks/useAIAdjustCV';
 import { getStoredAIAPIKey } from '@/lib/consts';
+import { CVChangeSummary, summarizeCVChanges } from '@/lib/cvDiff';
 import { CVData } from '@/lib/schema';
 import { useUIStore } from '@/store/useUIStore';
-import { Loader2 } from 'lucide-react';
+import { Loader2, FilePenLine } from 'lucide-react';
 import { useState } from 'react';
 
 interface AIAdjustDialogProps {
@@ -41,8 +42,22 @@ export function AIAdjustDialog({
 
   const [jobDescription, setJobDescription] = useState('');
   const [localError, setLocalError] = useState<string | null>(null);
+  const [pendingResult, setPendingResult] = useState<CVData | null>(null);
+  const [changeSummary, setChangeSummary] = useState<CVChangeSummary[]>([]);
 
   const effectiveError = error ?? localError;
+
+  const resetState = () => {
+    setJobDescription('');
+    setLocalError(null);
+    setPendingResult(null);
+    setChangeSummary([]);
+  };
+
+  const handleOpenChange = (next: boolean) => {
+    if (!next) resetState();
+    onOpenChange(next);
+  };
 
   const handleSubmit = async () => {
     setLocalError(null);
@@ -68,19 +83,68 @@ export function AIAdjustDialog({
     });
 
     if (result) {
-      onApply(result);
-      toast.add({
-        type: 'success',
-        description: 'CV adjusted to match the job description.',
-        priority: 'high',
-      });
-      onOpenChange(false);
-      setJobDescription('');
+      setPendingResult(result);
+      setChangeSummary(summarizeCVChanges(cvData, result));
     }
   };
 
+  const handleApply = () => {
+    if (!pendingResult) return;
+    onApply(pendingResult);
+    toast.add({
+      type: 'success',
+      description: 'CV adjusted to match the job description.',
+      priority: 'high',
+    });
+    handleOpenChange(false);
+  };
+
+  if (pendingResult) {
+    return (
+      <Dialog open={open} onOpenChange={handleOpenChange}>
+        <DialogContent className="sm:max-w-lg grid-rows-[auto_minmax(0,1fr)_auto] max-h-[calc(100dvh-2rem)] overflow-hidden">
+          <DialogHeader>
+            <DialogTitle>Review changes</DialogTitle>
+          </DialogHeader>
+
+          <div className="flex min-h-0 flex-col gap-2 overflow-y-auto overscroll-contain p-2 -mx-1">
+            {changeSummary.length === 0 ? (
+              <p className="text-sm text-muted-foreground">
+                No changes detected.
+              </p>
+            ) : (
+              <ul className="divide-y divide-border rounded-lg border border-border">
+                {changeSummary.map((item) => (
+                  <li
+                    key={item.label}
+                    className="flex items-center justify-between gap-2 px-3 py-2.5"
+                  >
+                    <span className="flex items-center gap-2 text-sm font-medium min-w-0">
+                      <FilePenLine className="w-4 h-4 text-primary shrink-0" />
+                      <span className="truncate">{item.label}</span>
+                    </span>
+                    <span className="text-sm text-muted-foreground shrink-0">
+                      {item.detail}
+                    </span>
+                  </li>
+                ))}
+              </ul>
+            )}
+          </div>
+
+          <DialogFooter>
+            <Button variant="outline" onClick={() => handleOpenChange(false)}>
+              Cancel
+            </Button>
+            <Button onClick={handleApply}>Apply Changes</Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
+    );
+  }
+
   return (
-    <Dialog open={open} onOpenChange={onOpenChange}>
+    <Dialog open={open} onOpenChange={handleOpenChange}>
       <DialogContent className="sm:max-w-lg grid-rows-[auto_minmax(0,1fr)_auto] max-h-[calc(100dvh-2rem)] overflow-hidden">
         <DialogHeader>
           <DialogTitle>AI CV Adjust</DialogTitle>
@@ -109,7 +173,7 @@ export function AIAdjustDialog({
         <DialogFooter>
           <Button
             variant="outline"
-            onClick={() => onOpenChange(false)}
+            onClick={() => handleOpenChange(false)}
             disabled={isAdjusting}
           >
             Cancel
