@@ -15,6 +15,8 @@ const eslintConfig = defineConfig([
     // Generated/minified third-party assets:
     'public/sw.js',
     'public/pdf.worker.min.mjs',
+    // Test coverage output:
+    'coverage/**',
   ]),
 ]);
 
