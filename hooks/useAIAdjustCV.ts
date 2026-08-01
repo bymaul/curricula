@@ -1,6 +1,7 @@
 import { useState } from 'react';
 import { CVData } from '@/lib/schema';
 import { AIProvider } from '@/lib/consts';
+import { parseResponseJSON } from '@/lib/request';
 
 interface AIAdjustParams {
     cvData: CVData;
@@ -25,14 +26,7 @@ export function useAIAdjustCV() {
                 body: JSON.stringify(params),
             });
 
-            const data = await response.json();
-
-            if (!response.ok) {
-                setError(data.error || 'Failed to adjust CV');
-                return null;
-            }
-
-            return data as CVData;
+            return await parseResponseJSON<CVData>(response);
         } catch (err) {
             setError(err instanceof Error ? err.message : 'Unexpected error while adjusting CV');
             return null;

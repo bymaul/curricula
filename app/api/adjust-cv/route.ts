@@ -3,7 +3,8 @@ import { cvSchema } from '@/lib/schema';
 import { aiErrorResponse, createAIModel } from '@/lib/ai';
 import z from 'zod';
 
-export const runtime = 'edge';
+export const runtime = 'nodejs';
+export const maxDuration = 60;
 
 const requestSchema = z.object({
     cvData: cvSchema,

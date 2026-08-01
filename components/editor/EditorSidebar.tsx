@@ -1,165 +1,198 @@
-import { getStoredAIAPIKey, SECTIONS } from '@/lib/consts';
-import { CVData } from '@/lib/schema';
-import { cn } from '@/lib/utils';
-import { useUIStore } from '@/store/useUIStore';
-import {
-  CheckCircle2,
-  ChevronDown,
-  Download,
-  FileText,
-  FileJson,
-  Printer,
-  Sparkles,
-  Upload,
-} from 'lucide-react';
-import { useState } from 'react';
-import { AIAdjustDialog } from '../ai/AIAdjustDialog';
-import { AISettingsDialog } from '../ai/AISettingsDialog';
-import { CVImportPreviewDialog } from '../import/CVImportPreviewDialog';
-import { CertificationsForm } from '../forms/CertificationsForm';
-import { EducationForm } from '../forms/EducationForm';
-import { ExperienceForm } from '../forms/ExperienceForm';
-import { PersonalForm } from '../forms/PersonalForm';
-import { ProjectsForm } from '../forms/ProjectsForm';
-import { SkillsForm } from '../forms/SkillsForm';
-import { Button } from '../ui/button';
-import {
-  DropdownMenu,
-  DropdownMenuContent,
-  DropdownMenuItem,
-  DropdownMenuTrigger,
-} from '../ui/dropdown-menu';
-import { ScrollArea } from '../ui/scroll-area';
-import { Tooltip, TooltipContent, TooltipTrigger } from '../ui/tooltip';
+import { DEFAULT_SECTION_ORDER, RENDERABLE_SECTIONS } from "@/lib/consts";
+import { CVData } from "@/lib/schema";
+import { cn } from "@/lib/utils";
+import { useResumeStore } from "@/store/useResumeStore";
+import { useUIStore } from "@/store/useUIStore";
+import { CheckCircle2, ListOrdered, Loader2 } from "lucide-react";
+import { useEffect, useState } from "react";
+import { CVImportPreviewDialog } from "../import/CVImportPreviewDialog";
+import { CertificationsForm } from "../forms/CertificationsForm";
+import { EducationForm } from "../forms/EducationForm";
+import { ExperienceForm } from "../forms/ExperienceForm";
+import { PersonalForm } from "../forms/PersonalForm";
+import { ProjectsForm } from "../forms/ProjectsForm";
+import { SkillsForm } from "../forms/SkillsForm";
+import { ScrollArea } from "../ui/scroll-area";
+import { Tooltip, TooltipContent, TooltipTrigger } from "../ui/tooltip";
+import { ActionsDropdown } from "./ActionsDropdown";
+import { SectionsOrderDialog } from "./SectionsOrderDialog";
+
+export interface EditorFileActions {
+  handleExportData: () => void;
+  handlePrintClick: () => void;
+  onImportJSON: (e: React.ChangeEvent<HTMLInputElement>) => void;
+  onImportPDF: (e: React.ChangeEvent<HTMLInputElement>) => void;
+}
 
 interface EditorSidebarProps {
   className?: string;
   jsonInputRef: React.RefObject<HTMLInputElement | null>;
   pdfInputRef: React.RefObject<HTMLInputElement | null>;
-  handleImportJSON: (e: React.ChangeEvent<HTMLInputElement>) => void;
-  handleImportPDF: (e: React.ChangeEvent<HTMLInputElement>) => void;
-  handleExportData: () => void;
-  handlePrintClick: () => void;
-  cvData: CVData;
+  fileActions: EditorFileActions;
   onApplyCVData: (data: CVData) => void;
+  saveStatus: "saving" | "saved";
+  lastSavedAt: number | null;
   pendingImport: CVData | null;
   onDiscardImport: () => void;
-  aiSettingsOpen: boolean;
+  onOpenAIAdjust: () => void;
   onAISettingsOpenChange: (open: boolean) => void;
+  onOpenResumes?: () => void;
+}
+
+function formatRelativeTime(timestamp: number, now: number): string {
+  const seconds = Math.max(0, Math.floor((now - timestamp) / 1000));
+  if (seconds < 5) return "just now";
+  if (seconds < 60) return `${seconds}s ago`;
+  const minutes = Math.floor(seconds / 60);
+  if (minutes < 60) return `${minutes}m ago`;
+  return `${Math.floor(minutes / 60)}h ago`;
+}
+
+function SaveStatus({
+  saveStatus,
+  lastSavedAt,
+}: {
+  saveStatus: "saving" | "saved";
+  lastSavedAt: number | null;
+}) {
+  const [now, setNow] = useState(() => Date.now());
+
+  useEffect(() => {
+    if (saveStatus !== "saved") return;
+    const interval = setInterval(() => setNow(Date.now()), 1_000);
+    return () => clearInterval(interval);
+  }, [saveStatus]);
+
+  if (saveStatus === "saving") {
+    return (
+      <>
+        <Loader2 className="w-4 h-4 text-amber-500 animate-spin" />
+        <span className="text-[10px] text-muted-foreground font-medium uppercase tracking-wider">
+          Saving…
+        </span>
+      </>
+    );
+  }
+
+  return (
+    <>
+      <CheckCircle2 className="w-4 h-4 text-green-500" />
+      <span className="text-[10px] text-muted-foreground font-medium uppercase tracking-wider">
+        Saved {lastSavedAt ? formatRelativeTime(lastSavedAt, now) : ""}
+      </span>
+    </>
+  );
 }
 
 export function EditorSidebar({
   className,
   jsonInputRef,
   pdfInputRef,
-  handleImportJSON,
-  handleImportPDF,
-  handleExportData,
-  handlePrintClick,
-  cvData,
+  fileActions,
   onApplyCVData,
+  saveStatus,
+  lastSavedAt,
   pendingImport,
   onDiscardImport,
-  aiSettingsOpen,
+  onOpenAIAdjust,
   onAISettingsOpenChange,
+  onOpenResumes,
 }: EditorSidebarProps) {
   const { activeTab, setActiveTab } = useUIStore();
-  const [isAIDialogOpen, setIsAIDialogOpen] = useState(false);
+  const sectionOrder =
+    useResumeStore(
+      (state) =>
+        state.resumes.find((r) => r.id === state.activeId)?.sectionOrder,
+    ) ?? DEFAULT_SECTION_ORDER;
+  const [isSectionsDialogOpen, setIsSectionsDialogOpen] = useState(false);
 
-  const handleImportPDFClick = () => {
-    if (!getStoredAIAPIKey()) {
-      onAISettingsOpenChange(true);
-      return;
-    }
-    pdfInputRef.current?.click();
-  };
+  const navTabs = [
+    { key: "Personal", name: "Personal" },
+    ...sectionOrder
+      .filter((id) => id !== "summary")
+      .map((id) => ({
+        key: id,
+        name:
+          RENDERABLE_SECTIONS.find((section) => section.id === id)?.title ?? id,
+      })),
+  ];
 
   return (
     <section
       className={cn(
-        'w-full lg:w-[35%] xl:w-[30%] flex-col border border-border bg-card rounded-xl shadow-lg overflow-hidden shrink-0 print:hidden',
+        "w-full lg:w-[35%] xl:w-[30%] flex-col border border-border bg-card rounded-xl shadow-lg overflow-hidden shrink-0 print:hidden",
         className,
       )}
     >
-      <header className="px-5 py-4 border-b border-border flex items-center justify-between shrink-0 bg-muted/30 z-10">
-        <h1 className="text-lg font-bold tracking-tight">Curricula</h1>
-
-        <div className="flex items-center gap-2">
-          <Tooltip>
-            <TooltipTrigger
-              render={
-                <Button
-                  variant="outline"
-                  size="sm"
-                  className="h-9 lg:h-8 text-xs font-semibold gap-2 bg-background"
-                  onClick={() => setIsAIDialogOpen(true)}
-                >
-                  <Sparkles className="w-3.5 h-3.5 text-primary" />
-                  AI Adjust
-                </Button>
-              }
-            />
-            <TooltipContent>
-              <p>Rewrite your CV to match a job description</p>
-            </TooltipContent>
-          </Tooltip>
-
-          <DropdownMenu>
-            <DropdownMenuTrigger
-              render={
-                <Button
-                  variant="outline"
-                  size="sm"
-                  className="h-9 lg:h-8 text-xs font-semibold gap-2 bg-background"
-                >
-                  {activeTab}
-                  <ChevronDown className="w-3.5 h-3.5 text-muted-foreground" />
-                </Button>
-              }
-            />
-            <DropdownMenuContent align="end" className="w-56 p-1.5">
-              {SECTIONS.map(({ name, icon: Icon }) => (
-                <DropdownMenuItem
-                  key={name}
-                  onClick={() => setActiveTab(name)}
-                  className="gap-3 py-2.5 px-3 text-sm cursor-pointer rounded-md"
-                >
-                  <Icon className="w-4 h-4 text-muted-foreground" />
-                  <span className={activeTab === name ? 'font-bold' : ''}>{name}</span>
-                </DropdownMenuItem>
-              ))}
-            </DropdownMenuContent>
-          </DropdownMenu>
-        </div>
-      </header>
-
       <div className="flex-1 min-h-0">
-        <ScrollArea className="h-full p-2">
+        <ScrollArea className="h-full px-2">
           <form onSubmit={(e) => e.preventDefault()} className="space-y-6 pb-6">
-            {activeTab === 'Personal' && <PersonalForm />}
-            {activeTab === 'Experience' && <ExperienceForm />}
-            {activeTab === 'Projects' && <ProjectsForm />}
-            {activeTab === 'Education' && <EducationForm />}
-            {activeTab === 'Skills' && <SkillsForm />}
-            {activeTab === 'Certifications' && <CertificationsForm />}
+            {activeTab === "Personal" && <PersonalForm />}
+            {activeTab === "Experience" && <ExperienceForm />}
+            {activeTab === "Projects" && <ProjectsForm />}
+            {activeTab === "Education" && <EducationForm />}
+            {activeTab === "Skills" && <SkillsForm />}
+            {activeTab === "Certifications" && <CertificationsForm />}
           </form>
         </ScrollArea>
       </div>
 
-      <footer className="px-5 py-4 border-t border-border bg-muted/30 flex items-center justify-between shrink-0 z-10">
-        <div className="flex items-center gap-2">
-          <CheckCircle2 className="w-4 h-4 text-green-500" />
-          <span className="text-[10px] text-muted-foreground font-medium uppercase tracking-wider">
-            Saved
-          </span>
+      <nav
+        className="border-t border-border bg-muted/30 shrink-0 overflow-hidden flex items-stretch"
+        aria-label="CV sections"
+      >
+        <ScrollArea orientation="horizontal" className="min-w-0 flex-1 h-14">
+          <div className="flex items-center gap-1 w-max h-full px-3">
+            {navTabs.map(({ key, name }) => {
+              const active = activeTab === name;
+              return (
+                <button
+                  key={key}
+                  type="button"
+                  onClick={() => setActiveTab(name)}
+                  aria-current={active ? "page" : undefined}
+                  className={cn(
+                    "shrink-0 h-9 px-2.5 rounded-md text-sm font-semibold transition-colors",
+                    active
+                      ? "text-foreground border-border border"
+                      : "text-muted-foreground hover:text-foreground",
+                  )}
+                >
+                  {name}
+                </button>
+              );
+            })}
+          </div>
+        </ScrollArea>
+
+        <Tooltip>
+          <TooltipTrigger
+            render={
+              <button
+                type="button"
+                onClick={() => setIsSectionsDialogOpen(true)}
+                aria-label="Reorder sections"
+                className="shrink-0 w-12 flex items-center justify-center text-muted-foreground hover:text-foreground hover:bg-muted/50 border-l border-border transition-colors"
+              >
+                <ListOrdered className="w-5 h-5" />
+              </button>
+            }
+          />
+          <TooltipContent side="top">Reorder sections</TooltipContent>
+        </Tooltip>
+      </nav>
+
+      <footer className="px-5 py-4 border-t border-border bg-muted/30 flex items-center justify-between gap-2 shrink-0 z-10">
+        <div className="flex items-center gap-2 min-w-0" aria-live="polite">
+          <SaveStatus saveStatus={saveStatus} lastSavedAt={lastSavedAt} />
         </div>
 
-        <div className="flex items-center gap-2">
+        <div className="flex items-center gap-1">
           <input
             type="file"
             accept=".json,application/json"
             ref={jsonInputRef}
-            onChange={handleImportJSON}
+            onChange={fileActions.onImportJSON}
             aria-label="Import CV data (JSON file)"
             className="hidden"
           />
@@ -167,68 +200,22 @@ export function EditorSidebar({
             type="file"
             accept=".pdf,application/pdf"
             ref={pdfInputRef}
-            onChange={handleImportPDF}
+            onChange={fileActions.onImportPDF}
             aria-label="Import CV data (PDF file)"
             className="hidden"
           />
 
-          <DropdownMenu>
-            <DropdownMenuTrigger
-              render={
-                <Button
-                  variant="outline"
-                  size="sm"
-                  className="h-9 lg:h-8 text-xs font-semibold gap-2 bg-background"
-                  aria-label="File actions"
-                >
-                  <FileText className="w-3.5 h-3.5 text-muted-foreground" />
-                  File
-                  <ChevronDown className="w-3.5 h-3.5 text-muted-foreground" />
-                </Button>
-              }
-            />
-            <DropdownMenuContent align="end" className="w-48 p-1.5">
-              <DropdownMenuItem
-                onClick={() => jsonInputRef.current?.click()}
-                className="gap-3 py-2.5 px-3 text-sm cursor-pointer rounded-md"
-              >
-                <FileJson className="w-4 h-4 text-muted-foreground" />
-                Import JSON
-              </DropdownMenuItem>
-              <DropdownMenuItem
-                onClick={handleImportPDFClick}
-                className="gap-3 py-2.5 px-3 text-sm cursor-pointer rounded-md"
-              >
-                <Upload className="w-4 h-4 text-muted-foreground" />
-                Import PDF (AI)
-              </DropdownMenuItem>
-              <DropdownMenuItem
-                onClick={handleExportData}
-                className="gap-3 py-2.5 px-3 text-sm cursor-pointer rounded-md"
-              >
-                <Download className="w-4 h-4 text-muted-foreground" />
-                Export JSON
-              </DropdownMenuItem>
-              <DropdownMenuItem
-                onClick={handlePrintClick}
-                className="gap-3 py-2.5 px-3 text-sm cursor-pointer rounded-md"
-              >
-                <Printer className="w-4 h-4 text-muted-foreground" />
-                Print / PDF
-              </DropdownMenuItem>
-            </DropdownMenuContent>
-          </DropdownMenu>
+          <ActionsDropdown
+            jsonInputRef={jsonInputRef}
+            pdfInputRef={pdfInputRef}
+            handleExportData={fileActions.handleExportData}
+            handlePrintClick={fileActions.handlePrintClick}
+            onOpenAIAdjust={onOpenAIAdjust}
+            onOpenAISettings={() => onAISettingsOpenChange(true)}
+            onOpenResumes={onOpenResumes}
+          />
         </div>
       </footer>
-
-      <AIAdjustDialog
-        open={isAIDialogOpen}
-        onOpenChange={setIsAIDialogOpen}
-        cvData={cvData}
-        onApply={onApplyCVData}
-      />
-
-      <AISettingsDialog open={aiSettingsOpen} onOpenChange={onAISettingsOpenChange} />
 
       <CVImportPreviewDialog
         cvData={pendingImport}
@@ -239,6 +226,11 @@ export function EditorSidebar({
           }
         }}
         onDiscard={onDiscardImport}
+      />
+
+      <SectionsOrderDialog
+        open={isSectionsDialogOpen}
+        onOpenChange={setIsSectionsDialogOpen}
       />
     </section>
   );

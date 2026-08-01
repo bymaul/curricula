@@ -1,5 +1,6 @@
 import { CVData } from '@/lib/schema';
 import { AIProvider } from '@/lib/consts';
+import { parseResponseJSON } from '@/lib/request';
 
 let pdfjsPromise: Promise<typeof import('pdfjs-dist')> | null = null;
 
@@ -62,11 +63,5 @@ export async function parseCVTextWithAI(cvText: string, params: ParseCVParams): 
     body: JSON.stringify({ cvText, ...params }),
   });
 
-  const data = await response.json();
-
-  if (!response.ok) {
-    throw new Error(data.error || 'Failed to parse CV');
-  }
-
-  return data as CVData;
+  return parseResponseJSON<CVData>(response);
 }

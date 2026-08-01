@@ -1,72 +1,131 @@
-'use client';
+"use client";
 
-import { EditorSidebar } from '@/components/editor/EditorSidebar';
-import { MobileViewToggle } from '@/components/editor/MobileViewToggle';
-import { ResumePreview } from '@/components/editor/ResumePreview';
-import { useCVAutoSave } from '@/hooks/useCVAutoSave';
-import { useCVImportExport } from '@/hooks/useCVImportExport';
-import { useCVPrint } from '@/hooks/useCVPrint';
-import { useMediaQuery } from '@/hooks/useMediaQuery';
-import { CVData, cvSchema, initialCVState } from '@/lib/schema';
-import { cn } from '@/lib/utils';
-import { zodResolver } from '@hookform/resolvers/zod';
-import { useState } from 'react';
-import { FormProvider, useForm } from 'react-hook-form';
+import { AIAdjustDialog } from "@/components/ai/AIAdjustDialog";
+import { AISettingsDialog } from "@/components/ai/AISettingsDialog";
+import { EditorSidebar } from "@/components/editor/EditorSidebar";
+import { MobileTopBar } from "@/components/editor/MobileTopBar";
+import { ResumesDialog } from "@/components/editor/ResumesDialog";
+import { ResumePreview } from "@/components/editor/ResumePreview";
+import { useCVAutoSave } from "@/hooks/useCVAutoSave";
+import { useCVImportExport } from "@/hooks/useCVImportExport";
+import { useCVPrint } from "@/hooks/useCVPrint";
+import { useMediaQuery } from "@/hooks/useMediaQuery";
+import { CVData, cvSchema, initialCVState } from "@/lib/schema";
+import { useResumeStore } from "@/store/useResumeStore";
+import { cn } from "@/lib/utils";
+import { ChevronsUpDown, FileText } from "lucide-react";
+import { zodResolver } from "@hookform/resolvers/zod";
+import { useState } from "react";
+import { FormProvider, useForm } from "react-hook-form";
 
 export default function Home() {
   const methods = useForm<CVData>({
     resolver: zodResolver(cvSchema),
     defaultValues: initialCVState,
-    mode: 'onChange',
+    mode: "onChange",
   });
 
-  const [mobileView, setMobileView] = useState<'edit' | 'preview'>('edit');
+  const [mobileView, setMobileView] = useState<"edit" | "preview">("edit");
   const [pendingImport, setPendingImport] = useState<CVData | null>(null);
   const [isAISettingsOpen, setIsAISettingsOpen] = useState(false);
+  const [isAIDialogOpen, setIsAIDialogOpen] = useState(false);
+  const [isResumesDialogOpen, setIsResumesDialogOpen] = useState(false);
 
-  const { mounted, cvData } = useCVAutoSave(methods);
-  const { jsonInputRef, pdfInputRef, handleExportData, handleImportJSON, handleImportPDF } =
-    useCVImportExport(cvData, methods.reset, {
-      onPDFImported: setPendingImport,
-      onMissingAPIKey: () => setIsAISettingsOpen(true),
-    });
+  const { mounted, cvData, saveStatus, lastSavedAt } = useCVAutoSave(methods);
+  const {
+    jsonInputRef,
+    pdfInputRef,
+    handleExportData,
+    handleImportJSON,
+    handleImportPDF,
+  } = useCVImportExport(cvData, methods.reset, {
+    onPDFImported: setPendingImport,
+    onMissingAPIKey: () => setIsAISettingsOpen(true),
+  });
   const { printRef, handlePrintClick } = useCVPrint(cvData, methods);
 
-  const isLargeScreen = useMediaQuery('(min-width: 1024px)');
-  const isPreviewVisible = isLargeScreen || mobileView === 'preview';
+  const isLargeScreen = useMediaQuery("(min-width: 1024px)");
+  const isPreviewVisible = isLargeScreen || mobileView === "preview";
+  const activeResume = useResumeStore((state) =>
+    state.resumes.find((r) => r.id === state.activeId),
+  );
+  const activeResumeTitle = activeResume?.title ?? "Untitled CV";
 
   if (!mounted) return null;
 
   return (
     <FormProvider {...methods}>
       <main className="h-dvh w-full bg-background text-foreground flex flex-col lg:p-6 overflow-hidden print:h-auto print:block print:p-0 print:overflow-visible print:bg-white">
-        <MobileViewToggle value={mobileView} onChange={setMobileView} />
+        <MobileTopBar value={mobileView} onChange={setMobileView} />
+
+        <header className="hidden lg:flex items-center justify-between shrink-0 px-4 pt-4 lg:px-0 lg:pt-0 mb-4 lg:mb-6 print:hidden">
+          <h1 className="text-lg font-bold tracking-tight shrink-0">
+            Curricula
+          </h1>
+
+          <button
+            type="button"
+            onClick={() => setIsResumesDialogOpen(true)}
+            className="hidden lg:flex items-center gap-1.5 min-w-0 max-w-[50%] rounded-md px-2 py-1 text-sm font-semibold text-muted-foreground hover:text-foreground hover:bg-muted transition-colors"
+          >
+            <FileText className="w-4 h-4 shrink-0" />
+            <span className="truncate">{activeResumeTitle}</span>
+            <ChevronsUpDown className="w-4 h-4 shrink-0" />
+          </button>
+        </header>
 
         <div className="flex-1 min-h-0 w-full flex flex-col lg:flex-row gap-4 lg:gap-6 px-4 pb-4 lg:px-0 lg:pb-0 print:p-0 print:block">
           <EditorSidebar
-            className={cn('h-full', mobileView === 'edit' ? 'flex' : 'hidden', 'lg:flex')}
+            className={cn(
+              "h-full",
+              mobileView === "edit" ? "flex" : "hidden",
+              "lg:flex",
+            )}
             jsonInputRef={jsonInputRef}
             pdfInputRef={pdfInputRef}
-            handleExportData={handleExportData}
-            handleImportJSON={handleImportJSON}
-            handleImportPDF={handleImportPDF}
-            handlePrintClick={handlePrintClick}
-            cvData={cvData}
+            fileActions={{
+              handleExportData,
+              handlePrintClick,
+              onImportJSON: handleImportJSON,
+              onImportPDF: handleImportPDF,
+            }}
             onApplyCVData={(data) => methods.reset(data)}
+            saveStatus={saveStatus}
+            lastSavedAt={lastSavedAt}
             pendingImport={pendingImport}
             onDiscardImport={() => setPendingImport(null)}
-            aiSettingsOpen={isAISettingsOpen}
+            onOpenAIAdjust={() => setIsAIDialogOpen(true)}
             onAISettingsOpenChange={setIsAISettingsOpen}
+            onOpenResumes={isLargeScreen ? undefined : () => setIsResumesDialogOpen(true)}
           />
 
           <ResumePreview
             cvData={cvData}
             printRef={printRef}
+            sectionOrder={activeResume?.sectionOrder}
+            hiddenSections={activeResume?.hiddenSections}
             isVisible={isPreviewVisible}
-            mobileActive={mobileView === 'preview'}
+            mobileActive={mobileView === "preview"}
           />
         </div>
       </main>
+
+      <AIAdjustDialog
+        open={isAIDialogOpen}
+        onOpenChange={setIsAIDialogOpen}
+        cvData={cvData}
+        onApply={(data) => methods.reset(data)}
+      />
+
+      <AISettingsDialog
+        open={isAISettingsOpen}
+        onOpenChange={setIsAISettingsOpen}
+      />
+
+      <ResumesDialog
+        open={isResumesDialogOpen}
+        onOpenChange={setIsResumesDialogOpen}
+      />
     </FormProvider>
   );
 }

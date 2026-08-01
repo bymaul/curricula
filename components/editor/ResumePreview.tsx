@@ -3,6 +3,8 @@
 import { HarvardTemplate } from '@/components/resume/HarvardTemplate';
 import { ScrollArea, ScrollBar } from '@/components/ui/scroll-area';
 import { usePageScale } from '@/hooks/usePageScale';
+import { usePinchZoom } from '@/hooks/usePinchZoom';
+import { SectionId } from '@/lib/consts';
 import { CVData } from '@/lib/schema';
 import { cn } from '@/lib/utils';
 import { RefObject } from 'react';
@@ -15,21 +17,30 @@ const FRAME_WIDTH_PX = PAGE_WIDTH_PX + GUTTER_PX * 2;
 interface ResumePreviewProps {
     cvData: CVData;
     printRef: RefObject<HTMLDivElement | null>;
+    sectionOrder?: SectionId[];
+    hiddenSections?: SectionId[];
     isVisible: boolean;
     mobileActive: boolean;
 }
 
-export function ResumePreview({ cvData, printRef, isVisible, mobileActive }: ResumePreviewProps) {
-    const { panelRef, frameRef, scale, frameHeight, zoomIn, zoomOut, zoomReset, minScale, maxScale } = usePageScale({
+export function ResumePreview({ cvData, printRef, sectionOrder, hiddenSections, isVisible, mobileActive }: ResumePreviewProps) {
+    const { panelRef, frameRef, scale, frameHeight, zoomTo, zoomIn, zoomOut, zoomReset, minScale, maxScale } = usePageScale({
         frameWidthPx: FRAME_WIDTH_PX,
         isVisible,
     });
 
+    const { containerRef } = usePinchZoom({ scale, minScale, maxScale, onZoomChange: zoomTo });
+
+    const setPanelRef = (node: HTMLDivElement | null) => {
+        panelRef.current = node;
+        containerRef.current = node;
+    };
+
     return (
         <section
-            ref={panelRef}
+            ref={setPanelRef}
             className={cn(
-                'flex-1 w-full bg-muted/20 border border-border rounded-xl shadow-inner flex-col h-full relative overflow-hidden print:border-none print:shadow-none print:bg-transparent print:overflow-visible',
+                'flex-1 w-full bg-muted/20 border border-border rounded-xl shadow-inner flex-col h-full relative overflow-hidden touch-pan-x touch-pan-y print:border-none print:shadow-none print:bg-transparent print:overflow-visible',
                 mobileActive ? 'flex' : 'hidden',
                 'lg:flex print:flex!',
             )}>
@@ -61,7 +72,7 @@ export function ResumePreview({ cvData, printRef, isVisible, mobileActive }: Res
                                 <div
                                     style={{ width: PAGE_WIDTH_PX }}
                                     className='bg-white text-black shadow-2xl overflow-hidden print:w-full! print:shadow-none'>
-                                    <HarvardTemplate ref={printRef} cvData={cvData} />
+                                    <HarvardTemplate ref={printRef} cvData={cvData} sectionOrder={sectionOrder} hiddenSections={hiddenSections} />
                                 </div>
                             </div>
                         </div>

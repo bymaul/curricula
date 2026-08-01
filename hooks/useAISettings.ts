@@ -24,9 +24,9 @@ export function useAISettings() {
     const onKeyChange = (value: string) => {
         setApiKey(value);
         if (value.trim()) {
-            sessionStorage.setItem(AI_API_KEY_STORAGE_KEY, value.trim());
+            localStorage.setItem(AI_API_KEY_STORAGE_KEY, value.trim());
         } else {
-            sessionStorage.removeItem(AI_API_KEY_STORAGE_KEY);
+            localStorage.removeItem(AI_API_KEY_STORAGE_KEY);
         }
     };
 

@@ -1,8 +1,11 @@
 import React, { forwardRef } from 'react';
+import { DEFAULT_SECTION_ORDER, SectionId } from '@/lib/consts';
 import { CVData } from '@/lib/schema';
 
 interface TemplateProps {
     cvData: CVData;
+    sectionOrder?: SectionId[];
+    hiddenSections?: SectionId[];
 }
 
 /**
@@ -126,8 +129,83 @@ function EntrySubheader({ left, right }: { left?: string; right?: string }) {
     );
 }
 
-export const HarvardTemplate = forwardRef<HTMLDivElement, TemplateProps>(({ cvData }, ref) => {
-    return (
+type SectionRenderer = (cvData: CVData) => React.ReactNode;
+
+const SECTION_RENDERERS: Record<SectionId, SectionRenderer> = {
+    summary: (cvData) =>
+        cvData.summary ? (
+            <Section title='Summary'>
+                <p className={`text-justify ${TYPE.body}`}>{cvData.summary}</p>
+            </Section>
+        ) : null,
+    experience: (cvData) =>
+        cvData.experience.length > 0 ? (
+            <Section title='Experience'>
+                {cvData.experience.map((exp, index) => (
+                    <div key={index} className={`${SPACE.itemGap} break-inside-avoid`}>
+                        <EntryHeader title={exp.role} meta={exp.date} />
+                        <EntrySubheader left={exp.company} right={exp.location} />
+                        {renderFormattedText(exp.description)}
+                    </div>
+                ))}
+            </Section>
+        ) : null,
+    projects: (cvData) =>
+        cvData.projects.length > 0 ? (
+            <Section title='Projects'>
+                {cvData.projects.map((proj, index) => (
+                    <div key={index} className={`${SPACE.itemGap} break-inside-avoid`}>
+                        <EntryHeader title={proj.name} meta={proj.date} />
+                        {renderFormattedText(proj.description)}
+                    </div>
+                ))}
+            </Section>
+        ) : null,
+    education: (cvData) =>
+        cvData.education.length > 0 ? (
+            <Section title='Education'>
+                {cvData.education.map((edu, index) => (
+                    <div key={index} className={`${SPACE.itemGap} break-inside-avoid`}>
+                        <EntryHeader title={edu.institution} meta={edu.date} />
+                        <EntrySubheader left={edu.degree} right={edu.location} />
+                        {renderFormattedText(edu.description)}
+                    </div>
+                ))}
+            </Section>
+        ) : null,
+    skills: (cvData) =>
+        cvData.skills.length > 0 ? (
+            <Section title='Skills' avoidBreakAfter>
+                {cvData.skills.map((skill, index) => (
+                    <div key={index} className='mb-1 text-[10.5pt]'>
+                        <span className='font-semibold'>{skill.category}:</span> {skill.items}
+                    </div>
+                ))}
+            </Section>
+        ) : null,
+    certifications: (cvData) =>
+        cvData.certifications.length > 0 ? (
+            <Section title='Certifications' avoidBreakAfter>
+                {cvData.certifications.map((cert, index) => (
+                    <div key={index} className={`mb-1 flex justify-between text-[10.5pt]`}>
+                        <span>
+                            <span className='font-semibold'>{cert.name}</span>
+                            {cert.issuer && ` | ${cert.issuer}`}
+                        </span>
+                        <span className={TYPE.itemMeta}>{cert.date}</span>
+                    </div>
+                ))}
+            </Section>
+        ) : null,
+};
+
+export const HarvardTemplate = forwardRef<HTMLDivElement, TemplateProps>(
+    ({ cvData, sectionOrder, hiddenSections }, ref) => {
+        const order = (sectionOrder ?? DEFAULT_SECTION_ORDER).filter(
+            (id) => !hiddenSections?.includes(id),
+        );
+
+        return (
         <div ref={ref} className='mx-auto shadow-2xl print:shadow-none bg-white'>
             <style type='text/css' media='print'>
                 {`
@@ -184,76 +262,10 @@ export const HarvardTemplate = forwardRef<HTMLDivElement, TemplateProps>(({ cvDa
                                 </div>
                             </div>
 
-                            {/* --- SUMMARY SECTION --- */}
-                            {cvData.summary && (
-                                <Section title='Summary'>
-                                    <p className={`text-justify ${TYPE.body}`}>{cvData.summary}</p>
-                                </Section>
-                            )}
-
-                            {/* --- EXPERIENCE SECTION --- */}
-                            {cvData.experience.length > 0 && (
-                                <Section title='Experience'>
-                                    {cvData.experience.map((exp, index) => (
-                                        <div key={index} className={`${SPACE.itemGap} break-inside-avoid`}>
-                                            <EntryHeader title={exp.role} meta={exp.date} />
-                                            <EntrySubheader left={exp.company} right={exp.location} />
-                                            {renderFormattedText(exp.description)}
-                                        </div>
-                                    ))}
-                                </Section>
-                            )}
-
-                            {/* --- PROJECTS SECTION --- */}
-                            {cvData.projects.length > 0 && (
-                                <Section title='Projects'>
-                                    {cvData.projects.map((proj, index) => (
-                                        <div key={index} className={`${SPACE.itemGap} break-inside-avoid`}>
-                                            <EntryHeader title={proj.name} meta={proj.date} />
-                                            {renderFormattedText(proj.description)}
-                                        </div>
-                                    ))}
-                                </Section>
-                            )}
-
-                            {/* --- EDUCATION SECTION --- */}
-                            {cvData.education.length > 0 && (
-                                <Section title='Education'>
-                                    {cvData.education.map((edu, index) => (
-                                        <div key={index} className={`${SPACE.itemGap} break-inside-avoid`}>
-                                            <EntryHeader title={edu.institution} meta={edu.date} />
-                                            <EntrySubheader left={edu.degree} right={edu.location} />
-                                            {renderFormattedText(edu.description)}
-                                        </div>
-                                    ))}
-                                </Section>
-                            )}
-
-                            {/* --- SKILLS SECTION --- */}
-                            {cvData.skills.length > 0 && (
-                                <Section title='Skills' avoidBreakAfter>
-                                    {cvData.skills.map((skill, index) => (
-                                        <div key={index} className='mb-1 text-[10.5pt]'>
-                                            <span className='font-semibold'>{skill.category}:</span> {skill.items}
-                                        </div>
-                                    ))}
-                                </Section>
-                            )}
-
-                            {/* --- CERTIFICATIONS SECTION --- */}
-                            {cvData.certifications.length > 0 && (
-                                <Section title='Certifications' avoidBreakAfter>
-                                    {cvData.certifications.map((cert, index) => (
-                                        <div key={index} className={`mb-1 flex justify-between text-[10.5pt]`}>
-                                            <span>
-                                                <span className='font-semibold'>{cert.name}</span>
-                                                {cert.issuer && ` | ${cert.issuer}`}
-                                            </span>
-                                            <span className={TYPE.itemMeta}>{cert.date}</span>
-                                        </div>
-                                    ))}
-                                </Section>
-                            )}
+                            {/* --- CONTENT SECTIONS (ordered) --- */}
+                            {order.map((id) => (
+                                <React.Fragment key={id}>{SECTION_RENDERERS[id](cvData)}</React.Fragment>
+                            ))}
                         </td>
                     </tr>
                 </tbody>

@@ -8,8 +8,11 @@ import { cn } from "@/lib/utils"
 function ScrollArea({
   className,
   children,
+  orientation = "vertical",
   ...props
-}: ScrollAreaPrimitive.Root.Props) {
+}: ScrollAreaPrimitive.Root.Props & {
+  orientation?: "vertical" | "horizontal";
+}) {
   return (
     <ScrollAreaPrimitive.Root
       data-slot="scroll-area"
@@ -22,7 +25,7 @@ function ScrollArea({
       >
         {children}
       </ScrollAreaPrimitive.Viewport>
-      <ScrollBar />
+      <ScrollBar orientation={orientation} />
       <ScrollAreaPrimitive.Corner />
     </ScrollAreaPrimitive.Root>
   )
@@ -39,7 +42,7 @@ function ScrollBar({
       data-orientation={orientation}
       orientation={orientation}
       className={cn(
-        "flex touch-none p-px transition-colors select-none data-horizontal:h-2.5 data-horizontal:flex-col data-horizontal:border-t data-horizontal:border-t-transparent data-vertical:h-full data-vertical:w-2.5 data-vertical:border-l data-vertical:border-l-transparent",
+        "flex touch-none p-px transition-opacity select-none data-horizontal:h-2.5 data-horizontal:flex-col data-horizontal:border-t data-horizontal:border-t-transparent data-vertical:h-full data-vertical:w-2.5 data-vertical:border-l data-vertical:border-l-transparent opacity-0",
         className
       )}
       {...props}
