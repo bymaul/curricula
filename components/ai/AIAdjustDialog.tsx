@@ -22,7 +22,7 @@ import { getStoredAIAPIKey } from '@/lib/consts';
 import { CVChangeSummary, summarizeCVChanges } from '@/lib/cvDiff';
 import { CVData } from '@/lib/schema';
 import { useUIStore } from '@/store/useUIStore';
-import { Loader2, FilePenLine } from 'lucide-react';
+import { Loader2, FilePenLine, TriangleAlertIcon } from 'lucide-react';
 import { useState } from 'react';
 
 interface AIAdjustDialogProps {
@@ -43,7 +43,10 @@ export function AIAdjustDialog({
 
   const [jobDescription, setJobDescription] = useState('');
   const [localError, setLocalError] = useState<string | null>(null);
-  const [pendingResult, setPendingResult] = useState<CVData | null>(null);
+  const [pendingResult, setPendingResult] = useState<{
+    data: CVData;
+    warnings: string[];
+  } | null>(null);
   const [changeSummary, setChangeSummary] = useState<CVChangeSummary[]>([]);
 
   const effectiveError = error ?? localError;
@@ -80,13 +83,13 @@ export function AIAdjustDialog({
 
     if (result) {
       setPendingResult(result);
-      setChangeSummary(summarizeCVChanges(cvData, result));
+      setChangeSummary(summarizeCVChanges(cvData, result.data));
     }
   };
 
   const handleApply = () => {
     if (!pendingResult) return;
-    onApply(pendingResult);
+    onApply(pendingResult.data);
     toast.add({
       type: 'success',
       description: 'CV adjusted to match the job description.',
@@ -104,6 +107,23 @@ export function AIAdjustDialog({
           </DialogHeader>
 
           <div className="flex min-h-0 flex-col gap-2 overflow-y-auto overscroll-contain p-2 -mx-1">
+            {pendingResult.warnings.length > 0 && (
+              <div className="rounded-lg border border-amber-500/40 bg-amber-500/10 px-3 py-2.5">
+                <div className="mb-1 flex items-center gap-2 text-sm font-medium text-amber-700 dark:text-amber-400">
+                  <TriangleAlertIcon
+                    className="size-4 shrink-0"
+                    aria-hidden="true"
+                  />
+                  Review these fields
+                </div>
+                <ul className="space-y-0.5 text-sm text-muted-foreground">
+                  {pendingResult.warnings.map((warning) => (
+                    <li key={warning}>- {warning}</li>
+                  ))}
+                </ul>
+              </div>
+            )}
+
             {changeSummary.length === 0 ? (
               <p className="text-sm text-muted-foreground">
                 No changes detected.

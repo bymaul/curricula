@@ -1,0 +1,236 @@
+import { beforeEach, describe, expect, it, vi } from 'vitest';
+
+vi.mock('ai', () => {
+  class NoObjectGeneratedError extends Error {
+    static isInstance(error: unknown) {
+      return error instanceof NoObjectGeneratedError;
+    }
+    text: string;
+    cause: unknown;
+    constructor(options: { message?: string; text?: string; cause?: unknown }) {
+      super(options.message ?? 'No object generated.');
+      this.text = options.text ?? '';
+      this.cause = options.cause;
+    }
+  }
+  return {
+    generateText: vi.fn(),
+    NoObjectGeneratedError,
+    Output: { object: vi.fn(() => ({ type: 'object' })) },
+  };
+});
+
+import { generateText, NoObjectGeneratedError } from 'ai';
+import {
+  extractJSON,
+  normalizeCVOutput,
+  normalizeCVText,
+  parseCVWithRepair,
+} from '@/lib/cvParsing';
+
+const mockedGenerateText = vi.mocked(generateText);
+
+const validResume = {
+  name: 'Jane Doe',
+  jobTitle: 'Engineer',
+  email: 'jane@example.com',
+  phone: '+1-555-0100',
+  summary: 'Experienced engineer with 8 years building web apps.',
+  experience: [
+    {
+      role: 'Dev',
+      company: 'Acme',
+      date: '2020-2022',
+      description: '- Led team.',
+    },
+  ],
+  projects: [],
+  education: [],
+  skills: [{ category: '', items: 'JavaScript' }],
+  certifications: [],
+};
+
+const minimalModel = {} as Parameters<typeof parseCVWithRepair>[0]['model'];
+
+const noObjectError = (text: string) =>
+  new NoObjectGeneratedError({ text } as never);
+
+describe('normalizeCVText', () => {
+  it('collapses runs of blank lines', () => {
+    expect(normalizeCVText('a\n\n\n\n\nb')).toBe('a\n\nb');
+  });
+
+  it('trims surrounding whitespace', () => {
+    expect(normalizeCVText('  hello  \n  world  ')).toBe('hello  \n  world');
+  });
+
+  it('caps length at MAX_CV_TEXT_CHARS without splitting words', () => {
+    const long = `${'word '.repeat(5000)}end`;
+    const out = normalizeCVText(long);
+    expect(out.length).toBeLessThanOrEqual(12_000);
+    expect(out).not.toContain('end');
+  });
+});
+
+describe('extractJSON', () => {
+  it('parses plain JSON objects', () => {
+    expect(extractJSON('{"a":1}')).toEqual({ a: 1 });
+  });
+
+  it('extracts JSON wrapped in markdown fences', () => {
+    const fenced = '```json\n{"name":"Bob"}\n```';
+    expect(extractJSON(fenced)).toEqual({ name: 'Bob' });
+  });
+
+  it('extracts JSON embedded in prose', () => {
+    const prose = 'Here you go: {"name":"Al"} thanks!';
+    expect(extractJSON(prose)).toEqual({ name: 'Al' });
+  });
+
+  it('ignores strings containing braces', () => {
+    const tricky = '{"note":"a} still in string","x":1}';
+    expect(extractJSON(tricky)).toEqual({ note: 'a} still in string', x: 1 });
+  });
+
+  it('returns null for non-JSON input', () => {
+    expect(extractJSON('just some text')).toBeNull();
+    expect(extractJSON('')).toBeNull();
+  });
+});
+
+describe('normalizeCVOutput', () => {
+  it('coerces a complete object into CVData', () => {
+    const { data, warnings } = normalizeCVOutput(validResume);
+    expect(data.name).toBe('Jane Doe');
+    expect(data.experience[0].description).toBe('- Led team.');
+    expect(warnings).toEqual([]);
+  });
+
+  it('fills missing fields with empty values and derives warnings', () => {
+    const { data, warnings } = normalizeCVOutput({
+      name: 'Bob Smith',
+      jobTitle: 'Mechanic',
+      summary: 'I fix cars.',
+    });
+    expect(data.email).toBe('');
+    expect(data.phone).toBe('');
+    expect(data.links).toEqual([]);
+    expect(warnings).toContain('Email not found');
+    expect(warnings).toContain('Phone not found');
+    expect(warnings).toContain('No experience or projects found');
+  });
+
+  it('handles garbage input gracefully', () => {
+    const { data, warnings } = normalizeCVOutput(null);
+    expect(data.name).toBe('');
+    expect(Object.keys(data).sort()).toEqual(
+      [
+        'name',
+        'jobTitle',
+        'email',
+        'phone',
+        'location',
+        'links',
+        'summary',
+        'experience',
+        'projects',
+        'education',
+        'skills',
+        'certifications',
+      ].sort(),
+    );
+    expect(warnings.length).toBeGreaterThan(0);
+  });
+
+  it('coerces numeric values to strings', () => {
+    const { data } = normalizeCVOutput({ phone: 12345 });
+    expect(data.phone).toBe('12345');
+  });
+
+  it('drops non-object array entries', () => {
+    const { data } = normalizeCVOutput({
+      experience: [
+        { role: 'Dev', company: 'X', date: '2020', description: '' },
+        'junk',
+        null,
+      ],
+    });
+    expect(data.experience).toHaveLength(1);
+  });
+});
+
+describe('parseCVWithRepair', () => {
+  beforeEach(() => {
+    mockedGenerateText.mockReset();
+  });
+
+  it('returns normalized output on success', async () => {
+    mockedGenerateText.mockResolvedValue({ output: validResume } as never);
+    const result = await parseCVWithRepair({
+      model: minimalModel,
+      system: 'sys',
+      resumeText: 'resume text',
+    });
+    expect(result.data.name).toBe('Jane Doe');
+    expect(result.warnings).toEqual([]);
+  });
+
+  it('salvages fenced JSON without an extra model call', async () => {
+    mockedGenerateText.mockRejectedValue(
+      noObjectError('```json\n' + JSON.stringify(validResume) + '\n```'),
+    );
+    const result = await parseCVWithRepair({
+      model: minimalModel,
+      system: 'sys',
+      resumeText: 'resume text',
+    });
+    expect(result.data.name).toBe('Jane Doe');
+    expect(mockedGenerateText).toHaveBeenCalledTimes(1);
+  });
+
+  it('re-prompts the model with validation feedback after a failure', async () => {
+    mockedGenerateText
+      .mockRejectedValueOnce(noObjectError('not json at all'))
+      .mockResolvedValueOnce({ output: validResume } as never);
+
+    const result = await parseCVWithRepair({
+      model: minimalModel,
+      system: 'sys',
+      resumeText: 'resume text',
+    });
+    expect(result.data.name).toBe('Jane Doe');
+    expect(mockedGenerateText).toHaveBeenCalledTimes(2);
+
+    const repairCall = mockedGenerateText.mock.calls[1][0];
+    const userContent = repairCall.messages![0].content as Array<{
+      text?: string;
+    }>;
+    expect(userContent[userContent.length - 1].text).toContain(
+      'corrected JSON',
+    );
+  });
+
+  it('throws a friendly error when repairs are exhausted', async () => {
+    mockedGenerateText.mockRejectedValue(noObjectError('still not json'));
+
+    await expect(
+      parseCVWithRepair({
+        model: minimalModel,
+        system: 'sys',
+        resumeText: 'resume text',
+        maxRepairAttempts: 1,
+      }),
+    ).rejects.toThrow('Could not generate the requested output');
+  });
+
+  it('rethrows non-schema errors untouched', async () => {
+    mockedGenerateText.mockRejectedValue(new Error('boom'));
+    await expect(
+      parseCVWithRepair({
+        model: minimalModel,
+        system: 'sys',
+        resumeText: 'resume text',
+      }),
+    ).rejects.toThrow('boom');
+  });
+});

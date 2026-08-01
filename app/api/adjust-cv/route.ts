@@ -1,13 +1,13 @@
-import { generateText, Output } from 'ai';
-import { cvSchema } from '@/lib/schema';
 import {
   aiErrorResponse,
   createAIModel,
   resolveAIKey,
   resolveAIModel,
 } from '@/lib/ai';
-import { clientIP, rateLimitResponse, rateLimitStatus } from '@/lib/rateLimit';
 import { sanitizeJSON, stripInvisibleChars } from '@/lib/cleanText';
+import { adjustCVWithRepair } from '@/lib/cvParsing';
+import { clientIP, rateLimitResponse, rateLimitStatus } from '@/lib/rateLimit';
+import { cvSchema } from '@/lib/schema';
 import z from 'zod';
 
 export const runtime = 'nodejs';
@@ -67,15 +67,14 @@ CRITICAL RULES:
 9. Preserve all factual details: company names, institutions, dates, certifications, locations, and contact info must remain unchanged.
 10. Do not pad sections that are empty in the source CV — leave empty arrays as empty arrays.`;
 
-    const { output } = await generateText({
+    const { data, warnings } = await adjustCVWithRepair({
       model,
       system: systemPrompt,
-      prompt: `CV Data: ${JSON.stringify(cleanCVData)}\n\nJob Description: ${cleanJobDescription}`,
-      output: Output.object({ schema: cvSchema }),
-      maxRetries: 0,
+      cvData: cleanCVData,
+      jobDescription: cleanJobDescription,
     });
 
-    return Response.json(output);
+    return Response.json({ data, warnings });
   } catch (error: unknown) {
     return aiErrorResponse(error);
   }

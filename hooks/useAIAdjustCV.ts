@@ -11,11 +11,18 @@ interface AIAdjustParams {
   apiKey?: string;
 }
 
+export interface AIAdjustResult {
+  data: CVData;
+  warnings: string[];
+}
+
 export function useAIAdjustCV() {
   const [isAdjusting, setIsAdjusting] = useState(false);
   const [error, setError] = useState<string | null>(null);
 
-  const adjustCV = async (params: AIAdjustParams): Promise<CVData | null> => {
+  const adjustCV = async (
+    params: AIAdjustParams,
+  ): Promise<AIAdjustResult | null> => {
     setIsAdjusting(true);
     setError(null);
 
@@ -26,7 +33,7 @@ export function useAIAdjustCV() {
         body: JSON.stringify(params),
       });
 
-      return await parseResponseJSON<CVData>(response);
+      return await parseResponseJSON<AIAdjustResult>(response);
     } catch (err) {
       setError(
         err instanceof Error
