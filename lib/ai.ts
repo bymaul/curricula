@@ -2,14 +2,16 @@ import { createAnthropic } from '@ai-sdk/anthropic';
 import { createGoogleGenerativeAI } from '@ai-sdk/google';
 import { createOpenAI } from '@ai-sdk/openai';
 import { AIProvider, AI_PROVIDERS } from '@/lib/consts';
+import { stripInvisibleChars } from '@/lib/cleanText';
 
 export function resolveAIKey(clientKey?: string): string | null {
-  if (clientKey) return clientKey;
-  return process.env.AI_API_KEY?.trim() || null;
+  if (clientKey) return stripInvisibleChars(clientKey);
+  return stripInvisibleChars(process.env.AI_API_KEY?.trim() || '') || null;
 }
 
 export function resolveAIModel(modelName?: string): string | undefined {
-  return modelName?.trim() || process.env.AI_MODEL?.trim() || undefined;
+  const value = modelName?.trim() || process.env.AI_MODEL?.trim() || '';
+  return stripInvisibleChars(value) || undefined;
 }
 
 export function createAIModel(
