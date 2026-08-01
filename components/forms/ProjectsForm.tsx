@@ -19,7 +19,7 @@ export const ProjectsForm = () => (
                 className: 'sm:col-span-2',
                 label: 'Description / Bullet Points',
                 placeholder: '- Built with Next.js, Tailwind, and PostgreSQL...',
-                textareaClassName: 'h-32 font-mono text-xs',
+                textareaClassName: 'h-32',
             },
         ]}
     />

@@ -21,7 +21,7 @@ export const ExperienceForm = () => (
                 className: 'sm:col-span-2',
                 label: 'Description / Bullet Points',
                 placeholder: '- Spearheaded migration to Next.js\n- Improved load speeds by 40%',
-                textareaClassName: 'h-32 font-mono text-xs',
+                textareaClassName: 'h-32',
             },
         ]}
     />
