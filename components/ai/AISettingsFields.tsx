@@ -63,7 +63,7 @@ export function AISettingsFields({
       <Field>
         <FieldLabel>API Key</FieldLabel>
         <FieldDescription>
-          Kept in this browser tab only, never stored permanently.
+          Optional — leave blank to use the built-in free key.
         </FieldDescription>
         <Input
           type="password"

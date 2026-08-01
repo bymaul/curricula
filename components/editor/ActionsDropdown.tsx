@@ -1,4 +1,3 @@
-import { getStoredAIAPIKey } from '@/lib/consts';
 import { cn } from '@/lib/utils';
 import {
   Download,
@@ -43,10 +42,6 @@ export function ActionsDropdown({
   triggerClassName,
 }: ActionsDropdownProps) {
   const handleImportPDFClick = () => {
-    if (!getStoredAIAPIKey()) {
-      onOpenAISettings();
-      return;
-    }
     pdfInputRef.current?.click();
   };
 

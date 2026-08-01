@@ -3,6 +3,15 @@ import { createGoogleGenerativeAI } from '@ai-sdk/google';
 import { createOpenAI } from '@ai-sdk/openai';
 import { AIProvider, AI_PROVIDERS } from '@/lib/consts';
 
+export function resolveAIKey(clientKey?: string): string | null {
+  if (clientKey) return clientKey;
+  return process.env.AI_API_KEY?.trim() || null;
+}
+
+export function resolveAIModel(modelName?: string): string | undefined {
+  return modelName?.trim() || process.env.AI_MODEL?.trim() || undefined;
+}
+
 export function createAIModel(
   provider: AIProvider,
   apiKey: string,
