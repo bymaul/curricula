@@ -50,7 +50,7 @@ export class ScannedPDFError extends Error {
 interface ParseCVParams {
   provider: AIProvider;
   modelName?: string;
-  apiKey: string;
+  apiKey?: string;
 }
 
 /** Sends extracted PDF text to the AI and returns structured CVData. */

@@ -15,7 +15,7 @@ export const useUIStore = create<UIState>()(
     (set) => ({
       activeTab: 'Personal',
       setActiveTab: (tab) => set({ activeTab: tab }),
-      aiProvider: 'openai',
+      aiProvider: 'google',
       aiModel: '',
       setAIPrefs: (aiProvider, aiModel) => set({ aiProvider, aiModel }),
     }),
