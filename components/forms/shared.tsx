@@ -20,7 +20,12 @@ import { GripVertical, Plus, Trash2 } from 'lucide-react';
 import { ReactNode } from 'react';
 import { FormField } from '@/components/ui/form-field';
 import { CVData } from '@/lib/schema';
-import { FieldPath, PathValue, useFieldArray, useFormContext } from 'react-hook-form';
+import {
+  FieldPath,
+  PathValue,
+  useFieldArray,
+  useFormContext,
+} from 'react-hook-form';
 
 export function DragHandle({
   className,
@@ -117,7 +122,9 @@ interface SortableListProps {
 export function SortableList({ ids, onMove, children }: SortableListProps) {
   const sensors = useSensors(
     useSensor(PointerSensor),
-    useSensor(KeyboardSensor, { coordinateGetter: sortableKeyboardCoordinates }),
+    useSensor(KeyboardSensor, {
+      coordinateGetter: sortableKeyboardCoordinates,
+    }),
   );
 
   const handleDragEnd = (event: DragEndEvent) => {
@@ -127,7 +134,11 @@ export function SortableList({ ids, onMove, children }: SortableListProps) {
   };
 
   return (
-    <DndContext sensors={sensors} collisionDetection={closestCenter} onDragEnd={handleDragEnd}>
+    <DndContext
+      sensors={sensors}
+      collisionDetection={closestCenter}
+      onDragEnd={handleDragEnd}
+    >
       <SortableContext items={ids} strategy={verticalListSortingStrategy}>
         {children}
       </SortableContext>
@@ -150,7 +161,8 @@ export function SortableCard({
   removeTitle,
   children,
 }: SortableCardProps) {
-  const { attributes, listeners, setNodeRef, transform, transition } = useSortable({ id });
+  const { attributes, listeners, setNodeRef, transform, transition } =
+    useSortable({ id });
   const style = { transform: CSS.Transform.toString(transform), transition };
 
   return (
@@ -184,8 +196,14 @@ interface SortableRowProps {
   children: ReactNode;
 }
 
-export function SortableRow({ id, className, handleClassName, children }: SortableRowProps) {
-  const { attributes, listeners, setNodeRef, transform, transition } = useSortable({ id });
+export function SortableRow({
+  id,
+  className,
+  handleClassName,
+  children,
+}: SortableRowProps) {
+  const { attributes, listeners, setNodeRef, transform, transition } =
+    useSortable({ id });
   const style = { transform: CSS.Transform.toString(transform), transition };
 
   return (
@@ -197,7 +215,11 @@ export function SortableRow({ id, className, handleClassName, children }: Sortab
         className,
       )}
     >
-      <DragHandle {...attributes} {...listeners} className={cn('mb-2', handleClassName)} />
+      <DragHandle
+        {...attributes}
+        {...listeners}
+        className={cn('mb-2', handleClassName)}
+      />
       {children}
     </div>
   );
@@ -221,7 +243,9 @@ interface SectionFieldDef {
 }
 
 type SectionFieldValue = PathValue<CVData, SectionFieldName>;
-type SectionFieldItem = SectionFieldValue extends readonly (infer U)[] ? U : never;
+type SectionFieldItem = SectionFieldValue extends readonly (infer U)[]
+  ? U
+  : never;
 
 interface SectionFieldArrayProps {
   name: SectionFieldName;
@@ -251,10 +275,18 @@ export function SectionFieldArray({
     register,
     formState: { errors },
   } = useFormContext<CVData>();
-  const { fields: rows, append, remove, move } = useFieldArray({ control, name });
+  const {
+    fields: rows,
+    append,
+    remove,
+    move,
+  } = useFieldArray({ control, name });
 
   const itemErrors = errors[name] as unknown as
-    | Record<number, Record<string, { message?: string } | undefined> | undefined>
+    | Record<
+        number,
+        Record<string, { message?: string } | undefined> | undefined
+      >
     | undefined;
   const errorFor = (index: number, fieldName: string) =>
     itemErrors?.[index]?.[fieldName]?.message;
@@ -289,12 +321,17 @@ export function SectionFieldArray({
               onRemove={() => remove(index)}
               removeTitle={removeTitle}
             >
-              <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">{body}</div>
+              <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+                {body}
+              </div>
             </SortableCard>
           ) : (
             <SortableRow key={row.id} id={row.id}>
               {body}
-              <ItemRemoveButton onClick={() => remove(index)} title={removeTitle} />
+              <ItemRemoveButton
+                onClick={() => remove(index)}
+                title={removeTitle}
+              />
             </SortableRow>
           );
         })}

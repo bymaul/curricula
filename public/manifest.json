@@ -1,22 +1,22 @@
 {
-    "name": "Curricula",
-    "short_name": "Curricula",
-    "description": "An offline-first PWA for crafting professional Harvard-style resumes with precision print and PDF layouts.",
-    "start_url": "/",
-    "display": "standalone",
-    "orientation": "portrait-primary",
-    "background_color": "#09090b",
-    "theme_color": "#09090b",
-    "icons": [
-        {
-            "src": "/icon-192x192.png",
-            "sizes": "192x192",
-            "type": "image/png"
-        },
-        {
-            "src": "/icon-512x512.png",
-            "sizes": "512x512",
-            "type": "image/png"
-        }
-    ]
+  "name": "Curricula",
+  "short_name": "Curricula",
+  "description": "An offline-first PWA for crafting professional Harvard-style resumes with precision print and PDF layouts.",
+  "start_url": "/",
+  "display": "standalone",
+  "orientation": "portrait-primary",
+  "background_color": "#09090b",
+  "theme_color": "#09090b",
+  "icons": [
+    {
+      "src": "/icon-192x192.png",
+      "sizes": "192x192",
+      "type": "image/png"
+    },
+    {
+      "src": "/icon-512x512.png",
+      "sizes": "512x512",
+      "type": "image/png"
+    }
+  ]
 }

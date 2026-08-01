@@ -1,6 +1,6 @@
-"use client";
+'use client';
 
-import { Button } from "@/components/ui/button";
+import { Button } from '@/components/ui/button';
 import {
   Dialog,
   DialogContent,
@@ -8,13 +8,13 @@ import {
   DialogFooter,
   DialogHeader,
   DialogTitle,
-} from "@/components/ui/dialog";
-import { Input } from "@/components/ui/input";
-import { ScrollArea } from "@/components/ui/scroll-area";
-import { useResumeStore } from "@/store/useResumeStore";
-import { cn } from "@/lib/utils";
-import { Check, Copy, FileText, Pencil, Plus, Trash2 } from "lucide-react";
-import { useState } from "react";
+} from '@/components/ui/dialog';
+import { Input } from '@/components/ui/input';
+import { ScrollArea } from '@/components/ui/scroll-area';
+import { useResumeStore } from '@/store/useResumeStore';
+import { cn } from '@/lib/utils';
+import { Check, Copy, FileText, Pencil, Plus, Trash2 } from 'lucide-react';
+import { useState } from 'react';
 
 interface ResumesDialogProps {
   open: boolean;
@@ -23,7 +23,7 @@ interface ResumesDialogProps {
 
 function formatRelativeTime(timestamp: number): string {
   const seconds = Math.max(0, Math.floor((Date.now() - timestamp) / 1000));
-  if (seconds < 5) return "just now";
+  if (seconds < 5) return 'just now';
   if (seconds < 60) return `${seconds}s ago`;
   const minutes = Math.floor(seconds / 60);
   if (minutes < 60) return `${minutes}m ago`;
@@ -33,7 +33,7 @@ function formatRelativeTime(timestamp: number): string {
 }
 
 const ACTION_CLASSNAME =
-  "shrink-0 p-2 lg:p-1.5 rounded-md text-muted-foreground hover:text-foreground hover:bg-muted disabled:opacity-40 disabled:pointer-events-none transition-colors";
+  'shrink-0 p-2 lg:p-1.5 rounded-md text-muted-foreground hover:text-foreground hover:bg-muted disabled:opacity-40 disabled:pointer-events-none transition-colors';
 
 export function ResumesDialog({ open, onOpenChange }: ResumesDialogProps) {
   const resumes = useResumeStore((state) => state.resumes);
@@ -45,7 +45,7 @@ export function ResumesDialog({ open, onOpenChange }: ResumesDialogProps) {
   const renameResume = useResumeStore((state) => state.renameResume);
 
   const [editingId, setEditingId] = useState<string | null>(null);
-  const [draft, setDraft] = useState("");
+  const [draft, setDraft] = useState('');
 
   const startRename = (id: string, title: string) => {
     setEditingId(id);
@@ -94,10 +94,10 @@ export function ResumesDialog({ open, onOpenChange }: ResumesDialogProps) {
                   <div
                     key={r.id}
                     className={cn(
-                      "group grid grid-cols-[minmax(0,1fr)_auto] items-center gap-2 rounded-lg border border-border p-3 w-full min-w-0 transition-colors",
+                      'group grid grid-cols-[minmax(0,1fr)_auto] items-center gap-2 rounded-lg border border-border p-3 w-full min-w-0 transition-colors',
                       active
-                        ? "bg-muted/40 border-primary/40"
-                        : "hover:bg-muted/30",
+                        ? 'bg-muted/40 border-primary/40'
+                        : 'hover:bg-muted/30',
                     )}
                   >
                     {editing ? (
@@ -105,8 +105,8 @@ export function ResumesDialog({ open, onOpenChange }: ResumesDialogProps) {
                         value={draft}
                         onChange={(e) => setDraft(e.target.value)}
                         onKeyDown={(e) => {
-                          if (e.key === "Enter") commitRename();
-                          if (e.key === "Escape") setEditingId(null);
+                          if (e.key === 'Enter') commitRename();
+                          if (e.key === 'Escape') setEditingId(null);
                         }}
                         onBlur={commitRename}
                         autoFocus
@@ -121,8 +121,8 @@ export function ResumesDialog({ open, onOpenChange }: ResumesDialogProps) {
                       >
                         <FileText
                           className={cn(
-                            "w-4 h-4 shrink-0",
-                            active ? "text-primary" : "text-muted-foreground",
+                            'w-4 h-4 shrink-0',
+                            active ? 'text-primary' : 'text-muted-foreground',
                           )}
                         />
                         <span className="min-w-0">
@@ -165,7 +165,7 @@ export function ResumesDialog({ open, onOpenChange }: ResumesDialogProps) {
                             disabled={resumes.length <= 1}
                             className={cn(
                               ACTION_CLASSNAME,
-                              "hover:text-destructive hover:bg-destructive/10",
+                              'hover:text-destructive hover:bg-destructive/10',
                             )}
                           >
                             <Trash2 className="w-4 h-4" />

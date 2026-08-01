@@ -33,14 +33,16 @@ function getPDFImportErrorInfo(error: unknown): PDFImportErrorInfo {
   if (name === 'PasswordException') {
     return {
       title: 'Password protected',
-      message: 'This PDF is password-protected. Remove the password and try again.',
+      message:
+        'This PDF is password-protected. Remove the password and try again.',
     };
   }
 
   if (error instanceof TypeError) {
     return {
       title: 'Network error',
-      message: 'Could not reach the AI service. Check your connection and try again.',
+      message:
+        'Could not reach the AI service. Check your connection and try again.',
     };
   }
 
@@ -84,7 +86,8 @@ export function useCVImportExport(
           console.error('Validation errors:', validationResult.error);
           toast.add({
             type: 'error',
-            description: 'Invalid CV format. The file is corrupted or from an older version.',
+            description:
+              'Invalid CV format. The file is corrupted or from an older version.',
             priority: 'high',
           });
           return;
@@ -99,7 +102,8 @@ export function useCVImportExport(
       } catch {
         toast.add({
           type: 'error',
-          description: 'Could not read file. Please upload a valid JSON backup.',
+          description:
+            'Could not read file. Please upload a valid JSON backup.',
           priority: 'high',
         });
       } finally {
@@ -169,5 +173,11 @@ export function useCVImportExport(
     }
   };
 
-  return { jsonInputRef, pdfInputRef, handleExportData, handleImportJSON, handleImportPDF };
+  return {
+    jsonInputRef,
+    pdfInputRef,
+    handleExportData,
+    handleImportJSON,
+    handleImportPDF,
+  };
 }

@@ -67,7 +67,10 @@ export function ActionsDropdown({
       <DropdownMenuContent align="end" className="w-52 p-1.5">
         {onOpenResumes && (
           <>
-            <DropdownMenuItem onClick={onOpenResumes} className={ITEM_CLASSNAME}>
+            <DropdownMenuItem
+              onClick={onOpenResumes}
+              className={ITEM_CLASSNAME}
+            >
               <FileText className="w-4 h-4 text-muted-foreground" />
               Manage Resumes
             </DropdownMenuItem>
@@ -81,7 +84,10 @@ export function ActionsDropdown({
           <FileJson className="w-4 h-4 text-muted-foreground" />
           Import JSON
         </DropdownMenuItem>
-        <DropdownMenuItem onClick={handleImportPDFClick} className={ITEM_CLASSNAME}>
+        <DropdownMenuItem
+          onClick={handleImportPDFClick}
+          className={ITEM_CLASSNAME}
+        >
           <Upload className="w-4 h-4 text-muted-foreground" />
           Import PDF (AI)
         </DropdownMenuItem>

@@ -1,31 +1,31 @@
-"use client";
+'use client';
 
-import { AIAdjustDialog } from "@/components/ai/AIAdjustDialog";
-import { AISettingsDialog } from "@/components/ai/AISettingsDialog";
-import { EditorSidebar } from "@/components/editor/EditorSidebar";
-import { MobileTopBar } from "@/components/editor/MobileTopBar";
-import { ResumesDialog } from "@/components/editor/ResumesDialog";
-import { ResumePreview } from "@/components/editor/ResumePreview";
-import { useCVAutoSave } from "@/hooks/useCVAutoSave";
-import { useCVImportExport } from "@/hooks/useCVImportExport";
-import { useCVPrint } from "@/hooks/useCVPrint";
-import { useMediaQuery } from "@/hooks/useMediaQuery";
-import { CVData, cvSchema, initialCVState } from "@/lib/schema";
-import { useResumeStore } from "@/store/useResumeStore";
-import { cn } from "@/lib/utils";
-import { ChevronsUpDown, FileText } from "lucide-react";
-import { zodResolver } from "@hookform/resolvers/zod";
-import { useState } from "react";
-import { FormProvider, useForm } from "react-hook-form";
+import { AIAdjustDialog } from '@/components/ai/AIAdjustDialog';
+import { AISettingsDialog } from '@/components/ai/AISettingsDialog';
+import { EditorSidebar } from '@/components/editor/EditorSidebar';
+import { MobileTopBar } from '@/components/editor/MobileTopBar';
+import { ResumesDialog } from '@/components/editor/ResumesDialog';
+import { ResumePreview } from '@/components/editor/ResumePreview';
+import { useCVAutoSave } from '@/hooks/useCVAutoSave';
+import { useCVImportExport } from '@/hooks/useCVImportExport';
+import { useCVPrint } from '@/hooks/useCVPrint';
+import { useMediaQuery } from '@/hooks/useMediaQuery';
+import { CVData, cvSchema, initialCVState } from '@/lib/schema';
+import { useResumeStore } from '@/store/useResumeStore';
+import { cn } from '@/lib/utils';
+import { ChevronsUpDown, FileText } from 'lucide-react';
+import { zodResolver } from '@hookform/resolvers/zod';
+import { useState } from 'react';
+import { FormProvider, useForm } from 'react-hook-form';
 
 export default function Home() {
   const methods = useForm<CVData>({
     resolver: zodResolver(cvSchema),
     defaultValues: initialCVState,
-    mode: "onChange",
+    mode: 'onChange',
   });
 
-  const [mobileView, setMobileView] = useState<"edit" | "preview">("edit");
+  const [mobileView, setMobileView] = useState<'edit' | 'preview'>('edit');
   const [pendingImport, setPendingImport] = useState<CVData | null>(null);
   const [isAISettingsOpen, setIsAISettingsOpen] = useState(false);
   const [isAIDialogOpen, setIsAIDialogOpen] = useState(false);
@@ -44,12 +44,12 @@ export default function Home() {
   });
   const { printRef, handlePrintClick } = useCVPrint(cvData, methods);
 
-  const isLargeScreen = useMediaQuery("(min-width: 1024px)");
-  const isPreviewVisible = isLargeScreen || mobileView === "preview";
+  const isLargeScreen = useMediaQuery('(min-width: 1024px)');
+  const isPreviewVisible = isLargeScreen || mobileView === 'preview';
   const activeResume = useResumeStore((state) =>
     state.resumes.find((r) => r.id === state.activeId),
   );
-  const activeResumeTitle = activeResume?.title ?? "Untitled CV";
+  const activeResumeTitle = activeResume?.title ?? 'Untitled CV';
 
   if (!mounted) return null;
 
@@ -77,9 +77,9 @@ export default function Home() {
         <div className="flex-1 min-h-0 w-full flex flex-col lg:flex-row gap-4 lg:gap-6 px-4 pb-4 lg:px-0 lg:pb-0 print:p-0 print:block">
           <EditorSidebar
             className={cn(
-              "h-full",
-              mobileView === "edit" ? "flex" : "hidden",
-              "lg:flex",
+              'h-full',
+              mobileView === 'edit' ? 'flex' : 'hidden',
+              'lg:flex',
             )}
             jsonInputRef={jsonInputRef}
             pdfInputRef={pdfInputRef}
@@ -96,7 +96,9 @@ export default function Home() {
             onDiscardImport={() => setPendingImport(null)}
             onOpenAIAdjust={() => setIsAIDialogOpen(true)}
             onAISettingsOpenChange={setIsAISettingsOpen}
-            onOpenResumes={isLargeScreen ? undefined : () => setIsResumesDialogOpen(true)}
+            onOpenResumes={
+              isLargeScreen ? undefined : () => setIsResumesDialogOpen(true)
+            }
           />
 
           <ResumePreview
@@ -105,7 +107,7 @@ export default function Home() {
             sectionOrder={activeResume?.sectionOrder}
             hiddenSections={activeResume?.hiddenSections}
             isVisible={isPreviewVisible}
-            mobileActive={mobileView === "preview"}
+            mobileActive={mobileView === 'preview'}
           />
         </div>
       </main>

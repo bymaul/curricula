@@ -1,21 +1,21 @@
-import { DEFAULT_SECTION_ORDER, RENDERABLE_SECTIONS } from "@/lib/consts";
-import { CVData } from "@/lib/schema";
-import { cn } from "@/lib/utils";
-import { useResumeStore } from "@/store/useResumeStore";
-import { useUIStore } from "@/store/useUIStore";
-import { CheckCircle2, ListOrdered, Loader2 } from "lucide-react";
-import { useEffect, useState } from "react";
-import { CVImportPreviewDialog } from "../import/CVImportPreviewDialog";
-import { CertificationsForm } from "../forms/CertificationsForm";
-import { EducationForm } from "../forms/EducationForm";
-import { ExperienceForm } from "../forms/ExperienceForm";
-import { PersonalForm } from "../forms/PersonalForm";
-import { ProjectsForm } from "../forms/ProjectsForm";
-import { SkillsForm } from "../forms/SkillsForm";
-import { ScrollArea } from "../ui/scroll-area";
-import { Tooltip, TooltipContent, TooltipTrigger } from "../ui/tooltip";
-import { ActionsDropdown } from "./ActionsDropdown";
-import { SectionsOrderDialog } from "./SectionsOrderDialog";
+import { DEFAULT_SECTION_ORDER, RENDERABLE_SECTIONS } from '@/lib/consts';
+import { CVData } from '@/lib/schema';
+import { cn } from '@/lib/utils';
+import { useResumeStore } from '@/store/useResumeStore';
+import { useUIStore } from '@/store/useUIStore';
+import { CheckCircle2, ListOrdered, Loader2 } from 'lucide-react';
+import { useEffect, useState } from 'react';
+import { CVImportPreviewDialog } from '../import/CVImportPreviewDialog';
+import { CertificationsForm } from '../forms/CertificationsForm';
+import { EducationForm } from '../forms/EducationForm';
+import { ExperienceForm } from '../forms/ExperienceForm';
+import { PersonalForm } from '../forms/PersonalForm';
+import { ProjectsForm } from '../forms/ProjectsForm';
+import { SkillsForm } from '../forms/SkillsForm';
+import { ScrollArea } from '../ui/scroll-area';
+import { Tooltip, TooltipContent, TooltipTrigger } from '../ui/tooltip';
+import { ActionsDropdown } from './ActionsDropdown';
+import { SectionsOrderDialog } from './SectionsOrderDialog';
 
 export interface EditorFileActions {
   handleExportData: () => void;
@@ -30,7 +30,7 @@ interface EditorSidebarProps {
   pdfInputRef: React.RefObject<HTMLInputElement | null>;
   fileActions: EditorFileActions;
   onApplyCVData: (data: CVData) => void;
-  saveStatus: "saving" | "saved";
+  saveStatus: 'saving' | 'saved';
   lastSavedAt: number | null;
   pendingImport: CVData | null;
   onDiscardImport: () => void;
@@ -41,7 +41,7 @@ interface EditorSidebarProps {
 
 function formatRelativeTime(timestamp: number, now: number): string {
   const seconds = Math.max(0, Math.floor((now - timestamp) / 1000));
-  if (seconds < 5) return "just now";
+  if (seconds < 5) return 'just now';
   if (seconds < 60) return `${seconds}s ago`;
   const minutes = Math.floor(seconds / 60);
   if (minutes < 60) return `${minutes}m ago`;
@@ -52,18 +52,18 @@ function SaveStatus({
   saveStatus,
   lastSavedAt,
 }: {
-  saveStatus: "saving" | "saved";
+  saveStatus: 'saving' | 'saved';
   lastSavedAt: number | null;
 }) {
   const [now, setNow] = useState(() => Date.now());
 
   useEffect(() => {
-    if (saveStatus !== "saved") return;
+    if (saveStatus !== 'saved') return;
     const interval = setInterval(() => setNow(Date.now()), 1_000);
     return () => clearInterval(interval);
   }, [saveStatus]);
 
-  if (saveStatus === "saving") {
+  if (saveStatus === 'saving') {
     return (
       <>
         <Loader2 className="w-4 h-4 text-amber-500 animate-spin" />
@@ -78,7 +78,7 @@ function SaveStatus({
     <>
       <CheckCircle2 className="w-4 h-4 text-green-500" />
       <span className="text-[10px] text-muted-foreground font-medium uppercase tracking-wider">
-        Saved {lastSavedAt ? formatRelativeTime(lastSavedAt, now) : ""}
+        Saved {lastSavedAt ? formatRelativeTime(lastSavedAt, now) : ''}
       </span>
     </>
   );
@@ -107,9 +107,9 @@ export function EditorSidebar({
   const [isSectionsDialogOpen, setIsSectionsDialogOpen] = useState(false);
 
   const navTabs = [
-    { key: "Personal", name: "Personal" },
+    { key: 'Personal', name: 'Personal' },
     ...sectionOrder
-      .filter((id) => id !== "summary")
+      .filter((id) => id !== 'summary')
       .map((id) => ({
         key: id,
         name:
@@ -120,7 +120,7 @@ export function EditorSidebar({
   return (
     <section
       className={cn(
-        "w-full lg:w-[35%] xl:w-[30%] flex-col border border-border bg-card rounded-xl shadow-lg overflow-hidden shrink-0 print:hidden",
+        'w-full lg:w-[35%] xl:w-[30%] flex-col border border-border bg-card rounded-xl shadow-lg overflow-hidden shrink-0 print:hidden',
         className,
       )}
     >
@@ -130,12 +130,12 @@ export function EditorSidebar({
             onSubmit={(e) => e.preventDefault()}
             className="space-y-6 pt-4 pb-6"
           >
-            {activeTab === "Personal" && <PersonalForm />}
-            {activeTab === "Experience" && <ExperienceForm />}
-            {activeTab === "Projects" && <ProjectsForm />}
-            {activeTab === "Education" && <EducationForm />}
-            {activeTab === "Skills" && <SkillsForm />}
-            {activeTab === "Certifications" && <CertificationsForm />}
+            {activeTab === 'Personal' && <PersonalForm />}
+            {activeTab === 'Experience' && <ExperienceForm />}
+            {activeTab === 'Projects' && <ProjectsForm />}
+            {activeTab === 'Education' && <EducationForm />}
+            {activeTab === 'Skills' && <SkillsForm />}
+            {activeTab === 'Certifications' && <CertificationsForm />}
           </form>
         </ScrollArea>
       </div>
@@ -153,12 +153,12 @@ export function EditorSidebar({
                   key={key}
                   type="button"
                   onClick={() => setActiveTab(name)}
-                  aria-current={active ? "page" : undefined}
+                  aria-current={active ? 'page' : undefined}
                   className={cn(
-                    "shrink-0 h-9 px-2.5 rounded-md text-sm font-semibold transition-colors",
+                    'shrink-0 h-9 px-2.5 rounded-md text-sm font-semibold transition-colors',
                     active
-                      ? "text-foreground font-semibold"
-                      : "text-muted-foreground hover:text-foreground",
+                      ? 'text-foreground font-semibold'
+                      : 'text-muted-foreground hover:text-foreground',
                   )}
                 >
                   {name}

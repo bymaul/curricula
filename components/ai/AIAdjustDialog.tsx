@@ -8,7 +8,12 @@ import {
   DialogHeader,
   DialogTitle,
 } from '@/components/ui/dialog';
-import { Field, FieldDescription, FieldError, FieldLabel } from '@/components/ui/field';
+import {
+  Field,
+  FieldDescription,
+  FieldError,
+  FieldLabel,
+} from '@/components/ui/field';
 import { Textarea } from '@/components/ui/textarea';
 import { toast } from '@/components/ui/toast';
 import { useAIAdjustCV } from '@/hooks/useAIAdjustCV';
@@ -25,7 +30,12 @@ interface AIAdjustDialogProps {
   onApply: (data: CVData) => void;
 }
 
-export function AIAdjustDialog({ open, onOpenChange, cvData, onApply }: AIAdjustDialogProps) {
+export function AIAdjustDialog({
+  open,
+  onOpenChange,
+  cvData,
+  onApply,
+}: AIAdjustDialogProps) {
   const { isAdjusting, error, adjustCV } = useAIAdjustCV();
   const { aiProvider, aiModel } = useUIStore();
 
@@ -91,11 +101,17 @@ export function AIAdjustDialog({ open, onOpenChange, cvData, onApply }: AIAdjust
             />
           </Field>
 
-          {effectiveError && <FieldError className="-mt-2">{effectiveError}</FieldError>}
+          {effectiveError && (
+            <FieldError className="-mt-2">{effectiveError}</FieldError>
+          )}
         </div>
 
         <DialogFooter>
-          <Button variant="outline" onClick={() => onOpenChange(false)} disabled={isAdjusting}>
+          <Button
+            variant="outline"
+            onClick={() => onOpenChange(false)}
+            disabled={isAdjusting}
+          >
             Cancel
           </Button>
           <Button onClick={handleSubmit} disabled={isAdjusting}>

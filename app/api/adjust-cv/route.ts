@@ -7,24 +7,28 @@ export const runtime = 'nodejs';
 export const maxDuration = 60;
 
 const requestSchema = z.object({
-    cvData: cvSchema,
-    jobDescription: z.string().max(10000, 'Job description too long'),
-    provider: z.enum(['openai', 'anthropic', 'google']).default('openai'),
-    modelName: z.string().optional(),
-    apiKey: z.string().min(10, 'Invalid API Key'),
+  cvData: cvSchema,
+  jobDescription: z.string().max(10000, 'Job description too long'),
+  provider: z.enum(['openai', 'anthropic', 'google']).default('openai'),
+  modelName: z.string().optional(),
+  apiKey: z.string().min(10, 'Invalid API Key'),
 });
 
 export async function POST(req: Request) {
-    try {
-        const parsedBody = requestSchema.safeParse(await req.json());
-        if (!parsedBody.success) {
-            return Response.json({ error: 'Invalid payload', details: parsedBody.error }, { status: 400 });
-        }
-        const { cvData, jobDescription, provider, modelName, apiKey } = parsedBody.data;
+  try {
+    const parsedBody = requestSchema.safeParse(await req.json());
+    if (!parsedBody.success) {
+      return Response.json(
+        { error: 'Invalid payload', details: parsedBody.error },
+        { status: 400 },
+      );
+    }
+    const { cvData, jobDescription, provider, modelName, apiKey } =
+      parsedBody.data;
 
-        const model = createAIModel(provider, apiKey, modelName);
+    const model = createAIModel(provider, apiKey, modelName);
 
-        const systemPrompt = `You are an expert ATS (Applicant Tracking System) resume writer. Rewrite the provided CV to align strictly with the Job Description while remaining honest to the candidate's original information.
+    const systemPrompt = `You are an expert ATS (Applicant Tracking System) resume writer. Rewrite the provided CV to align strictly with the Job Description while remaining honest to the candidate's original information.
 
 CRITICAL RULES:
 1. Output ONLY a valid JSON object matching the requested schema. No explanations, no markdown code fences.
@@ -38,16 +42,16 @@ CRITICAL RULES:
 9. Preserve all factual details: company names, institutions, dates, certifications, locations, and contact info must remain unchanged.
 10. Do not pad sections that are empty in the source CV — leave empty arrays as empty arrays.`;
 
-        const { output } = await generateText({
-            model,
-            system: systemPrompt,
-            prompt: `CV Data: ${JSON.stringify(cvData)}\n\nJob Description: ${jobDescription}`,
-            output: Output.object({ schema: cvSchema }),
-            maxRetries: 0,
-        });
+    const { output } = await generateText({
+      model,
+      system: systemPrompt,
+      prompt: `CV Data: ${JSON.stringify(cvData)}\n\nJob Description: ${jobDescription}`,
+      output: Output.object({ schema: cvSchema }),
+      maxRetries: 0,
+    });
 
-        return Response.json(output);
-    } catch (error: unknown) {
-        return aiErrorResponse(error);
-    }
+    return Response.json(output);
+  } catch (error: unknown) {
+    return aiErrorResponse(error);
+  }
 }

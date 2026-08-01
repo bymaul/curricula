@@ -21,7 +21,9 @@ export function useCVAutoSave(methods: UseFormReturn<CVData>) {
   const [lastSavedAt, setLastSavedAt] = useState<number | null>(null);
   const { watch, reset } = methods;
 
-  const activeResume = useResumeStore((state) => state.resumes.find((r) => r.id === state.activeId));
+  const activeResume = useResumeStore((state) =>
+    state.resumes.find((r) => r.id === state.activeId),
+  );
   const updateResumeData = useResumeStore((state) => state.updateResumeData);
   const activeId = activeResume?.id ?? null;
 

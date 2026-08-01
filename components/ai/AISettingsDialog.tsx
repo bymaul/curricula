@@ -14,7 +14,10 @@ interface AISettingsDialogProps {
   onOpenChange: (open: boolean) => void;
 }
 
-export function AISettingsDialog({ open, onOpenChange }: AISettingsDialogProps) {
+export function AISettingsDialog({
+  open,
+  onOpenChange,
+}: AISettingsDialogProps) {
   const settings = useAISettings();
 
   return (

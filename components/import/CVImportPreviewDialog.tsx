@@ -26,7 +26,11 @@ function CountRow({ label, count }: { label: string; count: number }) {
   );
 }
 
-export function CVImportPreviewDialog({ cvData, onApply, onDiscard }: CVImportPreviewDialogProps) {
+export function CVImportPreviewDialog({
+  cvData,
+  onApply,
+  onDiscard,
+}: CVImportPreviewDialogProps) {
   const open = cvData !== null;
 
   return (
@@ -35,18 +39,25 @@ export function CVImportPreviewDialog({ cvData, onApply, onDiscard }: CVImportPr
         <DialogHeader>
           <DialogTitle>Review imported CV</DialogTitle>
           <DialogDescription>
-            The AI extracted the following from your PDF. Apply it to the editor or discard.
+            The AI extracted the following from your PDF. Apply it to the editor
+            or discard.
           </DialogDescription>
         </DialogHeader>
 
         {cvData && (
           <div className="space-y-4">
             <div className="space-y-0.5">
-              <p className="text-base font-semibold leading-tight">{cvData.name || 'Unnamed'}</p>
+              <p className="text-base font-semibold leading-tight">
+                {cvData.name || 'Unnamed'}
+              </p>
               {cvData.jobTitle && (
-                <p className="text-sm text-muted-foreground">{cvData.jobTitle}</p>
+                <p className="text-sm text-muted-foreground">
+                  {cvData.jobTitle}
+                </p>
               )}
-              {cvData.email && <p className="text-sm text-muted-foreground">{cvData.email}</p>}
+              {cvData.email && (
+                <p className="text-sm text-muted-foreground">{cvData.email}</p>
+              )}
             </div>
 
             <div className="grid grid-cols-2 gap-2">
@@ -54,7 +65,10 @@ export function CVImportPreviewDialog({ cvData, onApply, onDiscard }: CVImportPr
               <CountRow label="Projects" count={cvData.projects.length} />
               <CountRow label="Education" count={cvData.education.length} />
               <CountRow label="Skill groups" count={cvData.skills.length} />
-              <CountRow label="Certifications" count={cvData.certifications.length} />
+              <CountRow
+                label="Certifications"
+                count={cvData.certifications.length}
+              />
               <CountRow label="Links" count={cvData.links.length} />
             </div>
           </div>

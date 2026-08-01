@@ -40,7 +40,9 @@ export async function extractTextFromPDF(file: File): Promise<string> {
 
 export class ScannedPDFError extends Error {
   constructor() {
-    super('This PDF appears to be scanned images with no extractable text. Use a text-based PDF or run OCR first.');
+    super(
+      'This PDF appears to be scanned images with no extractable text. Use a text-based PDF or run OCR first.',
+    );
     this.name = 'ScannedPDFError';
   }
 }
@@ -52,7 +54,10 @@ interface ParseCVParams {
 }
 
 /** Sends extracted PDF text to the AI and returns structured CVData. */
-export async function parseCVTextWithAI(cvText: string, params: ParseCVParams): Promise<CVData> {
+export async function parseCVTextWithAI(
+  cvText: string,
+  params: ParseCVParams,
+): Promise<CVData> {
   if (cvText.trim().length < 40) {
     throw new ScannedPDFError();
   }
