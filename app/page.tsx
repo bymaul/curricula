@@ -58,7 +58,7 @@ export default function Home() {
       <main className="h-dvh w-full bg-background text-foreground flex flex-col lg:p-6 overflow-hidden print:h-auto print:block print:p-0 print:overflow-visible print:bg-white">
         <MobileTopBar value={mobileView} onChange={setMobileView} />
 
-        <header className="hidden lg:flex items-center justify-between shrink-0 px-4 pt-4 lg:px-0 lg:pt-0 mb-4 lg:mb-6 print:hidden">
+        <header className="hidden lg:flex items-center justify-between shrink-0 mb-6 print:hidden">
           <h1 className="text-lg font-bold tracking-tight shrink-0">
             Curricula
           </h1>
