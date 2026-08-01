@@ -31,7 +31,7 @@ describe('cvSchema', () => {
   });
 
   it('accepts optional fields being omitted', () => {
-    const withoutLocation = { ...validCV };
+    const withoutLocation: Record<string, unknown> = { ...validCV };
     delete withoutLocation.location;
     const result = cvSchema.safeParse(withoutLocation);
     expect(result.success).toBe(true);
