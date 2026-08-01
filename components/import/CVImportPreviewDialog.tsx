@@ -10,9 +10,11 @@ import {
   DialogTitle,
 } from '@/components/ui/dialog';
 import { CVData } from '@/lib/schema';
+import { TriangleAlertIcon } from 'lucide-react';
 
 interface CVImportPreviewDialogProps {
   cvData: CVData | null;
+  warnings?: string[];
   onApply: () => void;
   onDiscard: () => void;
 }
@@ -28,6 +30,7 @@ function CountRow({ label, count }: { label: string; count: number }) {
 
 export function CVImportPreviewDialog({
   cvData,
+  warnings = [],
   onApply,
   onDiscard,
 }: CVImportPreviewDialogProps) {
@@ -46,6 +49,23 @@ export function CVImportPreviewDialog({
 
         {cvData && (
           <div className="space-y-4">
+            {warnings.length > 0 && (
+              <div className="rounded-lg border border-amber-500/40 bg-amber-500/10 px-3 py-2.5">
+                <div className="mb-1 flex items-center gap-2 text-sm font-medium text-amber-700 dark:text-amber-400">
+                  <TriangleAlertIcon
+                    className="size-4 shrink-0"
+                    aria-hidden="true"
+                  />
+                  Review these fields
+                </div>
+                <ul className="space-y-0.5 text-sm text-muted-foreground">
+                  {warnings.map((warning) => (
+                    <li key={warning}>- {warning}</li>
+                  ))}
+                </ul>
+              </div>
+            )}
+
             <div className="space-y-0.5">
               <p className="text-base font-semibold leading-tight">
                 {cvData.name || 'Unnamed'}

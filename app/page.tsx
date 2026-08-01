@@ -27,7 +27,10 @@ export default function Home() {
   });
 
   const [mobileView, setMobileView] = useState<'edit' | 'preview'>('edit');
-  const [pendingImport, setPendingImport] = useState<CVData | null>(null);
+  const [pendingImport, setPendingImport] = useState<{
+    data: CVData;
+    warnings: string[];
+  } | null>(null);
   const [isAISettingsOpen, setIsAISettingsOpen] = useState(false);
   const [isAIDialogOpen, setIsAIDialogOpen] = useState(false);
   const [isResumesDialogOpen, setIsResumesDialogOpen] = useState(false);

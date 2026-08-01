@@ -32,7 +32,7 @@ interface EditorSidebarProps {
   onApplyCVData: (data: CVData) => void;
   saveStatus: 'saving' | 'saved';
   lastSavedAt: number | null;
-  pendingImport: CVData | null;
+  pendingImport: { data: CVData; warnings: string[] } | null;
   onDiscardImport: () => void;
   onOpenAIAdjust: () => void;
   onAISettingsOpenChange: (open: boolean) => void;
@@ -221,10 +221,11 @@ export function EditorSidebar({
       </footer>
 
       <CVImportPreviewDialog
-        cvData={pendingImport}
+        cvData={pendingImport?.data ?? null}
+        warnings={pendingImport?.warnings}
         onApply={() => {
           if (pendingImport) {
-            onApplyCVData(pendingImport);
+            onApplyCVData(pendingImport.data);
             onDiscardImport();
           }
         }}
