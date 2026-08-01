@@ -7,6 +7,7 @@ import {
   resolveAIModel,
 } from '@/lib/ai';
 import { clientIP, rateLimitResponse, rateLimitStatus } from '@/lib/rateLimit';
+import { sanitizeJSON, stripInvisibleChars } from '@/lib/cleanText';
 import z from 'zod';
 
 export const runtime = 'nodejs';
@@ -34,6 +35,9 @@ export async function POST(req: Request) {
       );
     }
     const { cvData, jobDescription, provider, apiKey } = parsedBody.data;
+
+    const cleanCVData = sanitizeJSON(cvData);
+    const cleanJobDescription = stripInvisibleChars(jobDescription);
 
     const key = resolveAIKey(apiKey);
     if (!key) {
@@ -66,7 +70,7 @@ CRITICAL RULES:
     const { output } = await generateText({
       model,
       system: systemPrompt,
-      prompt: `CV Data: ${JSON.stringify(cvData)}\n\nJob Description: ${jobDescription}`,
+      prompt: `CV Data: ${JSON.stringify(cleanCVData)}\n\nJob Description: ${cleanJobDescription}`,
       output: Output.object({ schema: cvSchema }),
       maxRetries: 0,
     });
