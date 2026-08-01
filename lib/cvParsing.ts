@@ -257,14 +257,14 @@ function buildUserContent(text: string, imageParts: CVImagePart[] | undefined) {
 }
 
 function buildRepairPrompt(
-  resumeText: string,
+  context: string,
   invalidOutput: string,
   errors: string,
 ): string {
   return `The previous attempt did not produce a valid JSON object.
 
-Resume text:
-${resumeText || '(empty — use the page images above)'}
+Input:
+${context || '(empty)'}
 
 Previous invalid output:
 ${invalidOutput || '(empty)'}
@@ -272,40 +272,35 @@ ${invalidOutput || '(empty)'}
 Validation errors:
 ${errors || 'Could not parse the output as JSON.'}
 
-Return ONLY a single corrected JSON object with the extracted structured data. Do not use markdown code fences.`;
+Return ONLY a single corrected JSON object with the requested structured data. Do not use markdown code fences.`;
 }
 
-export interface ParseCVWithRepairOptions {
+interface GenerateJSONWithRepairOptions {
   model: LanguageModel;
   system: string;
-  resumeText: string;
+  prompt: string;
   imageParts?: CVImagePart[];
+  repairContext: string;
   maxRetries?: number;
   maxRepairAttempts?: number;
 }
 
 /**
- * Parses resume text (and optional page images) into structured CV data.
- *
- * - Retries transient provider errors up to `maxRetries` (SDK-level).
- * - On schema/parse failure, first salvages valid JSON from the raw text,
- *   then re-prompts the model with the previous output + validation errors
- *   up to `maxRepairAttempts` more times (images re-included each time).
+ * Core AI call: structured JSON output with transient retries and a schema
+ * repair loop. On `NoObjectGeneratedError` it first salvages valid JSON from
+ * the raw text, then re-prompts the model with the previous output and
+ * validation errors (images re-included each time).
  */
-export async function parseCVWithRepair({
+async function generateJSONWithRepair({
   model,
   system,
-  resumeText,
+  prompt,
   imageParts,
+  repairContext,
   maxRetries = MAX_TRANSIENT_RETRIES,
   maxRepairAttempts = MAX_REPAIR_ATTEMPTS,
-}: ParseCVWithRepairOptions): Promise<CVParseResult> {
-  const initialPrompt = `Extract structured data from the resume below and return a single JSON object matching the requested schema. If the resume text is empty or incomplete, use the accompanying page images.
-
-Resume text:
-${resumeText || '(empty — use the page images)'}`;
-
-  let prompt = initialPrompt;
+}: GenerateJSONWithRepairOptions): Promise<CVParseResult> {
+  let currentPrompt = prompt;
   let invalidOutput = '';
   let errors = '';
 
@@ -315,7 +310,10 @@ ${resumeText || '(empty — use the page images)'}`;
         model,
         system,
         messages: [
-          { role: 'user', content: buildUserContent(prompt, imageParts) },
+          {
+            role: 'user',
+            content: buildUserContent(currentPrompt, imageParts),
+          },
         ],
         output: Output.object({ schema: cvParseSchema }),
         maxRetries,
@@ -335,11 +333,92 @@ ${resumeText || '(empty — use the page images)'}`;
       errors = validationMessage((error as NoObjectGeneratedError).cause);
 
       if (attempt >= maxRepairAttempts) break;
-      prompt = buildRepairPrompt(resumeText, invalidOutput, errors);
+      currentPrompt = buildRepairPrompt(repairContext, invalidOutput, errors);
     }
   }
 
   throw new Error(
-    'Could not parse the resume with AI. Please check the resume text and try again.',
+    'Could not generate the requested output with AI. Please try again.',
   );
+}
+
+export interface ParseCVWithRepairOptions {
+  model: LanguageModel;
+  system: string;
+  resumeText: string;
+  imageParts?: CVImagePart[];
+  maxRetries?: number;
+  maxRepairAttempts?: number;
+}
+
+/**
+ * Parses resume text (and optional page images) into structured CV data.
+ * See `generateJSONWithRepair` for the retry/repair behavior.
+ */
+export async function parseCVWithRepair(
+  options: ParseCVWithRepairOptions,
+): Promise<CVParseResult> {
+  const {
+    model,
+    system,
+    resumeText,
+    imageParts,
+    maxRetries,
+    maxRepairAttempts,
+  } = options;
+
+  const prompt = `Extract structured data from the resume below and return a single JSON object matching the requested schema. If the resume text is empty or incomplete, use the accompanying page images.
+
+Resume text:
+${resumeText || '(empty — use the page images)'}`;
+
+  return generateJSONWithRepair({
+    model,
+    system,
+    prompt,
+    imageParts,
+    repairContext: `Resume text:\n${resumeText || '(empty — use the page images above)'}`,
+    maxRetries,
+    maxRepairAttempts,
+  });
+}
+
+export interface AdjustCVWithRepairOptions {
+  model: LanguageModel;
+  system: string;
+  cvData: CVData;
+  jobDescription: string;
+  maxRetries?: number;
+  maxRepairAttempts?: number;
+}
+
+/**
+ * Rewrites a CV to align with a job description, returning the adjusted
+ * `CVData` plus review warnings. See `generateJSONWithRepair` for the
+ * retry/repair behavior.
+ */
+export async function adjustCVWithRepair(
+  options: AdjustCVWithRepairOptions,
+): Promise<CVParseResult> {
+  const {
+    model,
+    system,
+    cvData,
+    jobDescription,
+    maxRetries,
+    maxRepairAttempts,
+  } = options;
+
+  const cvText = JSON.stringify(cvData);
+  const input = `CV Data:\n${cvText}\n\nJob Description:\n${jobDescription}`;
+  const prompt = `Rewrite the CV to match the job description and return the adjusted CV as a single JSON object matching the requested schema.\n\n${input}`;
+
+  return generateJSONWithRepair({
+    model,
+    system,
+    prompt,
+    repairContext: input,
+    maxRetries,
+    maxRepairAttempts,
+  });
 }

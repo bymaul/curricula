@@ -19,7 +19,8 @@
     "start": "next start",
     "lint": "eslint .",
     "format": "prettier --write .",
-    "format:check": "prettier --check ."
+    "format:check": "prettier --check .",
+    "test": "vitest run"
   },
   "dependencies": {
     "@ai-sdk/anthropic": "^4.0.18",
@@ -59,6 +60,7 @@
     "prettier": "^3.9.6",
     "serwist": "^9.5.12",
     "tailwindcss": "^4",
-    "typescript": "^5"
+    "typescript": "^5",
+    "vitest": "^4.1.10"
   }
 }
