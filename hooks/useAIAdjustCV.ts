@@ -1,6 +1,6 @@
 import { useState } from 'react';
 import { CVData } from '@/lib/schema';
-import { AIProvider } from '@/lib/consts';
+import { AIAdjustScope, AIProvider } from '@/lib/consts';
 import { parseResponseJSON } from '@/lib/request';
 
 interface AIAdjustParams {
@@ -9,6 +9,7 @@ interface AIAdjustParams {
   provider: AIProvider;
   modelName?: string;
   apiKey?: string;
+  scope?: AIAdjustScope;
 }
 
 export interface AIAdjustResult {

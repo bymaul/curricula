@@ -14,11 +14,22 @@ import {
   FieldError,
   FieldLabel,
 } from '@/components/ui/field';
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from '@/components/ui/select';
 import { Textarea } from '@/components/ui/textarea';
 import { toast } from '@/components/ui/toast';
 import { useAIAdjustCV } from '@/hooks/useAIAdjustCV';
 import { stripInvisibleChars } from '@/lib/cleanText';
-import { getStoredAIAPIKey } from '@/lib/consts';
+import {
+  AIAdjustScope,
+  AI_ADJUST_SCOPES,
+  getStoredAIAPIKey,
+} from '@/lib/consts';
 import { CVChangeSummary, summarizeCVChanges } from '@/lib/cvDiff';
 import { CVData } from '@/lib/schema';
 import { useUIStore } from '@/store/useUIStore';
@@ -42,6 +53,7 @@ export function AIAdjustDialog({
   const { aiProvider, aiModel } = useUIStore();
 
   const [jobDescription, setJobDescription] = useState('');
+  const [scope, setScope] = useState<AIAdjustScope>('full');
   const [localError, setLocalError] = useState<string | null>(null);
   const [pendingResult, setPendingResult] = useState<{
     data: CVData;
@@ -53,6 +65,7 @@ export function AIAdjustDialog({
 
   const resetState = () => {
     setJobDescription('');
+    setScope('full');
     setLocalError(null);
     setPendingResult(null);
     setChangeSummary([]);
@@ -79,6 +92,7 @@ export function AIAdjustDialog({
       provider: aiProvider,
       modelName: aiModel.trim() || undefined,
       apiKey,
+      scope,
     });
 
     if (result) {
@@ -167,6 +181,29 @@ export function AIAdjustDialog({
         </DialogHeader>
 
         <div className="flex min-h-0 flex-col gap-4 overflow-y-auto overscroll-contain p-2 -mx-1">
+          <Field>
+            <FieldLabel>Adjust Scope</FieldLabel>
+            <FieldDescription>
+              Rewrite the whole CV or just one section to match the job
+              description.
+            </FieldDescription>
+            <Select
+              value={scope}
+              onValueChange={(value) => value && setScope(value)}
+            >
+              <SelectTrigger className="w-full">
+                <SelectValue />
+              </SelectTrigger>
+              <SelectContent align="start">
+                {AI_ADJUST_SCOPES.map((option) => (
+                  <SelectItem key={option.value} value={option.value}>
+                    {option.label}
+                  </SelectItem>
+                ))}
+              </SelectContent>
+            </Select>
+          </Field>
+
           <Field>
             <FieldLabel>Job Description</FieldLabel>
             <FieldDescription>

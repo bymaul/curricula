@@ -1,6 +1,7 @@
 import { generateText, NoObjectGeneratedError, Output } from 'ai';
 import type { LanguageModel } from 'ai';
 import { z } from 'zod';
+import { AIAdjustScope, RENDERABLE_SECTIONS } from '@/lib/consts';
 import { CVData, initialCVState } from '@/lib/schema';
 
 export const MAX_CV_TEXT_CHARS = 12_000;
@@ -388,8 +389,69 @@ export interface AdjustCVWithRepairOptions {
   system: string;
   cvData: CVData;
   jobDescription: string;
+  scope?: AIAdjustScope;
   maxRetries?: number;
   maxRepairAttempts?: number;
+}
+
+function buildAdjustPrompt(
+  scope: AIAdjustScope | undefined,
+  input: string,
+): string {
+  if (!scope || scope === 'full') {
+    return `Rewrite the CV to match the job description and return the adjusted CV as a single JSON object matching the requested schema.\n\n${input}`;
+  }
+
+  const sectionName =
+    RENDERABLE_SECTIONS.find((section) => section.id === scope)?.title ?? scope;
+
+  return `Rewrite ONLY the ${sectionName} section of the CV to match the job description. Return the complete adjusted CV as a single JSON object matching the requested schema, with every other field byte-for-byte identical to the source CV.\n\n${input}`;
+}
+
+const ADJUST_SCOPE_FIELD: Record<
+  Exclude<AIAdjustScope, 'full'>,
+  keyof CVData
+> = {
+  summary: 'summary',
+  experience: 'experience',
+  projects: 'projects',
+  education: 'education',
+  skills: 'skills',
+};
+
+function scopeFieldHasValue(
+  field: keyof CVData,
+  value: CVData[typeof field],
+): boolean {
+  if (Array.isArray(value)) return value.length > 0;
+  return typeof value === 'string' ? value.trim().length > 0 : value != null;
+}
+
+/**
+ * Scoped adjusts cannot trust the model to leave unrelated fields alone.
+ * Merge the targeted field from the AI result back into the original CV and
+ * keep every other field from the source. If the model returned nothing for
+ * the targeted section, keep the source untouched and surface a warning.
+ */
+function applyScope(
+  scope: Exclude<AIAdjustScope, 'full'>,
+  cvData: CVData,
+  result: CVParseResult,
+): CVParseResult {
+  const field = ADJUST_SCOPE_FIELD[scope];
+  const candidate = result.data[field];
+
+  if (!scopeFieldHasValue(field, candidate)) {
+    const title =
+      RENDERABLE_SECTIONS.find((section) => section.id === scope)?.title ??
+      scope;
+    return {
+      data: cvData,
+      warnings: [`Could not adjust the ${title} section.`],
+    };
+  }
+
+  return { data: { ...cvData, [field]: candidate }, warnings: [] };
 }
 
 /**
@@ -405,15 +467,16 @@ export async function adjustCVWithRepair(
     system,
     cvData,
     jobDescription,
+    scope,
     maxRetries,
     maxRepairAttempts,
   } = options;
 
   const cvText = JSON.stringify(cvData);
   const input = `CV Data:\n${cvText}\n\nJob Description:\n${jobDescription}`;
-  const prompt = `Rewrite the CV to match the job description and return the adjusted CV as a single JSON object matching the requested schema.\n\n${input}`;
+  const prompt = buildAdjustPrompt(scope, input);
 
-  return generateJSONWithRepair({
+  const result = await generateJSONWithRepair({
     model,
     system,
     prompt,
@@ -421,4 +484,7 @@ export async function adjustCVWithRepair(
     maxRetries,
     maxRepairAttempts,
   });
+
+  if (!scope || scope === 'full') return result;
+  return applyScope(scope, cvData, result);
 }

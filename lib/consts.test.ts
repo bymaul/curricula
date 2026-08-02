@@ -1,6 +1,7 @@
 import { beforeEach, describe, expect, it, vi } from 'vitest';
 import {
   AI_API_KEY_STORAGE_KEY,
+  AI_ADJUST_SCOPES,
   AI_PROVIDERS,
   DEFAULT_SECTION_ORDER,
   RENDERABLE_SECTIONS,
@@ -42,6 +43,14 @@ describe('getStoredAIAPIKey', () => {
   it('returns the stored key trimmed', () => {
     localStorage.setItem(AI_API_KEY_STORAGE_KEY, '  sk-test-key  ');
     expect(getStoredAIAPIKey()).toBe('sk-test-key');
+  });
+});
+
+describe('AI_ADJUST_SCOPES', () => {
+  it('exposes a full option first and section scopes', () => {
+    expect(AI_ADJUST_SCOPES[0]).toEqual({ value: 'full', label: 'Entire CV' });
+    expect(AI_ADJUST_SCOPES.map((s) => s.value)).toContain('summary');
+    expect(AI_ADJUST_SCOPES.map((s) => s.value)).toContain('skills');
   });
 });
 
