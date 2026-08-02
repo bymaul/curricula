@@ -3,15 +3,17 @@ import { createGoogleGenerativeAI } from '@ai-sdk/google';
 import { createOpenAI } from '@ai-sdk/openai';
 import { AIProvider, AI_PROVIDERS } from '@/lib/consts';
 import { stripInvisibleChars } from '@/lib/cleanText';
+import { parseEnv } from '@/lib/env';
 
 export function resolveAIKey(clientKey?: string): string | null {
   if (clientKey) return stripInvisibleChars(clientKey);
-  return stripInvisibleChars(process.env.AI_API_KEY?.trim() || '') || null;
+  return parseEnv().apiKey;
 }
 
 export function resolveAIModel(modelName?: string): string | undefined {
-  const value = modelName?.trim() || process.env.AI_MODEL?.trim() || '';
-  return stripInvisibleChars(value) || undefined;
+  const value = modelName?.trim();
+  if (value) return stripInvisibleChars(value) || undefined;
+  return parseEnv().model;
 }
 
 export function createAIModel(

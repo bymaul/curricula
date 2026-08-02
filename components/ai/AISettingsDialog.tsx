@@ -10,6 +10,7 @@ import {
   DialogTitle,
 } from '@/components/ui/dialog';
 import { useAISettings } from '@/hooks/useAISettings';
+import { useAIStatus } from '@/hooks/useAIStatus';
 
 interface AISettingsDialogProps {
   open: boolean;
@@ -21,6 +22,7 @@ export function AISettingsDialog({
   onOpenChange,
 }: AISettingsDialogProps) {
   const settings = useAISettings();
+  const status = useAIStatus(open);
 
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
@@ -30,7 +32,11 @@ export function AISettingsDialog({
         </DialogHeader>
 
         <div className="flex flex-col gap-4 p-2 -mx-1">
-          <AISettingsFields {...settings} />
+          <AISettingsFields
+            {...settings}
+            hasBundledKey={status?.hasBundledKey}
+            bundledProvider={status?.provider ?? null}
+          />
         </div>
 
         <DialogFooter>
