@@ -22,11 +22,13 @@ vi.mock('ai', () => {
 
 import { generateText, NoObjectGeneratedError } from 'ai';
 import {
+  adjustCVWithRepair,
   extractJSON,
   normalizeCVOutput,
   normalizeCVText,
   parseCVWithRepair,
 } from '@/lib/cvParsing';
+import { CVData } from '@/lib/schema';
 
 const mockedGenerateText = vi.mocked(generateText);
 
@@ -232,5 +234,137 @@ describe('parseCVWithRepair', () => {
         resumeText: 'resume text',
       }),
     ).rejects.toThrow('boom');
+  });
+});
+
+describe('adjustCVWithRepair', () => {
+  beforeEach(() => {
+    mockedGenerateText.mockReset();
+  });
+
+  const lastUserText = () => {
+    const call = mockedGenerateText.mock.calls[0][0];
+    const content = call.messages![0].content as Array<{ text?: string }>;
+    return content[content.length - 1].text ?? '';
+  };
+
+  it('returns normalized output on success', async () => {
+    mockedGenerateText.mockResolvedValue({ output: validResume } as never);
+    const result = await adjustCVWithRepair({
+      model: minimalModel,
+      system: 'sys',
+      cvData: validResume as unknown as CVData,
+      jobDescription: 'Senior engineer role',
+    });
+    expect(result.data.name).toBe('Jane Doe');
+    expect(result.warnings).toEqual([]);
+  });
+
+  it('builds a full-CV prompt by default', async () => {
+    mockedGenerateText.mockResolvedValue({ output: validResume } as never);
+    await adjustCVWithRepair({
+      model: minimalModel,
+      system: 'sys',
+      cvData: validResume as unknown as CVData,
+      jobDescription: 'job',
+    });
+    expect(lastUserText()).toContain(
+      'Rewrite the CV to match the job description',
+    );
+    expect(lastUserText()).not.toContain('Rewrite ONLY the');
+  });
+
+  it('builds a full-CV prompt for the full scope', async () => {
+    mockedGenerateText.mockResolvedValue({ output: validResume } as never);
+    await adjustCVWithRepair({
+      model: minimalModel,
+      system: 'sys',
+      cvData: validResume as unknown as CVData,
+      jobDescription: 'job',
+      scope: 'full',
+    });
+    expect(lastUserText()).not.toContain('Rewrite ONLY the');
+  });
+
+  it('injects a scope directive for a targeted section', async () => {
+    mockedGenerateText.mockResolvedValue({ output: validResume } as never);
+    await adjustCVWithRepair({
+      model: minimalModel,
+      system: 'sys',
+      cvData: validResume as unknown as CVData,
+      jobDescription: 'job',
+      scope: 'summary',
+    });
+    expect(lastUserText()).toContain('Rewrite ONLY the Summary section');
+    expect(lastUserText()).toContain(
+      'byte-for-byte identical to the source CV',
+    );
+    expect(lastUserText()).toContain('CV Data:');
+    expect(lastUserText()).toContain('Job Description:');
+  });
+
+  it('uses the human-readable section title for scoped prompts', async () => {
+    mockedGenerateText.mockResolvedValue({ output: validResume } as never);
+    await adjustCVWithRepair({
+      model: minimalModel,
+      system: 'sys',
+      cvData: validResume as unknown as CVData,
+      jobDescription: 'job',
+      scope: 'experience',
+    });
+    expect(lastUserText()).toContain('Rewrite ONLY the Experience section');
+  });
+
+  it('merges a scoped result back into the source, preserving other fields', async () => {
+    mockedGenerateText.mockResolvedValue({
+      output: { name: 'Jane Doe', summary: 'New tailored summary' },
+    } as never);
+    const source = validResume as unknown as CVData;
+    const result = await adjustCVWithRepair({
+      model: minimalModel,
+      system: 'sys',
+      cvData: source,
+      jobDescription: 'job',
+      scope: 'summary',
+    });
+    expect(result.data.summary).toBe('New tailored summary');
+    expect(result.data.email).toBe(source.email);
+    expect(result.data.experience).toEqual(source.experience);
+    expect(result.data.name).toBe(source.name);
+    expect(result.warnings).toEqual([]);
+  });
+
+  it('keeps the source section when the model returns nothing for it', async () => {
+    mockedGenerateText.mockResolvedValue({
+      output: { name: 'Jane Doe', summary: '   ' },
+    } as never);
+    const source = validResume as unknown as CVData;
+    const result = await adjustCVWithRepair({
+      model: minimalModel,
+      system: 'sys',
+      cvData: source,
+      jobDescription: 'job',
+      scope: 'summary',
+    });
+    expect(result.data.summary).toBe(source.summary);
+    expect(result.warnings).toEqual(['Could not adjust the Summary section.']);
+  });
+
+  it('keeps the source array section when the model empties it', async () => {
+    mockedGenerateText.mockResolvedValue({
+      output: { name: 'Jane Doe', experience: [] },
+    } as never);
+    const source = validResume as unknown as CVData;
+    const result = await adjustCVWithRepair({
+      model: minimalModel,
+      system: 'sys',
+      cvData: source,
+      jobDescription: 'job',
+      scope: 'experience',
+    });
+    expect(result.data.experience).toEqual(source.experience);
+    expect(result.warnings).toEqual([
+      'Could not adjust the Experience section.',
+    ]);
   });
 });

@@ -5,12 +5,17 @@ import { ScrollArea, ScrollBar } from '@/components/ui/scroll-area';
 import { usePageScale } from '@/hooks/usePageScale';
 import { usePinchZoom } from '@/hooks/usePinchZoom';
 import { SectionId } from '@/lib/consts';
+import {
+  PAGE_HEIGHT_PX,
+  PAGE_WIDTH_PX,
+  computePageCount,
+} from '@/lib/pagination';
 import { CVData } from '@/lib/schema';
 import { cn } from '@/lib/utils';
-import { RefObject } from 'react';
+import { FileText } from 'lucide-react';
+import { RefObject, useEffect, useState } from 'react';
 import { ZoomControls } from './ZoomControls';
 
-const PAGE_WIDTH_PX = 794;
 const GUTTER_PX = 32;
 const FRAME_WIDTH_PX = PAGE_WIDTH_PX + GUTTER_PX * 2;
 
@@ -59,6 +64,25 @@ export function ResumePreview({
     containerRef.current = node;
   };
 
+  const [pageCount, setPageCount] = useState(1);
+
+  useEffect(() => {
+    const el = printRef.current;
+    if (!el) return;
+    const update = () => {
+      setPageCount(computePageCount(el.scrollHeight, PAGE_HEIGHT_PX));
+    };
+    update();
+    const ro = new ResizeObserver(update);
+    ro.observe(el);
+    return () => ro.disconnect();
+  }, [printRef, cvData]);
+
+  const pageBreaks = Array.from({ length: pageCount - 1 }, (_, i) => ({
+    top: (i + 1) * PAGE_HEIGHT_PX,
+    label: i + 2,
+  }));
+
   return (
     <section
       ref={setPanelRef}
@@ -76,6 +100,16 @@ export function ResumePreview({
         onZoomOut={zoomOut}
         onReset={zoomReset}
       />
+
+      <div
+        className="absolute top-3 left-3 z-20 flex items-center gap-1.5 bg-card border border-border rounded-lg shadow-md px-2.5 py-1 print:hidden"
+        aria-label={`Resume is ${pageCount} ${pageCount === 1 ? 'page' : 'pages'} long`}
+      >
+        <FileText className="w-3.5 h-3.5 text-muted-foreground" />
+        <span className="text-xs font-semibold tabular-nums text-muted-foreground">
+          {pageCount} {pageCount === 1 ? 'page' : 'pages'}
+        </span>
+      </div>
 
       <div className="flex-1 min-h-0 print:overflow-visible">
         <ScrollArea className="h-full w-full print:h-auto print:overflow-visible">
@@ -97,14 +131,34 @@ export function ResumePreview({
               >
                 <div
                   style={{ width: PAGE_WIDTH_PX }}
-                  className="bg-white text-black shadow-2xl overflow-hidden print:w-full! print:shadow-none"
+                  className="relative bg-white text-black shadow-2xl print:w-full! print:shadow-none"
                 >
-                  <HarvardTemplate
-                    ref={printRef}
-                    cvData={cvData}
-                    sectionOrder={sectionOrder}
-                    hiddenSections={hiddenSections}
-                  />
+                  <div className="overflow-hidden print:overflow-visible">
+                    <HarvardTemplate
+                      ref={printRef}
+                      cvData={cvData}
+                      sectionOrder={sectionOrder}
+                      hiddenSections={hiddenSections}
+                    />
+                  </div>
+
+                  <div
+                    aria-hidden="true"
+                    className="absolute inset-0 pointer-events-none print:hidden"
+                  >
+                    {pageBreaks.map(({ top, label }) => (
+                      <div
+                        key={top}
+                        style={{ top }}
+                        className="absolute left-0 right-0 -translate-y-1/2 z-10 flex items-center"
+                      >
+                        <div className="w-full border-t-2 border-dashed border-destructive/60" />
+                        <span className="absolute left-3 -translate-y-1/2 rounded-md bg-destructive/10 px-1.5 py-0.5 text-[10px] font-semibold text-destructive">
+                          Page {label}
+                        </span>
+                      </div>
+                    ))}
+                  </div>
                 </div>
               </div>
             </div>

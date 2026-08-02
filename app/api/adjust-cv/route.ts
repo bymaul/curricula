@@ -22,6 +22,9 @@ const requestSchema = z.object({
     .default(parseEnv().provider),
   modelName: z.string().optional(),
   apiKey: z.string().min(10, 'Invalid API Key').optional(),
+  scope: z
+    .enum(['full', 'summary', 'experience', 'projects', 'education', 'skills'])
+    .default('full'),
 });
 
 export async function POST(req: Request) {
@@ -37,7 +40,7 @@ export async function POST(req: Request) {
         { status: 400 },
       );
     }
-    const { cvData, jobDescription, provider, apiKey } = parsedBody.data;
+    const { cvData, jobDescription, provider, apiKey, scope } = parsedBody.data;
 
     const cleanCVData = sanitizeJSON(cvData);
     const cleanJobDescription = stripInvisibleChars(jobDescription);
@@ -75,6 +78,7 @@ CRITICAL RULES:
       system: systemPrompt,
       cvData: cleanCVData,
       jobDescription: cleanJobDescription,
+      scope,
     });
 
     return Response.json({ data, warnings });
