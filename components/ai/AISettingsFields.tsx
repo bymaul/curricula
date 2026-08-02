@@ -18,6 +18,8 @@ interface AISettingsFieldsProps {
   onProviderChange: (value: AIProvider | null) => void;
   onModelChange: (value: string) => void;
   onKeyChange: (value: string) => void;
+  hasBundledKey?: boolean;
+  bundledProvider?: AIProvider | null;
 }
 
 export function AISettingsFields({
@@ -27,8 +29,20 @@ export function AISettingsFields({
   onProviderChange,
   onModelChange,
   onKeyChange,
+  hasBundledKey,
+  bundledProvider = null,
 }: AISettingsFieldsProps) {
   const selectedProvider = AI_PROVIDERS.find((p) => p.value === provider);
+
+  const bundledProviderLabel =
+    AI_PROVIDERS.find((p) => p.value === bundledProvider)?.label ?? 'AI';
+
+  const apiKeyDescription =
+    hasBundledKey === true
+      ? `Free ${bundledProviderLabel} key available — leave blank to use it.`
+      : hasBundledKey === false
+        ? 'No free key configured — add your own API key to enable AI.'
+        : 'Optional — leave blank to use the built-in free key.';
 
   return (
     <>
@@ -64,9 +78,7 @@ export function AISettingsFields({
 
       <Field>
         <FieldLabel>API Key</FieldLabel>
-        <FieldDescription>
-          Optional — leave blank to use the built-in free key.
-        </FieldDescription>
+        <FieldDescription>{apiKeyDescription}</FieldDescription>
         <Input
           type="password"
           value={apiKey}

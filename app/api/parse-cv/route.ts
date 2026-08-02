@@ -11,6 +11,7 @@ import {
   normalizeCVText,
   parseCVWithRepair,
 } from '@/lib/cvParsing';
+import { parseEnv } from '@/lib/env';
 import { clientIP, rateLimitResponse, rateLimitStatus } from '@/lib/rateLimit';
 import z from 'zod';
 
@@ -31,7 +32,9 @@ const imageSchema = z
 const requestSchema = z
   .object({
     cvText: z.string().optional(),
-    provider: z.enum(['openai', 'anthropic', 'google']).default('google'),
+    provider: z
+      .enum(['openai', 'anthropic', 'google'])
+      .default(parseEnv().provider),
     modelName: z.string().optional(),
     apiKey: z.string().min(10, 'Invalid API Key').optional(),
     images: z.array(imageSchema).max(MAX_CV_IMAGES).optional(),

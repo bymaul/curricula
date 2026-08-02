@@ -6,6 +6,7 @@ import {
 } from '@/lib/ai';
 import { sanitizeJSON, stripInvisibleChars } from '@/lib/cleanText';
 import { adjustCVWithRepair } from '@/lib/cvParsing';
+import { parseEnv } from '@/lib/env';
 import { clientIP, rateLimitResponse, rateLimitStatus } from '@/lib/rateLimit';
 import { cvSchema } from '@/lib/schema';
 import z from 'zod';
@@ -16,7 +17,9 @@ export const maxDuration = 60;
 const requestSchema = z.object({
   cvData: cvSchema,
   jobDescription: z.string().max(10000, 'Job description too long'),
-  provider: z.enum(['openai', 'anthropic', 'google']).default('google'),
+  provider: z
+    .enum(['openai', 'anthropic', 'google'])
+    .default(parseEnv().provider),
   modelName: z.string().optional(),
   apiKey: z.string().min(10, 'Invalid API Key').optional(),
 });
