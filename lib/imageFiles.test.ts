@@ -15,6 +15,7 @@ interface FileReaderLike {
 let readResults: Array<string | Error> = [];
 let readCount = 0;
 let decodeFails = false;
+let canvasDims: Array<{ width: number; height: number }> = [];
 
 class FakeFileReader implements FileReaderLike {
   result: string | ArrayBuffer | null = null;
@@ -53,12 +54,21 @@ function makeCanvas() {
   const ctx = {
     drawImage: () => {},
   };
-  return {
+  const canvas = {
     width: 0,
     height: 0,
     toDataURL: () => JPEG_OUTPUT,
     getContext: (kind: string) => (kind === '2d' ? ctx : null),
   };
+  return new Proxy(canvas, {
+    set(target, key, value) {
+      Reflect.set(target, key, value);
+      if (key === 'height') {
+        canvasDims.push({ width: target.width, height: target.height });
+      }
+      return true;
+    },
+  });
 }
 
 const makeFile = (name: string, type: string) =>
@@ -70,6 +80,7 @@ beforeEach(() => {
   readResults = [];
   readCount = 0;
   decodeFails = false;
+  canvasDims = [];
   globalThis.FileReader = FakeFileReader as unknown as typeof FileReader;
   globalThis.Image = FakeImage as unknown as typeof Image;
   globalThis.document = {
@@ -91,6 +102,18 @@ describe('readImagePartsFromFiles', () => {
     ]);
     expect(errors).toEqual([]);
     expect(parts).toEqual([{ data: 'SlBH', mimeType: 'image/jpeg' }]);
+  });
+
+  it('caps the total pixel count of tall screenshots', async () => {
+    globalThis.Image = class extends FakeImage {
+      naturalWidth = 1200;
+      naturalHeight = 8000;
+    } as unknown as typeof Image;
+    readResults = [jpegDataUrl];
+    await readImagePartsFromFiles([makeFile('jd.png', 'image/png')]);
+    const { width, height } = canvasDims[0];
+    expect(width * height).toBeLessThanOrEqual(1_500_000);
+    expect(width).toBeLessThan(1200);
   });
 
   it('falls back to the original data when the image cannot be decoded', async () => {

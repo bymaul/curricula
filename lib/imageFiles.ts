@@ -8,7 +8,8 @@ export const SUPPORTED_IMAGE_TYPES = new Set([
 ]);
 
 export const MAX_SCAN_WIDTH = 1200;
-export const JPEG_QUALITY = 0.8;
+export const MAX_TOTAL_PIXELS = 1_500_000;
+export const JPEG_QUALITY = 0.75;
 
 export interface ReadImageFilesResult {
   parts: CVImagePart[];
@@ -58,7 +59,17 @@ function loadImage(dataUrl: string): Promise<HTMLImageElement> {
 export async function downscaleImage(dataUrl: string): Promise<string | null> {
   try {
     const image = await loadImage(dataUrl);
-    const scale = Math.min(2, MAX_SCAN_WIDTH / image.naturalWidth);
+    const scale = Math.min(
+      2,
+      MAX_SCAN_WIDTH / image.naturalWidth,
+      // Vision models slow down sharply on multi-megapixel inputs (a full-page
+      // job posting screenshot can be several thousand pixels tall), so cap
+      // the total pixel count to keep the AI call within the function limit.
+      Math.sqrt(
+        MAX_TOTAL_PIXELS /
+          Math.max(1, image.naturalWidth * image.naturalHeight),
+      ),
+    );
     const width = Math.max(1, Math.floor(image.naturalWidth * scale));
     const height = Math.max(1, Math.floor(image.naturalHeight * scale));
 
