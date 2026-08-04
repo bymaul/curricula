@@ -95,7 +95,7 @@ export function AIAdjustDialog({
   };
 
   const handleFilesSelected = (event: React.ChangeEvent<HTMLInputElement>) => {
-    const files = event.target.files;
+    const files = event.target.files ? Array.from(event.target.files) : [];
     event.target.value = '';
     void processFiles(files);
   };
