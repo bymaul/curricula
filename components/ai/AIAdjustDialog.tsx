@@ -254,52 +254,63 @@ export function AIAdjustDialog({
               Prefer to tailor from an image? Attach up to {MAX_CV_IMAGES} JPEG,
               PNG, or WebP screenshots.
             </FieldDescription>
-            <div className="flex flex-wrap items-center gap-2">
-              <Button
-                type="button"
-                variant="outline"
-                size="sm"
-                onClick={() => fileInputRef.current?.click()}
-                disabled={isAdjusting}
-              >
-                <ImagePlus className="w-4 h-4" aria-hidden="true" />
-                Upload image
-              </Button>
-              <input
-                ref={fileInputRef}
-                type="file"
-                accept="image/jpeg,image/png,image/webp"
-                multiple
-                className="hidden"
-                onChange={handleFilesSelected}
-              />
-              {images.length > 0 && (
-                <span className="text-sm text-muted-foreground">
-                  {images.length}/{MAX_CV_IMAGES} attached
-                </span>
-              )}
-            </div>
+            <input
+              ref={fileInputRef}
+              type="file"
+              accept="image/jpeg,image/png,image/webp"
+              multiple
+              className="hidden"
+              onChange={handleFilesSelected}
+            />
+            <button
+              type="button"
+              onClick={() => fileInputRef.current?.click()}
+              disabled={isAdjusting}
+              aria-label="Upload job description image"
+              className="flex w-full flex-col items-center justify-center gap-1.5 rounded-lg border-2 border-dashed border-border bg-muted/30 px-4 py-6 text-center text-sm text-muted-foreground transition-colors hover:border-primary/50 hover:text-foreground disabled:opacity-50"
+            >
+              <ImagePlus className="w-6 h-6" aria-hidden="true" />
+              <span className="font-medium">Upload job description image</span>
+              <span>
+                JPEG, PNG, or WebP — up to {MAX_CV_IMAGES} screenshots
+              </span>
+            </button>
             {images.length > 0 && (
-              <ul className="flex flex-wrap gap-2">
-                {images.map((image, index) => (
-                  <li key={index} className="relative">
-                    {/* eslint-disable-next-line @next/next/no-img-element */}
-                    <img
-                      src={`data:${image.mimeType};base64,${image.data}`}
-                      alt={`Job description image ${index + 1}`}
-                      className="h-16 w-16 rounded-md border border-border object-cover"
-                    />
-                    <button
-                      type="button"
-                      onClick={() => handleRemoveImage(index)}
-                      aria-label={`Remove image ${index + 1}`}
-                      className="absolute -top-1.5 -right-1.5 rounded-full bg-background p-1 text-muted-foreground shadow-sm border border-border hover:text-foreground"
-                    >
-                      <X className="w-3 h-3" aria-hidden="true" />
-                    </button>
-                  </li>
-                ))}
-              </ul>
+              <>
+                <div className="flex flex-wrap items-center gap-2">
+                  <span className="text-sm text-muted-foreground">
+                    {images.length}/{MAX_CV_IMAGES} attached
+                  </span>
+                  <button
+                    type="button"
+                    onClick={() => fileInputRef.current?.click()}
+                    disabled={isAdjusting}
+                    className="text-sm font-medium text-primary hover:underline"
+                  >
+                    Add more
+                  </button>
+                </div>
+                <ul className="flex flex-wrap gap-2">
+                  {images.map((image, index) => (
+                    <li key={index} className="relative">
+                      {/* eslint-disable-next-line @next/next/no-img-element */}
+                      <img
+                        src={`data:${image.mimeType};base64,${image.data}`}
+                        alt={`Job description image ${index + 1}`}
+                        className="h-16 w-16 rounded-md border border-border object-cover"
+                      />
+                      <button
+                        type="button"
+                        onClick={() => handleRemoveImage(index)}
+                        aria-label={`Remove image ${index + 1}`}
+                        className="absolute -top-1.5 -right-1.5 rounded-full bg-background p-1 text-muted-foreground shadow-sm border border-border hover:text-foreground"
+                      >
+                        <X className="w-3 h-3" aria-hidden="true" />
+                      </button>
+                    </li>
+                  ))}
+                </ul>
+              </>
             )}
           </Field>
 
