@@ -1,6 +1,7 @@
 import { useState } from 'react';
 import { CVData } from '@/lib/schema';
 import { AIAdjustScope, AIProvider } from '@/lib/consts';
+import type { CVImagePart } from '@/lib/cvParsing';
 import { parseResponseJSON } from '@/lib/request';
 
 interface AIAdjustParams {
@@ -10,6 +11,7 @@ interface AIAdjustParams {
   modelName?: string;
   apiKey?: string;
   scope?: AIAdjustScope;
+  images?: CVImagePart[];
 }
 
 export interface AIAdjustResult {

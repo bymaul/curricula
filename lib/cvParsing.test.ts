@@ -248,6 +248,16 @@ describe('adjustCVWithRepair', () => {
     return content[content.length - 1].text ?? '';
   };
 
+  const firstUserContent = () => {
+    const call = mockedGenerateText.mock.calls[0][0];
+    return call.messages![0].content as Array<{
+      type?: string;
+      text?: string;
+      image?: string;
+      mediaType?: string;
+    }>;
+  };
+
   it('returns normalized output on success', async () => {
     mockedGenerateText.mockResolvedValue({ output: validResume } as never);
     const result = await adjustCVWithRepair({
@@ -366,5 +376,64 @@ describe('adjustCVWithRepair', () => {
     expect(result.warnings).toEqual([
       'Could not adjust the Experience section.',
     ]);
+  });
+
+  it('sends job description images to the model alongside the text', async () => {
+    mockedGenerateText.mockResolvedValue({ output: validResume } as never);
+    await adjustCVWithRepair({
+      model: minimalModel,
+      system: 'sys',
+      cvData: validResume as unknown as CVData,
+      jobDescription: 'Senior engineer role',
+      imageParts: [{ data: 'BASE64DATA', mimeType: 'image/jpeg' }],
+    });
+    const content = firstUserContent();
+    expect(content[0]).toEqual({
+      type: 'image',
+      image: 'BASE64DATA',
+      mediaType: 'image/jpeg',
+    });
+    expect(content[content.length - 1].text).toContain('Senior engineer role');
+  });
+
+  it('marks the job description as image-provided when text is empty', async () => {
+    mockedGenerateText.mockResolvedValue({ output: validResume } as never);
+    await adjustCVWithRepair({
+      model: minimalModel,
+      system: 'sys',
+      cvData: validResume as unknown as CVData,
+      jobDescription: '   ',
+      imageParts: [{ data: 'BASE64DATA', mimeType: 'image/png' }],
+    });
+    expect(firstUserContent()[0]).toEqual({
+      type: 'image',
+      image: 'BASE64DATA',
+      mediaType: 'image/png',
+    });
+    expect(lastUserText()).toContain('(provided as image(s) above)');
+  });
+
+  it('re-includes the job description images on repair attempts', async () => {
+    mockedGenerateText
+      .mockRejectedValueOnce(noObjectError('not json at all'))
+      .mockResolvedValueOnce({ output: validResume } as never);
+
+    const result = await adjustCVWithRepair({
+      model: minimalModel,
+      system: 'sys',
+      cvData: validResume as unknown as CVData,
+      jobDescription: 'job',
+      imageParts: [{ data: 'BASE64DATA', mimeType: 'image/webp' }],
+    });
+    expect(result.data.name).toBe('Jane Doe');
+    expect(mockedGenerateText).toHaveBeenCalledTimes(2);
+
+    const repairContent = mockedGenerateText.mock.calls[1][0].messages![0]
+      .content as Array<{ type?: string; image?: string }>;
+    expect(repairContent[0]).toEqual({
+      type: 'image',
+      image: 'BASE64DATA',
+      mediaType: 'image/webp',
+    });
   });
 });

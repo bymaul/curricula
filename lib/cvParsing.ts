@@ -389,6 +389,7 @@ export interface AdjustCVWithRepairOptions {
   system: string;
   cvData: CVData;
   jobDescription: string;
+  imageParts?: CVImagePart[];
   scope?: AIAdjustScope;
   maxRetries?: number;
   maxRepairAttempts?: number;
@@ -467,19 +468,25 @@ export async function adjustCVWithRepair(
     system,
     cvData,
     jobDescription,
+    imageParts,
     scope,
     maxRetries,
     maxRepairAttempts,
   } = options;
 
   const cvText = JSON.stringify(cvData);
-  const input = `CV Data:\n${cvText}\n\nJob Description:\n${jobDescription}`;
+  const jobText =
+    jobDescription.trim().length > 0
+      ? jobDescription
+      : '(provided as image(s) above)';
+  const input = `CV Data:\n${cvText}\n\nJob Description:\n${jobText}`;
   const prompt = buildAdjustPrompt(scope, input);
 
   const result = await generateJSONWithRepair({
     model,
     system,
     prompt,
+    imageParts,
     repairContext: input,
     maxRetries,
     maxRepairAttempts,

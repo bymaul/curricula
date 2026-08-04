@@ -30,11 +30,20 @@ import {
   AI_ADJUST_SCOPES,
   getStoredAIAPIKey,
 } from '@/lib/consts';
+import type { CVImagePart } from '@/lib/cvParsing';
+import { MAX_CV_IMAGES } from '@/lib/cvParsing';
 import { CVChangeSummary, summarizeCVChanges } from '@/lib/cvDiff';
+import { readImagePartsFromFiles } from '@/lib/imageFiles';
 import { CVData } from '@/lib/schema';
 import { useUIStore } from '@/store/useUIStore';
-import { Loader2, FilePenLine, TriangleAlertIcon } from 'lucide-react';
-import { useState } from 'react';
+import {
+  Loader2,
+  FilePenLine,
+  TriangleAlertIcon,
+  ImagePlus,
+  X,
+} from 'lucide-react';
+import { useRef, useState } from 'react';
 
 interface AIAdjustDialogProps {
   open: boolean;
@@ -53,6 +62,8 @@ export function AIAdjustDialog({
   const { aiProvider, aiModel } = useUIStore();
 
   const [jobDescription, setJobDescription] = useState('');
+  const [images, setImages] = useState<CVImagePart[]>([]);
+  const fileInputRef = useRef<HTMLInputElement>(null);
   const [scope, setScope] = useState<AIAdjustScope>('full');
   const [localError, setLocalError] = useState<string | null>(null);
   const [pendingResult, setPendingResult] = useState<{
@@ -65,10 +76,28 @@ export function AIAdjustDialog({
 
   const resetState = () => {
     setJobDescription('');
+    setImages([]);
     setScope('full');
     setLocalError(null);
     setPendingResult(null);
     setChangeSummary([]);
+  };
+
+  const handleFilesSelected = async (
+    event: React.ChangeEvent<HTMLInputElement>,
+  ) => {
+    const files = event.target.files;
+    event.target.value = '';
+    if (!files?.length) return;
+
+    setLocalError(null);
+    const { parts, errors } = await readImagePartsFromFiles(files);
+    setImages((prev) => [...prev, ...parts].slice(0, MAX_CV_IMAGES));
+    if (errors.length > 0) setLocalError(errors[0]);
+  };
+
+  const handleRemoveImage = (index: number) => {
+    setImages((prev) => prev.filter((_, i) => i !== index));
   };
 
   const handleOpenChange = (next: boolean) => {
@@ -79,8 +108,8 @@ export function AIAdjustDialog({
   const handleSubmit = async () => {
     setLocalError(null);
 
-    if (!jobDescription.trim()) {
-      setLocalError('Please paste a job description.');
+    if (!jobDescription.trim() && images.length === 0) {
+      setLocalError('Please paste a job description or upload an image.');
       return;
     }
 
@@ -93,6 +122,7 @@ export function AIAdjustDialog({
       modelName: aiModel.trim() || undefined,
       apiKey,
       scope,
+      images: images.length ? images : undefined,
     });
 
     if (result) {
@@ -207,7 +237,7 @@ export function AIAdjustDialog({
           <Field>
             <FieldLabel>Job Description</FieldLabel>
             <FieldDescription>
-              Paste the job posting you want to tailor your CV for.
+              Paste the job posting, or upload a screenshot or photo of it.
             </FieldDescription>
             <Textarea
               value={jobDescription}
@@ -216,6 +246,61 @@ export function AIAdjustDialog({
               className="min-h-32 sm:min-h-40 max-h-40 sm:max-h-60 resize-y"
               aria-invalid={!!effectiveError}
             />
+          </Field>
+
+          <Field>
+            <FieldLabel>Job Description Image</FieldLabel>
+            <FieldDescription>
+              Prefer to tailor from an image? Attach up to {MAX_CV_IMAGES} JPEG,
+              PNG, or WebP screenshots.
+            </FieldDescription>
+            <div className="flex flex-wrap items-center gap-2">
+              <Button
+                type="button"
+                variant="outline"
+                size="sm"
+                onClick={() => fileInputRef.current?.click()}
+                disabled={isAdjusting}
+              >
+                <ImagePlus className="w-4 h-4" aria-hidden="true" />
+                Upload image
+              </Button>
+              <input
+                ref={fileInputRef}
+                type="file"
+                accept="image/jpeg,image/png,image/webp"
+                multiple
+                className="hidden"
+                onChange={handleFilesSelected}
+              />
+              {images.length > 0 && (
+                <span className="text-sm text-muted-foreground">
+                  {images.length}/{MAX_CV_IMAGES} attached
+                </span>
+              )}
+            </div>
+            {images.length > 0 && (
+              <ul className="flex flex-wrap gap-2">
+                {images.map((image, index) => (
+                  <li key={index} className="relative">
+                    {/* eslint-disable-next-line @next/next/no-img-element */}
+                    <img
+                      src={`data:${image.mimeType};base64,${image.data}`}
+                      alt={`Job description image ${index + 1}`}
+                      className="h-16 w-16 rounded-md border border-border object-cover"
+                    />
+                    <button
+                      type="button"
+                      onClick={() => handleRemoveImage(index)}
+                      aria-label={`Remove image ${index + 1}`}
+                      className="absolute -top-1.5 -right-1.5 rounded-full bg-background p-1 text-muted-foreground shadow-sm border border-border hover:text-foreground"
+                    >
+                      <X className="w-3 h-3" aria-hidden="true" />
+                    </button>
+                  </li>
+                ))}
+              </ul>
+            )}
           </Field>
 
           {effectiveError && (

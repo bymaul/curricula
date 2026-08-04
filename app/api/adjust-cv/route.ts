@@ -5,7 +5,11 @@ import {
   resolveAIModel,
 } from '@/lib/ai';
 import { sanitizeJSON, stripInvisibleChars } from '@/lib/cleanText';
-import { adjustCVWithRepair } from '@/lib/cvParsing';
+import {
+  MAX_CV_IMAGE_BASE64_CHARS,
+  MAX_CV_IMAGES,
+  adjustCVWithRepair,
+} from '@/lib/cvParsing';
 import { parseEnv } from '@/lib/env';
 import { clientIP, rateLimitResponse, rateLimitStatus } from '@/lib/rateLimit';
 import { cvSchema } from '@/lib/schema';
@@ -14,18 +18,43 @@ import z from 'zod';
 export const runtime = 'nodejs';
 export const maxDuration = 60;
 
-const requestSchema = z.object({
-  cvData: cvSchema,
-  jobDescription: z.string().max(10000, 'Job description too long'),
-  provider: z
-    .enum(['openai', 'anthropic', 'google'])
-    .default(parseEnv().provider),
-  modelName: z.string().optional(),
-  apiKey: z.string().min(10, 'Invalid API Key').optional(),
-  scope: z
-    .enum(['full', 'summary', 'experience', 'projects', 'education', 'skills'])
-    .default('full'),
-});
+const supportedMimeTypes = new Set(['image/jpeg', 'image/png', 'image/webp']);
+
+const imageSchema = z
+  .object({
+    data: z.string().min(1),
+    mimeType: z.string().refine((v) => supportedMimeTypes.has(v)),
+  })
+  .refine((img) => img.data.length <= MAX_CV_IMAGE_BASE64_CHARS, {
+    message: 'Image too large',
+  });
+
+const requestSchema = z
+  .object({
+    cvData: cvSchema,
+    jobDescription: z.string().max(10000, 'Job description too long'),
+    provider: z
+      .enum(['openai', 'anthropic', 'google'])
+      .default(parseEnv().provider),
+    modelName: z.string().optional(),
+    apiKey: z.string().min(10, 'Invalid API Key').optional(),
+    scope: z
+      .enum([
+        'full',
+        'summary',
+        'experience',
+        'projects',
+        'education',
+        'skills',
+      ])
+      .default('full'),
+    images: z.array(imageSchema).max(MAX_CV_IMAGES).optional(),
+  })
+  .refine(
+    (body) =>
+      body.jobDescription.trim().length > 0 || (body.images?.length ?? 0) > 0,
+    { message: 'Provide a job description or job description image(s)' },
+  );
 
 export async function POST(req: Request) {
   try {
@@ -40,7 +69,8 @@ export async function POST(req: Request) {
         { status: 400 },
       );
     }
-    const { cvData, jobDescription, provider, apiKey, scope } = parsedBody.data;
+    const { cvData, jobDescription, provider, apiKey, scope, images } =
+      parsedBody.data;
 
     const cleanCVData = sanitizeJSON(cvData);
     const cleanJobDescription = stripInvisibleChars(jobDescription);
@@ -71,13 +101,15 @@ CRITICAL RULES:
 7. Keep each bullet under ~25 words and scannable for a recruiter skimming in 30 seconds.
 8. Tailor the summary (2-3 sentences) to mirror the Job Description's seniority level, title, and core requirements.
 9. Preserve all factual details: company names, institutions, dates, certifications, locations, and contact info must remain unchanged.
-10. Do not pad sections that are empty in the source CV — leave empty arrays as empty arrays.`;
+10. Do not pad sections that are empty in the source CV — leave empty arrays as empty arrays.
+11. If the job description is provided as image(s), read the text visible in each image carefully.`;
 
     const { data, warnings } = await adjustCVWithRepair({
       model,
       system: systemPrompt,
       cvData: cleanCVData,
       jobDescription: cleanJobDescription,
+      imageParts: images?.length ? images : undefined,
       scope,
     });
 
