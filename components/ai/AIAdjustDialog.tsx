@@ -31,7 +31,7 @@ import {
   getStoredAIAPIKey,
 } from '@/lib/consts';
 import type { CVImagePart } from '@/lib/cvParsing';
-import { MAX_CV_IMAGES } from '@/lib/cvParsing';
+import { MAX_ADJUST_IMAGES } from '@/lib/cvParsing';
 import { CVChangeSummary, summarizeCVChanges } from '@/lib/cvDiff';
 import { readImagePartsFromFiles } from '@/lib/imageFiles';
 import { CVData } from '@/lib/schema';
@@ -89,8 +89,10 @@ export function AIAdjustDialog({
     if (!files?.length) return;
 
     setLocalError(null);
-    const { parts, errors } = await readImagePartsFromFiles(files);
-    setImages((prev) => [...prev, ...parts].slice(0, MAX_CV_IMAGES));
+    const { parts, errors } = await readImagePartsFromFiles(files, {
+      maxImages: MAX_ADJUST_IMAGES,
+    });
+    setImages((prev) => [...prev, ...parts].slice(0, MAX_ADJUST_IMAGES));
     if (errors.length > 0) setLocalError(errors[0]);
   };
 
@@ -255,8 +257,8 @@ export function AIAdjustDialog({
           <Field>
             <FieldLabel>Job Description Image</FieldLabel>
             <FieldDescription>
-              Prefer to tailor from an image? Attach up to {MAX_CV_IMAGES} JPEG,
-              PNG, or WebP screenshots.
+              Prefer to tailor from an image? Attach up to {MAX_ADJUST_IMAGES}{' '}
+              JPEG, PNG, or WebP screenshots.
             </FieldDescription>
             <input
               ref={fileInputRef}
@@ -266,11 +268,17 @@ export function AIAdjustDialog({
               className="hidden"
               onChange={handleFilesSelected}
             />
-            <button
-              type="button"
-              onClick={() => fileInputRef.current?.click()}
-              disabled={isAdjusting}
+            <div
+              role="button"
+              tabIndex={0}
               aria-label="Upload job description image"
+              onClick={() => fileInputRef.current?.click()}
+              onKeyDown={(e) => {
+                if (e.key === 'Enter' || e.key === ' ') {
+                  e.preventDefault();
+                  fileInputRef.current?.click();
+                }
+              }}
               onDragOver={(e) => {
                 e.preventDefault();
                 setIsDragging(true);
@@ -285,57 +293,54 @@ export function AIAdjustDialog({
                 setIsDragging(false);
                 void processFiles(e.dataTransfer.files);
               }}
-              className={`flex w-full flex-col items-center justify-center gap-1.5 rounded-lg border-2 border-dashed px-4 py-6 text-center text-sm text-muted-foreground transition-colors disabled:opacity-50 ${
+              className={`flex w-full cursor-pointer flex-col items-center justify-center gap-2 rounded-lg border-2 border-dashed px-4 py-6 text-center text-sm text-muted-foreground transition-colors disabled:opacity-50 ${
                 isDragging
                   ? 'border-primary bg-primary/10 text-primary'
                   : 'border-border bg-muted/30 hover:border-primary/50 hover:text-foreground'
               }`}
             >
-              <ImagePlus className="w-6 h-6" aria-hidden="true" />
-              <span className="font-medium">
-                Upload or drag &amp; drop job description image
-              </span>
-              <span>
-                JPEG, PNG, or WebP — up to {MAX_CV_IMAGES} screenshots
-              </span>
-            </button>
-            {images.length > 0 && (
-              <>
-                <div className="flex flex-wrap items-center gap-2">
-                  <span className="text-sm text-muted-foreground">
-                    {images.length}/{MAX_CV_IMAGES} attached
+              {images.length === 0 ? (
+                <>
+                  <ImagePlus className="w-6 h-6" aria-hidden="true" />
+                  <span className="font-medium">
+                    Upload or drag &amp; drop job description image
                   </span>
-                  <button
-                    type="button"
-                    onClick={() => fileInputRef.current?.click()}
-                    disabled={isAdjusting}
-                    className="text-sm font-medium text-primary hover:underline"
-                  >
-                    Add more
-                  </button>
-                </div>
-                <ul className="flex flex-wrap gap-2">
-                  {images.map((image, index) => (
-                    <li key={index} className="relative">
-                      {/* eslint-disable-next-line @next/next/no-img-element */}
-                      <img
-                        src={`data:${image.mimeType};base64,${image.data}`}
-                        alt={`Job description image ${index + 1}`}
-                        className="h-16 w-16 rounded-md border border-border object-cover"
-                      />
-                      <button
-                        type="button"
-                        onClick={() => handleRemoveImage(index)}
-                        aria-label={`Remove image ${index + 1}`}
-                        className="absolute -top-1.5 -right-1.5 rounded-full bg-background p-1 text-muted-foreground shadow-sm border border-border hover:text-foreground"
-                      >
-                        <X className="w-3 h-3" aria-hidden="true" />
-                      </button>
-                    </li>
-                  ))}
-                </ul>
-              </>
-            )}
+                  <span>
+                    JPEG, PNG, or WebP — up to {MAX_ADJUST_IMAGES} screenshots
+                  </span>
+                </>
+              ) : (
+                <>
+                  <ul className="flex flex-wrap justify-center gap-2">
+                    {images.map((image, index) => (
+                      <li key={index} className="relative">
+                        {/* eslint-disable-next-line @next/next/no-img-element */}
+                        <img
+                          src={`data:${image.mimeType};base64,${image.data}`}
+                          alt={`Job description image ${index + 1}`}
+                          className="h-16 w-16 rounded-md border border-border object-cover"
+                        />
+                        <button
+                          type="button"
+                          onClick={(e) => {
+                            e.stopPropagation();
+                            handleRemoveImage(index);
+                          }}
+                          aria-label={`Remove image ${index + 1}`}
+                          className="absolute -top-1.5 -right-1.5 rounded-full bg-background p-1 text-muted-foreground shadow-sm border border-border hover:text-foreground"
+                        >
+                          <X className="w-3 h-3" aria-hidden="true" />
+                        </button>
+                      </li>
+                    ))}
+                  </ul>
+                  <span className="font-medium">
+                    {images.length}/{MAX_ADJUST_IMAGES} attached — click or drag
+                    &amp; drop to add more
+                  </span>
+                </>
+              )}
+            </div>
           </Field>
 
           {effectiveError && (

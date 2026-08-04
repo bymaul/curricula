@@ -6,8 +6,8 @@ import {
 } from '@/lib/ai';
 import { sanitizeJSON, stripInvisibleChars } from '@/lib/cleanText';
 import {
+  MAX_ADJUST_IMAGES,
   MAX_CV_IMAGE_BASE64_CHARS,
-  MAX_CV_IMAGES,
   adjustCVWithRepair,
 } from '@/lib/cvParsing';
 import { parseEnv } from '@/lib/env';
@@ -48,7 +48,7 @@ const requestSchema = z
         'skills',
       ])
       .default('full'),
-    images: z.array(imageSchema).max(MAX_CV_IMAGES).optional(),
+    images: z.array(imageSchema).max(MAX_ADJUST_IMAGES).optional(),
   })
   .refine(
     (body) =>

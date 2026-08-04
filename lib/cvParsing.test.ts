@@ -436,4 +436,20 @@ describe('adjustCVWithRepair', () => {
       mediaType: 'image/webp',
     });
   });
+
+  it('disables transient retries and caps repairs when images are attached', async () => {
+    mockedGenerateText.mockRejectedValue(noObjectError('bad json'));
+    await expect(
+      adjustCVWithRepair({
+        model: minimalModel,
+        system: 'sys',
+        cvData: validResume as unknown as CVData,
+        jobDescription: 'job',
+        imageParts: [{ data: 'BASE64DATA', mimeType: 'image/jpeg' }],
+      }),
+    ).rejects.toThrow('Could not generate the requested output');
+    expect(mockedGenerateText).toHaveBeenCalledTimes(2);
+    expect(mockedGenerateText.mock.calls[0][0].maxRetries).toBe(0);
+    expect(mockedGenerateText.mock.calls[1][0].maxRetries).toBe(0);
+  });
 });

@@ -6,6 +6,7 @@ import { CVData, initialCVState } from '@/lib/schema';
 
 export const MAX_CV_TEXT_CHARS = 12_000;
 export const MAX_CV_IMAGES = 6;
+export const MAX_ADJUST_IMAGES = 3;
 export const MAX_CV_IMAGE_BASE64_CHARS = 1_500_000;
 export const MAX_REPAIR_ATTEMPTS = 2;
 export const MAX_TRANSIENT_RETRIES = 2;
@@ -298,8 +299,10 @@ async function generateJSONWithRepair({
   prompt,
   imageParts,
   repairContext,
-  maxRetries = MAX_TRANSIENT_RETRIES,
-  maxRepairAttempts = MAX_REPAIR_ATTEMPTS,
+  // Vision requests are slow and each call re-sends the images, so cap the
+  // number of AI attempts to keep requests within the function time limit.
+  maxRetries = imageParts?.length ? 0 : MAX_TRANSIENT_RETRIES,
+  maxRepairAttempts = imageParts?.length ? 1 : MAX_REPAIR_ATTEMPTS,
 }: GenerateJSONWithRepairOptions): Promise<CVParseResult> {
   let currentPrompt = prompt;
   let invalidOutput = '';
