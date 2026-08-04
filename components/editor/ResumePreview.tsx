@@ -4,7 +4,7 @@ import { HarvardTemplate } from '@/components/resume/HarvardTemplate';
 import { ScrollArea, ScrollBar } from '@/components/ui/scroll-area';
 import { usePageScale } from '@/hooks/usePageScale';
 import { usePinchZoom } from '@/hooks/usePinchZoom';
-import { SectionId } from '@/lib/consts';
+import { getSectionIdFromTab, SectionId } from '@/lib/consts';
 import {
   PAGE_HEIGHT_PX,
   PAGE_WIDTH_PX,
@@ -12,12 +12,14 @@ import {
 } from '@/lib/pagination';
 import { CVData } from '@/lib/schema';
 import { cn } from '@/lib/utils';
+import { useUIStore } from '@/store/useUIStore';
 import { FileText } from 'lucide-react';
 import { RefObject, useEffect, useState } from 'react';
 import { ZoomControls } from './ZoomControls';
 
 const GUTTER_PX = 32;
 const FRAME_WIDTH_PX = PAGE_WIDTH_PX + GUTTER_PX * 2;
+const SCROLL_OFFSET_PX = 16;
 
 interface ResumePreviewProps {
   cvData: CVData;
@@ -26,6 +28,7 @@ interface ResumePreviewProps {
   hiddenSections?: SectionId[];
   isVisible: boolean;
   mobileActive: boolean;
+  onSectionClick?: (sectionId: SectionId) => void;
 }
 
 export function ResumePreview({
@@ -35,6 +38,7 @@ export function ResumePreview({
   hiddenSections,
   isVisible,
   mobileActive,
+  onSectionClick,
 }: ResumePreviewProps) {
   const {
     panelRef,
@@ -82,6 +86,29 @@ export function ResumePreview({
     top: (i + 1) * PAGE_HEIGHT_PX,
     label: i + 2,
   }));
+
+  const activeTab = useUIStore((state) => state.activeTab);
+
+  useEffect(() => {
+    if (!isVisible) return;
+    const sectionId = getSectionIdFromTab(activeTab);
+    if (!sectionId) return;
+    const panel = panelRef.current;
+    if (!panel) return;
+    const target = panel.querySelector<HTMLElement>(
+      `[data-section-id="${sectionId}"]`,
+    );
+    const viewport = panel.querySelector<HTMLElement>(
+      '[data-slot="scroll-area-viewport"]',
+    );
+    if (!target || !viewport) return;
+    const delta =
+      (target.getBoundingClientRect().top -
+        viewport.getBoundingClientRect().top) /
+        scale -
+      SCROLL_OFFSET_PX;
+    viewport.scrollTo({ top: viewport.scrollTop + delta, behavior: 'smooth' });
+  }, [activeTab, isVisible, scale, panelRef]);
 
   return (
     <section
@@ -139,6 +166,7 @@ export function ResumePreview({
                       cvData={cvData}
                       sectionOrder={sectionOrder}
                       hiddenSections={hiddenSections}
+                      onSectionClick={onSectionClick}
                     />
                   </div>
 

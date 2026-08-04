@@ -10,7 +10,9 @@ import { useCVImportExport } from '@/hooks/useCVImportExport';
 import { useCVPrint } from '@/hooks/useCVPrint';
 import { useMediaQuery } from '@/hooks/useMediaQuery';
 import { CVData, cvSchema, initialCVState } from '@/lib/schema';
+import { getSectionTabName, SectionId } from '@/lib/consts';
 import { useResumeStore } from '@/store/useResumeStore';
+import { useUIStore } from '@/store/useUIStore';
 import { cn } from '@/lib/utils';
 import { ChevronsUpDown, FileText } from 'lucide-react';
 import { zodResolver } from '@hookform/resolvers/zod';
@@ -68,6 +70,11 @@ export default function Home() {
     state.resumes.find((r) => r.id === state.activeId),
   );
   const activeResumeTitle = activeResume?.title ?? 'Untitled CV';
+
+  const handlePreviewSectionClick = (sectionId: SectionId) => {
+    useUIStore.getState().setActiveTab(getSectionTabName(sectionId));
+    if (!isLargeScreen) setMobileView('edit');
+  };
 
   if (!mounted) return null;
 
@@ -127,6 +134,7 @@ export default function Home() {
             hiddenSections={activeResume?.hiddenSections}
             isVisible={isPreviewVisible}
             mobileActive={mobileView === 'preview'}
+            onSectionClick={handlePreviewSectionClick}
           />
         </div>
       </main>

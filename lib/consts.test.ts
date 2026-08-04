@@ -6,6 +6,8 @@ import {
   DEFAULT_SECTION_ORDER,
   RENDERABLE_SECTIONS,
   SECTIONS,
+  getSectionIdFromTab,
+  getSectionTabName,
   getStoredAIAPIKey,
 } from '@/lib/consts';
 
@@ -51,6 +53,28 @@ describe('AI_ADJUST_SCOPES', () => {
     expect(AI_ADJUST_SCOPES[0]).toEqual({ value: 'full', label: 'Entire CV' });
     expect(AI_ADJUST_SCOPES.map((s) => s.value)).toContain('summary');
     expect(AI_ADJUST_SCOPES.map((s) => s.value)).toContain('skills');
+  });
+});
+
+describe('section tab mapping', () => {
+  it('maps the summary section to the Personal tab', () => {
+    expect(getSectionTabName('summary')).toBe('Personal');
+  });
+
+  it('maps content sections to their titles', () => {
+    expect(getSectionTabName('experience')).toBe('Experience');
+    expect(getSectionTabName('skills')).toBe('Skills');
+    expect(getSectionTabName('certifications')).toBe('Certifications');
+  });
+
+  it('maps section tabs back to their section id', () => {
+    expect(getSectionIdFromTab('Experience')).toBe('experience');
+    expect(getSectionIdFromTab('Education')).toBe('education');
+  });
+
+  it('returns null for the Personal tab and unknown tabs', () => {
+    expect(getSectionIdFromTab('Personal')).toBeNull();
+    expect(getSectionIdFromTab('Nope')).toBeNull();
   });
 });
 

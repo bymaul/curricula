@@ -8,6 +8,11 @@ interface TemplateProps {
   cvData: CVData;
   sectionOrder?: SectionId[];
   hiddenSections?: SectionId[];
+  onSectionClick?: (sectionId: SectionId) => void;
+}
+
+interface SectionContext {
+  onClick?: (sectionId: SectionId) => void;
 }
 
 /**
@@ -95,17 +100,37 @@ const formatUrl = (url: string) => {
 
 /** Section wrapper: heading + underline, consistent across the page. */
 function Section({
+  id,
   title,
   avoidBreakAfter,
+  onClick,
   children,
 }: {
+  id: SectionId;
   title: string;
   avoidBreakAfter?: boolean;
+  onClick?: (sectionId: SectionId) => void;
   children: React.ReactNode;
 }) {
+  const handleClick = (event: React.MouseEvent<HTMLElement>) => {
+    if ((event.target as HTMLElement).closest('a')) return;
+    onClick?.(id);
+  };
+
+  const handleKeyDown = (event: React.KeyboardEvent<HTMLElement>) => {
+    if (event.key !== 'Enter' && event.key !== ' ') return;
+    event.preventDefault();
+    onClick?.(id);
+  };
+
   return (
     <section
-      className={`${SPACE.sectionGap} ${avoidBreakAfter ? 'break-after-avoid' : ''}`}
+      data-section-id={id}
+      onClick={onClick ? handleClick : undefined}
+      onKeyDown={onClick ? handleKeyDown : undefined}
+      tabIndex={onClick ? 0 : undefined}
+      aria-label={onClick ? `Edit ${title}` : undefined}
+      className={`${SPACE.sectionGap} ${avoidBreakAfter ? 'break-after-avoid' : ''} ${onClick ? 'cursor-pointer hover:ring-1 hover:ring-primary/40 hover:rounded-sm focus:outline-none focus-visible:ring-2 focus-visible:ring-primary/40 focus-visible:rounded-sm' : ''}`}
     >
       <h2
         className={`${TYPE.sectionTitle} border-b border-black ${SPACE.sectionTitleGap} break-after-avoid`}
@@ -138,18 +163,21 @@ function EntrySubheader({ left, right }: { left?: string; right?: string }) {
   );
 }
 
-type SectionRenderer = (cvData: CVData) => React.ReactNode;
+type SectionRenderer = (
+  cvData: CVData,
+  context: SectionContext,
+) => React.ReactNode;
 
 const SECTION_RENDERERS: Record<SectionId, SectionRenderer> = {
-  summary: (cvData) =>
+  summary: (cvData, { onClick }) =>
     cvData.summary ? (
-      <Section title="Summary">
+      <Section id="summary" title="Summary" onClick={onClick}>
         <p className={`text-justify ${TYPE.body}`}>{cvData.summary}</p>
       </Section>
     ) : null,
-  experience: (cvData) =>
+  experience: (cvData, { onClick }) =>
     cvData.experience.length > 0 ? (
-      <Section title="Experience">
+      <Section id="experience" title="Experience" onClick={onClick}>
         {cvData.experience.map((exp, index) => (
           <div key={index} className={`${SPACE.itemGap} break-inside-avoid`}>
             <EntryHeader title={exp.role} meta={exp.date} />
@@ -159,9 +187,9 @@ const SECTION_RENDERERS: Record<SectionId, SectionRenderer> = {
         ))}
       </Section>
     ) : null,
-  projects: (cvData) =>
+  projects: (cvData, { onClick }) =>
     cvData.projects.length > 0 ? (
-      <Section title="Projects">
+      <Section id="projects" title="Projects" onClick={onClick}>
         {cvData.projects.map((proj, index) => (
           <div key={index} className={`${SPACE.itemGap} break-inside-avoid`}>
             <EntryHeader title={proj.name} meta={proj.date} />
@@ -170,9 +198,9 @@ const SECTION_RENDERERS: Record<SectionId, SectionRenderer> = {
         ))}
       </Section>
     ) : null,
-  education: (cvData) =>
+  education: (cvData, { onClick }) =>
     cvData.education.length > 0 ? (
-      <Section title="Education">
+      <Section id="education" title="Education" onClick={onClick}>
         {cvData.education.map((edu, index) => (
           <div key={index} className={`${SPACE.itemGap} break-inside-avoid`}>
             <EntryHeader title={edu.institution} meta={edu.date} />
@@ -182,9 +210,9 @@ const SECTION_RENDERERS: Record<SectionId, SectionRenderer> = {
         ))}
       </Section>
     ) : null,
-  skills: (cvData) =>
+  skills: (cvData, { onClick }) =>
     cvData.skills.length > 0 ? (
-      <Section title="Skills" avoidBreakAfter>
+      <Section id="skills" title="Skills" onClick={onClick} avoidBreakAfter>
         {cvData.skills.map((skill, index) => (
           <div key={index} className="mb-1 text-[10.5pt]">
             <span className="font-semibold">{skill.category}:</span>{' '}
@@ -193,9 +221,14 @@ const SECTION_RENDERERS: Record<SectionId, SectionRenderer> = {
         ))}
       </Section>
     ) : null,
-  certifications: (cvData) =>
+  certifications: (cvData, { onClick }) =>
     cvData.certifications.length > 0 ? (
-      <Section title="Certifications" avoidBreakAfter>
+      <Section
+        id="certifications"
+        title="Certifications"
+        onClick={onClick}
+        avoidBreakAfter
+      >
         {cvData.certifications.map((cert, index) => (
           <div
             key={index}
@@ -213,10 +246,22 @@ const SECTION_RENDERERS: Record<SectionId, SectionRenderer> = {
 };
 
 export const HarvardTemplate = forwardRef<HTMLDivElement, TemplateProps>(
-  ({ cvData, sectionOrder, hiddenSections }, ref) => {
+  ({ cvData, sectionOrder, hiddenSections, onSectionClick }, ref) => {
     const order = (sectionOrder ?? DEFAULT_SECTION_ORDER).filter(
       (id) => !hiddenSections?.includes(id),
     );
+
+    const context: SectionContext = { onClick: onSectionClick };
+
+    const handleHeaderClick = () => onSectionClick?.('summary');
+
+    const handleHeaderKeyDown = (
+      event: React.KeyboardEvent<HTMLDivElement>,
+    ) => {
+      if (event.key !== 'Enter' && event.key !== ' ') return;
+      event.preventDefault();
+      onSectionClick?.('summary');
+    };
 
     return (
       <div ref={ref} className="mx-auto shadow-2xl print:shadow-none bg-white">
@@ -249,7 +294,16 @@ export const HarvardTemplate = forwardRef<HTMLDivElement, TemplateProps>(
                 className={`${SPACE.pageMargin} align-top font-serif text-black leading-snug`}
               >
                 {/* --- HEADER SECTION --- */}
-                <div className="text-center mb-4">
+                <div
+                  data-section-id="personal"
+                  onClick={onSectionClick ? handleHeaderClick : undefined}
+                  onKeyDown={onSectionClick ? handleHeaderKeyDown : undefined}
+                  tabIndex={onSectionClick ? 0 : undefined}
+                  aria-label={
+                    onSectionClick ? 'Edit Personal details' : undefined
+                  }
+                  className={`text-center mb-4 ${onSectionClick ? 'cursor-pointer hover:ring-1 hover:ring-primary/40 hover:rounded-sm focus:outline-none focus-visible:ring-2 focus-visible:ring-primary/40 focus-visible:rounded-sm' : ''}`}
+                >
                   <h1 className={`${TYPE.name} mb-1`}>
                     {cvData.name || 'Your Name'}
                   </h1>
@@ -287,7 +341,7 @@ export const HarvardTemplate = forwardRef<HTMLDivElement, TemplateProps>(
                 {/* --- CONTENT SECTIONS (ordered) --- */}
                 {order.map((id) => (
                   <React.Fragment key={id}>
-                    {SECTION_RENDERERS[id](cvData)}
+                    {SECTION_RENDERERS[id](cvData, context)}
                   </React.Fragment>
                 ))}
               </td>
