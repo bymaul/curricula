@@ -7,6 +7,9 @@ export const SUPPORTED_IMAGE_TYPES = new Set([
   'image/webp',
 ]);
 
+export const MAX_SCAN_WIDTH = 1200;
+export const JPEG_QUALITY = 0.8;
+
 export interface ReadImageFilesResult {
   parts: CVImagePart[];
   errors: string[];
@@ -26,9 +29,11 @@ function fileToDataUrl(file: File): Promise<string> {
     const reader = new FileReader();
     reader.onload = () => {
       const result = typeof reader.result === 'string' ? reader.result : '';
-      const match = result.match(/^data:[^;]*;base64,(.+)$/);
-      if (match) resolve(match[1]);
-      else reject(new Error('Unreadable image file'));
+      if (!result.startsWith('data:')) {
+        reject(new Error('Unreadable image file'));
+        return;
+      }
+      resolve(result);
     };
     reader.onerror = () =>
       reject(reader.error ?? new Error('Unreadable image file'));
@@ -36,9 +41,44 @@ function fileToDataUrl(file: File): Promise<string> {
   });
 }
 
+function loadImage(dataUrl: string): Promise<HTMLImageElement> {
+  return new Promise((resolve, reject) => {
+    const image = new Image();
+    image.onload = () => resolve(image);
+    image.onerror = () => reject(new Error('Undecodable image'));
+    image.src = dataUrl;
+  });
+}
+
+/**
+ * Downscales an image to a JPEG at most `MAX_SCAN_WIDTH` pixels wide, keeping
+ * uploaded job description images small enough for thumbnails and the AI
+ * request payload. Returns null when the source cannot be decoded.
+ */
+export async function downscaleImage(dataUrl: string): Promise<string | null> {
+  try {
+    const image = await loadImage(dataUrl);
+    const scale = Math.min(2, MAX_SCAN_WIDTH / image.naturalWidth);
+    const width = Math.max(1, Math.floor(image.naturalWidth * scale));
+    const height = Math.max(1, Math.floor(image.naturalHeight * scale));
+
+    const canvas = document.createElement('canvas');
+    canvas.width = width;
+    canvas.height = height;
+    const ctx = canvas.getContext('2d');
+    if (!ctx) return null;
+
+    ctx.drawImage(image, 0, 0, width, height);
+    return canvas.toDataURL('image/jpeg', JPEG_QUALITY);
+  } catch {
+    return null;
+  }
+}
+
 /**
  * Reads image files (JPEG/PNG/WebP) into base64 `CVImagePart`s for the AI
- * vision pipeline, enforcing the same limits as the parse-CV route.
+ * vision pipeline, downscaling each to a JPEG so real-world screenshots stay
+ * within the parse-CV payload limits.
  */
 export async function readImagePartsFromFiles(
   files: FileList | readonly File[],
@@ -59,7 +99,16 @@ export async function readImagePartsFromFiles(
       break;
     }
     try {
-      const data = await fileToDataUrl(file);
+      const dataUrl = await fileToDataUrl(file);
+      const downscaled = await downscaleImage(dataUrl);
+      if (downscaled) {
+        const match = downscaled.match(/^data:image\/jpeg;base64,(.+)$/);
+        if (match) {
+          parts.push({ data: match[1], mimeType: 'image/jpeg' });
+          continue;
+        }
+      }
+      const data = dataUrl.replace(/^data:[^;]*;base64,/, '');
       if (data.length > MAX_CV_IMAGE_BASE64_CHARS) {
         errors.push(`${file.name} is too large.`);
         continue;

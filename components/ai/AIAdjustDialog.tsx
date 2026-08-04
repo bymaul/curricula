@@ -63,6 +63,7 @@ export function AIAdjustDialog({
 
   const [jobDescription, setJobDescription] = useState('');
   const [images, setImages] = useState<CVImagePart[]>([]);
+  const [isDragging, setIsDragging] = useState(false);
   const fileInputRef = useRef<HTMLInputElement>(null);
   const [scope, setScope] = useState<AIAdjustScope>('full');
   const [localError, setLocalError] = useState<string | null>(null);
@@ -77,23 +78,26 @@ export function AIAdjustDialog({
   const resetState = () => {
     setJobDescription('');
     setImages([]);
+    setIsDragging(false);
     setScope('full');
     setLocalError(null);
     setPendingResult(null);
     setChangeSummary([]);
   };
 
-  const handleFilesSelected = async (
-    event: React.ChangeEvent<HTMLInputElement>,
-  ) => {
-    const files = event.target.files;
-    event.target.value = '';
+  const processFiles = async (files: FileList | readonly File[] | null) => {
     if (!files?.length) return;
 
     setLocalError(null);
     const { parts, errors } = await readImagePartsFromFiles(files);
     setImages((prev) => [...prev, ...parts].slice(0, MAX_CV_IMAGES));
     if (errors.length > 0) setLocalError(errors[0]);
+  };
+
+  const handleFilesSelected = (event: React.ChangeEvent<HTMLInputElement>) => {
+    const files = event.target.files;
+    event.target.value = '';
+    void processFiles(files);
   };
 
   const handleRemoveImage = (index: number) => {
@@ -267,10 +271,30 @@ export function AIAdjustDialog({
               onClick={() => fileInputRef.current?.click()}
               disabled={isAdjusting}
               aria-label="Upload job description image"
-              className="flex w-full flex-col items-center justify-center gap-1.5 rounded-lg border-2 border-dashed border-border bg-muted/30 px-4 py-6 text-center text-sm text-muted-foreground transition-colors hover:border-primary/50 hover:text-foreground disabled:opacity-50"
+              onDragOver={(e) => {
+                e.preventDefault();
+                setIsDragging(true);
+              }}
+              onDragLeave={(e) => {
+                if (!e.currentTarget.contains(e.relatedTarget as Node)) {
+                  setIsDragging(false);
+                }
+              }}
+              onDrop={(e) => {
+                e.preventDefault();
+                setIsDragging(false);
+                void processFiles(e.dataTransfer.files);
+              }}
+              className={`flex w-full flex-col items-center justify-center gap-1.5 rounded-lg border-2 border-dashed px-4 py-6 text-center text-sm text-muted-foreground transition-colors disabled:opacity-50 ${
+                isDragging
+                  ? 'border-primary bg-primary/10 text-primary'
+                  : 'border-border bg-muted/30 hover:border-primary/50 hover:text-foreground'
+              }`}
             >
               <ImagePlus className="w-6 h-6" aria-hidden="true" />
-              <span className="font-medium">Upload job description image</span>
+              <span className="font-medium">
+                Upload or drag &amp; drop job description image
+              </span>
               <span>
                 JPEG, PNG, or WebP — up to {MAX_CV_IMAGES} screenshots
               </span>
