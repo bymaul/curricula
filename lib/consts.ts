@@ -41,6 +41,17 @@ export const RENDERABLE_SECTIONS: { id: SectionId; title: string }[] = [
   { id: 'certifications', title: 'Certifications' },
 ];
 
+export const getSectionTabName = (sectionId: SectionId): string => {
+  if (sectionId === 'summary') return 'Personal';
+  return (
+    RENDERABLE_SECTIONS.find((section) => section.id === sectionId)?.title ??
+    'Personal'
+  );
+};
+
+export const getSectionIdFromTab = (tab: string): SectionId | null =>
+  RENDERABLE_SECTIONS.find((section) => section.title === tab)?.id ?? null;
+
 export const DEFAULT_SECTION_ORDER: SectionId[] = RENDERABLE_SECTIONS.map(
   (s) => s.id,
 );
