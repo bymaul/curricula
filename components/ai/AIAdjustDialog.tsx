@@ -293,10 +293,8 @@ export function AIAdjustDialog({
                 setIsDragging(false);
                 void processFiles(e.dataTransfer.files);
               }}
-              className={`flex w-full cursor-pointer flex-col items-center justify-center gap-2 rounded-lg border-2 border-dashed px-4 py-6 text-center text-sm text-muted-foreground transition-colors disabled:opacity-50 ${
-                isDragging
-                  ? 'border-primary bg-primary/10 text-primary'
-                  : 'border-border bg-muted/30 hover:border-primary/50 hover:text-foreground'
+              className={`flex w-full cursor-pointer flex-col items-center justify-center gap-2 rounded-lg border-2 border-dashed px-4 py-6 text-center text-sm text-muted-foreground transition-colors disabled:opacity-50 border-border ${
+                isDragging ? 'bg-primary/10 text-primary' : 'hover:bg-muted'
               }`}
             >
               {images.length === 0 ? (
@@ -335,8 +333,8 @@ export function AIAdjustDialog({
                     ))}
                   </ul>
                   <span className="font-medium">
-                    {images.length}/{MAX_ADJUST_IMAGES} attached — click or drag
-                    &amp; drop to add more
+                    {images.length}/{MAX_ADJUST_IMAGES}&nbsp;attached — click or
+                    drag &amp; drop to add more
                   </span>
                 </>
               )}
