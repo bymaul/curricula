@@ -30,11 +30,20 @@ import {
   AI_ADJUST_SCOPES,
   getStoredAIAPIKey,
 } from '@/lib/consts';
+import type { CVImagePart } from '@/lib/cvParsing';
+import { MAX_ADJUST_IMAGES } from '@/lib/cvParsing';
 import { CVChangeSummary, summarizeCVChanges } from '@/lib/cvDiff';
+import { readImagePartsFromFiles } from '@/lib/imageFiles';
 import { CVData } from '@/lib/schema';
 import { useUIStore } from '@/store/useUIStore';
-import { Loader2, FilePenLine, TriangleAlertIcon } from 'lucide-react';
-import { useState } from 'react';
+import {
+  Loader2,
+  FilePenLine,
+  TriangleAlertIcon,
+  ImagePlus,
+  X,
+} from 'lucide-react';
+import { useRef, useState } from 'react';
 
 interface AIAdjustDialogProps {
   open: boolean;
@@ -53,6 +62,9 @@ export function AIAdjustDialog({
   const { aiProvider, aiModel } = useUIStore();
 
   const [jobDescription, setJobDescription] = useState('');
+  const [images, setImages] = useState<CVImagePart[]>([]);
+  const [isDragging, setIsDragging] = useState(false);
+  const fileInputRef = useRef<HTMLInputElement>(null);
   const [scope, setScope] = useState<AIAdjustScope>('full');
   const [localError, setLocalError] = useState<string | null>(null);
   const [pendingResult, setPendingResult] = useState<{
@@ -65,10 +77,33 @@ export function AIAdjustDialog({
 
   const resetState = () => {
     setJobDescription('');
+    setImages([]);
+    setIsDragging(false);
     setScope('full');
     setLocalError(null);
     setPendingResult(null);
     setChangeSummary([]);
+  };
+
+  const processFiles = async (files: FileList | readonly File[] | null) => {
+    if (!files?.length) return;
+
+    setLocalError(null);
+    const { parts, errors } = await readImagePartsFromFiles(files, {
+      maxImages: MAX_ADJUST_IMAGES,
+    });
+    setImages((prev) => [...prev, ...parts].slice(0, MAX_ADJUST_IMAGES));
+    if (errors.length > 0) setLocalError(errors[0]);
+  };
+
+  const handleFilesSelected = (event: React.ChangeEvent<HTMLInputElement>) => {
+    const files = event.target.files ? Array.from(event.target.files) : [];
+    event.target.value = '';
+    void processFiles(files);
+  };
+
+  const handleRemoveImage = (index: number) => {
+    setImages((prev) => prev.filter((_, i) => i !== index));
   };
 
   const handleOpenChange = (next: boolean) => {
@@ -79,8 +114,8 @@ export function AIAdjustDialog({
   const handleSubmit = async () => {
     setLocalError(null);
 
-    if (!jobDescription.trim()) {
-      setLocalError('Please paste a job description.');
+    if (!jobDescription.trim() && images.length === 0) {
+      setLocalError('Please paste a job description or upload an image.');
       return;
     }
 
@@ -93,6 +128,7 @@ export function AIAdjustDialog({
       modelName: aiModel.trim() || undefined,
       apiKey,
       scope,
+      images: images.length ? images : undefined,
     });
 
     if (result) {
@@ -207,7 +243,7 @@ export function AIAdjustDialog({
           <Field>
             <FieldLabel>Job Description</FieldLabel>
             <FieldDescription>
-              Paste the job posting you want to tailor your CV for.
+              Paste the job posting, or upload a screenshot or photo of it.
             </FieldDescription>
             <Textarea
               value={jobDescription}
@@ -216,6 +252,95 @@ export function AIAdjustDialog({
               className="min-h-32 sm:min-h-40 max-h-40 sm:max-h-60 resize-y"
               aria-invalid={!!effectiveError}
             />
+          </Field>
+
+          <Field>
+            <FieldLabel>Job Description Image</FieldLabel>
+            <FieldDescription>
+              Prefer to tailor from an image? Attach up to {MAX_ADJUST_IMAGES}{' '}
+              JPEG, PNG, or WebP screenshots.
+            </FieldDescription>
+            <input
+              ref={fileInputRef}
+              type="file"
+              accept="image/jpeg,image/png,image/webp"
+              multiple
+              className="hidden"
+              onChange={handleFilesSelected}
+            />
+            <div
+              role="button"
+              tabIndex={0}
+              aria-label="Upload job description image"
+              onClick={() => fileInputRef.current?.click()}
+              onKeyDown={(e) => {
+                if (e.key === 'Enter' || e.key === ' ') {
+                  e.preventDefault();
+                  fileInputRef.current?.click();
+                }
+              }}
+              onDragOver={(e) => {
+                e.preventDefault();
+                setIsDragging(true);
+              }}
+              onDragLeave={(e) => {
+                if (!e.currentTarget.contains(e.relatedTarget as Node)) {
+                  setIsDragging(false);
+                }
+              }}
+              onDrop={(e) => {
+                e.preventDefault();
+                setIsDragging(false);
+                void processFiles(e.dataTransfer.files);
+              }}
+              className={`flex w-full cursor-pointer flex-col items-center justify-center gap-2 rounded-lg border-2 border-dashed px-4 py-6 text-center text-sm text-muted-foreground transition-colors disabled:opacity-50 ${
+                isDragging
+                  ? 'border-primary bg-primary/10 text-primary'
+                  : 'border-border bg-muted/30 hover:border-primary/50 hover:text-foreground'
+              }`}
+            >
+              {images.length === 0 ? (
+                <>
+                  <ImagePlus className="w-6 h-6" aria-hidden="true" />
+                  <span className="font-medium">
+                    Upload or drag &amp; drop job description image
+                  </span>
+                  <span>
+                    JPEG, PNG, or WebP — up to {MAX_ADJUST_IMAGES} screenshots
+                  </span>
+                </>
+              ) : (
+                <>
+                  <ul className="flex flex-wrap justify-center gap-2">
+                    {images.map((image, index) => (
+                      <li key={index} className="relative">
+                        {/* eslint-disable-next-line @next/next/no-img-element */}
+                        <img
+                          src={`data:${image.mimeType};base64,${image.data}`}
+                          alt={`Job description image ${index + 1}`}
+                          className="h-16 w-16 rounded-md border border-border object-cover"
+                        />
+                        <button
+                          type="button"
+                          onClick={(e) => {
+                            e.stopPropagation();
+                            handleRemoveImage(index);
+                          }}
+                          aria-label={`Remove image ${index + 1}`}
+                          className="absolute -top-1.5 -right-1.5 rounded-full bg-background p-1 text-muted-foreground shadow-sm border border-border hover:text-foreground"
+                        >
+                          <X className="w-3 h-3" aria-hidden="true" />
+                        </button>
+                      </li>
+                    ))}
+                  </ul>
+                  <span className="font-medium">
+                    {images.length}/{MAX_ADJUST_IMAGES} attached — click or drag
+                    &amp; drop to add more
+                  </span>
+                </>
+              )}
+            </div>
           </Field>
 
           {effectiveError && (
