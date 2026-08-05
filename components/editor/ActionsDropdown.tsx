@@ -1,6 +1,8 @@
 'use client';
 
+import { useMediaQuery } from '@/hooks/useMediaQuery';
 import { cn } from '@/lib/utils';
+import { useDialogStore } from '@/store/useDialogStore';
 import {
   DatabaseBackup,
   EllipsisVertical,
@@ -23,11 +25,6 @@ import {
 interface ActionsDropdownProps {
   pdfInputRef: React.RefObject<HTMLInputElement | null>;
   handlePrintClick: () => void;
-  onOpenShare: () => void;
-  onOpenBackup: () => void;
-  onOpenAIAdjust: () => void;
-  onOpenAISettings: () => void;
-  onOpenResumes?: () => void;
   triggerClassName?: string;
 }
 
@@ -36,13 +33,11 @@ const ITEM_CLASSNAME = 'gap-3 py-2.5 px-3 text-sm cursor-pointer rounded-md';
 export function ActionsDropdown({
   pdfInputRef,
   handlePrintClick,
-  onOpenShare,
-  onOpenBackup,
-  onOpenAIAdjust,
-  onOpenAISettings,
-  onOpenResumes,
   triggerClassName,
 }: ActionsDropdownProps) {
+  const setDialog = useDialogStore((state) => state.setDialog);
+  const isMobile = !useMediaQuery('(min-width: 1024px)');
+
   const handleImportPDFClick = () => {
     pdfInputRef.current?.click();
   };
@@ -62,10 +57,10 @@ export function ActionsDropdown({
         }
       />
       <DropdownMenuContent align="end" className="w-52 p-1.5">
-        {onOpenResumes && (
+        {isMobile && (
           <>
             <DropdownMenuItem
-              onClick={onOpenResumes}
+              onClick={() => setDialog('resumes', true)}
               className={ITEM_CLASSNAME}
             >
               <FileText className="w-4 h-4 text-muted-foreground" />
@@ -81,16 +76,25 @@ export function ActionsDropdown({
           <Upload className="w-4 h-4 text-muted-foreground" />
           Import PDF (AI)
         </DropdownMenuItem>
-        <DropdownMenuItem onClick={onOpenAIAdjust} className={ITEM_CLASSNAME}>
+        <DropdownMenuItem
+          onClick={() => setDialog('aiAdjust', true)}
+          className={ITEM_CLASSNAME}
+        >
           <Sparkles className="w-4 h-4 text-primary" />
           AI Adjust
         </DropdownMenuItem>
-        <DropdownMenuItem onClick={onOpenAISettings} className={ITEM_CLASSNAME}>
+        <DropdownMenuItem
+          onClick={() => setDialog('aiSettings', true)}
+          className={ITEM_CLASSNAME}
+        >
           <Settings2 className="w-4 h-4 text-muted-foreground" />
           AI Settings
         </DropdownMenuItem>
         <DropdownMenuSeparator />
-        <DropdownMenuItem onClick={onOpenShare} className={ITEM_CLASSNAME}>
+        <DropdownMenuItem
+          onClick={() => setDialog('share', true)}
+          className={ITEM_CLASSNAME}
+        >
           <Share2 className="w-4 h-4 text-muted-foreground" />
           Share Link
         </DropdownMenuItem>
@@ -99,7 +103,10 @@ export function ActionsDropdown({
           Print / PDF
         </DropdownMenuItem>
         <DropdownMenuSeparator />
-        <DropdownMenuItem onClick={onOpenBackup} className={ITEM_CLASSNAME}>
+        <DropdownMenuItem
+          onClick={() => setDialog('backup', true)}
+          className={ITEM_CLASSNAME}
+        >
           <DatabaseBackup className="w-4 h-4 text-muted-foreground" />
           Backup &amp; Restore
         </DropdownMenuItem>

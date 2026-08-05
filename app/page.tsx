@@ -14,6 +14,7 @@ import { useMediaQuery } from '@/hooks/useMediaQuery';
 import { useShareLinkImport } from '@/hooks/useShareLinkImport';
 import { CVData, cvSchema, initialCVState } from '@/lib/schema';
 import { getSectionTabName, SectionId } from '@/lib/consts';
+import { useDialogStore } from '@/store/useDialogStore';
 import { useResumeStore } from '@/store/useResumeStore';
 import { useUIStore } from '@/store/useUIStore';
 import { cn } from '@/lib/utils';
@@ -51,9 +52,8 @@ export default function Home() {
     data: CVData;
     warnings: string[];
   } | null>(null);
-  const [isAISettingsOpen, setIsAISettingsOpen] = useState(false);
-  const [isAIDialogOpen, setIsAIDialogOpen] = useState(false);
-  const [isResumesDialogOpen, setIsResumesDialogOpen] = useState(false);
+
+  const { dialogs, setDialog } = useDialogStore();
 
   const { mounted, cvData, saveStatus, lastSavedAt } = useCVAutoSave(methods);
   const { pdfInputRef, handleImportPDF } = useCVImportExport({
@@ -92,7 +92,7 @@ export default function Home() {
             <Button
               variant="ghost"
               type="button"
-              onClick={() => setIsResumesDialogOpen(true)}
+              onClick={() => setDialog('resumes', true)}
               className="hidden lg:flex"
             >
               <FileText className="w-4 h-4" data-icon="inline-start" />
@@ -120,11 +120,6 @@ export default function Home() {
             lastSavedAt={lastSavedAt}
             pendingImport={pendingImport}
             onDiscardImport={() => setPendingImport(null)}
-            onOpenAIAdjust={() => setIsAIDialogOpen(true)}
-            onAISettingsOpenChange={setIsAISettingsOpen}
-            onOpenResumes={
-              isLargeScreen ? undefined : () => setIsResumesDialogOpen(true)
-            }
           />
 
           <ResumePreview
@@ -140,20 +135,20 @@ export default function Home() {
       </main>
 
       <AIAdjustDialog
-        open={isAIDialogOpen}
-        onOpenChange={setIsAIDialogOpen}
+        open={dialogs.aiAdjust}
+        onOpenChange={(open) => setDialog('aiAdjust', open)}
         cvData={cvData}
         onApply={(data) => methods.reset(data)}
       />
 
       <AISettingsDialog
-        open={isAISettingsOpen}
-        onOpenChange={setIsAISettingsOpen}
+        open={dialogs.aiSettings}
+        onOpenChange={(open) => setDialog('aiSettings', open)}
       />
 
       <ResumesDialog
-        open={isResumesDialogOpen}
-        onOpenChange={setIsResumesDialogOpen}
+        open={dialogs.resumes}
+        onOpenChange={(open) => setDialog('resumes', open)}
       />
     </FormProvider>
   );
