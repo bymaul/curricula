@@ -23,7 +23,7 @@ import { PersonalForm } from '../forms/PersonalForm';
 import { ProjectsForm } from '../forms/ProjectsForm';
 import { SkillsForm } from '../forms/SkillsForm';
 import { ScrollArea } from '../ui/scroll-area';
-import { Tooltip, TooltipContent, TooltipTrigger } from '../ui/tooltip';
+import { TooltipIconButton } from '../ui/tooltip-icon-button';
 import { ActionsDropdown } from './ActionsDropdown';
 import { BackupDialog } from './BackupDialog';
 import { SectionsOrderDialog } from './SectionsOrderDialog';
@@ -171,21 +171,13 @@ export function EditorSidebar({
           </div>
         </ScrollArea>
 
-        <Tooltip>
-          <TooltipTrigger
-            render={
-              <button
-                type="button"
-                onClick={() => setDialog('sections', true)}
-                aria-label="Reorder sections"
-                className="shrink-0 w-12 flex items-center justify-center text-muted-foreground hover:text-foreground hover:bg-muted/50 border-l border-border transition-colors"
-              >
-                <ListOrdered className="w-5 h-5" />
-              </button>
-            }
-          />
-          <TooltipContent side="top">Reorder sections</TooltipContent>
-        </Tooltip>
+        <TooltipIconButton
+          label="Reorder sections"
+          onClick={() => setDialog('sections', true)}
+          className="h-full w-12 rounded-none border-l border-border"
+        >
+          <ListOrdered className="w-5 h-5" />
+        </TooltipIconButton>
       </nav>
 
       <footer className="px-5 py-4 border-t border-border bg-muted/30 flex items-center justify-between gap-2 shrink-0 z-10">
@@ -194,55 +186,20 @@ export function EditorSidebar({
         </div>
 
         <div className="flex items-center gap-1">
-          <Tooltip>
-            <TooltipTrigger
-              render={
-                <button
-                  type="button"
-                  onClick={undo}
-                  disabled={!canUndo}
-                  aria-label="Undo"
-                  className="shrink-0 size-8 flex items-center justify-center text-muted-foreground hover:text-foreground hover:bg-muted/50 rounded-md transition-colors disabled:opacity-40 disabled:pointer-events-none"
-                >
-                  <Undo2 className="w-4 h-4" />
-                </button>
-              }
-            />
-            <TooltipContent side="top">Undo</TooltipContent>
-          </Tooltip>
+          <TooltipIconButton label="Undo" onClick={undo} disabled={!canUndo}>
+            <Undo2 className="w-4 h-4" />
+          </TooltipIconButton>
 
-          <Tooltip>
-            <TooltipTrigger
-              render={
-                <button
-                  type="button"
-                  onClick={redo}
-                  disabled={!canRedo}
-                  aria-label="Redo"
-                  className="shrink-0 size-8 flex items-center justify-center text-muted-foreground hover:text-foreground hover:bg-muted/50 rounded-md transition-colors disabled:opacity-40 disabled:pointer-events-none"
-                >
-                  <Redo2 className="w-4 h-4" />
-                </button>
-              }
-            />
-            <TooltipContent side="top">Redo</TooltipContent>
-          </Tooltip>
+          <TooltipIconButton label="Redo" onClick={redo} disabled={!canRedo}>
+            <Redo2 className="w-4 h-4" />
+          </TooltipIconButton>
 
-          <Tooltip>
-            <TooltipTrigger
-              render={
-                <button
-                  type="button"
-                  onClick={() => setDialog('history', true)}
-                  aria-label="Version history"
-                  className="shrink-0 size-8 flex items-center justify-center text-muted-foreground hover:text-foreground hover:bg-muted/50 rounded-md transition-colors"
-                >
-                  <History className="w-4 h-4" />
-                </button>
-              }
-            />
-            <TooltipContent side="top">Version history</TooltipContent>
-          </Tooltip>
+          <TooltipIconButton
+            label="Version history"
+            onClick={() => setDialog('history', true)}
+          >
+            <History className="w-4 h-4" />
+          </TooltipIconButton>
 
           <input
             type="file"

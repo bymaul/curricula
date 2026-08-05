@@ -1,11 +1,11 @@
 'use client';
 
 import { Button } from '@/components/ui/button';
+import { ConfirmDialog } from '@/components/ui/confirm-dialog';
 import {
   Dialog,
   DialogContent,
   DialogDescription,
-  DialogFooter,
   DialogHeader,
   DialogTitle,
 } from '@/components/ui/dialog';
@@ -212,47 +212,37 @@ export function BackupDialog({
         </DialogContent>
       </Dialog>
 
-      <Dialog
+      <ConfirmDialog
         open={pendingRestore !== null}
         onOpenChange={(next) => !next && setPendingRestore(null)}
+        title="Restore backup?"
+        description={`This replaces ${pendingRestore?.resumes.length} current CV${
+          pendingRestore?.resumes.length === 1 ? '' : 's'
+        } with the backup. This cannot be undone.`}
+        confirmLabel={
+          <>
+            <RefreshCcw className="w-4 h-4" />
+            Restore
+          </>
+        }
+        onConfirm={handleRestore}
       >
-        <DialogContent className="sm:max-w-md">
-          <DialogHeader>
-            <DialogTitle>Restore backup?</DialogTitle>
-            <DialogDescription>
-              This replaces {pendingRestore?.resumes.length} current CV
-              {pendingRestore?.resumes.length === 1 ? '' : 's'} with the backup.
-              This cannot be undone.
-            </DialogDescription>
-          </DialogHeader>
-
-          <ul className="max-h-48 overflow-auto rounded-lg border border-border divide-y divide-border">
-            {pendingRestore?.resumes.map((resume) => (
-              <li key={resume.id} className="flex items-center gap-2 px-3 py-2">
-                <FileJson className="w-4 h-4 shrink-0 text-muted-foreground" />
-                <span className="min-w-0 truncate text-sm font-medium">
-                  {resume.title}
+        <ul className="max-h-48 overflow-auto rounded-lg border border-border divide-y divide-border">
+          {pendingRestore?.resumes.map((resume) => (
+            <li key={resume.id} className="flex items-center gap-2 px-3 py-2">
+              <FileJson className="w-4 h-4 shrink-0 text-muted-foreground" />
+              <span className="min-w-0 truncate text-sm font-medium">
+                {resume.title}
+              </span>
+              {resume.id === pendingRestore.activeId && (
+                <span className="ml-auto shrink-0 text-xs text-muted-foreground">
+                  active
                 </span>
-                {resume.id === pendingRestore.activeId && (
-                  <span className="ml-auto shrink-0 text-xs text-muted-foreground">
-                    active
-                  </span>
-                )}
-              </li>
-            ))}
-          </ul>
-
-          <DialogFooter>
-            <Button variant="outline" onClick={() => setPendingRestore(null)}>
-              Cancel
-            </Button>
-            <Button onClick={handleRestore}>
-              <RefreshCcw className="w-4 h-4" />
-              Restore
-            </Button>
-          </DialogFooter>
-        </DialogContent>
-      </Dialog>
+              )}
+            </li>
+          ))}
+        </ul>
+      </ConfirmDialog>
     </>
   );
 }

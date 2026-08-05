@@ -10,6 +10,7 @@ import {
 } from '@/components/ui/dialog';
 import { SortableList, SortableRow } from '@/components/forms/shared';
 import { ScrollArea } from '@/components/ui/scroll-area';
+import { IconButton } from '@/components/ui/icon-button';
 import { RENDERABLE_SECTIONS, SectionId } from '@/lib/consts';
 import { useResumeStore } from '@/store/useResumeStore';
 import { cn } from '@/lib/utils';
@@ -65,20 +66,17 @@ export function SectionsOrderDialog({
                     <span className="flex-1 text-sm font-semibold">
                       {title}
                     </span>
-                    <button
-                      type="button"
-                      onClick={() => toggleSectionVisibility(id as SectionId)}
-                      title={hidden ? `Show ${title}` : `Hide ${title}`}
+                    <IconButton
                       aria-label={hidden ? `Show ${title}` : `Hide ${title}`}
+                      onClick={() => toggleSectionVisibility(id as SectionId)}
                       aria-pressed={!hidden}
-                      className="shrink-0 p-1.5 rounded-md text-muted-foreground hover:text-foreground hover:bg-muted transition-colors"
                     >
                       {hidden ? (
                         <EyeOff className="w-4 h-4" />
                       ) : (
                         <Eye className="w-4 h-4" />
                       )}
-                    </button>
+                    </IconButton>
                   </SortableRow>
                 );
               })}
