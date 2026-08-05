@@ -19,7 +19,6 @@ import {
   Undo2,
 } from 'lucide-react';
 import { useEffect, useState } from 'react';
-import { CVImportPreviewDialog } from '../import/CVImportPreviewDialog';
 import { CertificationsForm } from '../forms/CertificationsForm';
 import { EducationForm } from '../forms/EducationForm';
 import { ExperienceForm } from '../forms/ExperienceForm';
@@ -47,8 +46,6 @@ interface EditorSidebarProps {
   onApplyCVData: (data: CVData) => void;
   saveStatus: 'saving' | 'saved';
   lastSavedAt: number | null;
-  pendingImport: { data: CVData; warnings: string[] } | null;
-  onDiscardImport: () => void;
 }
 
 function SaveStatus({
@@ -95,8 +92,6 @@ export function EditorSidebar({
   onApplyCVData,
   saveStatus,
   lastSavedAt,
-  pendingImport,
-  onDiscardImport,
 }: EditorSidebarProps) {
   const { activeTab, setActiveTab } = useUIStore();
   const { dialogs, setDialog } = useDialogStore();
@@ -220,18 +215,6 @@ export function EditorSidebar({
           />
         </div>
       </footer>
-
-      <CVImportPreviewDialog
-        cvData={pendingImport?.data ?? null}
-        warnings={pendingImport?.warnings}
-        onApply={() => {
-          if (pendingImport) {
-            onApplyCVData(pendingImport.data);
-            onDiscardImport();
-          }
-        }}
-        onDiscard={onDiscardImport}
-      />
 
       <SectionsOrderDialog
         open={dialogs.sections}

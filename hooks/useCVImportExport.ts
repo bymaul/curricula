@@ -1,56 +1,12 @@
 import { useRef } from 'react';
-import { CVData } from '@/lib/schema';
 import { toast } from '@/components/ui/toast';
-import {
-  extractTextFromPDF,
-  parseCVWithAI,
-  ScannedPDFError,
-} from '@/hooks/useCVImportPDF';
+import { extractTextFromPDF, parseCVWithAI } from '@/hooks/useCVImportPDF';
 import { getStoredAIAPIKey } from '@/lib/consts';
+import { getPDFImportErrorInfo } from '@/lib/pdfImportErrors';
+import { useImportStore } from '@/store/useImportStore';
 import { useUIStore } from '@/store/useUIStore';
 
-interface UseCVImportExportOptions {
-  onPDFImported: (result: { data: CVData; warnings: string[] }) => void;
-}
-
-interface PDFImportErrorInfo {
-  title: string;
-  message: string;
-}
-
-function getPDFImportErrorInfo(error: unknown): PDFImportErrorInfo {
-  if (error instanceof ScannedPDFError) {
-    return {
-      title: 'No text found',
-      message: error.message,
-    };
-  }
-
-  const name = error instanceof Error ? error.name : '';
-
-  if (name === 'PasswordException') {
-    return {
-      title: 'Password protected',
-      message:
-        'This PDF is password-protected. Remove the password and try again.',
-    };
-  }
-
-  if (error instanceof TypeError) {
-    return {
-      title: 'Network error',
-      message:
-        'Could not reach the AI service. Check your connection and try again.',
-    };
-  }
-
-  return {
-    title: 'Import failed',
-    message: error instanceof Error ? error.message : 'Could not read the PDF.',
-  };
-}
-
-export function useCVImportExport(options: UseCVImportExportOptions) {
+export function useCVImportExport() {
   const pdfInputRef = useRef<HTMLInputElement>(null);
   const pendingFileRef = useRef<File | null>(null);
   const { aiProvider, aiModel } = useUIStore();
@@ -114,7 +70,7 @@ export function useCVImportExport(options: UseCVImportExportOptions) {
         timeout: 5000,
       });
 
-      options.onPDFImported({ data, warnings });
+      useImportStore.getState().setPendingImport({ data, warnings });
     } catch (error) {
       console.error('PDF import error:', error);
       const { title, message } = getPDFImportErrorInfo(error);

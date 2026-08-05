@@ -12,6 +12,7 @@ import {
 import { toast } from '@/components/ui/toast';
 import { BackupFile, parseBackup, serializeBackup } from '@/lib/backup';
 import { CVData, cvSchema } from '@/lib/schema';
+import { downloadFile } from '@/lib/utils';
 import { useResumeStore } from '@/store/useResumeStore';
 import {
   Download,
@@ -27,16 +28,6 @@ interface BackupDialogProps {
   onOpenChange: (open: boolean) => void;
   cvData: CVData;
   onApplyCVData: (data: CVData) => void;
-}
-
-function downloadFile(content: string, filename: string) {
-  const blob = new Blob([content], { type: 'application/json' });
-  const url = URL.createObjectURL(blob);
-  const link = document.createElement('a');
-  link.href = url;
-  link.download = filename;
-  link.click();
-  URL.revokeObjectURL(url);
 }
 
 export function BackupDialog({

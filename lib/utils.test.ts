@@ -1,5 +1,5 @@
-import { describe, expect, it } from 'vitest';
-import { cn, formatRelativeTime } from '@/lib/utils';
+import { afterEach, describe, expect, it, vi } from 'vitest';
+import { cn, downloadFile, formatRelativeTime } from '@/lib/utils';
 
 describe('cn', () => {
   it('joins class names', () => {
@@ -50,5 +50,52 @@ describe('formatRelativeTime', () => {
 
   it('clamps future timestamps to just now', () => {
     expect(formatRelativeTime(now + 10_000, now)).toBe('just now');
+  });
+});
+
+describe('downloadFile', () => {
+  interface FakeLink {
+    href: string;
+    download: string;
+    click: ReturnType<typeof vi.fn>;
+  }
+
+  let createdLinks: FakeLink[] = [];
+
+  afterEach(() => {
+    vi.unstubAllGlobals();
+    createdLinks = [];
+  });
+
+  it('triggers a download of the content as a JSON blob', () => {
+    const createObjectURL = vi.fn<(blob: Blob) => string>(
+      () => 'blob:mock-url',
+    );
+    const revokeObjectURL = vi.fn();
+
+    vi.stubGlobal('URL', {
+      createObjectURL,
+      revokeObjectURL,
+    });
+    vi.stubGlobal('document', {
+      createElement: vi.fn(() => {
+        const link: FakeLink = { href: '', download: '', click: vi.fn() };
+        createdLinks.push(link);
+        return link;
+      }),
+    });
+
+    downloadFile('{"a":1}', 'my-cv.json');
+
+    expect(createdLinks).toHaveLength(1);
+    const link = createdLinks[0];
+    expect(link.href).toBe('blob:mock-url');
+    expect(link.download).toBe('my-cv.json');
+    expect(link.click).toHaveBeenCalledOnce();
+
+    const blob = createObjectURL.mock.calls[0][0];
+    expect(blob).toBeInstanceOf(Blob);
+    expect(blob.type).toBe('application/json');
+    expect(revokeObjectURL).toHaveBeenCalledWith('blob:mock-url');
   });
 });

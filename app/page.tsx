@@ -6,6 +6,7 @@ import { Button } from '@/components/ui/button';
 import { EditorSidebar } from '@/components/editor/EditorSidebar';
 import { MobileTopBar } from '@/components/editor/MobileTopBar';
 import { ResumePreview } from '@/components/editor/ResumePreview';
+import { CVImportPreviewDialog } from '@/components/import/CVImportPreviewDialog';
 import { useCVAutoSave } from '@/hooks/useCVAutoSave';
 import { useCVImportExport } from '@/hooks/useCVImportExport';
 import { useCVPrint } from '@/hooks/useCVPrint';
@@ -14,6 +15,7 @@ import { useShareLinkImport } from '@/hooks/useShareLinkImport';
 import { CVData, cvSchema, initialCVState } from '@/lib/schema';
 import { getSectionTabName, SectionId } from '@/lib/consts';
 import { useDialogStore } from '@/store/useDialogStore';
+import { useImportStore } from '@/store/useImportStore';
 import { useResumeStore } from '@/store/useResumeStore';
 import { useUIStore } from '@/store/useUIStore';
 import { cn } from '@/lib/utils';
@@ -47,17 +49,15 @@ export default function Home() {
   });
 
   const [mobileView, setMobileView] = useState<'edit' | 'preview'>('edit');
-  const [pendingImport, setPendingImport] = useState<{
-    data: CVData;
-    warnings: string[];
-  } | null>(null);
 
   const { dialogs, setDialog } = useDialogStore();
+  const pendingImport = useImportStore((state) => state.pendingImport);
+  const clearPendingImport = useImportStore(
+    (state) => state.clearPendingImport,
+  );
 
   const { mounted, cvData, saveStatus, lastSavedAt } = useCVAutoSave(methods);
-  const { pdfInputRef, handleImportPDF } = useCVImportExport({
-    onPDFImported: setPendingImport,
-  });
+  const { pdfInputRef, handleImportPDF } = useCVImportExport();
   const { printRef, handlePrintClick } = useCVPrint(cvData, methods);
   useShareLinkImport();
 
@@ -110,8 +110,6 @@ export default function Home() {
             onApplyCVData={(data) => methods.reset(data)}
             saveStatus={saveStatus}
             lastSavedAt={lastSavedAt}
-            pendingImport={pendingImport}
-            onDiscardImport={() => setPendingImport(null)}
           />
 
           <ResumePreview
@@ -141,6 +139,18 @@ export default function Home() {
       <ResumesDialog
         open={dialogs.resumes}
         onOpenChange={(open) => setDialog('resumes', open)}
+      />
+
+      <CVImportPreviewDialog
+        cvData={pendingImport?.data ?? null}
+        warnings={pendingImport?.warnings}
+        onApply={() => {
+          if (pendingImport) {
+            methods.reset(pendingImport.data);
+            clearPendingImport();
+          }
+        }}
+        onDiscard={clearPendingImport}
       />
     </FormProvider>
   );

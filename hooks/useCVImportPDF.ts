@@ -2,6 +2,7 @@ import { CVData } from '@/lib/schema';
 import { AIProvider } from '@/lib/consts';
 import { stripInvisibleChars } from '@/lib/cleanText';
 import type { CVImagePart } from '@/lib/cvParsing';
+import { ScannedPDFError } from '@/lib/pdfImportErrors';
 import { parseResponseJSON } from '@/lib/request';
 import type { PDFDocumentProxy } from 'pdfjs-dist';
 
@@ -87,16 +88,6 @@ export async function extractTextFromPDF(
     await loadingTask.destroy();
   }
 }
-
-export class ScannedPDFError extends Error {
-  constructor() {
-    super(
-      'This PDF appears to be scanned images with no extractable text. Use a text-based PDF or run OCR first.',
-    );
-    this.name = 'ScannedPDFError';
-  }
-}
-
 interface ParseCVParams {
   provider: AIProvider;
   modelName?: string;
