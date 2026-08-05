@@ -1,10 +1,7 @@
 'use client';
 
 import dynamic from 'next/dynamic';
-import { BrandMark } from '@/components/BrandHeader';
-import { Button } from '@/components/ui/button';
 import { EditorSidebar } from '@/components/editor/EditorSidebar';
-import { MobileTopBar } from '@/components/editor/MobileTopBar';
 import { ResumePreview } from '@/components/editor/ResumePreview';
 import { CVImportPreviewDialog } from '@/components/import/CVImportPreviewDialog';
 import { useCVAutoSave } from '@/hooks/useCVAutoSave';
@@ -19,10 +16,10 @@ import { useImportStore } from '@/store/useImportStore';
 import { useResumeStore } from '@/store/useResumeStore';
 import { useUIStore } from '@/store/useUIStore';
 import { cn } from '@/lib/utils';
-import { ChevronsUpDown, FileText } from 'lucide-react';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { useState } from 'react';
 import { FormProvider, useForm } from 'react-hook-form';
+import { Header } from '@/components/Header';
 
 const AIAdjustDialog = dynamic(
   () => import('@/components/ai/AIAdjustDialog').then((m) => m.AIAdjustDialog),
@@ -78,21 +75,7 @@ export default function Home() {
   return (
     <FormProvider {...methods}>
       <main className="h-dvh w-full bg-background text-foreground flex flex-col lg:p-6 overflow-hidden print:h-auto print:block print:p-0 print:overflow-visible print:bg-white">
-        <MobileTopBar value={mobileView} onChange={setMobileView} />
-
-        <header className="hidden lg:flex items-center justify-between shrink-0 mb-6 print:hidden">
-          <BrandMark />
-
-          <Button
-            variant="ghost"
-            type="button"
-            onClick={() => setDialog('resumes', true)}
-          >
-            <FileText className="w-4 h-4" data-icon="inline-start" />
-            <span className="truncate">{activeResumeTitle}</span>
-            <ChevronsUpDown className="w-4 h-4" data-icon="inline-end" />
-          </Button>
-        </header>
+        <Header value={mobileView} onChange={setMobileView} />
 
         <div className="flex-1 min-h-0 w-full flex flex-col lg:flex-row gap-4 lg:gap-6 px-4 pb-4 lg:px-0 lg:pb-0 print:p-0 print:block">
           <EditorSidebar
