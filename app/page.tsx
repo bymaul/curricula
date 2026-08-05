@@ -86,7 +86,7 @@ export default function Home() {
             Curricula
           </h1>
 
-          <div className="flex items-center gap-3">
+          <div className="flex items-center gap-2">
             <GitHubLink />
             <Separator orientation="vertical" />
             <Button
