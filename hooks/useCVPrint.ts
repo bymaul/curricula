@@ -1,5 +1,5 @@
 import { toast } from '@/components/ui/toast';
-import { SECTIONS } from '@/lib/consts';
+import { SECTIONS, TabName } from '@/lib/consts';
 import { CVData } from '@/lib/schema';
 import { useUIStore } from '@/store/useUIStore';
 import { useRef } from 'react';
@@ -15,7 +15,7 @@ export function useCVPrint(cvData: CVData, methods: UseFormReturn<CVData>) {
     documentTitle: `${cvData.name || 'My'} - ${cvData.jobTitle} - CV`,
   });
 
-  const focusFirstInvalidSection = () => {
+  const focusFirstInvalidSection = (): TabName | null => {
     const errorKeys = Object.keys(methods.formState.errors) as (keyof CVData)[];
     if (errorKeys.length === 0) return null;
 
@@ -23,7 +23,7 @@ export function useCVPrint(cvData: CVData, methods: UseFormReturn<CVData>) {
     const targetSection = SECTIONS.find((section) =>
       section.fields.includes(firstErrorField),
     );
-    const targetTab = targetSection?.name ?? 'Personal';
+    const targetTab: TabName = targetSection?.name ?? 'Personal';
 
     setActiveTab(targetTab);
     return targetTab;

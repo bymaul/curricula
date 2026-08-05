@@ -1,10 +1,10 @@
 import { create } from 'zustand';
 import { persist } from 'zustand/middleware';
-import { AIProvider } from '@/lib/consts';
+import { AIProvider, TabName } from '@/lib/consts';
 
 interface UIState {
-  activeTab: string;
-  setActiveTab: (tab: string) => void;
+  activeTab: TabName;
+  setActiveTab: (tab: TabName) => void;
   aiProvider: AIProvider;
   aiModel: string;
   setAIPrefs: (provider: AIProvider, model: string) => void;

@@ -1,6 +1,10 @@
 'use client';
 
-import { DEFAULT_SECTION_ORDER, RENDERABLE_SECTIONS } from '@/lib/consts';
+import {
+  DEFAULT_SECTION_ORDER,
+  RENDERABLE_SECTIONS,
+  TabName,
+} from '@/lib/consts';
 import { CVData } from '@/lib/schema';
 import { cn, formatRelativeTime } from '@/lib/utils';
 import { useDialogStore } from '@/store/useDialogStore';
@@ -109,14 +113,14 @@ export function EditorSidebar({
   const canUndo = (history?.cursor ?? 0) > 0;
   const canRedo = !!history && history.cursor < history.entries.length - 1;
 
-  const navTabs = [
+  const navTabs: { key: string; name: TabName }[] = [
     { key: 'Personal', name: 'Personal' },
     ...sectionOrder
       .filter((id) => id !== 'summary')
       .map((id) => ({
         key: id,
-        name:
-          RENDERABLE_SECTIONS.find((section) => section.id === id)?.title ?? id,
+        name: (RENDERABLE_SECTIONS.find((section) => section.id === id)
+          ?.title ?? id) as TabName,
       })),
   ];
 
