@@ -91,6 +91,8 @@ export default function Home() {
           </h1>
 
           <div className="flex items-center gap-3">
+            <GitHubLink />
+            <Separator orientation="vertical" className="h-5" />
             <Button
               variant="ghost"
               type="button"
@@ -101,8 +103,6 @@ export default function Home() {
               <span className="truncate">{activeResumeTitle}</span>
               <ChevronsUpDown className="w-4 h-4" data-icon="inline-end" />
             </Button>
-            <Separator orientation="vertical" className="h-5" />
-            <GitHubLink />
           </div>
         </header>
 

@@ -21,6 +21,8 @@ export function MobileTopBar({ value, onChange }: MobileTopBarProps) {
         <h1 className="text-lg font-bold tracking-tight shrink-0">Curricula</h1>
 
         <div className="flex items-center gap-3">
+          <GitHubLink />
+          <Separator orientation="vertical" className="h-5" />
           <div className="flex items-center gap-1">
             {OPTIONS.map(({ value: v, label }) => (
               <button
@@ -39,8 +41,6 @@ export function MobileTopBar({ value, onChange }: MobileTopBarProps) {
               </button>
             ))}
           </div>
-          <Separator orientation="vertical" className="h-5" />
-          <GitHubLink />
         </div>
       </div>
     </header>

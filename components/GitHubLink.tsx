@@ -23,7 +23,7 @@ export function GitHubLink({ className }: { className?: string }) {
       rel="noopener noreferrer"
       aria-label="GitHub repository"
       className={cn(
-        'shrink-0 size-8 flex items-center justify-center rounded-md text-muted-foreground hover:text-foreground hover:bg-muted/50 transition-colors',
+        'shrink-0 size-8 flex items-center justify-center rounded-md text-foreground/40 hover:text-foreground hover:bg-muted/50 transition-colors',
         className,
       )}
     >
