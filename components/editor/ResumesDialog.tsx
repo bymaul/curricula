@@ -9,7 +9,9 @@ import {
   DialogHeader,
   DialogTitle,
 } from '@/components/ui/dialog';
+import { ConfirmDialog } from '@/components/ui/confirm-dialog';
 import { Input } from '@/components/ui/input';
+import { IconButton } from '@/components/ui/icon-button';
 import { ScrollArea } from '@/components/ui/scroll-area';
 import { useResumeStore } from '@/store/useResumeStore';
 import { cn, formatRelativeTime } from '@/lib/utils';
@@ -20,9 +22,6 @@ interface ResumesDialogProps {
   open: boolean;
   onOpenChange: (open: boolean) => void;
 }
-
-const ACTION_CLASSNAME =
-  'shrink-0 p-2 lg:p-1.5 rounded-md text-muted-foreground hover:text-foreground hover:bg-muted disabled:opacity-40 disabled:pointer-events-none transition-colors';
 
 export function ResumesDialog({ open, onOpenChange }: ResumesDialogProps) {
   const resumes = useResumeStore((state) => state.resumes);
@@ -138,37 +137,26 @@ export function ResumesDialog({ open, onOpenChange }: ResumesDialogProps) {
                       <div className="flex items-center gap-0.5 shrink-0">
                         {!editing && (
                           <div className="flex items-center gap-0.5 opacity-100 lg:opacity-0 lg:group-hover:opacity-100 lg:focus-within:opacity-100 transition-opacity">
-                            <button
-                              type="button"
-                              onClick={() => startRename(r.id, r.title)}
-                              title="Rename"
+                            <IconButton
                               aria-label={`Rename ${r.title}`}
-                              className={ACTION_CLASSNAME}
+                              onClick={() => startRename(r.id, r.title)}
                             >
                               <Pencil className="w-4 h-4" />
-                            </button>
-                            <button
-                              type="button"
-                              onClick={() => duplicateResume(r.id)}
-                              title="Duplicate"
+                            </IconButton>
+                            <IconButton
                               aria-label={`Duplicate ${r.title}`}
-                              className={ACTION_CLASSNAME}
+                              onClick={() => duplicateResume(r.id)}
                             >
                               <Copy className="w-4 h-4" />
-                            </button>
-                            <button
-                              type="button"
-                              onClick={() => handleDelete(r.id, r.title)}
-                              title="Delete"
+                            </IconButton>
+                            <IconButton
                               aria-label={`Delete ${r.title}`}
+                              onClick={() => handleDelete(r.id, r.title)}
                               disabled={resumes.length <= 1}
-                              className={cn(
-                                ACTION_CLASSNAME,
-                                'hover:text-destructive hover:bg-destructive/10',
-                              )}
+                              className="hover:text-destructive hover:bg-destructive/10"
                             >
                               <Trash2 className="w-4 h-4" />
-                            </button>
+                            </IconButton>
                           </div>
                         )}
 
@@ -193,28 +181,24 @@ export function ResumesDialog({ open, onOpenChange }: ResumesDialogProps) {
         </DialogContent>
       </Dialog>
 
-      <Dialog
+      <ConfirmDialog
         open={deleteTarget !== null}
         onOpenChange={(next) => !next && setDeleteTarget(null)}
-      >
-        <DialogContent className="sm:max-w-sm">
-          <DialogHeader>
-            <DialogTitle>Delete resume?</DialogTitle>
-            <DialogDescription>
-              Delete &quot;{deleteTarget?.title}&quot;? This cannot be undone.
-            </DialogDescription>
-          </DialogHeader>
-          <DialogFooter>
-            <Button variant="outline" onClick={() => setDeleteTarget(null)}>
-              Cancel
-            </Button>
-            <Button variant="destructive" onClick={confirmDelete}>
-              <Trash2 className="w-4 h-4" />
-              Delete
-            </Button>
-          </DialogFooter>
-        </DialogContent>
-      </Dialog>
+        title="Delete resume?"
+        description={
+          deleteTarget
+            ? `Delete "${deleteTarget.title}"? This cannot be undone.`
+            : undefined
+        }
+        confirmLabel={
+          <>
+            <Trash2 className="w-4 h-4" />
+            Delete
+          </>
+        }
+        destructive
+        onConfirm={confirmDelete}
+      />
     </>
   );
 }

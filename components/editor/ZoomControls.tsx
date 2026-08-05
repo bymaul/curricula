@@ -1,5 +1,6 @@
 'use client';
 
+import { IconButton } from '@/components/ui/icon-button';
 import { Maximize2, Minus, Plus } from 'lucide-react';
 
 interface ZoomControlsProps {
@@ -21,34 +22,29 @@ export function ZoomControls({
 }: ZoomControlsProps) {
   return (
     <div className="absolute bottom-3 right-3 z-20 flex items-center gap-0.5 bg-card border border-border rounded-lg shadow-md p-1 print:hidden">
-      <button
-        type="button"
+      <IconButton
+        size="icon-sm"
+        aria-label="Zoom out"
         onClick={onZoomOut}
         disabled={scale <= minScale}
-        className="h-7 w-7 flex items-center justify-center rounded-md text-muted-foreground hover:bg-muted hover:text-foreground disabled:opacity-40 disabled:hover:bg-transparent"
       >
         <Minus className="w-3.5 h-3.5" />
-      </button>
+      </IconButton>
       <span className="w-11 text-center text-xs font-semibold tabular-nums text-muted-foreground">
         {Math.round(scale * 100)}%
       </span>
-      <button
-        type="button"
+      <IconButton
+        size="icon-sm"
+        aria-label="Zoom in"
         onClick={onZoomIn}
         disabled={scale >= maxScale}
-        className="h-7 w-7 flex items-center justify-center rounded-md text-muted-foreground hover:bg-muted hover:text-foreground disabled:opacity-40 disabled:hover:bg-transparent"
       >
         <Plus className="w-3.5 h-3.5" />
-      </button>
+      </IconButton>
       <div className="w-px h-4 bg-border mx-0.5" />
-      <button
-        type="button"
-        onClick={onReset}
-        title="Fit to width"
-        className="h-7 w-7 flex items-center justify-center rounded-md text-muted-foreground hover:bg-muted hover:text-foreground"
-      >
+      <IconButton size="icon-sm" aria-label="Fit to width" onClick={onReset}>
         <Maximize2 className="w-3.5 h-3.5" />
-      </button>
+      </IconButton>
     </div>
   );
 }
