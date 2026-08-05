@@ -28,6 +28,10 @@ accounts, no cloud storage.
   states
 - **Section control** — reorder and hide sections per resume
 - **Import/export** — JSON backup, PDF import, JSON export, browser print
+- **Backup & restore** — download every CV as a single backup file, or restore
+  from one (data, section order, and visibility included)
+- **Share links** — share any CV as a compressed link; the data travels in the
+  URL itself and is opened as a new resume on the recipient's device
 
 ## Stack
 

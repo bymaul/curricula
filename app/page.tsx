@@ -11,6 +11,7 @@ import { useCVAutoSave } from '@/hooks/useCVAutoSave';
 import { useCVImportExport } from '@/hooks/useCVImportExport';
 import { useCVPrint } from '@/hooks/useCVPrint';
 import { useMediaQuery } from '@/hooks/useMediaQuery';
+import { useShareLinkImport } from '@/hooks/useShareLinkImport';
 import { CVData, cvSchema, initialCVState } from '@/lib/schema';
 import { getSectionTabName, SectionId } from '@/lib/consts';
 import { useResumeStore } from '@/store/useResumeStore';
@@ -65,6 +66,7 @@ export default function Home() {
     onPDFImported: setPendingImport,
   });
   const { printRef, handlePrintClick } = useCVPrint(cvData, methods);
+  useShareLinkImport();
 
   const isLargeScreen = useMediaQuery('(min-width: 1024px)');
   const isPreviewVisible = isLargeScreen || mobileView === 'preview';
@@ -121,6 +123,7 @@ export default function Home() {
               onImportJSON: handleImportJSON,
               onImportPDF: handleImportPDF,
             }}
+            cvData={cvData}
             onApplyCVData={(data) => methods.reset(data)}
             saveStatus={saveStatus}
             lastSavedAt={lastSavedAt}

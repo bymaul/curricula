@@ -38,6 +38,8 @@ interface ResumeState {
   deleteResume: (id: string) => void;
   renameResume: (id: string, title: string) => void;
   setActiveResume: (id: string) => void;
+  importResumeData: (data: CVData, title?: string) => void;
+  restoreBackup: (resumes: ResumeRecord[], activeId: string | null) => void;
   updateResumeData: (id: string, data: CVData) => void;
   moveSection: (fromIndex: number, toIndex: number) => void;
   toggleSectionVisibility: (sectionId: SectionId) => void;
@@ -280,6 +282,37 @@ export const useResumeStore = create<ResumeState>()(
           return {
             activeId: id,
             histories: { ...state.histories, [id]: seedHistory(record) },
+          };
+        }),
+
+      importResumeData: (data, title) =>
+        set((state) => {
+          const record = makeResume(data, title);
+          return {
+            resumes: [...state.resumes, record],
+            activeId: record.id,
+            histories: {
+              ...state.histories,
+              [record.id]: seedHistory(record),
+            },
+          };
+        }),
+
+      restoreBackup: (resumes, activeId) =>
+        set((state) => {
+          if (resumes.length === 0) return {};
+          const targetId = resumes.some((r) => r.id === activeId)
+            ? activeId
+            : resumes[0].id;
+          const histories: Record<string, ResumeHistory> = {};
+          for (const record of resumes) {
+            histories[record.id] = seedHistory(record);
+          }
+          return {
+            resumes: [...resumes],
+            activeId: targetId,
+            histories,
+            revision: state.revision + 1,
           };
         }),
 

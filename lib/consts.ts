@@ -56,6 +56,8 @@ export const DEFAULT_SECTION_ORDER: SectionId[] = RENDERABLE_SECTIONS.map(
   (s) => s.id,
 );
 
+export const SECTION_IDS: SectionId[] = RENDERABLE_SECTIONS.map((s) => s.id);
+
 export const SECTIONS: { name: string; fields: (keyof CVData)[] }[] = [
   {
     name: 'Personal',

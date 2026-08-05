@@ -2,12 +2,14 @@
 
 import { cn } from '@/lib/utils';
 import {
+  DatabaseBackup,
   Download,
   EllipsisVertical,
   FileJson,
   FileText,
   Printer,
   Settings2,
+  Share2,
   Sparkles,
   Upload,
 } from 'lucide-react';
@@ -25,6 +27,8 @@ interface ActionsDropdownProps {
   pdfInputRef: React.RefObject<HTMLInputElement | null>;
   handleExportData: () => void;
   handlePrintClick: () => void;
+  onOpenShare: () => void;
+  onOpenBackup: () => void;
   onOpenAIAdjust: () => void;
   onOpenAISettings: () => void;
   onOpenResumes?: () => void;
@@ -38,6 +42,8 @@ export function ActionsDropdown({
   pdfInputRef,
   handleExportData,
   handlePrintClick,
+  onOpenShare,
+  onOpenBackup,
   onOpenAIAdjust,
   onOpenAISettings,
   onOpenResumes,
@@ -91,6 +97,14 @@ export function ActionsDropdown({
         <DropdownMenuItem onClick={handleExportData} className={ITEM_CLASSNAME}>
           <Download className="w-4 h-4 text-muted-foreground" />
           Export JSON
+        </DropdownMenuItem>
+        <DropdownMenuItem onClick={onOpenShare} className={ITEM_CLASSNAME}>
+          <Share2 className="w-4 h-4 text-muted-foreground" />
+          Share Link
+        </DropdownMenuItem>
+        <DropdownMenuItem onClick={onOpenBackup} className={ITEM_CLASSNAME}>
+          <DatabaseBackup className="w-4 h-4 text-muted-foreground" />
+          Backup &amp; Restore
         </DropdownMenuItem>
         <DropdownMenuItem onClick={handlePrintClick} className={ITEM_CLASSNAME}>
           <Printer className="w-4 h-4 text-muted-foreground" />
