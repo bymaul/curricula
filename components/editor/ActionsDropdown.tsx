@@ -81,9 +81,13 @@ export function ActionsDropdown({
           <Upload className="w-4 h-4 text-muted-foreground" />
           Import PDF (AI)
         </DropdownMenuItem>
-        <DropdownMenuItem onClick={onOpenBackup} className={ITEM_CLASSNAME}>
-          <DatabaseBackup className="w-4 h-4 text-muted-foreground" />
-          Backup &amp; Restore
+        <DropdownMenuItem onClick={onOpenAIAdjust} className={ITEM_CLASSNAME}>
+          <Sparkles className="w-4 h-4 text-primary" />
+          AI Adjust
+        </DropdownMenuItem>
+        <DropdownMenuItem onClick={onOpenAISettings} className={ITEM_CLASSNAME}>
+          <Settings2 className="w-4 h-4 text-muted-foreground" />
+          AI Settings
         </DropdownMenuItem>
         <DropdownMenuItem onClick={onOpenShare} className={ITEM_CLASSNAME}>
           <Share2 className="w-4 h-4 text-muted-foreground" />
@@ -93,14 +97,9 @@ export function ActionsDropdown({
           <Printer className="w-4 h-4 text-muted-foreground" />
           Print / PDF
         </DropdownMenuItem>
-        <DropdownMenuSeparator />
-        <DropdownMenuItem onClick={onOpenAIAdjust} className={ITEM_CLASSNAME}>
-          <Sparkles className="w-4 h-4 text-primary" />
-          AI Adjust
-        </DropdownMenuItem>
-        <DropdownMenuItem onClick={onOpenAISettings} className={ITEM_CLASSNAME}>
-          <Settings2 className="w-4 h-4 text-muted-foreground" />
-          AI Settings
+        <DropdownMenuItem onClick={onOpenBackup} className={ITEM_CLASSNAME}>
+          <DatabaseBackup className="w-4 h-4 text-muted-foreground" />
+          Backup &amp; Restore
         </DropdownMenuItem>
       </DropdownMenuContent>
     </DropdownMenu>
