@@ -2,7 +2,7 @@
 
 import { GitHubLink } from '@/components/GitHubLink';
 import { Separator } from '@/components/ui/separator';
-import { cn } from '@/lib/utils';
+import { buttonVariants } from '../ui/button';
 
 interface MobileTopBarProps {
   value: 'edit' | 'preview';
@@ -20,8 +20,8 @@ export function MobileTopBar({ value, onChange }: MobileTopBarProps) {
       <div className="flex items-center justify-between gap-3">
         <h1 className="text-lg font-bold tracking-tight shrink-0">Curricula</h1>
 
-        <div className="flex items-center gap-3">
-          <GitHubLink />
+        <div className="flex items-center gap-2">
+          <GitHubLink size="sm" />
           <Separator orientation="vertical" />
           <div className="flex items-center gap-1">
             {OPTIONS.map(({ value: v, label }) => (
@@ -30,12 +30,10 @@ export function MobileTopBar({ value, onChange }: MobileTopBarProps) {
                 type="button"
                 onClick={() => onChange(v)}
                 aria-current={value === v ? 'page' : undefined}
-                className={cn(
-                  'h-7 px-2 rounded-md text-xs font-semibold transition-colors',
-                  value === v
-                    ? 'text-foreground border border-border'
-                    : 'text-muted-foreground hover:text-foreground',
-                )}
+                className={buttonVariants({
+                  variant: value === v ? 'outline' : 'ghost',
+                  size: 'sm',
+                })}
               >
                 {label}
               </button>
