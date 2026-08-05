@@ -1,12 +1,11 @@
 'use client';
 
 import dynamic from 'next/dynamic';
+import { BrandMark } from '@/components/BrandHeader';
 import { Button } from '@/components/ui/button';
-import { GitHubLink } from '@/components/GitHubLink';
 import { EditorSidebar } from '@/components/editor/EditorSidebar';
 import { MobileTopBar } from '@/components/editor/MobileTopBar';
 import { ResumePreview } from '@/components/editor/ResumePreview';
-import { Separator } from '@/components/ui/separator';
 import { useCVAutoSave } from '@/hooks/useCVAutoSave';
 import { useCVImportExport } from '@/hooks/useCVImportExport';
 import { useCVPrint } from '@/hooks/useCVPrint';
@@ -82,24 +81,17 @@ export default function Home() {
         <MobileTopBar value={mobileView} onChange={setMobileView} />
 
         <header className="hidden lg:flex items-center justify-between shrink-0 mb-6 print:hidden">
-          <h1 className="text-lg font-bold tracking-tight shrink-0">
-            Curricula
-          </h1>
+          <BrandMark />
 
-          <div className="flex items-center gap-2">
-            <GitHubLink />
-            <Separator orientation="vertical" />
-            <Button
-              variant="ghost"
-              type="button"
-              onClick={() => setDialog('resumes', true)}
-              className="hidden lg:flex"
-            >
-              <FileText className="w-4 h-4" data-icon="inline-start" />
-              <span className="truncate">{activeResumeTitle}</span>
-              <ChevronsUpDown className="w-4 h-4" data-icon="inline-end" />
-            </Button>
-          </div>
+          <Button
+            variant="ghost"
+            type="button"
+            onClick={() => setDialog('resumes', true)}
+          >
+            <FileText className="w-4 h-4" data-icon="inline-start" />
+            <span className="truncate">{activeResumeTitle}</span>
+            <ChevronsUpDown className="w-4 h-4" data-icon="inline-end" />
+          </Button>
         </header>
 
         <div className="flex-1 min-h-0 w-full flex flex-col lg:flex-row gap-4 lg:gap-6 px-4 pb-4 lg:px-0 lg:pb-0 print:p-0 print:block">
