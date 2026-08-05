@@ -92,7 +92,7 @@ export default function Home() {
 
           <div className="flex items-center gap-3">
             <GitHubLink />
-            <Separator orientation="vertical" className="h-5" />
+            <Separator orientation="vertical" />
             <Button
               variant="ghost"
               type="button"

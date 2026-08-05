@@ -22,7 +22,7 @@ export function MobileTopBar({ value, onChange }: MobileTopBarProps) {
 
         <div className="flex items-center gap-3">
           <GitHubLink />
-          <Separator orientation="vertical" className="h-5" />
+          <Separator orientation="vertical" />
           <div className="flex items-center gap-1">
             {OPTIONS.map(({ value: v, label }) => (
               <button
