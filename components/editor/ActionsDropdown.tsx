@@ -81,13 +81,13 @@ export function ActionsDropdown({
           <Upload className="w-4 h-4 text-muted-foreground" />
           Import PDF (AI)
         </DropdownMenuItem>
-        <DropdownMenuItem onClick={onOpenShare} className={ITEM_CLASSNAME}>
-          <Share2 className="w-4 h-4 text-muted-foreground" />
-          Share Link
-        </DropdownMenuItem>
         <DropdownMenuItem onClick={onOpenBackup} className={ITEM_CLASSNAME}>
           <DatabaseBackup className="w-4 h-4 text-muted-foreground" />
           Backup &amp; Restore
+        </DropdownMenuItem>
+        <DropdownMenuItem onClick={onOpenShare} className={ITEM_CLASSNAME}>
+          <Share2 className="w-4 h-4 text-muted-foreground" />
+          Share Link
         </DropdownMenuItem>
         <DropdownMenuItem onClick={handlePrintClick} className={ITEM_CLASSNAME}>
           <Printer className="w-4 h-4 text-muted-foreground" />
