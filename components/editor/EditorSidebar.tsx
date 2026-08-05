@@ -5,7 +5,14 @@ import { CVData } from '@/lib/schema';
 import { cn, formatRelativeTime } from '@/lib/utils';
 import { useResumeStore } from '@/store/useResumeStore';
 import { useUIStore } from '@/store/useUIStore';
-import { CheckCircle2, ListOrdered, Loader2 } from 'lucide-react';
+import {
+  CheckCircle2,
+  History,
+  ListOrdered,
+  Loader2,
+  Redo2,
+  Undo2,
+} from 'lucide-react';
 import { useEffect, useState } from 'react';
 import { CVImportPreviewDialog } from '../import/CVImportPreviewDialog';
 import { CertificationsForm } from '../forms/CertificationsForm';
@@ -18,6 +25,7 @@ import { ScrollArea } from '../ui/scroll-area';
 import { Tooltip, TooltipContent, TooltipTrigger } from '../ui/tooltip';
 import { ActionsDropdown } from './ActionsDropdown';
 import { SectionsOrderDialog } from './SectionsOrderDialog';
+import { VersionHistoryDialog } from './VersionHistoryDialog';
 
 export interface EditorFileActions {
   handleExportData: () => void;
@@ -98,6 +106,14 @@ export function EditorSidebar({
         state.resumes.find((r) => r.id === state.activeId)?.sectionOrder,
     ) ?? DEFAULT_SECTION_ORDER;
   const [isSectionsDialogOpen, setIsSectionsDialogOpen] = useState(false);
+  const [isHistoryDialogOpen, setIsHistoryDialogOpen] = useState(false);
+  const undo = useResumeStore((state) => state.undo);
+  const redo = useResumeStore((state) => state.redo);
+  const history = useResumeStore((state) =>
+    state.activeId ? state.histories[state.activeId] : undefined,
+  );
+  const canUndo = (history?.cursor ?? 0) > 0;
+  const canRedo = !!history && history.cursor < history.entries.length - 1;
 
   const navTabs = [
     { key: 'Personal', name: 'Personal' },
@@ -184,6 +200,56 @@ export function EditorSidebar({
         </div>
 
         <div className="flex items-center gap-1">
+          <Tooltip>
+            <TooltipTrigger
+              render={
+                <button
+                  type="button"
+                  onClick={undo}
+                  disabled={!canUndo}
+                  aria-label="Undo"
+                  className="shrink-0 size-8 flex items-center justify-center text-muted-foreground hover:text-foreground hover:bg-muted/50 rounded-md transition-colors disabled:opacity-40 disabled:pointer-events-none"
+                >
+                  <Undo2 className="w-4 h-4" />
+                </button>
+              }
+            />
+            <TooltipContent side="top">Undo</TooltipContent>
+          </Tooltip>
+
+          <Tooltip>
+            <TooltipTrigger
+              render={
+                <button
+                  type="button"
+                  onClick={redo}
+                  disabled={!canRedo}
+                  aria-label="Redo"
+                  className="shrink-0 size-8 flex items-center justify-center text-muted-foreground hover:text-foreground hover:bg-muted/50 rounded-md transition-colors disabled:opacity-40 disabled:pointer-events-none"
+                >
+                  <Redo2 className="w-4 h-4" />
+                </button>
+              }
+            />
+            <TooltipContent side="top">Redo</TooltipContent>
+          </Tooltip>
+
+          <Tooltip>
+            <TooltipTrigger
+              render={
+                <button
+                  type="button"
+                  onClick={() => setIsHistoryDialogOpen(true)}
+                  aria-label="Version history"
+                  className="shrink-0 size-8 flex items-center justify-center text-muted-foreground hover:text-foreground hover:bg-muted/50 rounded-md transition-colors"
+                >
+                  <History className="w-4 h-4" />
+                </button>
+              }
+            />
+            <TooltipContent side="top">Version history</TooltipContent>
+          </Tooltip>
+
           <input
             type="file"
             accept=".json,application/json"
@@ -228,6 +294,11 @@ export function EditorSidebar({
       <SectionsOrderDialog
         open={isSectionsDialogOpen}
         onOpenChange={setIsSectionsDialogOpen}
+      />
+
+      <VersionHistoryDialog
+        open={isHistoryDialogOpen}
+        onOpenChange={setIsHistoryDialogOpen}
       />
     </section>
   );

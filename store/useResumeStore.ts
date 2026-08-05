@@ -13,9 +13,26 @@ export interface ResumeRecord {
   updatedAt: number;
 }
 
+export interface HistorySnapshot {
+  data: CVData;
+  sectionOrder: SectionId[];
+  hiddenSections: SectionId[];
+  at: number;
+}
+
+export interface ResumeHistory {
+  entries: HistorySnapshot[];
+  cursor: number;
+}
+
+const COALESCE_MS = 2_000;
+const MAX_HISTORY_ENTRIES = 100;
+
 interface ResumeState {
   resumes: ResumeRecord[];
   activeId: string | null;
+  histories: Record<string, ResumeHistory>;
+  revision: number;
   createResume: () => void;
   duplicateResume: (id: string) => void;
   deleteResume: (id: string) => void;
@@ -25,6 +42,9 @@ interface ResumeState {
   moveSection: (fromIndex: number, toIndex: number) => void;
   toggleSectionVisibility: (sectionId: SectionId) => void;
   resetSectionOrder: () => void;
+  undo: () => void;
+  redo: () => void;
+  restoreHistory: (id: string, index: number) => void;
 }
 
 const LEGACY_KEY = 'curricula-data';
@@ -73,13 +93,118 @@ function seedResumes(): ResumeRecord[] {
   return [makeResume()];
 }
 
-function updateActive(
+function snapshotFromRecord(record: ResumeRecord): HistorySnapshot {
+  return {
+    data: record.data,
+    sectionOrder: [...record.sectionOrder],
+    hiddenSections: [...record.hiddenSections],
+    at: now(),
+  };
+}
+
+function seedHistory(record: ResumeRecord): ResumeHistory {
+  return { entries: [snapshotFromRecord(record)], cursor: 0 };
+}
+
+function nextStateEqual(
+  a: Pick<HistorySnapshot, 'data' | 'sectionOrder' | 'hiddenSections'>,
+  b: Pick<HistorySnapshot, 'data' | 'sectionOrder' | 'hiddenSections'>,
+): boolean {
+  return (
+    JSON.stringify(a.data) === JSON.stringify(b.data) &&
+    JSON.stringify(a.sectionOrder) === JSON.stringify(b.sectionOrder) &&
+    JSON.stringify(a.hiddenSections) === JSON.stringify(b.hiddenSections)
+  );
+}
+
+function commitHistory(
+  history: ResumeHistory | undefined,
+  next: Pick<HistorySnapshot, 'data' | 'sectionOrder' | 'hiddenSections'>,
+  at: number,
+): ResumeHistory {
+  const truncated = !!(history && history.cursor < history.entries.length - 1);
+  if (truncated && history) {
+    history = {
+      entries: history.entries.slice(0, history.cursor + 1),
+      cursor: history.cursor,
+    };
+  }
+  const tip = history?.entries[history.entries.length - 1];
+  if (tip && nextStateEqual(tip, next)) {
+    return history ?? { entries: [], cursor: -1 };
+  }
+  const entries = history ? [...history.entries] : [];
+  const last = entries[entries.length - 1];
+  const canCoalesce =
+    !truncated && last && entries.length > 1 && at - last.at < COALESCE_MS;
+  if (canCoalesce) {
+    entries[entries.length - 1] = { ...next, at };
+  } else {
+    entries.push({ ...next, at });
+  }
+  if (entries.length > MAX_HISTORY_ENTRIES) {
+    entries.splice(0, entries.length - MAX_HISTORY_ENTRIES);
+  }
+  return { entries, cursor: entries.length - 1 };
+}
+
+function applySnapshot(
   state: ResumeState,
-  fn: (record: ResumeRecord) => ResumeRecord,
+  id: string,
+  index: number,
+): Partial<ResumeState> | undefined {
+  const history = state.histories[id];
+  const snapshot = history?.entries[index];
+  const record = state.resumes.find((r) => r.id === id);
+  if (!history || !snapshot || !record || index === history.cursor) {
+    return undefined;
+  }
+  const updated: ResumeRecord = {
+    ...record,
+    data: snapshot.data,
+    sectionOrder: snapshot.sectionOrder,
+    hiddenSections: snapshot.hiddenSections,
+    updatedAt: now(),
+    title: record.autoTitle
+      ? snapshot.data.name?.trim() || 'Untitled CV'
+      : record.title,
+  };
+  return {
+    resumes: state.resumes.map((r) => (r.id === id ? updated : r)),
+    histories: { ...state.histories, [id]: { ...history, cursor: index } },
+    revision: state.revision + 1,
+  };
+}
+
+function commitActiveSectionChange(
+  state: ResumeState,
+  patch: Partial<Pick<ResumeRecord, 'sectionOrder' | 'hiddenSections'>>,
 ): Partial<ResumeState> {
   const { resumes, activeId } = state;
   if (!activeId) return {};
-  return { resumes: resumes.map((r) => (r.id === activeId ? fn(r) : r)) };
+  const record = resumes.find((r) => r.id === activeId);
+  if (!record) return {};
+  const next = { ...record, ...patch };
+  const unchanged =
+    JSON.stringify(next.sectionOrder) === JSON.stringify(record.sectionOrder) &&
+    JSON.stringify(next.hiddenSections) ===
+      JSON.stringify(record.hiddenSections);
+  if (unchanged) return {};
+  return {
+    resumes: resumes.map((r) => (r.id === activeId ? next : r)),
+    histories: {
+      ...state.histories,
+      [activeId]: commitHistory(
+        state.histories[activeId],
+        {
+          data: record.data,
+          sectionOrder: next.sectionOrder,
+          hiddenSections: next.hiddenSections,
+        },
+        now(),
+      ),
+    },
+  };
 }
 
 export const useResumeStore = create<ResumeState>()(
@@ -87,12 +212,15 @@ export const useResumeStore = create<ResumeState>()(
     (set) => ({
       resumes: [],
       activeId: null,
+      histories: {},
+      revision: 0,
 
       createResume: () => {
         const record = makeResume();
         set((state) => ({
           resumes: [...state.resumes, record],
           activeId: record.id,
+          histories: { ...state.histories, [record.id]: seedHistory(record) },
         }));
       },
 
@@ -110,7 +238,14 @@ export const useResumeStore = create<ResumeState>()(
           const index = state.resumes.findIndex((r) => r.id === id);
           const resumes = [...state.resumes];
           resumes.splice(index + 1, 0, copy);
-          return { resumes, activeId: copy.id };
+          return {
+            resumes,
+            activeId: copy.id,
+            histories: {
+              ...state.histories,
+              [copy.id]: seedHistory(copy),
+            },
+          };
         });
       },
 
@@ -120,7 +255,9 @@ export const useResumeStore = create<ResumeState>()(
           const resumes = state.resumes.filter((r) => r.id !== id);
           const activeId =
             state.activeId === id ? resumes[0].id : state.activeId;
-          return { resumes, activeId };
+          const histories = { ...state.histories };
+          delete histories[id];
+          return { resumes, activeId, histories };
         });
       },
 
@@ -134,63 +271,116 @@ export const useResumeStore = create<ResumeState>()(
         }));
       },
 
-      setActiveResume: (id) => set({ activeId: id }),
+      setActiveResume: (id) =>
+        set((state) => {
+          if (state.activeId === id) return {};
+          const record = state.resumes.find((r) => r.id === id);
+          if (!record) return {};
+          if (state.histories[id]) return { activeId: id };
+          return {
+            activeId: id,
+            histories: { ...state.histories, [id]: seedHistory(record) },
+          };
+        }),
 
       updateResumeData: (id, data) => {
-        set((state) => ({
-          resumes: state.resumes.map((r) =>
-            r.id === id
-              ? {
-                  ...r,
+        set((state) => {
+          const record = state.resumes.find((r) => r.id === id);
+          if (!record) return {};
+          if (JSON.stringify(record.data) === JSON.stringify(data)) return {};
+          const updated: ResumeRecord = {
+            ...record,
+            data,
+            updatedAt: now(),
+            title: record.autoTitle
+              ? data.name?.trim() || 'Untitled CV'
+              : record.title,
+          };
+          return {
+            resumes: state.resumes.map((r) => (r.id === id ? updated : r)),
+            histories: {
+              ...state.histories,
+              [id]: commitHistory(
+                state.histories[id],
+                {
                   data,
-                  updatedAt: now(),
-                  title: r.autoTitle
-                    ? data.name?.trim() || 'Untitled CV'
-                    : r.title,
-                }
-              : r,
-          ),
-        }));
+                  sectionOrder: record.sectionOrder,
+                  hiddenSections: record.hiddenSections,
+                },
+                now(),
+              ),
+            },
+          };
+        });
       },
 
       moveSection: (fromIndex, toIndex) =>
-        set((state) =>
-          updateActive(state, (r) => {
-            const order = [...r.sectionOrder];
-            const [moved] = order.splice(fromIndex, 1);
-            order.splice(toIndex, 0, moved);
-            return { ...r, sectionOrder: order };
-          }),
-        ),
+        set((state) => {
+          const order = [
+            ...(state.resumes.find((r) => r.id === state.activeId)
+              ?.sectionOrder ?? []),
+          ];
+          const [moved] = order.splice(fromIndex, 1);
+          order.splice(toIndex, 0, moved);
+          return commitActiveSectionChange(state, { sectionOrder: order });
+        }),
 
       toggleSectionVisibility: (sectionId) =>
-        set((state) =>
-          updateActive(state, (r) => ({
-            ...r,
-            hiddenSections: r.hiddenSections.includes(sectionId)
-              ? r.hiddenSections.filter((id) => id !== sectionId)
-              : [...r.hiddenSections, sectionId],
-          })),
-        ),
+        set((state) => {
+          const record = state.resumes.find((r) => r.id === state.activeId);
+          if (!record) return {};
+          const hiddenSections = record.hiddenSections.includes(sectionId)
+            ? record.hiddenSections.filter((id) => id !== sectionId)
+            : [...record.hiddenSections, sectionId];
+          return commitActiveSectionChange(state, { hiddenSections });
+        }),
 
       resetSectionOrder: () =>
         set((state) =>
-          updateActive(state, (r) => ({
-            ...r,
+          commitActiveSectionChange(state, {
             sectionOrder: [...DEFAULT_SECTION_ORDER],
-          })),
+          }),
         ),
+
+      undo: () =>
+        set((state) => {
+          const id = state.activeId;
+          if (!id) return {};
+          const history = state.histories[id];
+          if (!history || history.cursor <= 0) return {};
+          return applySnapshot(state, id, history.cursor - 1) ?? {};
+        }),
+
+      redo: () =>
+        set((state) => {
+          const id = state.activeId;
+          if (!id) return {};
+          const history = state.histories[id];
+          if (!history || history.cursor >= history.entries.length - 1) {
+            return {};
+          }
+          return applySnapshot(state, id, history.cursor + 1) ?? {};
+        }),
+
+      restoreHistory: (id, index) =>
+        set((state) => applySnapshot(state, id, index) ?? {}),
     }),
     {
       name: STORAGE_KEY,
+      partialize: (state) => ({
+        resumes: state.resumes,
+        activeId: state.activeId,
+      }),
       merge: (persisted, current) => {
         const base = { ...current, ...(persisted as Partial<ResumeState>) };
-        const resumes = base.resumes ?? [];
+        let resumes = base.resumes ?? [];
         if (resumes.length === 0) {
-          const seeded = seedResumes();
-          return { ...base, resumes: seeded, activeId: seeded[0].id };
+          resumes = seedResumes();
         }
-        return { ...base, activeId: base.activeId ?? resumes[0].id };
+        const activeId = base.activeId ?? resumes[0].id;
+        const record = resumes.find((r) => r.id === activeId);
+        const histories = record ? { [record.id]: seedHistory(record) } : {};
+        return { ...base, resumes, activeId, histories };
       },
     },
   ),

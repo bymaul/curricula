@@ -23,6 +23,9 @@ accounts, no cloud storage.
   a summary of the changes before applying
 - **Multi-resume management** — create, duplicate, rename, delete, and switch
   between resumes
+- **Undo, redo & version history** — every edit (including AI adjustments and
+  imports) is undoable, with an in-session version history to restore earlier
+  states
 - **Section control** — reorder and hide sections per resume
 - **Import/export** — JSON backup, PDF import, JSON export, browser print
 
