@@ -3,6 +3,7 @@
 import { DEFAULT_SECTION_ORDER, RENDERABLE_SECTIONS } from '@/lib/consts';
 import { CVData } from '@/lib/schema';
 import { cn, formatRelativeTime } from '@/lib/utils';
+import { useDialogStore } from '@/store/useDialogStore';
 import { useResumeStore } from '@/store/useResumeStore';
 import { useUIStore } from '@/store/useUIStore';
 import {
@@ -44,9 +45,6 @@ interface EditorSidebarProps {
   lastSavedAt: number | null;
   pendingImport: { data: CVData; warnings: string[] } | null;
   onDiscardImport: () => void;
-  onOpenAIAdjust: () => void;
-  onAISettingsOpenChange: (open: boolean) => void;
-  onOpenResumes?: () => void;
 }
 
 function SaveStatus({
@@ -95,20 +93,14 @@ export function EditorSidebar({
   lastSavedAt,
   pendingImport,
   onDiscardImport,
-  onOpenAIAdjust,
-  onAISettingsOpenChange,
-  onOpenResumes,
 }: EditorSidebarProps) {
   const { activeTab, setActiveTab } = useUIStore();
+  const { dialogs, setDialog } = useDialogStore();
   const sectionOrder =
     useResumeStore(
       (state) =>
         state.resumes.find((r) => r.id === state.activeId)?.sectionOrder,
     ) ?? DEFAULT_SECTION_ORDER;
-  const [isSectionsDialogOpen, setIsSectionsDialogOpen] = useState(false);
-  const [isHistoryDialogOpen, setIsHistoryDialogOpen] = useState(false);
-  const [isShareDialogOpen, setIsShareDialogOpen] = useState(false);
-  const [isBackupDialogOpen, setIsBackupDialogOpen] = useState(false);
   const undo = useResumeStore((state) => state.undo);
   const redo = useResumeStore((state) => state.redo);
   const history = useResumeStore((state) =>
@@ -184,7 +176,7 @@ export function EditorSidebar({
             render={
               <button
                 type="button"
-                onClick={() => setIsSectionsDialogOpen(true)}
+                onClick={() => setDialog('sections', true)}
                 aria-label="Reorder sections"
                 className="shrink-0 w-12 flex items-center justify-center text-muted-foreground hover:text-foreground hover:bg-muted/50 border-l border-border transition-colors"
               >
@@ -241,7 +233,7 @@ export function EditorSidebar({
               render={
                 <button
                   type="button"
-                  onClick={() => setIsHistoryDialogOpen(true)}
+                  onClick={() => setDialog('history', true)}
                   aria-label="Version history"
                   className="shrink-0 size-8 flex items-center justify-center text-muted-foreground hover:text-foreground hover:bg-muted/50 rounded-md transition-colors"
                 >
@@ -264,11 +256,6 @@ export function EditorSidebar({
           <ActionsDropdown
             pdfInputRef={pdfInputRef}
             handlePrintClick={fileActions.handlePrintClick}
-            onOpenShare={() => setIsShareDialogOpen(true)}
-            onOpenBackup={() => setIsBackupDialogOpen(true)}
-            onOpenAIAdjust={onOpenAIAdjust}
-            onOpenAISettings={() => onAISettingsOpenChange(true)}
-            onOpenResumes={onOpenResumes}
           />
         </div>
       </footer>
@@ -286,24 +273,24 @@ export function EditorSidebar({
       />
 
       <SectionsOrderDialog
-        open={isSectionsDialogOpen}
-        onOpenChange={setIsSectionsDialogOpen}
+        open={dialogs.sections}
+        onOpenChange={(open) => setDialog('sections', open)}
       />
 
       <VersionHistoryDialog
-        open={isHistoryDialogOpen}
-        onOpenChange={setIsHistoryDialogOpen}
+        open={dialogs.history}
+        onOpenChange={(open) => setDialog('history', open)}
       />
 
       <ShareDialog
-        open={isShareDialogOpen}
-        onOpenChange={setIsShareDialogOpen}
+        open={dialogs.share}
+        onOpenChange={(open) => setDialog('share', open)}
         cvData={cvData}
       />
 
       <BackupDialog
-        open={isBackupDialogOpen}
-        onOpenChange={setIsBackupDialogOpen}
+        open={dialogs.backup}
+        onOpenChange={(open) => setDialog('backup', open)}
         cvData={cvData}
         onApplyCVData={onApplyCVData}
       />
