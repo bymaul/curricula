@@ -24,21 +24,21 @@ import { SkillsForm } from '../forms/SkillsForm';
 import { ScrollArea } from '../ui/scroll-area';
 import { Tooltip, TooltipContent, TooltipTrigger } from '../ui/tooltip';
 import { ActionsDropdown } from './ActionsDropdown';
+import { BackupDialog } from './BackupDialog';
 import { SectionsOrderDialog } from './SectionsOrderDialog';
+import { ShareDialog } from './ShareDialog';
 import { VersionHistoryDialog } from './VersionHistoryDialog';
 
 export interface EditorFileActions {
-  handleExportData: () => void;
   handlePrintClick: () => void;
-  onImportJSON: (e: React.ChangeEvent<HTMLInputElement>) => void;
   onImportPDF: (e: React.ChangeEvent<HTMLInputElement>) => void;
 }
 
 interface EditorSidebarProps {
   className?: string;
-  jsonInputRef: React.RefObject<HTMLInputElement | null>;
   pdfInputRef: React.RefObject<HTMLInputElement | null>;
   fileActions: EditorFileActions;
+  cvData: CVData;
   onApplyCVData: (data: CVData) => void;
   saveStatus: 'saving' | 'saved';
   lastSavedAt: number | null;
@@ -87,9 +87,9 @@ function SaveStatus({
 
 export function EditorSidebar({
   className,
-  jsonInputRef,
   pdfInputRef,
   fileActions,
+  cvData,
   onApplyCVData,
   saveStatus,
   lastSavedAt,
@@ -107,6 +107,8 @@ export function EditorSidebar({
     ) ?? DEFAULT_SECTION_ORDER;
   const [isSectionsDialogOpen, setIsSectionsDialogOpen] = useState(false);
   const [isHistoryDialogOpen, setIsHistoryDialogOpen] = useState(false);
+  const [isShareDialogOpen, setIsShareDialogOpen] = useState(false);
+  const [isBackupDialogOpen, setIsBackupDialogOpen] = useState(false);
   const undo = useResumeStore((state) => state.undo);
   const redo = useResumeStore((state) => state.redo);
   const history = useResumeStore((state) =>
@@ -252,14 +254,6 @@ export function EditorSidebar({
 
           <input
             type="file"
-            accept=".json,application/json"
-            ref={jsonInputRef}
-            onChange={fileActions.onImportJSON}
-            aria-label="Import CV data (JSON file)"
-            className="hidden"
-          />
-          <input
-            type="file"
             accept=".pdf,application/pdf"
             ref={pdfInputRef}
             onChange={fileActions.onImportPDF}
@@ -268,10 +262,10 @@ export function EditorSidebar({
           />
 
           <ActionsDropdown
-            jsonInputRef={jsonInputRef}
             pdfInputRef={pdfInputRef}
-            handleExportData={fileActions.handleExportData}
             handlePrintClick={fileActions.handlePrintClick}
+            onOpenShare={() => setIsShareDialogOpen(true)}
+            onOpenBackup={() => setIsBackupDialogOpen(true)}
             onOpenAIAdjust={onOpenAIAdjust}
             onOpenAISettings={() => onAISettingsOpenChange(true)}
             onOpenResumes={onOpenResumes}
@@ -299,6 +293,19 @@ export function EditorSidebar({
       <VersionHistoryDialog
         open={isHistoryDialogOpen}
         onOpenChange={setIsHistoryDialogOpen}
+      />
+
+      <ShareDialog
+        open={isShareDialogOpen}
+        onOpenChange={setIsShareDialogOpen}
+        cvData={cvData}
+      />
+
+      <BackupDialog
+        open={isBackupDialogOpen}
+        onOpenChange={setIsBackupDialogOpen}
+        cvData={cvData}
+        onApplyCVData={onApplyCVData}
       />
     </section>
   );

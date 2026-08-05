@@ -27,7 +27,13 @@ accounts, no cloud storage.
   imports) is undoable, with an in-session version history to restore earlier
   states
 - **Section control** — reorder and hide sections per resume
-- **Import/export** — JSON backup, PDF import, JSON export, browser print
+- **PDF import &amp; print** — import CVs from PDF (AI) and print or save as PDF
+  from the browser
+- **Backup &amp; restore** — download every CV as a single backup file, or
+  restore from one (data, section order, and visibility included); single-CV
+  JSON export/import lives here too
+- **Share links** — share any CV as a compressed link; the data travels in the
+  URL itself and is opened as a new resume on the recipient's device
 
 ## Stack
 

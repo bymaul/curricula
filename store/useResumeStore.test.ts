@@ -292,3 +292,102 @@ describe('useResumeStore history', () => {
     expect(persisted.state).not.toHaveProperty('revision');
   });
 });
+
+describe('useResumeStore import & backup', () => {
+  it('imports shared data as a new active resume', () => {
+    getState().createResume();
+    getState().importResumeData(
+      makeData({ name: 'Grace Hopper' }),
+      'Grace Hopper',
+    );
+
+    const resume = activeResume();
+    expect(resume.title).toBe('Grace Hopper');
+    expect(resume.data.name).toBe('Grace Hopper');
+    expect(resume.autoTitle).toBe(true);
+    expect(getHistory().entries).toHaveLength(1);
+    expect(getHistory().entries[0].data).toEqual(
+      makeData({ name: 'Grace Hopper' }),
+    );
+  });
+
+  it('uses an explicit title when importing', () => {
+    getState().createResume();
+    getState().importResumeData(
+      makeData({ name: 'Grace Hopper' }),
+      'Shared CV',
+    );
+    expect(activeResume().title).toBe('Shared CV');
+    expect(activeResume().data.name).toBe('Grace Hopper');
+  });
+
+  it('restores a backup and reseeds history for every resume', () => {
+    getState().createResume();
+    const originalId = activeId();
+    const backup: ResumeRecord[] = [
+      {
+        id: 'r1',
+        title: 'Resume A',
+        data: makeData({ jobTitle: 'A' }),
+        sectionOrder: [...DEFAULT_SECTION_ORDER],
+        hiddenSections: ['skills'],
+        autoTitle: false,
+        updatedAt: 1000,
+      },
+      {
+        id: 'r2',
+        title: 'Resume B',
+        data: makeData({ jobTitle: 'B' }),
+        sectionOrder: [...DEFAULT_SECTION_ORDER],
+        hiddenSections: [],
+        autoTitle: true,
+        updatedAt: 2000,
+      },
+    ];
+    const revisionBefore = getState().revision;
+
+    getState().restoreBackup(backup, 'r2');
+
+    expect(getState().resumes.map((r) => r.id)).toEqual(['r1', 'r2']);
+    expect(getState().activeId).toBe('r2');
+    expect(getState().histories['r1'].entries).toHaveLength(1);
+    expect(getState().histories['r2'].entries).toHaveLength(1);
+    expect(getState().histories['r2'].entries[0].data).toEqual(
+      makeData({ jobTitle: 'B' }),
+    );
+    expect(getState().histories[originalId]).toBeUndefined();
+    expect(getState().revision).toBe(revisionBefore + 1);
+  });
+
+  it('falls back to the first resume when the stored active id is missing', () => {
+    getState().createResume();
+    getState().restoreBackup(
+      [
+        {
+          id: 'r1',
+          title: 'Resume A',
+          data: makeData(),
+          sectionOrder: [...DEFAULT_SECTION_ORDER],
+          hiddenSections: [],
+          autoTitle: true,
+          updatedAt: 1000,
+        },
+      ],
+      'missing',
+    );
+
+    expect(getState().activeId).toBe('r1');
+    expect(getState().revision).toBeGreaterThan(0);
+  });
+
+  it('ignores an empty backup', () => {
+    getState().createResume();
+    const resumesBefore = getState().resumes;
+    const revisionBefore = getState().revision;
+
+    getState().restoreBackup([], null);
+
+    expect(getState().resumes).toBe(resumesBefore);
+    expect(getState().revision).toBe(revisionBefore);
+  });
+});

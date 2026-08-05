@@ -2,12 +2,12 @@
 
 import { cn } from '@/lib/utils';
 import {
-  Download,
+  DatabaseBackup,
   EllipsisVertical,
-  FileJson,
   FileText,
   Printer,
   Settings2,
+  Share2,
   Sparkles,
   Upload,
 } from 'lucide-react';
@@ -21,10 +21,10 @@ import {
 } from '../ui/dropdown-menu';
 
 interface ActionsDropdownProps {
-  jsonInputRef: React.RefObject<HTMLInputElement | null>;
   pdfInputRef: React.RefObject<HTMLInputElement | null>;
-  handleExportData: () => void;
   handlePrintClick: () => void;
+  onOpenShare: () => void;
+  onOpenBackup: () => void;
   onOpenAIAdjust: () => void;
   onOpenAISettings: () => void;
   onOpenResumes?: () => void;
@@ -34,10 +34,10 @@ interface ActionsDropdownProps {
 const ITEM_CLASSNAME = 'gap-3 py-2.5 px-3 text-sm cursor-pointer rounded-md';
 
 export function ActionsDropdown({
-  jsonInputRef,
   pdfInputRef,
-  handleExportData,
   handlePrintClick,
+  onOpenShare,
+  onOpenBackup,
   onOpenAIAdjust,
   onOpenAISettings,
   onOpenResumes,
@@ -75,28 +75,12 @@ export function ActionsDropdown({
           </>
         )}
         <DropdownMenuItem
-          onClick={() => jsonInputRef.current?.click()}
-          className={ITEM_CLASSNAME}
-        >
-          <FileJson className="w-4 h-4 text-muted-foreground" />
-          Import JSON
-        </DropdownMenuItem>
-        <DropdownMenuItem
           onClick={handleImportPDFClick}
           className={ITEM_CLASSNAME}
         >
           <Upload className="w-4 h-4 text-muted-foreground" />
           Import PDF (AI)
         </DropdownMenuItem>
-        <DropdownMenuItem onClick={handleExportData} className={ITEM_CLASSNAME}>
-          <Download className="w-4 h-4 text-muted-foreground" />
-          Export JSON
-        </DropdownMenuItem>
-        <DropdownMenuItem onClick={handlePrintClick} className={ITEM_CLASSNAME}>
-          <Printer className="w-4 h-4 text-muted-foreground" />
-          Print / PDF
-        </DropdownMenuItem>
-        <DropdownMenuSeparator />
         <DropdownMenuItem onClick={onOpenAIAdjust} className={ITEM_CLASSNAME}>
           <Sparkles className="w-4 h-4 text-primary" />
           AI Adjust
@@ -104,6 +88,20 @@ export function ActionsDropdown({
         <DropdownMenuItem onClick={onOpenAISettings} className={ITEM_CLASSNAME}>
           <Settings2 className="w-4 h-4 text-muted-foreground" />
           AI Settings
+        </DropdownMenuItem>
+        <DropdownMenuSeparator />
+        <DropdownMenuItem onClick={onOpenShare} className={ITEM_CLASSNAME}>
+          <Share2 className="w-4 h-4 text-muted-foreground" />
+          Share Link
+        </DropdownMenuItem>
+        <DropdownMenuItem onClick={handlePrintClick} className={ITEM_CLASSNAME}>
+          <Printer className="w-4 h-4 text-muted-foreground" />
+          Print / PDF
+        </DropdownMenuItem>
+        <DropdownMenuSeparator />
+        <DropdownMenuItem onClick={onOpenBackup} className={ITEM_CLASSNAME}>
+          <DatabaseBackup className="w-4 h-4 text-muted-foreground" />
+          Backup &amp; Restore
         </DropdownMenuItem>
       </DropdownMenuContent>
     </DropdownMenu>
