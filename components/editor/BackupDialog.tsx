@@ -11,37 +11,57 @@ import {
 } from '@/components/ui/dialog';
 import { toast } from '@/components/ui/toast';
 import { BackupFile, parseBackup, serializeBackup } from '@/lib/backup';
+import { CVData, cvSchema } from '@/lib/schema';
 import { useResumeStore } from '@/store/useResumeStore';
-import { FileJson, FolderDown, RefreshCcw, Upload } from 'lucide-react';
+import {
+  Download,
+  FileJson,
+  FolderDown,
+  RefreshCcw,
+  Upload,
+} from 'lucide-react';
 import { useRef, useState } from 'react';
 
 interface BackupDialogProps {
   open: boolean;
   onOpenChange: (open: boolean) => void;
+  cvData: CVData;
+  onApplyCVData: (data: CVData) => void;
 }
 
-export function BackupDialog({ open, onOpenChange }: BackupDialogProps) {
-  const fileInputRef = useRef<HTMLInputElement>(null);
+function downloadFile(content: string, filename: string) {
+  const blob = new Blob([content], { type: 'application/json' });
+  const url = URL.createObjectURL(blob);
+  const link = document.createElement('a');
+  link.href = url;
+  link.download = filename;
+  link.click();
+  URL.revokeObjectURL(url);
+}
+
+export function BackupDialog({
+  open,
+  onOpenChange,
+  cvData,
+  onApplyCVData,
+}: BackupDialogProps) {
+  const backupInputRef = useRef<HTMLInputElement>(null);
+  const jsonInputRef = useRef<HTMLInputElement>(null);
   const [pendingRestore, setPendingRestore] = useState<BackupFile | null>(null);
 
   const handleDownload = () => {
     const { resumes, activeId } = useResumeStore.getState();
-    const blob = new Blob([serializeBackup(resumes, activeId)], {
-      type: 'application/json',
-    });
-    const url = URL.createObjectURL(blob);
-    const link = document.createElement('a');
-    link.href = url;
-    link.download = `curricula-backup-${new Date().toISOString().slice(0, 10)}.json`;
-    link.click();
-    URL.revokeObjectURL(url);
+    downloadFile(
+      serializeBackup(resumes, activeId),
+      `curricula-backup-${new Date().toISOString().slice(0, 10)}.json`,
+    );
     toast.add({
       type: 'success',
       description: `Backed up ${resumes.length} resume${resumes.length === 1 ? '' : 's'}.`,
     });
   };
 
-  const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+  const handleBackupFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0];
     if (!file) return;
     e.target.value = '';
@@ -75,6 +95,49 @@ export function BackupDialog({ open, onOpenChange }: BackupDialogProps) {
     });
   };
 
+  const handleExportJSON = () => {
+    downloadFile(
+      JSON.stringify(cvData, null, 2),
+      `${cvData.name ? cvData.name.replace(/\s+/g, '_') : 'My'}_CV_Data.json`,
+    );
+  };
+
+  const handleImportJSON = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    if (!file) return;
+    const reader = new FileReader();
+    reader.onload = (event) => {
+      try {
+        const parsed = JSON.parse(event.target?.result as string);
+        const result = cvSchema.safeParse(parsed);
+        if (!result.success) {
+          toast.add({
+            type: 'error',
+            description:
+              'Invalid CV format. The file is corrupted or from an older version.',
+            priority: 'high',
+          });
+          return;
+        }
+        onApplyCVData(result.data);
+        toast.add({
+          type: 'success',
+          description: 'CV Data imported successfully!',
+        });
+      } catch {
+        toast.add({
+          type: 'error',
+          description:
+            'Could not read file. Please upload a valid JSON backup.',
+          priority: 'high',
+        });
+      } finally {
+        e.target.value = '';
+      }
+    };
+    reader.readAsText(file);
+  };
+
   return (
     <>
       <Dialog open={open} onOpenChange={onOpenChange}>
@@ -88,29 +151,64 @@ export function BackupDialog({ open, onOpenChange }: BackupDialogProps) {
             </DialogDescription>
           </DialogHeader>
 
+          <div className="space-y-4">
+            <div className="space-y-2">
+              <h3 className="text-[10px] font-semibold uppercase tracking-wider text-muted-foreground">
+                All CVs
+              </h3>
+              <Button onClick={handleDownload} className="w-full">
+                <FolderDown className="w-4 h-4" />
+                Download backup
+              </Button>
+              <Button
+                variant="outline"
+                onClick={() => backupInputRef.current?.click()}
+                className="w-full"
+              >
+                <Upload className="w-4 h-4" />
+                Restore from file
+              </Button>
+            </div>
+
+            <div className="space-y-2">
+              <h3 className="text-[10px] font-semibold uppercase tracking-wider text-muted-foreground">
+                Current CV
+              </h3>
+              <Button
+                variant="outline"
+                onClick={handleExportJSON}
+                className="w-full"
+              >
+                <Download className="w-4 h-4" />
+                Export JSON
+              </Button>
+              <Button
+                variant="outline"
+                onClick={() => jsonInputRef.current?.click()}
+                className="w-full"
+              >
+                <FileJson className="w-4 h-4" />
+                Import JSON
+              </Button>
+            </div>
+          </div>
+
           <input
             type="file"
             accept=".json,application/json"
-            ref={fileInputRef}
-            onChange={handleFileChange}
+            ref={backupInputRef}
+            onChange={handleBackupFileChange}
             aria-label="Restore from backup file"
             className="hidden"
           />
-
-          <div className="space-y-2">
-            <Button onClick={handleDownload} className="w-full">
-              <FolderDown className="w-4 h-4" />
-              Download backup
-            </Button>
-            <Button
-              variant="outline"
-              onClick={() => fileInputRef.current?.click()}
-              className="w-full"
-            >
-              <Upload className="w-4 h-4" />
-              Restore from file
-            </Button>
-          </div>
+          <input
+            type="file"
+            accept=".json,application/json"
+            ref={jsonInputRef}
+            onChange={handleImportJSON}
+            aria-label="Import CV data (JSON file)"
+            className="hidden"
+          />
         </DialogContent>
       </Dialog>
 

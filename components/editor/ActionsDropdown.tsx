@@ -3,9 +3,7 @@
 import { cn } from '@/lib/utils';
 import {
   DatabaseBackup,
-  Download,
   EllipsisVertical,
-  FileJson,
   FileText,
   Printer,
   Settings2,
@@ -23,9 +21,7 @@ import {
 } from '../ui/dropdown-menu';
 
 interface ActionsDropdownProps {
-  jsonInputRef: React.RefObject<HTMLInputElement | null>;
   pdfInputRef: React.RefObject<HTMLInputElement | null>;
-  handleExportData: () => void;
   handlePrintClick: () => void;
   onOpenShare: () => void;
   onOpenBackup: () => void;
@@ -38,9 +34,7 @@ interface ActionsDropdownProps {
 const ITEM_CLASSNAME = 'gap-3 py-2.5 px-3 text-sm cursor-pointer rounded-md';
 
 export function ActionsDropdown({
-  jsonInputRef,
   pdfInputRef,
-  handleExportData,
   handlePrintClick,
   onOpenShare,
   onOpenBackup,
@@ -81,22 +75,11 @@ export function ActionsDropdown({
           </>
         )}
         <DropdownMenuItem
-          onClick={() => jsonInputRef.current?.click()}
-          className={ITEM_CLASSNAME}
-        >
-          <FileJson className="w-4 h-4 text-muted-foreground" />
-          Import JSON
-        </DropdownMenuItem>
-        <DropdownMenuItem
           onClick={handleImportPDFClick}
           className={ITEM_CLASSNAME}
         >
           <Upload className="w-4 h-4 text-muted-foreground" />
           Import PDF (AI)
-        </DropdownMenuItem>
-        <DropdownMenuItem onClick={handleExportData} className={ITEM_CLASSNAME}>
-          <Download className="w-4 h-4 text-muted-foreground" />
-          Export JSON
         </DropdownMenuItem>
         <DropdownMenuItem onClick={onOpenShare} className={ITEM_CLASSNAME}>
           <Share2 className="w-4 h-4 text-muted-foreground" />

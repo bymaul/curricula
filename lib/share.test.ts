@@ -59,10 +59,28 @@ describe('share payload', () => {
     expect(await parseSharePayload(payload)).toEqual(data);
   });
 
-  it('returns null when the payload does not match the schema', async () => {
-    const invalid = makeData();
-    invalid.email = 'not-an-email';
-    const payload = encodeUncompressed(invalid);
+  it('round-trips an in-progress CV with empty fields', async () => {
+    const incomplete: CVData = {
+      name: '',
+      jobTitle: '',
+      email: '',
+      phone: '',
+      location: '',
+      links: [],
+      summary: '',
+      experience: [],
+      projects: [],
+      education: [],
+      skills: [],
+      certifications: [],
+    };
+
+    const payload = await buildSharePayload(incomplete);
+    expect(await parseSharePayload(payload)).toEqual(incomplete);
+  });
+
+  it('returns null when the payload is missing a required field', async () => {
+    const payload = encodeUncompressed({ ...makeData(), name: null });
 
     expect(await parseSharePayload(payload)).toBeNull();
   });

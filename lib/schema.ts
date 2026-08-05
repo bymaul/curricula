@@ -54,6 +54,41 @@ export const cvSchema = z.object({
 
 export type CVData = z.infer<typeof cvSchema>;
 
+export const cvDataStoredSchema = z.object({
+  name: z.string(),
+  jobTitle: z.string(),
+  email: z.string(),
+  phone: z.string(),
+  location: z.string().optional(),
+  links: z.array(z.object({ url: z.string() })),
+  summary: z.string(),
+  experience: z.array(
+    z.object({
+      role: z.string(),
+      company: z.string(),
+      date: z.string(),
+      location: z.string().optional(),
+      description: z.string(),
+    }),
+  ),
+  projects: z.array(
+    z.object({ name: z.string(), date: z.string(), description: z.string() }),
+  ),
+  education: z.array(
+    z.object({
+      degree: z.string(),
+      institution: z.string(),
+      date: z.string(),
+      location: z.string().optional(),
+      description: z.string(),
+    }),
+  ),
+  skills: z.array(z.object({ category: z.string(), items: z.string() })),
+  certifications: z.array(
+    z.object({ name: z.string(), issuer: z.string(), date: z.string() }),
+  ),
+});
+
 export const initialCVState: CVData = {
   name: '',
   jobTitle: '',

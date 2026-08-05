@@ -58,6 +58,31 @@ describe('backup', () => {
     expect(parsed!.resumes.map((r) => r.title)).toEqual(['First', 'Second']);
   });
 
+  it('round-trips an in-progress CV with empty fields', () => {
+    const record = makeRecord({
+      title: 'Untitled CV',
+      data: {
+        name: '',
+        jobTitle: '',
+        email: '',
+        phone: '',
+        location: '',
+        links: [],
+        summary: '',
+        experience: [],
+        projects: [],
+        education: [],
+        skills: [],
+        certifications: [],
+      },
+    });
+
+    const parsed = parseBackup(serializeBackup([record], 'r1'));
+    expect(parsed).not.toBeNull();
+    expect(parsed!.resumes[0].data).toEqual(record.data);
+    expect(parsed!.resumes[0].title).toBe('Untitled CV');
+  });
+
   it('rejects invalid JSON', () => {
     expect(parseBackup('not json')).toBeNull();
   });

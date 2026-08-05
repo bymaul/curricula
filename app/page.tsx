@@ -56,13 +56,7 @@ export default function Home() {
   const [isResumesDialogOpen, setIsResumesDialogOpen] = useState(false);
 
   const { mounted, cvData, saveStatus, lastSavedAt } = useCVAutoSave(methods);
-  const {
-    jsonInputRef,
-    pdfInputRef,
-    handleExportData,
-    handleImportJSON,
-    handleImportPDF,
-  } = useCVImportExport(cvData, methods.reset, {
+  const { pdfInputRef, handleImportPDF } = useCVImportExport({
     onPDFImported: setPendingImport,
   });
   const { printRef, handlePrintClick } = useCVPrint(cvData, methods);
@@ -115,12 +109,9 @@ export default function Home() {
               mobileView === 'edit' ? 'flex' : 'hidden',
               'lg:flex',
             )}
-            jsonInputRef={jsonInputRef}
             pdfInputRef={pdfInputRef}
             fileActions={{
-              handleExportData,
               handlePrintClick,
-              onImportJSON: handleImportJSON,
               onImportPDF: handleImportPDF,
             }}
             cvData={cvData}

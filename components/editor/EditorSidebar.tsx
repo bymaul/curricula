@@ -30,15 +30,12 @@ import { ShareDialog } from './ShareDialog';
 import { VersionHistoryDialog } from './VersionHistoryDialog';
 
 export interface EditorFileActions {
-  handleExportData: () => void;
   handlePrintClick: () => void;
-  onImportJSON: (e: React.ChangeEvent<HTMLInputElement>) => void;
   onImportPDF: (e: React.ChangeEvent<HTMLInputElement>) => void;
 }
 
 interface EditorSidebarProps {
   className?: string;
-  jsonInputRef: React.RefObject<HTMLInputElement | null>;
   pdfInputRef: React.RefObject<HTMLInputElement | null>;
   fileActions: EditorFileActions;
   cvData: CVData;
@@ -90,7 +87,6 @@ function SaveStatus({
 
 export function EditorSidebar({
   className,
-  jsonInputRef,
   pdfInputRef,
   fileActions,
   cvData,
@@ -258,14 +254,6 @@ export function EditorSidebar({
 
           <input
             type="file"
-            accept=".json,application/json"
-            ref={jsonInputRef}
-            onChange={fileActions.onImportJSON}
-            aria-label="Import CV data (JSON file)"
-            className="hidden"
-          />
-          <input
-            type="file"
             accept=".pdf,application/pdf"
             ref={pdfInputRef}
             onChange={fileActions.onImportPDF}
@@ -274,9 +262,7 @@ export function EditorSidebar({
           />
 
           <ActionsDropdown
-            jsonInputRef={jsonInputRef}
             pdfInputRef={pdfInputRef}
-            handleExportData={fileActions.handleExportData}
             handlePrintClick={fileActions.handlePrintClick}
             onOpenShare={() => setIsShareDialogOpen(true)}
             onOpenBackup={() => setIsBackupDialogOpen(true)}
@@ -318,6 +304,8 @@ export function EditorSidebar({
       <BackupDialog
         open={isBackupDialogOpen}
         onOpenChange={setIsBackupDialogOpen}
+        cvData={cvData}
+        onApplyCVData={onApplyCVData}
       />
     </section>
   );

@@ -1,6 +1,6 @@
 import { z } from 'zod';
 import { SECTION_IDS, SectionId } from '@/lib/consts';
-import { cvSchema } from '@/lib/schema';
+import { cvDataStoredSchema } from '@/lib/schema';
 import type { ResumeRecord } from '@/store/useResumeStore';
 
 const sectionIdSchema = z
@@ -18,7 +18,7 @@ export const backupSchema = z.object({
     z.object({
       id: z.string().min(1),
       title: z.string(),
-      data: cvSchema,
+      data: cvDataStoredSchema,
       sectionOrder: z.array(sectionIdSchema),
       hiddenSections: z.array(sectionIdSchema),
       autoTitle: z.boolean(),

@@ -1,4 +1,4 @@
-import { CVData, cvSchema } from '@/lib/schema';
+import { CVData, cvDataStoredSchema } from '@/lib/schema';
 
 const SHARE_PREFIX = 'c1:';
 
@@ -49,7 +49,7 @@ export async function parseSharePayload(
       json = new TextDecoder().decode(base64urlToBytes(payload));
     }
     const parsed = JSON.parse(json);
-    const result = cvSchema.safeParse(parsed);
+    const result = cvDataStoredSchema.safeParse(parsed);
     return result.success ? result.data : null;
   } catch {
     return null;
