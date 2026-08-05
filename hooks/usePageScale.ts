@@ -1,6 +1,7 @@
 'use client';
 
 import { useEffect, useLayoutEffect, useRef, useState } from 'react';
+import { useUIStore } from '@/store/useUIStore';
 
 const MIN_SCALE = 0.3;
 const MAX_SCALE = 1.5;
@@ -13,8 +14,10 @@ interface UsePageScaleOptions {
 export function usePageScale({ frameWidthPx, isVisible }: UsePageScaleOptions) {
   const panelRef = useRef<HTMLDivElement>(null);
   const frameRef = useRef<HTMLDivElement>(null);
-  const [scale, setScale] = useState(1);
+  const scale = useUIStore((state) => state.scale);
+  const setScale = useUIStore((state) => state.setScale);
   const [frameHeight, setFrameHeight] = useState<number>();
+  const activeScale = scale ?? 1;
 
   const fitToWidth = () => {
     const panel = panelRef.current;
@@ -25,32 +28,38 @@ export function usePageScale({ frameWidthPx, isVisible }: UsePageScaleOptions) {
 
   useLayoutEffect(() => {
     if (!isVisible) return;
-    fitToWidth();
+    if (scale === null) fitToWidth();
     window.addEventListener('resize', fitToWidth);
     return () => window.removeEventListener('resize', fitToWidth);
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [isVisible, frameWidthPx]);
+  }, [isVisible, frameWidthPx, scale, setScale]);
 
   useEffect(() => {
     const frame = frameRef.current;
     if (!frame) return;
-    const update = () => setFrameHeight(frame.scrollHeight * scale);
+    const update = () => setFrameHeight(frame.scrollHeight * activeScale);
     update();
     const ro = new ResizeObserver(update);
     ro.observe(frame);
     return () => ro.disconnect();
-  }, [scale]);
+  }, [activeScale]);
 
   return {
     panelRef,
     frameRef,
-    scale,
+    scale: activeScale,
     frameHeight,
     zoomTo: (next: number) =>
       setScale(Math.min(MAX_SCALE, Math.max(MIN_SCALE, +next.toFixed(2)))),
-    zoomIn: () => setScale((s) => Math.min(MAX_SCALE, +(s + 0.1).toFixed(2))),
-    zoomOut: () => setScale((s) => Math.max(MIN_SCALE, +(s - 0.1).toFixed(2))),
-    zoomReset: fitToWidth,
+    zoomIn: () => {
+      const current = useUIStore.getState().scale ?? 1;
+      setScale(Math.min(MAX_SCALE, +(current + 0.1).toFixed(2)));
+    },
+    zoomOut: () => {
+      const current = useUIStore.getState().scale ?? 1;
+      setScale(Math.max(MIN_SCALE, +(current - 0.1).toFixed(2)));
+    },
+    zoomReset: () => setScale(null),
     minScale: MIN_SCALE,
     maxScale: MAX_SCALE,
   };
