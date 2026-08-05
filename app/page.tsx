@@ -63,7 +63,6 @@ export default function Home() {
   const activeResume = useResumeStore((state) =>
     state.resumes.find((r) => r.id === state.activeId),
   );
-  const activeResumeTitle = activeResume?.title ?? 'Untitled CV';
 
   const handlePreviewSectionClick = (sectionId: SectionId) => {
     useUIStore.getState().setActiveTab(getSectionTabName(sectionId));
