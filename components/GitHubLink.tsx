@@ -1,4 +1,3 @@
-import { VariantProps } from 'class-variance-authority';
 import { buttonVariants } from './ui/button';
 
 const REPO_URL = 'https://github.com/bymaul/curricula';
@@ -16,18 +15,14 @@ function GitHubIcon({ className }: { className?: string }) {
   );
 }
 
-export function GitHubLink({
-  size = 'default',
-}: {
-  size?: VariantProps<typeof buttonVariants>['size'];
-}) {
+export function GitHubLink() {
   return (
     <a
       href={REPO_URL}
       target="_blank"
       rel="noopener noreferrer"
       aria-label="GitHub repository"
-      className={buttonVariants({ variant: 'ghost', size: size })}
+      className={buttonVariants({ variant: 'ghost', size: 'icon' })}
     >
       <GitHubIcon className="w-4 h-4" />
     </a>
