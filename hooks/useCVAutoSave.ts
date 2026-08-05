@@ -25,28 +25,39 @@ export function useCVAutoSave(methods: UseFormReturn<CVData>) {
     state.resumes.find((r) => r.id === state.activeId),
   );
   const updateResumeData = useResumeStore((state) => state.updateResumeData);
+  const revision = useResumeStore((state) => state.revision);
   const activeId = activeResume?.id ?? null;
-
-  useEffect(() => {
-    if (!activeResume) return;
-    reset(activeResume.data);
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [activeId]);
 
   const cvData = watch();
   const snapshot = JSON.stringify(cvData);
   const prevSnapshotRef = useRef(snapshot);
 
   useEffect(() => {
+    if (!activeResume) return;
+    reset(activeResume.data);
+    prevSnapshotRef.current = snapshot;
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [activeId, revision]);
+
+  useEffect(() => {
     if (prevSnapshotRef.current === snapshot) return;
     prevSnapshotRef.current = snapshot;
-    setSaveStatus('saving');
-  }, [snapshot]);
+    const stored = useResumeStore
+      .getState()
+      .resumes.find((r) => r.id === activeId)?.data;
+    const isSynced = !!stored && JSON.stringify(stored) === snapshot;
+    setSaveStatus(isSynced ? 'saved' : 'saving');
+  }, [snapshot, activeId]);
 
   useEffect(() => {
     if (saveStatus !== 'saving' || !activeId) return;
 
     const id = activeId;
+    const stored = useResumeStore
+      .getState()
+      .resumes.find((r) => r.id === id)?.data;
+    if (stored && JSON.stringify(stored) === snapshot) return;
+
     const timer = setTimeout(() => {
       updateResumeData(id, cvData);
       setLastSavedAt(Date.now());
@@ -54,7 +65,7 @@ export function useCVAutoSave(methods: UseFormReturn<CVData>) {
     }, SAVE_DEBOUNCE_MS);
 
     return () => clearTimeout(timer);
-  }, [saveStatus, snapshot, activeId, cvData, updateResumeData]);
+  }, [saveStatus, snapshot, activeId, cvData, revision, updateResumeData]);
 
   return { mounted, cvData, saveStatus, lastSavedAt };
 }
