@@ -89,6 +89,7 @@ export function ActionsDropdown({
           <Settings2 className="w-4 h-4 text-muted-foreground" />
           AI Settings
         </DropdownMenuItem>
+        <DropdownMenuSeparator />
         <DropdownMenuItem onClick={onOpenShare} className={ITEM_CLASSNAME}>
           <Share2 className="w-4 h-4 text-muted-foreground" />
           Share Link
@@ -97,6 +98,7 @@ export function ActionsDropdown({
           <Printer className="w-4 h-4 text-muted-foreground" />
           Print / PDF
         </DropdownMenuItem>
+        <DropdownMenuSeparator />
         <DropdownMenuItem onClick={onOpenBackup} className={ITEM_CLASSNAME}>
           <DatabaseBackup className="w-4 h-4 text-muted-foreground" />
           Backup &amp; Restore
