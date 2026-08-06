@@ -4,6 +4,7 @@ import {
   AI_ADJUST_SCOPES,
   AI_PROVIDERS,
   DEFAULT_SECTION_ORDER,
+  DESKTOP_MEDIA_QUERY,
   RENDERABLE_SECTIONS,
   SECTIONS,
   getSectionIdFromTab,
@@ -30,6 +31,12 @@ describe('AI_PROVIDERS', () => {
       'google',
     ]);
     expect(AI_PROVIDERS[2].defaultModel).toBeTruthy();
+  });
+});
+
+describe('DESKTOP_MEDIA_QUERY', () => {
+  it('matches the desktop breakpoint', () => {
+    expect(DESKTOP_MEDIA_QUERY).toBe('(min-width: 1024px)');
   });
 });
 
