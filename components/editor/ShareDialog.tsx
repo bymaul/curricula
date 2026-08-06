@@ -9,6 +9,7 @@ import {
   DialogTitle,
 } from '@/components/ui/dialog';
 import { toast } from '@/components/ui/toast';
+import { useI18n } from '@/components/I18nProvider';
 import { buildShareUrl } from '@/lib/share';
 import { CVData } from '@/lib/schema';
 import { Check, Copy, ExternalLink, Loader2, Share2 } from 'lucide-react';
@@ -23,6 +24,7 @@ interface ShareDialogProps {
 function ShareLinkContent({ cvData }: { cvData: CVData }) {
   const [link, setLink] = useState<string | null>(null);
   const [copied, setCopied] = useState(false);
+  const { t } = useI18n();
 
   useEffect(() => {
     let cancelled = false;
@@ -41,13 +43,13 @@ function ShareLinkContent({ cvData }: { cvData: CVData }) {
       setCopied(true);
       toast.add({
         type: 'success',
-        description: 'Share link copied to clipboard.',
+        description: t('share.toast.copied'),
       });
       setTimeout(() => setCopied(false), 2000);
     } catch {
       toast.add({
         type: 'error',
-        description: 'Could not copy the link. Select it manually.',
+        description: t('share.toast.copyFailed'),
         priority: 'high',
       });
     }
@@ -57,7 +59,7 @@ function ShareLinkContent({ cvData }: { cvData: CVData }) {
     return (
       <div className="flex items-center justify-center gap-2 py-8 text-sm text-muted-foreground">
         <Loader2 className="w-4 h-4 animate-spin" />
-        Building share link…
+        {t('share.building')}
       </div>
     );
   }
@@ -67,7 +69,7 @@ function ShareLinkContent({ cvData }: { cvData: CVData }) {
       <textarea
         readOnly
         value={link}
-        aria-label="Share link"
+        aria-label={t('share.linkAria')}
         className="h-24 w-full resize-none rounded-lg border border-input bg-transparent px-2.5 py-2 text-xs break-all leading-relaxed outline-none focus-visible:border-ring focus-visible:ring-3 focus-visible:ring-ring/50"
         onFocus={(e) => e.currentTarget.select()}
       />
@@ -78,31 +80,29 @@ function ShareLinkContent({ cvData }: { cvData: CVData }) {
           ) : (
             <Copy className="w-4 h-4" />
           )}
-          {copied ? 'Copied' : 'Copy link'}
+          {copied ? t('share.copied') : t('share.copyLink')}
         </Button>
         <Button onClick={() => window.open(link, '_blank')}>
           <ExternalLink className="w-4 h-4" />
-          Open
+          {t('share.open')}
         </Button>
       </div>
       <p className="flex items-center gap-1.5 text-xs text-muted-foreground">
         <Share2 className="w-3.5 h-3.5 shrink-0" />
-        The link can be long for detailed CVs.
+        {t('share.longLinkNote')}
       </p>
     </>
   );
 }
 
 export function ShareDialog({ open, onOpenChange, cvData }: ShareDialogProps) {
+  const { t } = useI18n();
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
       <DialogContent className="sm:max-w-md">
         <DialogHeader>
-          <DialogTitle>Share CV</DialogTitle>
-          <DialogDescription>
-            Anyone with this link can open this CV in Curricula. Your data is
-            encoded in the link itself and never leaves the browser.
-          </DialogDescription>
+          <DialogTitle>{t('share.title')}</DialogTitle>
+          <DialogDescription>{t('share.description')}</DialogDescription>
         </DialogHeader>
 
         {open && <ShareLinkContent cvData={cvData} />}

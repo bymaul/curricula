@@ -1,7 +1,7 @@
 'use client';
 
 import { ChevronsUpDown, FileText } from 'lucide-react';
-import { GitHubLink } from './GitHubLink';
+import { useI18n } from './I18nProvider';
 import { LanguageSwitcher } from './LanguageSwitcher';
 import { Button } from './ui/button';
 import { Separator } from './ui/separator';
@@ -15,25 +15,26 @@ interface HeaderProps {
 }
 
 const OPTIONS = [
-  { value: 'edit', label: 'Edit' },
-  { value: 'preview', label: 'Preview' },
+  { value: 'edit', labelKey: 'header.viewEdit' },
+  { value: 'preview', labelKey: 'header.viewPreview' },
 ] as const;
 
 export function Header({ value, onChange }: HeaderProps) {
+  const { t } = useI18n();
   const { setDialog } = useDialogStore();
   const activeResume = useResumeStore((state) =>
     state.resumes.find((r) => r.id === state.activeId),
   );
 
-  const activeResumeTitle = activeResume?.title ?? 'Untitled CV';
+  const activeResumeTitle = activeResume?.title ?? t('header.untitledCv');
 
   return (
     <header className="p-4 lg:p-0 flex items-center justify-between shrink-0 lg:mb-6 print:hidden">
-      <h1 className="text-lg font-bold tracking-tight shrink-0">Curricula</h1>
+      <h1 className="text-lg font-bold tracking-tight shrink-0">
+        {t('brand.name')}
+      </h1>
 
       <div className="flex items-center h-5 gap-2">
-        <GitHubLink />
-        <Separator orientation="vertical" />
         <LanguageSwitcher />
         <Separator orientation="vertical" />
         <Tabs
@@ -42,9 +43,9 @@ export function Header({ value, onChange }: HeaderProps) {
           className="flex lg:hidden"
         >
           <TabsList>
-            {OPTIONS.map(({ value, label }) => (
+            {OPTIONS.map(({ value, labelKey }) => (
               <TabsTrigger key={value} value={value}>
-                {label}
+                {t(labelKey)}
               </TabsTrigger>
             ))}
           </TabsList>

@@ -6,7 +6,9 @@ import {
   FieldSeparator,
   FieldSet,
 } from '@/components/ui/field';
+import { useI18n } from '@/components/I18nProvider';
 import { CVData } from '@/lib/schema';
+import { translateValidationMessage } from '@/lib/i18n';
 import { useFieldArray, useFormContext } from 'react-hook-form';
 import { FormField } from '../ui/form-field';
 import { AddItemButton, ItemRemoveButton, SectionHeading } from './shared';
@@ -17,59 +19,63 @@ export const PersonalForm = () => {
     control,
     formState: { errors },
   } = useFormContext<CVData>();
+  const { t } = useI18n();
 
   const { fields, append, remove } = useFieldArray({
     control,
     name: 'links',
   });
 
+  const errorFor = (message: string | undefined) =>
+    translateValidationMessage(t, message);
+
   return (
     <div className="p-2">
       <div className="mb-4">
         <SectionHeading
-          title="Personal Details"
-          description="Get started with your contact information and summary."
+          title={t('personalDetails.title')}
+          description={t('personalDetails.description')}
         />
       </div>
 
       <FieldGroup>
         <FieldSet>
-          <FieldLegend>Contact Information</FieldLegend>
+          <FieldLegend>{t('personalDetails.contactInformation')}</FieldLegend>
 
           <FieldGroup className="grid grid-cols-1 sm:grid-cols-2">
             <FormField
               name="name"
-              label="Full Name"
-              placeholder="e.g. Alex Johnson"
+              label={t('personalDetails.fullName')}
+              placeholder={t('personalDetails.fullNamePlaceholder')}
               register={register}
-              error={errors.name?.message}
+              error={errorFor(errors.name?.message)}
             />
             <FormField
               name="jobTitle"
-              label="Job Title"
-              placeholder="e.g. Senior Software Engineer"
+              label={t('personalDetails.jobTitle')}
+              placeholder={t('personalDetails.jobTitlePlaceholder')}
               register={register}
-              error={errors.jobTitle?.message}
+              error={errorFor(errors.jobTitle?.message)}
             />
             <FormField
               name="email"
-              label="Email Address"
+              label={t('personalDetails.email')}
               type="email"
-              placeholder="alex@example.com"
+              placeholder={t('personalDetails.emailPlaceholder')}
               register={register}
-              error={errors.email?.message}
+              error={errorFor(errors.email?.message)}
             />
             <FormField
               name="phone"
-              label="Phone Number"
-              placeholder="+1 (555) 000-0000"
+              label={t('personalDetails.phone')}
+              placeholder={t('personalDetails.phonePlaceholder')}
               register={register}
-              error={errors.phone?.message}
+              error={errorFor(errors.phone?.message)}
             />
             <FormField
               name="location"
-              label="Location (Optional)"
-              placeholder="e.g. San Francisco, CA"
+              label={t('personalDetails.location')}
+              placeholder={t('personalDetails.locationPlaceholder')}
               register={register}
               className="sm:col-span-2"
             />
@@ -79,7 +85,7 @@ export const PersonalForm = () => {
         <FieldSeparator />
 
         <FieldSet>
-          <FieldLegend>Custom Links</FieldLegend>
+          <FieldLegend>{t('personalDetails.customLinks')}</FieldLegend>
           <FieldGroup>
             {fields.map((field, index) => (
               <div
@@ -89,23 +95,23 @@ export const PersonalForm = () => {
                 <div className="flex gap-3 items-end">
                   <FormField
                     name={`links.${index}.url` as const}
-                    label="URL (e.g., github.com/username)"
-                    placeholder="github.com/username"
+                    label={t('personalDetails.linkUrlLabel')}
+                    placeholder={t('personalDetails.linkUrlPlaceholder')}
                     register={register}
-                    error={errors.links?.[index]?.url?.message}
+                    error={errorFor(errors.links?.[index]?.url?.message)}
                     className="flex-1"
                   />
 
                   <ItemRemoveButton
                     onClick={() => remove(index)}
-                    title="Remove Link"
+                    title={t('personalDetails.removeLink')}
                   />
                 </div>
               </div>
             ))}
 
             <AddItemButton size="sm" onClick={() => append({ url: '' })}>
-              Add Link
+              {t('personalDetails.addLink')}
             </AddItemButton>
           </FieldGroup>
         </FieldSet>
@@ -113,14 +119,14 @@ export const PersonalForm = () => {
         <FieldSeparator />
 
         <FieldSet>
-          <FieldLegend>Professional Summary</FieldLegend>
+          <FieldLegend>{t('personalDetails.professionalSummary')}</FieldLegend>
           <FieldGroup>
             <FormField
               as="textarea"
               name="summary"
-              placeholder="A brief overview of your professional background, key achievements, and core strengths..."
+              placeholder={t('personalDetails.summaryPlaceholder')}
               register={register}
-              error={errors.summary?.message}
+              error={errorFor(errors.summary?.message)}
             />
           </FieldGroup>
         </FieldSet>

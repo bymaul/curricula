@@ -1,4 +1,5 @@
 import { useState } from 'react';
+import { useI18n } from '@/components/I18nProvider';
 import { CVData } from '@/lib/schema';
 import { AIAdjustScope, AIProvider } from '@/lib/consts';
 import type { CVImagePart } from '@/lib/cvParsing';
@@ -22,6 +23,7 @@ export interface AIAdjustResult {
 }
 
 export function useAIAdjustCV() {
+  const { t } = useI18n();
   const [isAdjusting, setIsAdjusting] = useState(false);
   const [error, setError] = useState<string | null>(null);
 
@@ -45,14 +47,10 @@ export function useAIAdjustCV() {
       return await parseResponseJSON<AIAdjustResult>(response);
     } catch (err) {
       if (controller.signal.aborted) {
-        setError(
-          'The AI request timed out. Try again with a smaller or fewer images.',
-        );
+        setError(t('aiAdjust.timeoutError'));
       } else {
         setError(
-          err instanceof Error
-            ? err.message
-            : 'Unexpected error while adjusting CV',
+          err instanceof Error ? err.message : t('aiAdjust.unexpectedError'),
         );
       }
       return null;

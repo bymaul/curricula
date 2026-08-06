@@ -53,6 +53,7 @@ function SaveStatus({
   saveStatus: 'saving' | 'saved';
   lastSavedAt: number | null;
 }) {
+  const { t } = useI18n();
   const [now, setNow] = useState(() => Date.now());
 
   useEffect(() => {
@@ -66,7 +67,7 @@ function SaveStatus({
       <>
         <Loader2 className="w-4 h-4 text-amber-500 animate-spin" />
         <span className="text-[10px] text-muted-foreground font-medium uppercase tracking-wider">
-          Saving…
+          {t('editor.saveStatus.saving')}
         </span>
       </>
     );
@@ -76,7 +77,11 @@ function SaveStatus({
     <>
       <CheckCircle2 className="w-4 h-4 text-green-500" />
       <span className="text-[10px] text-muted-foreground font-medium uppercase tracking-wider">
-        Saved {lastSavedAt ? formatRelativeTime(lastSavedAt, now) : ''}
+        {lastSavedAt
+          ? t('editor.saveStatus.saved', {
+              time: formatRelativeTime(lastSavedAt, now, t),
+            })
+          : ''}
       </span>
     </>
   );
@@ -137,7 +142,7 @@ export function EditorSidebar({
 
       <nav
         className="border-t border-border bg-muted/30 shrink-0 overflow-hidden flex items-stretch"
-        aria-label="CV sections"
+        aria-label={t('editor.cvSectionsAriaLabel')}
       >
         <ScrollArea orientation="horizontal" className="min-w-0 flex-1 h-14">
           <div className="flex items-center gap-1 w-max h-full px-3">
@@ -164,7 +169,7 @@ export function EditorSidebar({
         </ScrollArea>
 
         <TooltipIconButton
-          label="Reorder sections"
+          label={t('editor.reorderSections')}
           onClick={() => setDialog('sections', true)}
           className="h-full w-12 rounded-none border-l border-border"
         >
@@ -178,16 +183,24 @@ export function EditorSidebar({
         </div>
 
         <div className="flex items-center gap-1">
-          <TooltipIconButton label="Undo" onClick={undo} disabled={!canUndo}>
+          <TooltipIconButton
+            label={t('editor.undo')}
+            onClick={undo}
+            disabled={!canUndo}
+          >
             <Undo2 className="w-4 h-4" />
           </TooltipIconButton>
 
-          <TooltipIconButton label="Redo" onClick={redo} disabled={!canRedo}>
+          <TooltipIconButton
+            label={t('editor.redo')}
+            onClick={redo}
+            disabled={!canRedo}
+          >
             <Redo2 className="w-4 h-4" />
           </TooltipIconButton>
 
           <TooltipIconButton
-            label="Version history"
+            label={t('editor.versionHistory')}
             onClick={() => setDialog('history', true)}
           >
             <History className="w-4 h-4" />
@@ -198,7 +211,7 @@ export function EditorSidebar({
             accept=".pdf,application/pdf"
             ref={pdfInputRef}
             onChange={fileActions.onImportPDF}
-            aria-label="Import CV data (PDF file)"
+            aria-label={t('editor.importPdfAriaLabel')}
             className="hidden"
           />
 

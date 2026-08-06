@@ -1,7 +1,7 @@
 import en, { Dictionary } from './en';
 import id from './id';
 import { Language, ResumeLanguage } from './languages';
-import { TabName } from '@/lib/consts';
+import { AIAdjustScope, TabName } from '@/lib/consts';
 
 export type { Language, ResumeLanguage } from './languages';
 export { UI_LANGUAGES, RESUME_LANGUAGES } from './languages';
@@ -31,6 +31,47 @@ export const TAB_KEYS: Record<TabName, TranslationKey> = {
   skills: 'tabs.skills',
   certifications: 'tabs.certifications',
 };
+
+export const AI_ADJUST_SCOPE_KEYS: Record<AIAdjustScope, TranslationKey> = {
+  full: 'aiAdjust.scopeFull',
+  summary: 'aiAdjust.scopeSummary',
+  experience: 'aiAdjust.scopeExperience',
+  projects: 'aiAdjust.scopeProjects',
+  education: 'aiAdjust.scopeEducation',
+  skills: 'aiAdjust.scopeSkills',
+};
+
+const VALIDATION_MESSAGE_KEYS: Record<string, TranslationKey> = {
+  'URL is required': 'validation.urlRequired',
+  'Role is required': 'validation.roleRequired',
+  'Company is required': 'validation.companyRequired',
+  'Date is required': 'validation.dateRequired',
+  'Project name is required': 'validation.projectNameRequired',
+  'Degree is required': 'validation.degreeRequired',
+  'Institution is required': 'validation.institutionRequired',
+  'Category is required': 'validation.categoryRequired',
+  'Skills are required': 'validation.skillsRequired',
+  'Name is required': 'validation.nameRequired',
+  'Issuer is required': 'validation.issuerRequired',
+  'Full Name is required': 'validation.fullNameRequired',
+  'Job Title is required': 'validation.jobTitleRequired',
+  'Invalid email address': 'validation.emailInvalid',
+  'Email is required': 'validation.emailRequired',
+  'Phone number is required': 'validation.phoneRequired',
+  'Summary must be at least 10 characters': 'validation.summaryMinLength',
+};
+
+export function translateValidationMessage(
+  translateFn: (
+    key: TranslationKey,
+    params?: Record<string, string | number>,
+  ) => string,
+  message: string | undefined,
+): string | undefined {
+  if (!message) return undefined;
+  const key = VALIDATION_MESSAGE_KEYS[message];
+  return key ? translateFn(key) : message;
+}
 
 export function interpolate(
   template: string,

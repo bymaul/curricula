@@ -10,6 +10,7 @@ import {
   SelectValue,
 } from '@/components/ui/select';
 import { AIProvider, AI_PROVIDERS } from '@/lib/consts';
+import { useI18n } from '@/components/I18nProvider';
 
 interface AISettingsFieldsProps {
   provider: AIProvider;
@@ -33,22 +34,26 @@ export function AISettingsFields({
   bundledProvider = null,
 }: AISettingsFieldsProps) {
   const selectedProvider = AI_PROVIDERS.find((p) => p.value === provider);
+  const { t } = useI18n();
 
   const bundledProviderLabel =
-    AI_PROVIDERS.find((p) => p.value === bundledProvider)?.label ?? 'AI';
+    AI_PROVIDERS.find((p) => p.value === bundledProvider)?.label ??
+    t('aiSettings.bundledFallback');
 
   const apiKeyDescription =
     hasBundledKey === true
-      ? `Free ${bundledProviderLabel} key available — leave blank to use it.`
+      ? t('aiSettings.apiKeyDescriptionBundled', {
+          provider: bundledProviderLabel,
+        })
       : hasBundledKey === false
-        ? 'No free key configured — add your own API key to enable AI.'
-        : 'Optional — leave blank to use the built-in free key.';
+        ? t('aiSettings.apiKeyDescriptionNone')
+        : t('aiSettings.apiKeyDescriptionOptional');
 
   return (
     <>
       <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
         <Field>
-          <FieldLabel>Provider</FieldLabel>
+          <FieldLabel>{t('aiSettings.providerLabel')}</FieldLabel>
           <Select value={provider} onValueChange={onProviderChange}>
             <SelectTrigger className="w-full">
               <SelectValue />
@@ -64,9 +69,11 @@ export function AISettingsFields({
         </Field>
 
         <Field>
-          <FieldLabel>Model</FieldLabel>
+          <FieldLabel>{t('aiSettings.modelLabel')}</FieldLabel>
           <FieldDescription>
-            Optional. Defaults to {selectedProvider?.defaultModel}.
+            {t('aiSettings.modelDescription', {
+              model: selectedProvider?.defaultModel ?? '',
+            })}
           </FieldDescription>
           <Input
             value={modelName}
@@ -77,13 +84,13 @@ export function AISettingsFields({
       </div>
 
       <Field>
-        <FieldLabel>API Key</FieldLabel>
+        <FieldLabel>{t('aiSettings.apiKeyLabel')}</FieldLabel>
         <FieldDescription>{apiKeyDescription}</FieldDescription>
         <Input
           type="password"
           value={apiKey}
           onChange={(e) => onKeyChange(e.target.value)}
-          placeholder="sk-..."
+          placeholder={t('aiSettings.apiKeyPlaceholder')}
           autoComplete="off"
         />
       </Field>

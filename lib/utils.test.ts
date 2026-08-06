@@ -51,6 +51,25 @@ describe('formatRelativeTime', () => {
   it('clamps future timestamps to just now', () => {
     expect(formatRelativeTime(now + 10_000, now)).toBe('just now');
   });
+
+  it('translates relative time when a translator is provided', () => {
+    const t = (key: string, params?: Record<string, string | number>) =>
+      `${key}${params ? `:${JSON.stringify(params)}` : ''}`;
+
+    expect(formatRelativeTime(now - 4_000, now, t)).toBe('common.time.justNow');
+    expect(formatRelativeTime(now - 45_000, now, t)).toBe(
+      'common.time.secondsAgo:{"s":45}',
+    );
+    expect(formatRelativeTime(now - 5 * 60_000, now, t)).toBe(
+      'common.time.minutesAgo:{"m":5}',
+    );
+    expect(formatRelativeTime(now - 2 * 3_600_000, now, t)).toBe(
+      'common.time.hoursAgo:{"h":2}',
+    );
+    expect(formatRelativeTime(now - 3 * 86_400_000, now, t)).toBe(
+      'common.time.daysAgo:{"d":3}',
+    );
+  });
 });
 
 describe('downloadFile', () => {

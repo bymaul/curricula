@@ -13,6 +13,7 @@ import { ConfirmDialog } from '@/components/ui/confirm-dialog';
 import { Input } from '@/components/ui/input';
 import { IconButton } from '@/components/ui/icon-button';
 import { ScrollArea } from '@/components/ui/scroll-area';
+import { useI18n } from '@/components/I18nProvider';
 import { useResumeStore } from '@/store/useResumeStore';
 import { cn, formatRelativeTime } from '@/lib/utils';
 import { Check, Copy, FileText, Pencil, Plus, Trash2 } from 'lucide-react';
@@ -31,6 +32,7 @@ export function ResumesDialog({ open, onOpenChange }: ResumesDialogProps) {
   const duplicateResume = useResumeStore((state) => state.duplicateResume);
   const deleteResume = useResumeStore((state) => state.deleteResume);
   const renameResume = useResumeStore((state) => state.renameResume);
+  const { t } = useI18n();
 
   const [editingId, setEditingId] = useState<string | null>(null);
   const [draft, setDraft] = useState('');
@@ -76,10 +78,8 @@ export function ResumesDialog({ open, onOpenChange }: ResumesDialogProps) {
       <Dialog open={open} onOpenChange={onOpenChange}>
         <DialogContent className="sm:max-w-md grid-rows-[auto_minmax(0,1fr)_auto] max-h-[calc(100dvh-2rem)] overflow-hidden">
           <DialogHeader>
-            <DialogTitle>Resumes</DialogTitle>
-            <DialogDescription>
-              Create, switch, or manage your CVs.
-            </DialogDescription>
+            <DialogTitle>{t('resumes.title')}</DialogTitle>
+            <DialogDescription>{t('resumes.description')}</DialogDescription>
           </DialogHeader>
 
           <div className="min-h-0 -mx-1">
@@ -108,7 +108,7 @@ export function ResumesDialog({ open, onOpenChange }: ResumesDialogProps) {
                           }}
                           onBlur={commitRename}
                           autoFocus
-                          aria-label="Resume title"
+                          aria-label={t('resumes.titleInputAria')}
                           className="h-8 text-sm w-full"
                         />
                       ) : (
@@ -128,7 +128,7 @@ export function ResumesDialog({ open, onOpenChange }: ResumesDialogProps) {
                               {r.title}
                             </span>
                             <span className="block text-xs text-muted-foreground truncate">
-                              {formatRelativeTime(r.updatedAt)}
+                              {formatRelativeTime(r.updatedAt, undefined, t)}
                             </span>
                           </span>
                         </button>
@@ -138,19 +138,25 @@ export function ResumesDialog({ open, onOpenChange }: ResumesDialogProps) {
                         {!editing && (
                           <div className="flex items-center gap-0.5 opacity-100 lg:opacity-0 lg:group-hover:opacity-100 lg:focus-within:opacity-100 transition-opacity">
                             <IconButton
-                              aria-label={`Rename ${r.title}`}
+                              aria-label={t('resumes.renameAria', {
+                                title: r.title,
+                              })}
                               onClick={() => startRename(r.id, r.title)}
                             >
                               <Pencil className="w-4 h-4" />
                             </IconButton>
                             <IconButton
-                              aria-label={`Duplicate ${r.title}`}
+                              aria-label={t('resumes.duplicateAria', {
+                                title: r.title,
+                              })}
                               onClick={() => duplicateResume(r.id)}
                             >
                               <Copy className="w-4 h-4" />
                             </IconButton>
                             <IconButton
-                              aria-label={`Delete ${r.title}`}
+                              aria-label={t('resumes.deleteAria', {
+                                title: r.title,
+                              })}
                               onClick={() => handleDelete(r.id, r.title)}
                               disabled={resumes.length <= 1}
                               className="hover:text-destructive hover:bg-destructive/10"
@@ -174,9 +180,11 @@ export function ResumesDialog({ open, onOpenChange }: ResumesDialogProps) {
           <DialogFooter>
             <Button variant="outline" onClick={handleCreate}>
               <Plus className="w-4 h-4" />
-              New CV
+              {t('resumes.newCv')}
             </Button>
-            <Button onClick={() => onOpenChange(false)}>Done</Button>
+            <Button onClick={() => onOpenChange(false)}>
+              {t('common.done')}
+            </Button>
           </DialogFooter>
         </DialogContent>
       </Dialog>
@@ -184,16 +192,18 @@ export function ResumesDialog({ open, onOpenChange }: ResumesDialogProps) {
       <ConfirmDialog
         open={deleteTarget !== null}
         onOpenChange={(next) => !next && setDeleteTarget(null)}
-        title="Delete resume?"
+        title={t('resumes.confirmDeleteTitle')}
         description={
           deleteTarget
-            ? `Delete "${deleteTarget.title}"? This cannot be undone.`
+            ? t('resumes.confirmDeleteDescription', {
+                title: deleteTarget.title,
+              })
             : undefined
         }
         confirmLabel={
           <>
             <Trash2 className="w-4 h-4" />
-            Delete
+            {t('common.delete')}
           </>
         }
         destructive

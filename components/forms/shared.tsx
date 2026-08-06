@@ -20,8 +20,10 @@ import {
 import { CSS } from '@dnd-kit/utilities';
 import { GripVertical, Plus, Trash2 } from 'lucide-react';
 import { ReactNode } from 'react';
+import { useI18n } from '@/components/I18nProvider';
 import { FormField } from '@/components/ui/form-field';
 import { CVData } from '@/lib/schema';
+import { translateValidationMessage } from '@/lib/i18n';
 import {
   FieldPath,
   PathValue,
@@ -277,6 +279,7 @@ export function SectionFieldArray({
     register,
     formState: { errors },
   } = useFormContext<CVData>();
+  const { t } = useI18n();
   const {
     fields: rows,
     append,
@@ -291,7 +294,7 @@ export function SectionFieldArray({
       >
     | undefined;
   const errorFor = (index: number, fieldName: string) =>
-    itemErrors?.[index]?.[fieldName]?.message;
+    translateValidationMessage(t, itemErrors?.[index]?.[fieldName]?.message);
   const pathFor = (index: number, fieldName: string) =>
     `${name}.${index}.${fieldName}` as FieldPath<CVData>;
 
@@ -319,7 +322,10 @@ export function SectionFieldArray({
             <SortableCard
               key={row.id}
               id={row.id}
-              label={`${itemLabel ?? name} #${index + 1}`}
+              label={t('common.itemNumber', {
+                label: itemLabel ?? name,
+                index: index + 1,
+              })}
               onRemove={() => remove(index)}
               removeTitle={removeTitle}
             >

@@ -10,6 +10,7 @@ import {
   DialogTitle,
 } from '@/components/ui/dialog';
 import { toast } from '@/components/ui/toast';
+import { useI18n } from '@/components/I18nProvider';
 import { BackupFile, parseBackup, serializeBackup } from '@/lib/backup';
 import { CVData, cvSchema } from '@/lib/schema';
 import { downloadFile } from '@/lib/utils';
@@ -39,6 +40,7 @@ export function BackupDialog({
   const backupInputRef = useRef<HTMLInputElement>(null);
   const jsonInputRef = useRef<HTMLInputElement>(null);
   const [pendingRestore, setPendingRestore] = useState<BackupFile | null>(null);
+  const { t } = useI18n();
 
   const handleDownload = () => {
     const { resumes, activeId } = useResumeStore.getState();
@@ -48,7 +50,10 @@ export function BackupDialog({
     );
     toast.add({
       type: 'success',
-      description: `Backed up ${resumes.length} resume${resumes.length === 1 ? '' : 's'}.`,
+      description:
+        resumes.length === 1
+          ? t('backup.toast.backedUpOne', { count: String(resumes.length) })
+          : t('backup.toast.backedUpMany', { count: String(resumes.length) }),
     });
   };
 
@@ -62,8 +67,7 @@ export function BackupDialog({
       if (!backup || backup.resumes.length === 0) {
         toast.add({
           type: 'error',
-          description:
-            'Invalid backup file. It is corrupted or from an older version.',
+          description: t('backup.toast.invalidFile'),
           priority: 'high',
         });
         return;
@@ -82,7 +86,10 @@ export function BackupDialog({
     setPendingRestore(null);
     toast.add({
       type: 'success',
-      description: `Restored ${count} resume${count === 1 ? '' : 's'} from backup.`,
+      description:
+        count === 1
+          ? t('backup.toast.restoredOne', { count: String(count) })
+          : t('backup.toast.restoredMany', { count: String(count) }),
     });
   };
 
@@ -104,8 +111,7 @@ export function BackupDialog({
         if (!result.success) {
           toast.add({
             type: 'error',
-            description:
-              'Invalid CV format. The file is corrupted or from an older version.',
+            description: t('backup.toast.invalidCv'),
             priority: 'high',
           });
           return;
@@ -113,13 +119,12 @@ export function BackupDialog({
         onApplyCVData(result.data);
         toast.add({
           type: 'success',
-          description: 'CV Data imported successfully!',
+          description: t('backup.toast.cvImported'),
         });
       } catch {
         toast.add({
           type: 'error',
-          description:
-            'Could not read file. Please upload a valid JSON backup.',
+          description: t('backup.toast.readFailed'),
           priority: 'high',
         });
       } finally {
@@ -134,22 +139,18 @@ export function BackupDialog({
       <Dialog open={open} onOpenChange={onOpenChange}>
         <DialogContent className="sm:max-w-md">
           <DialogHeader>
-            <DialogTitle>Backup &amp; Restore</DialogTitle>
-            <DialogDescription>
-              Back up all of your CVs to a single file, or restore from a
-              previous backup. Backups include every CV, its data, section
-              order, and visibility.
-            </DialogDescription>
+            <DialogTitle>{t('backup.title')}</DialogTitle>
+            <DialogDescription>{t('backup.description')}</DialogDescription>
           </DialogHeader>
 
           <div className="space-y-4">
             <div className="space-y-2">
               <h3 className="text-[10px] font-semibold uppercase tracking-wider text-muted-foreground">
-                All CVs
+                {t('backup.allCvs')}
               </h3>
               <Button onClick={handleDownload} className="w-full">
                 <FolderDown className="w-4 h-4" />
-                Download backup
+                {t('backup.downloadBackup')}
               </Button>
               <Button
                 variant="outline"
@@ -157,13 +158,13 @@ export function BackupDialog({
                 className="w-full"
               >
                 <Upload className="w-4 h-4" />
-                Restore from file
+                {t('backup.restoreFromFile')}
               </Button>
             </div>
 
             <div className="space-y-2">
               <h3 className="text-[10px] font-semibold uppercase tracking-wider text-muted-foreground">
-                Current CV
+                {t('backup.currentCv')}
               </h3>
               <Button
                 variant="outline"
@@ -171,7 +172,7 @@ export function BackupDialog({
                 className="w-full"
               >
                 <Download className="w-4 h-4" />
-                Export JSON
+                {t('backup.exportJson')}
               </Button>
               <Button
                 variant="outline"
@@ -179,7 +180,7 @@ export function BackupDialog({
                 className="w-full"
               >
                 <FileJson className="w-4 h-4" />
-                Import JSON
+                {t('backup.importJson')}
               </Button>
             </div>
           </div>
@@ -189,7 +190,7 @@ export function BackupDialog({
             accept=".json,application/json"
             ref={backupInputRef}
             onChange={handleBackupFileChange}
-            aria-label="Restore from backup file"
+            aria-label={t('backup.restoreFileAria')}
             className="hidden"
           />
           <input
@@ -197,7 +198,7 @@ export function BackupDialog({
             accept=".json,application/json"
             ref={jsonInputRef}
             onChange={handleImportJSON}
-            aria-label="Import CV data (JSON file)"
+            aria-label={t('backup.importFileAria')}
             className="hidden"
           />
         </DialogContent>
@@ -206,14 +207,17 @@ export function BackupDialog({
       <ConfirmDialog
         open={pendingRestore !== null}
         onOpenChange={(next) => !next && setPendingRestore(null)}
-        title="Restore backup?"
-        description={`This replaces ${pendingRestore?.resumes.length} current CV${
-          pendingRestore?.resumes.length === 1 ? '' : 's'
-        } with the backup. This cannot be undone.`}
+        title={t('backup.confirmRestoreTitle')}
+        description={t(
+          pendingRestore?.resumes.length === 1
+            ? 'backup.confirmRestoreDescriptionOne'
+            : 'backup.confirmRestoreDescriptionMany',
+          { count: String(pendingRestore?.resumes.length ?? 0) },
+        )}
         confirmLabel={
           <>
             <RefreshCcw className="w-4 h-4" />
-            Restore
+            {t('backup.confirmRestoreAction')}
           </>
         }
         onConfirm={handleRestore}
@@ -227,7 +231,7 @@ export function BackupDialog({
               </span>
               {resume.id === pendingRestore.activeId && (
                 <span className="ml-auto shrink-0 text-xs text-muted-foreground">
-                  active
+                  {t('backup.activeBadge')}
                 </span>
               )}
             </li>

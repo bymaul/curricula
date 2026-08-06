@@ -9,7 +9,10 @@ import {
   DialogHeader,
   DialogTitle,
 } from '@/components/ui/dialog';
+import { useI18n } from '@/components/I18nProvider';
 import { CVData } from '@/lib/schema';
+import { getSectionTabName } from '@/lib/consts';
+import { TAB_KEYS } from '@/lib/i18n';
 import { TriangleAlertIcon } from 'lucide-react';
 
 interface CVImportPreviewDialogProps {
@@ -34,16 +37,16 @@ export function CVImportPreviewDialog({
   onApply,
   onDiscard,
 }: CVImportPreviewDialogProps) {
+  const { t } = useI18n();
   const open = cvData !== null;
 
   return (
     <Dialog open={open} onOpenChange={(next) => !next && onDiscard()}>
       <DialogContent className="sm:max-w-md">
         <DialogHeader>
-          <DialogTitle>Review imported CV</DialogTitle>
+          <DialogTitle>{t('importPreview.title')}</DialogTitle>
           <DialogDescription>
-            The AI extracted the following from your PDF. Apply it to the editor
-            or discard.
+            {t('importPreview.description')}
           </DialogDescription>
         </DialogHeader>
 
@@ -56,7 +59,7 @@ export function CVImportPreviewDialog({
                     className="size-4 shrink-0"
                     aria-hidden="true"
                   />
-                  Review these fields
+                  {t('importPreview.reviewFields')}
                 </div>
                 <ul className="space-y-0.5 text-sm text-muted-foreground">
                   {warnings.map((warning) => (
@@ -68,7 +71,7 @@ export function CVImportPreviewDialog({
 
             <div className="space-y-0.5">
               <p className="text-base font-semibold leading-tight">
-                {cvData.name || 'Unnamed'}
+                {cvData.name || t('importPreview.unnamed')}
               </p>
               {cvData.jobTitle && (
                 <p className="text-sm text-muted-foreground">
@@ -81,24 +84,39 @@ export function CVImportPreviewDialog({
             </div>
 
             <div className="grid grid-cols-2 gap-2">
-              <CountRow label="Experience" count={cvData.experience.length} />
-              <CountRow label="Projects" count={cvData.projects.length} />
-              <CountRow label="Education" count={cvData.education.length} />
-              <CountRow label="Skill groups" count={cvData.skills.length} />
               <CountRow
-                label="Certifications"
+                label={t(TAB_KEYS[getSectionTabName('experience')])}
+                count={cvData.experience.length}
+              />
+              <CountRow
+                label={t(TAB_KEYS[getSectionTabName('projects')])}
+                count={cvData.projects.length}
+              />
+              <CountRow
+                label={t(TAB_KEYS[getSectionTabName('education')])}
+                count={cvData.education.length}
+              />
+              <CountRow
+                label={t('importPreview.skillGroups')}
+                count={cvData.skills.length}
+              />
+              <CountRow
+                label={t(TAB_KEYS[getSectionTabName('certifications')])}
                 count={cvData.certifications.length}
               />
-              <CountRow label="Links" count={cvData.links.length} />
+              <CountRow
+                label={t('importPreview.links')}
+                count={cvData.links.length}
+              />
             </div>
           </div>
         )}
 
         <DialogFooter>
           <Button variant="outline" onClick={onDiscard}>
-            Discard
+            {t('importPreview.discard')}
           </Button>
-          <Button onClick={onApply}>Apply to editor</Button>
+          <Button onClick={onApply}>{t('importPreview.applyToEditor')}</Button>
         </DialogFooter>
       </DialogContent>
     </Dialog>

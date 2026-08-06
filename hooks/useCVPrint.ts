@@ -15,7 +15,10 @@ export function useCVPrint(cvData: CVData, methods: UseFormReturn<CVData>) {
 
   const executePrint = useReactToPrint({
     contentRef: printRef,
-    documentTitle: `${cvData.name || 'My'} - ${cvData.jobTitle} - CV`,
+    documentTitle: t('print.documentTitle', {
+      name: cvData.name || t('common.my'),
+      jobTitle: cvData.jobTitle,
+    }),
   });
 
   const focusFirstInvalidSection = (): TabName | null => {
@@ -41,8 +44,10 @@ export function useCVPrint(cvData: CVData, methods: UseFormReturn<CVData>) {
 
       toast.add({
         type: 'warning',
-        title: 'Validation Error',
-        description: `Please fix the errors in the ${t(TAB_KEYS[targetTab])} section before printing your CV.`,
+        title: t('editor.validationError'),
+        description: t('editor.validationErrorDescription', {
+          section: t(TAB_KEYS[targetTab]),
+        }),
       });
       return;
     }
