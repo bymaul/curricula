@@ -32,7 +32,6 @@ const id: Dictionary = {
     retry: 'Coba lagi',
     actions: 'Tindakan',
     language: 'Bahasa',
-    githubRepository: 'Repositori GitHub',
     closeToast: 'Tutup notifikasi',
     itemNumber: '{label} #{index}',
     time: {

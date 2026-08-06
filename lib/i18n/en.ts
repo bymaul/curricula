@@ -30,7 +30,6 @@ const en = {
     retry: 'Retry',
     actions: 'Actions',
     language: 'Language',
-    githubRepository: 'GitHub repository',
     closeToast: 'Close toast',
     itemNumber: '{label} #{index}',
     time: {
