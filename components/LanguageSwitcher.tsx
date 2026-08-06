@@ -15,6 +15,7 @@ import {
 export function LanguageSwitcher() {
   const { lang } = useI18n();
   const setUILanguage = useUIStore((state) => state.setUILanguage);
+  const { t } = useI18n();
 
   return (
     <DropdownMenu>
@@ -24,7 +25,7 @@ export function LanguageSwitcher() {
             variant="ghost"
             size="icon-sm"
             className="h-9 w-9"
-            aria-label="Language"
+            aria-label={t('common.language')}
           >
             <Languages className="w-4 h-4" />
           </Button>

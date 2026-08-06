@@ -47,7 +47,7 @@ describe('summarizeCVChanges', () => {
   it('reports scalar field changes', () => {
     const adjusted = { ...baseCV, summary: 'A rewritten summary.' };
     expect(summarizeCVChanges(baseCV, adjusted)).toEqual([
-      { label: 'Summary', detail: 'changed' },
+      { labelKey: 'changes.labelSummary', detailKey: 'changes.detailChanged' },
     ]);
   });
 
@@ -58,8 +58,14 @@ describe('summarizeCVChanges', () => {
       jobTitle: 'Staff Engineer',
     };
     const result = summarizeCVChanges(baseCV, adjusted);
-    expect(result).toContainEqual({ label: 'Name', detail: 'changed' });
-    expect(result).toContainEqual({ label: 'Job title', detail: 'changed' });
+    expect(result).toContainEqual({
+      labelKey: 'changes.labelName',
+      detailKey: 'changes.detailChanged',
+    });
+    expect(result).toContainEqual({
+      labelKey: 'changes.labelJobTitle',
+      detailKey: 'changes.detailChanged',
+    });
     expect(result).toHaveLength(2);
   });
 
@@ -73,7 +79,11 @@ describe('summarizeCVChanges', () => {
       ],
     };
     expect(summarizeCVChanges(baseCV, adjusted)).toEqual([
-      { label: 'Experience', detail: '1 of 3 entries updated' },
+      {
+        labelKey: 'changes.labelExperience',
+        detailKey: 'changes.detailEntriesUpdated',
+        params: { changed: 1, count: 3 },
+      },
     ]);
   });
 
@@ -83,7 +93,11 @@ describe('summarizeCVChanges', () => {
       experience: baseCV.experience.slice(0, 1),
     };
     expect(summarizeCVChanges(baseCV, adjusted)).toEqual([
-      { label: 'Experience', detail: '3 → 1 entries' },
+      {
+        labelKey: 'changes.labelExperience',
+        detailKey: 'changes.detailEntryCount',
+        params: { from: 3, to: 1 },
+      },
     ]);
   });
 
@@ -109,7 +123,11 @@ describe('summarizeCVChanges', () => {
       ],
     };
     expect(summarizeCVChanges(baseCV, adjusted)).toEqual([
-      { label: 'Education', detail: '0 → 1 entries' },
+      {
+        labelKey: 'changes.labelEducation',
+        detailKey: 'changes.detailEntryCount',
+        params: { from: 0, to: 1 },
+      },
     ]);
   });
 });

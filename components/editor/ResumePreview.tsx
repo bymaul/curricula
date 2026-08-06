@@ -1,6 +1,7 @@
 'use client';
 
 import { HarvardTemplate } from '@/components/resume/HarvardTemplate';
+import { useI18n } from '@/components/I18nProvider';
 import { ScrollArea, ScrollBar } from '@/components/ui/scroll-area';
 import { usePageScale } from '@/hooks/usePageScale';
 import { usePinchZoom } from '@/hooks/usePinchZoom';
@@ -88,6 +89,7 @@ export function ResumePreview({
   }));
 
   const activeTab = useUIStore((state) => state.activeTab);
+  const { t } = useI18n();
 
   useEffect(() => {
     if (!isVisible) return;
@@ -130,11 +132,15 @@ export function ResumePreview({
 
       <div
         className="absolute top-3 left-3 z-20 flex items-center gap-1.5 bg-card border border-border rounded-lg shadow-md px-2.5 py-1 print:hidden"
-        aria-label={`Resume is ${pageCount} ${pageCount === 1 ? 'page' : 'pages'} long`}
+        aria-label={
+          pageCount === 1
+            ? t('preview.pageCountAriaOne', { count: pageCount })
+            : t('preview.pageCountAriaMany', { count: pageCount })
+        }
       >
         <FileText className="w-3.5 h-3.5 text-muted-foreground" />
         <span className="text-xs font-semibold tabular-nums text-muted-foreground">
-          {pageCount} {pageCount === 1 ? 'page' : 'pages'}
+          {pageCount} {pageCount === 1 ? t('preview.page') : t('preview.pages')}
         </span>
       </div>
 
@@ -182,7 +188,7 @@ export function ResumePreview({
                       >
                         <div className="w-full border-t-2 border-dashed border-destructive/60" />
                         <span className="absolute left-3 -translate-y-1/2 rounded-md bg-destructive/10 px-1.5 py-0.5 text-[10px] font-semibold text-destructive">
-                          Page {label}
+                          {t('preview.pageBreak', { number: label })}
                         </span>
                       </div>
                     ))}

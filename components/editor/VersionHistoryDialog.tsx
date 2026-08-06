@@ -8,6 +8,7 @@ import {
   DialogTitle,
 } from '@/components/ui/dialog';
 import { ScrollArea } from '@/components/ui/scroll-area';
+import { useI18n } from '@/components/I18nProvider';
 import { useResumeStore } from '@/store/useResumeStore';
 import { cn, formatRelativeTime } from '@/lib/utils';
 import { History } from 'lucide-react';
@@ -26,6 +27,7 @@ export function VersionHistoryDialog({
     activeId ? state.histories[activeId] : undefined,
   );
   const restoreHistory = useResumeStore((state) => state.restoreHistory);
+  const { t } = useI18n();
 
   const entries = history?.entries ?? [];
   const cursor = history?.cursor ?? -1;
@@ -35,25 +37,25 @@ export function VersionHistoryDialog({
     <Dialog open={open} onOpenChange={onOpenChange}>
       <DialogContent className="sm:max-w-md grid-rows-[auto_minmax(0,1fr)_auto] max-h-[calc(100dvh-2rem)] overflow-hidden">
         <DialogHeader>
-          <DialogTitle>Version History</DialogTitle>
+          <DialogTitle>{t('versionHistory.title')}</DialogTitle>
         </DialogHeader>
 
         <div className="min-h-0 -mx-1">
           <ScrollArea className="h-full p-2">
             <p className="text-xs text-muted-foreground mb-3 px-1">
-              Undo, redo, and restore any earlier version of this CV. History is
-              kept in memory for this session.
+              {t('versionHistory.description')}
             </p>
             {reversed.length === 0 ? (
               <p className="text-sm text-muted-foreground px-1">
-                No saved versions yet.
+                {t('versionHistory.empty')}
               </p>
             ) : (
               <ul className="divide-y divide-border">
                 {reversed.map((entry, i) => {
                   const index = entries.length - 1 - i;
                   const isCurrent = index === cursor;
-                  const title = entry.data.name?.trim() || 'Untitled CV';
+                  const title =
+                    entry.data.name?.trim() || t('header.untitledCv');
                   return (
                     <li
                       key={index}
@@ -70,7 +72,7 @@ export function VersionHistoryDialog({
                           <span className="truncate">{title}</span>
                         </p>
                         <p className="text-xs text-muted-foreground">
-                          {formatRelativeTime(entry.at)}
+                          {formatRelativeTime(entry.at, undefined, t)}
                         </p>
                       </div>
                       <Button
@@ -82,7 +84,7 @@ export function VersionHistoryDialog({
                         }
                         className="shrink-0"
                       >
-                        {isCurrent ? 'Current' : 'Restore'}
+                        {isCurrent ? t('common.current') : t('common.restore')}
                       </Button>
                     </li>
                   );

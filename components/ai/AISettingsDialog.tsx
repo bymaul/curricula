@@ -11,6 +11,7 @@ import {
 } from '@/components/ui/dialog';
 import { useAISettings } from '@/hooks/useAISettings';
 import { useAIStatus } from '@/hooks/useAIStatus';
+import { useI18n } from '@/components/I18nProvider';
 
 interface AISettingsDialogProps {
   open: boolean;
@@ -23,12 +24,13 @@ export function AISettingsDialog({
 }: AISettingsDialogProps) {
   const settings = useAISettings();
   const status = useAIStatus(open);
+  const { t } = useI18n();
 
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
       <DialogContent className="sm:max-w-lg">
         <DialogHeader>
-          <DialogTitle>AI Settings</DialogTitle>
+          <DialogTitle>{t('aiSettings.title')}</DialogTitle>
         </DialogHeader>
 
         <div className="flex flex-col gap-4 p-2 -mx-1">
@@ -40,7 +42,9 @@ export function AISettingsDialog({
         </div>
 
         <DialogFooter>
-          <Button onClick={() => onOpenChange(false)}>Save</Button>
+          <Button onClick={() => onOpenChange(false)}>
+            {t('aiSettings.save')}
+          </Button>
         </DialogFooter>
       </DialogContent>
     </Dialog>

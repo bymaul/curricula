@@ -2,6 +2,7 @@
 
 import { ReactNode } from 'react';
 import { Button } from '@/components/ui/button';
+import { useI18n } from '@/components/I18nProvider';
 import {
   Dialog,
   DialogContent,
@@ -31,11 +32,12 @@ export function ConfirmDialog({
   description,
   confirmLabel,
   onConfirm,
-  cancelLabel = 'Cancel',
+  cancelLabel,
   onCancel,
   destructive = false,
   children,
 }: ConfirmDialogProps) {
+  const { t } = useI18n();
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
       <DialogContent className="sm:max-w-sm">
@@ -54,7 +56,7 @@ export function ConfirmDialog({
               onOpenChange(false);
             }}
           >
-            {cancelLabel}
+            {cancelLabel ?? t('common.cancel')}
           </Button>
           <Button
             variant={destructive ? 'destructive' : 'default'}

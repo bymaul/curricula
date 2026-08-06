@@ -1,7 +1,9 @@
 'use client';
 
 import React, { forwardRef } from 'react';
+import { useI18n } from '@/components/I18nProvider';
 import { DEFAULT_SECTION_ORDER, SectionId } from '@/lib/consts';
+import { TranslationKey } from '@/lib/i18n';
 import { CVData } from '@/lib/schema';
 
 interface TemplateProps {
@@ -11,8 +13,14 @@ interface TemplateProps {
   onSectionClick?: (sectionId: SectionId) => void;
 }
 
+type T = (
+  key: TranslationKey,
+  params?: Record<string, string | number>,
+) => string;
+
 interface SectionContext {
   onClick?: (sectionId: SectionId) => void;
+  t: T;
 }
 
 /**
@@ -104,12 +112,14 @@ function Section({
   title,
   avoidBreakAfter,
   onClick,
+  t,
   children,
 }: {
   id: SectionId;
   title: string;
   avoidBreakAfter?: boolean;
   onClick?: (sectionId: SectionId) => void;
+  t: T;
   children: React.ReactNode;
 }) {
   const handleClick = (event: React.MouseEvent<HTMLElement>) => {
@@ -129,7 +139,7 @@ function Section({
       onClick={onClick ? handleClick : undefined}
       onKeyDown={onClick ? handleKeyDown : undefined}
       tabIndex={onClick ? 0 : undefined}
-      aria-label={onClick ? `Edit ${title}` : undefined}
+      aria-label={onClick ? t('template.editAria', { title }) : undefined}
       className={`${SPACE.sectionGap} ${avoidBreakAfter ? 'break-after-avoid' : ''} ${onClick ? 'cursor-pointer hover:ring-1 hover:ring-primary/40 hover:rounded-sm focus:outline-none focus-visible:ring-2 focus-visible:ring-primary/40 focus-visible:rounded-sm' : ''}`}
     >
       <h2
@@ -169,15 +179,25 @@ type SectionRenderer = (
 ) => React.ReactNode;
 
 const SECTION_RENDERERS: Record<SectionId, SectionRenderer> = {
-  summary: (cvData, { onClick }) =>
+  summary: (cvData, { onClick, t }) =>
     cvData.summary ? (
-      <Section id="summary" title="Summary" onClick={onClick}>
+      <Section
+        id="summary"
+        title={t('template.summary')}
+        onClick={onClick}
+        t={t}
+      >
         <p className={`text-justify ${TYPE.body}`}>{cvData.summary}</p>
       </Section>
     ) : null,
-  experience: (cvData, { onClick }) =>
+  experience: (cvData, { onClick, t }) =>
     cvData.experience.length > 0 ? (
-      <Section id="experience" title="Experience" onClick={onClick}>
+      <Section
+        id="experience"
+        title={t('template.experience')}
+        onClick={onClick}
+        t={t}
+      >
         {cvData.experience.map((exp, index) => (
           <div key={index} className={`${SPACE.itemGap} break-inside-avoid`}>
             <EntryHeader title={exp.role} meta={exp.date} />
@@ -187,9 +207,14 @@ const SECTION_RENDERERS: Record<SectionId, SectionRenderer> = {
         ))}
       </Section>
     ) : null,
-  projects: (cvData, { onClick }) =>
+  projects: (cvData, { onClick, t }) =>
     cvData.projects.length > 0 ? (
-      <Section id="projects" title="Projects" onClick={onClick}>
+      <Section
+        id="projects"
+        title={t('template.projects')}
+        onClick={onClick}
+        t={t}
+      >
         {cvData.projects.map((proj, index) => (
           <div key={index} className={`${SPACE.itemGap} break-inside-avoid`}>
             <EntryHeader title={proj.name} meta={proj.date} />
@@ -198,9 +223,14 @@ const SECTION_RENDERERS: Record<SectionId, SectionRenderer> = {
         ))}
       </Section>
     ) : null,
-  education: (cvData, { onClick }) =>
+  education: (cvData, { onClick, t }) =>
     cvData.education.length > 0 ? (
-      <Section id="education" title="Education" onClick={onClick}>
+      <Section
+        id="education"
+        title={t('template.education')}
+        onClick={onClick}
+        t={t}
+      >
         {cvData.education.map((edu, index) => (
           <div key={index} className={`${SPACE.itemGap} break-inside-avoid`}>
             <EntryHeader title={edu.institution} meta={edu.date} />
@@ -210,9 +240,15 @@ const SECTION_RENDERERS: Record<SectionId, SectionRenderer> = {
         ))}
       </Section>
     ) : null,
-  skills: (cvData, { onClick }) =>
+  skills: (cvData, { onClick, t }) =>
     cvData.skills.length > 0 ? (
-      <Section id="skills" title="Skills" onClick={onClick} avoidBreakAfter>
+      <Section
+        id="skills"
+        title={t('template.skills')}
+        onClick={onClick}
+        avoidBreakAfter
+        t={t}
+      >
         {cvData.skills.map((skill, index) => (
           <div key={index} className="mb-1 text-[10.5pt]">
             <span className="font-semibold">{skill.category}:</span>{' '}
@@ -221,13 +257,14 @@ const SECTION_RENDERERS: Record<SectionId, SectionRenderer> = {
         ))}
       </Section>
     ) : null,
-  certifications: (cvData, { onClick }) =>
+  certifications: (cvData, { onClick, t }) =>
     cvData.certifications.length > 0 ? (
       <Section
         id="certifications"
-        title="Certifications"
+        title={t('template.certifications')}
         onClick={onClick}
         avoidBreakAfter
+        t={t}
       >
         {cvData.certifications.map((cert, index) => (
           <div
@@ -247,11 +284,13 @@ const SECTION_RENDERERS: Record<SectionId, SectionRenderer> = {
 
 export const HarvardTemplate = forwardRef<HTMLDivElement, TemplateProps>(
   ({ cvData, sectionOrder, hiddenSections, onSectionClick }, ref) => {
+    const { t } = useI18n();
+
     const order = (sectionOrder ?? DEFAULT_SECTION_ORDER).filter(
       (id) => !hiddenSections?.includes(id),
     );
 
-    const context: SectionContext = { onClick: onSectionClick };
+    const context: SectionContext = { onClick: onSectionClick, t };
 
     const handleHeaderClick = () => onSectionClick?.('summary');
 
@@ -300,12 +339,16 @@ export const HarvardTemplate = forwardRef<HTMLDivElement, TemplateProps>(
                   onKeyDown={onSectionClick ? handleHeaderKeyDown : undefined}
                   tabIndex={onSectionClick ? 0 : undefined}
                   aria-label={
-                    onSectionClick ? 'Edit Personal details' : undefined
+                    onSectionClick
+                      ? t('template.editAria', {
+                          title: t('personalDetails.title'),
+                        })
+                      : undefined
                   }
                   className={`text-center mb-4 ${onSectionClick ? 'cursor-pointer hover:ring-1 hover:ring-primary/40 hover:rounded-sm focus:outline-none focus-visible:ring-2 focus-visible:ring-primary/40 focus-visible:rounded-sm' : ''}`}
                 >
                   <h1 className={`${TYPE.name} mb-1`}>
-                    {cvData.name || 'Your Name'}
+                    {cvData.name || t('template.yourName')}
                   </h1>
 
                   {cvData.jobTitle && (

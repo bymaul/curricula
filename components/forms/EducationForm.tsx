@@ -1,44 +1,55 @@
 'use client';
 
+import { useI18n } from '@/components/I18nProvider';
 import { SectionFieldArray } from './shared';
 
-export const EducationForm = () => (
-  <SectionFieldArray
-    name="education"
-    title="Education"
-    description="Add your academic background and credentials."
-    addLabel="Add Education"
-    variant="card"
-    itemLabel="Education"
-    removeTitle="Remove Education"
-    newItem={() => ({
-      institution: '',
-      degree: '',
-      date: '',
-      location: '',
-      description: '',
-    })}
-    fields={[
-      {
-        name: 'institution',
-        label: 'Institution',
-        placeholder: 'University of California',
-      },
-      {
-        name: 'degree',
-        label: 'Degree / Major',
-        placeholder: 'B.S. in Computer Science',
-      },
-      { name: 'location', label: 'Location', placeholder: 'Berkeley, CA' },
-      { name: 'date', label: 'Dates', placeholder: '2018 - 2022' },
-      {
-        name: 'description',
-        as: 'textarea',
-        className: 'sm:col-span-2',
-        label: 'Summary / Highlights',
-        placeholder: 'GPA: 3.8 / Dean’s List...',
-        textareaClassName: 'h-24',
-      },
-    ]}
-  />
-);
+export const EducationForm = () => {
+  const { t } = useI18n();
+  return (
+    <SectionFieldArray
+      name="education"
+      title={t('education.title')}
+      description={t('education.description')}
+      addLabel={t('education.add')}
+      variant="card"
+      itemLabel={t('education.itemLabel')}
+      removeTitle={t('education.remove')}
+      newItem={() => ({
+        degree: '',
+        institution: '',
+        date: '',
+        location: '',
+        description: '',
+      })}
+      fields={[
+        {
+          name: 'institution',
+          label: t('education.institutionLabel'),
+          placeholder: t('education.institutionPlaceholder'),
+        },
+        {
+          name: 'degree',
+          label: t('education.degreeLabel'),
+          placeholder: t('education.degreePlaceholder'),
+        },
+        {
+          name: 'location',
+          label: t('education.locationLabel'),
+          placeholder: t('education.locationPlaceholder'),
+        },
+        {
+          name: 'date',
+          label: t('education.datesLabel'),
+          placeholder: t('education.datesPlaceholder'),
+        },
+        {
+          name: 'description',
+          as: 'textarea',
+          className: 'sm:col-span-2',
+          label: t('education.summaryLabel'),
+          placeholder: t('education.summaryPlaceholder'),
+        },
+      ]}
+    />
+  );
+};

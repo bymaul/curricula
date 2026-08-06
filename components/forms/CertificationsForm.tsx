@@ -1,30 +1,36 @@
 'use client';
 
+import { useI18n } from '@/components/I18nProvider';
 import { SectionFieldArray } from './shared';
 
-export const CertificationsForm = () => (
-  <SectionFieldArray
-    name="certifications"
-    title="Certifications"
-    description="Add professional credentials and certifications."
-    addLabel="Add Certification"
-    variant="row"
-    removeTitle="Remove Certification"
-    newItem={() => ({ name: '', issuer: '', date: '' })}
-    fields={[
-      {
-        name: 'name',
-        className: 'flex-1',
-        label: 'Name',
-        placeholder: 'AWS Certified Developer',
-      },
-      {
-        name: 'issuer',
-        className: 'flex-1',
-        label: 'Issuer',
-        placeholder: 'Amazon Web Services',
-      },
-      { name: 'date', className: 'w-1/4', label: 'Date', placeholder: '2024' },
-    ]}
-  />
-);
+export const CertificationsForm = () => {
+  const { t } = useI18n();
+  return (
+    <SectionFieldArray
+      name="certifications"
+      title={t('certifications.title')}
+      description={t('certifications.description')}
+      addLabel={t('certifications.add')}
+      variant="row"
+      removeTitle={t('certifications.remove')}
+      newItem={() => ({ name: '', issuer: '', date: '' })}
+      fields={[
+        {
+          name: 'name',
+          label: t('certifications.nameLabel'),
+          placeholder: t('certifications.namePlaceholder'),
+        },
+        {
+          name: 'issuer',
+          label: t('certifications.issuerLabel'),
+          placeholder: t('certifications.issuerPlaceholder'),
+        },
+        {
+          name: 'date',
+          label: t('certifications.dateLabel'),
+          placeholder: t('certifications.datePlaceholder'),
+        },
+      ]}
+    />
+  );
+};

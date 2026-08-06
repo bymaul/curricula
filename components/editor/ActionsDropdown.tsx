@@ -1,6 +1,7 @@
 'use client';
 
 import { useMediaQuery } from '@/hooks/useMediaQuery';
+import { useI18n } from '@/components/I18nProvider';
 import { DESKTOP_MEDIA_QUERY } from '@/lib/consts';
 import { cn } from '@/lib/utils';
 import { useDialogStore } from '@/store/useDialogStore';
@@ -38,6 +39,7 @@ export function ActionsDropdown({
 }: ActionsDropdownProps) {
   const setDialog = useDialogStore((state) => state.setDialog);
   const isMobile = !useMediaQuery(DESKTOP_MEDIA_QUERY);
+  const { t } = useI18n();
 
   const handleImportPDFClick = () => {
     pdfInputRef.current?.click();
@@ -51,7 +53,7 @@ export function ActionsDropdown({
             variant="ghost"
             size="icon-sm"
             className={cn('h-9 lg:h-8', triggerClassName)}
-            aria-label="Actions"
+            aria-label={t('common.actions')}
           >
             <EllipsisVertical className="w-4 h-4" />
           </Button>
@@ -65,7 +67,7 @@ export function ActionsDropdown({
               className={ITEM_CLASSNAME}
             >
               <FileText className="w-4 h-4 text-muted-foreground" />
-              Manage Resumes
+              {t('editor.manageResumes')}
             </DropdownMenuItem>
             <DropdownMenuSeparator />
           </>
@@ -75,21 +77,21 @@ export function ActionsDropdown({
           className={ITEM_CLASSNAME}
         >
           <Upload className="w-4 h-4 text-muted-foreground" />
-          Import PDF (AI)
+          {t('editor.importPdf')}
         </DropdownMenuItem>
         <DropdownMenuItem
           onClick={() => setDialog('aiAdjust', true)}
           className={ITEM_CLASSNAME}
         >
           <Sparkles className="w-4 h-4 text-primary" />
-          AI Adjust
+          {t('editor.aiAdjust')}
         </DropdownMenuItem>
         <DropdownMenuItem
           onClick={() => setDialog('aiSettings', true)}
           className={ITEM_CLASSNAME}
         >
           <Settings2 className="w-4 h-4 text-muted-foreground" />
-          AI Settings
+          {t('editor.aiSettings')}
         </DropdownMenuItem>
         <DropdownMenuSeparator />
         <DropdownMenuItem
@@ -97,11 +99,11 @@ export function ActionsDropdown({
           className={ITEM_CLASSNAME}
         >
           <Share2 className="w-4 h-4 text-muted-foreground" />
-          Share Link
+          {t('editor.shareLink')}
         </DropdownMenuItem>
         <DropdownMenuItem onClick={handlePrintClick} className={ITEM_CLASSNAME}>
           <Printer className="w-4 h-4 text-muted-foreground" />
-          Print / PDF
+          {t('editor.printPdf')}
         </DropdownMenuItem>
         <DropdownMenuSeparator />
         <DropdownMenuItem
@@ -109,7 +111,7 @@ export function ActionsDropdown({
           className={ITEM_CLASSNAME}
         >
           <DatabaseBackup className="w-4 h-4 text-muted-foreground" />
-          Backup &amp; Restore
+          {t('editor.backupRestore')}
         </DropdownMenuItem>
       </DropdownMenuContent>
     </DropdownMenu>

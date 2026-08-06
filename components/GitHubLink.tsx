@@ -1,3 +1,4 @@
+import { useI18n } from './I18nProvider';
 import { buttonVariants } from './ui/button';
 
 const REPO_URL = 'https://github.com/bymaul/curricula';
@@ -16,12 +17,13 @@ function GitHubIcon({ className }: { className?: string }) {
 }
 
 export function GitHubLink() {
+  const { t } = useI18n();
   return (
     <a
       href={REPO_URL}
       target="_blank"
       rel="noopener noreferrer"
-      aria-label="GitHub repository"
+      aria-label={t('common.githubRepository')}
       className={buttonVariants({ variant: 'ghost', size: 'icon' })}
     >
       <GitHubIcon className="w-4 h-4" />

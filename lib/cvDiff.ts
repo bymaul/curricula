@@ -1,26 +1,28 @@
 import { CVData } from '@/lib/schema';
+import type { TranslationKey } from '@/lib/i18n';
 
 export interface CVChangeSummary {
-  label: string;
-  detail: string;
+  labelKey: TranslationKey;
+  detailKey: TranslationKey;
+  params?: Record<string, string | number>;
 }
 
-const SCALAR_SECTIONS: { key: keyof CVData; label: string }[] = [
-  { key: 'summary', label: 'Summary' },
-  { key: 'name', label: 'Name' },
-  { key: 'jobTitle', label: 'Job title' },
-  { key: 'email', label: 'Email' },
-  { key: 'phone', label: 'Phone' },
-  { key: 'location', label: 'Location' },
+const SCALAR_SECTIONS: { key: keyof CVData; labelKey: TranslationKey }[] = [
+  { key: 'summary', labelKey: 'changes.labelSummary' },
+  { key: 'name', labelKey: 'changes.labelName' },
+  { key: 'jobTitle', labelKey: 'changes.labelJobTitle' },
+  { key: 'email', labelKey: 'changes.labelEmail' },
+  { key: 'phone', labelKey: 'changes.labelPhone' },
+  { key: 'location', labelKey: 'changes.labelLocation' },
 ];
 
-const ARRAY_SECTIONS: { key: keyof CVData; label: string }[] = [
-  { key: 'experience', label: 'Experience' },
-  { key: 'projects', label: 'Projects' },
-  { key: 'education', label: 'Education' },
-  { key: 'skills', label: 'Skills' },
-  { key: 'certifications', label: 'Certifications' },
-  { key: 'links', label: 'Links' },
+const ARRAY_SECTIONS: { key: keyof CVData; labelKey: TranslationKey }[] = [
+  { key: 'experience', labelKey: 'changes.labelExperience' },
+  { key: 'projects', labelKey: 'changes.labelProjects' },
+  { key: 'education', labelKey: 'changes.labelEducation' },
+  { key: 'skills', labelKey: 'changes.labelSkills' },
+  { key: 'certifications', labelKey: 'changes.labelCertifications' },
+  { key: 'links', labelKey: 'changes.labelLinks' },
 ];
 
 function countChangedItems(
@@ -49,24 +51,32 @@ export function summarizeCVChanges(
 ): CVChangeSummary[] {
   const summaries: CVChangeSummary[] = [];
 
-  for (const { key, label } of SCALAR_SECTIONS) {
+  for (const { key, labelKey } of SCALAR_SECTIONS) {
     if (original[key] !== adjusted[key]) {
-      summaries.push({ label, detail: 'changed' });
+      summaries.push({ labelKey, detailKey: 'changes.detailChanged' });
     }
   }
 
-  for (const { key, label } of ARRAY_SECTIONS) {
+  for (const { key, labelKey } of ARRAY_SECTIONS) {
     const originalItems = original[key] as unknown[];
     const adjustedItems = adjusted[key] as unknown[];
     const { changed, count } = countChangedItems(originalItems, adjustedItems);
     if (changed === 0) continue;
 
-    const detail =
+    const params = (
       originalItems.length !== adjustedItems.length
-        ? `${originalItems.length} → ${adjustedItems.length} entries`
-        : `${changed} of ${count} entries updated`;
+        ? { from: originalItems.length, to: adjustedItems.length }
+        : { changed, count }
+    ) as Record<string, string | number>;
 
-    summaries.push({ label, detail });
+    summaries.push({
+      labelKey,
+      detailKey:
+        originalItems.length !== adjustedItems.length
+          ? 'changes.detailEntryCount'
+          : 'changes.detailEntriesUpdated',
+      params,
+    });
   }
 
   return summaries;

@@ -1,29 +1,31 @@
 'use client';
 
+import { useI18n } from '@/components/I18nProvider';
 import { SectionFieldArray } from './shared';
 
-export const SkillsForm = () => (
-  <SectionFieldArray
-    name="skills"
-    title="Skills"
-    description="Group your technical and soft skills by category for ATS readability."
-    addLabel="Add Skill Category"
-    variant="row"
-    removeTitle="Remove Skill Category"
-    newItem={() => ({ category: '', items: '' })}
-    fields={[
-      {
-        name: 'category',
-        className: 'w-1/3',
-        label: 'Category',
-        placeholder: 'Languages',
-      },
-      {
-        name: 'items',
-        className: 'flex-1',
-        label: 'Skills',
-        placeholder: 'TypeScript, Python, SQL...',
-      },
-    ]}
-  />
-);
+export const SkillsForm = () => {
+  const { t } = useI18n();
+  return (
+    <SectionFieldArray
+      name="skills"
+      title={t('skills.title')}
+      description={t('skills.description')}
+      addLabel={t('skills.addCategory')}
+      variant="row"
+      removeTitle={t('skills.removeCategory')}
+      newItem={() => ({ category: '', items: '' })}
+      fields={[
+        {
+          name: 'category',
+          label: t('skills.categoryLabel'),
+          placeholder: t('skills.categoryPlaceholder'),
+        },
+        {
+          name: 'items',
+          label: t('skills.itemsLabel'),
+          placeholder: t('skills.itemsPlaceholder'),
+        },
+      ]}
+    />
+  );
+};

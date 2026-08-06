@@ -23,13 +23,12 @@ import {
 } from '@/components/ui/select';
 import { Textarea } from '@/components/ui/textarea';
 import { toast } from '@/components/ui/toast';
+import { useI18n } from '@/components/I18nProvider';
 import { useAIAdjustCV } from '@/hooks/useAIAdjustCV';
 import { stripInvisibleChars } from '@/lib/cleanText';
-import {
-  AIAdjustScope,
-  AI_ADJUST_SCOPES,
-  getStoredAIAPIKey,
-} from '@/lib/consts';
+import { getStoredAIAPIKey } from '@/lib/consts';
+import { AIAdjustScope } from '@/lib/consts';
+import { AI_ADJUST_SCOPE_KEYS } from '@/lib/i18n';
 import type { CVImagePart } from '@/lib/cvParsing';
 import { MAX_ADJUST_IMAGES } from '@/lib/cvParsing';
 import { CVChangeSummary, summarizeCVChanges } from '@/lib/cvDiff';
@@ -60,6 +59,7 @@ export function AIAdjustDialog({
 }: AIAdjustDialogProps) {
   const { isAdjusting, error, adjustCV } = useAIAdjustCV();
   const { aiProvider, aiModel } = useUIStore();
+  const { t } = useI18n();
 
   const [jobDescription, setJobDescription] = useState('');
   const [images, setImages] = useState<CVImagePart[]>([]);
@@ -115,7 +115,7 @@ export function AIAdjustDialog({
     setLocalError(null);
 
     if (!jobDescription.trim() && images.length === 0) {
-      setLocalError('Please paste a job description or upload an image.');
+      setLocalError(t('aiAdjust.emptyInputError'));
       return;
     }
 
@@ -142,7 +142,7 @@ export function AIAdjustDialog({
     onApply(pendingResult.data);
     toast.add({
       type: 'success',
-      description: 'CV adjusted to match the job description.',
+      description: t('aiAdjust.toastAdjusted'),
       priority: 'high',
     });
     handleOpenChange(false);
@@ -153,7 +153,7 @@ export function AIAdjustDialog({
       <Dialog open={open} onOpenChange={handleOpenChange}>
         <DialogContent className="sm:max-w-lg grid-rows-[auto_minmax(0,1fr)_auto] max-h-[calc(100dvh-2rem)] overflow-hidden">
           <DialogHeader>
-            <DialogTitle>Review changes</DialogTitle>
+            <DialogTitle>{t('aiAdjust.reviewTitle')}</DialogTitle>
           </DialogHeader>
 
           <div className="flex min-h-0 flex-col gap-2 overflow-y-auto overscroll-contain p-2 -mx-1">
@@ -164,7 +164,7 @@ export function AIAdjustDialog({
                     className="size-4 shrink-0"
                     aria-hidden="true"
                   />
-                  Review these fields
+                  {t('importPreview.reviewFields')}
                 </div>
                 <ul className="space-y-0.5 text-sm text-muted-foreground">
                   {pendingResult.warnings.map((warning) => (
@@ -176,21 +176,21 @@ export function AIAdjustDialog({
 
             {changeSummary.length === 0 ? (
               <p className="text-sm text-muted-foreground">
-                No changes detected.
+                {t('aiAdjust.noChanges')}
               </p>
             ) : (
               <ul className="divide-y divide-border rounded-lg border border-border">
                 {changeSummary.map((item) => (
                   <li
-                    key={item.label}
+                    key={item.labelKey}
                     className="flex items-center justify-between gap-2 px-3 py-2.5"
                   >
                     <span className="flex items-center gap-2 text-sm font-medium min-w-0">
                       <FilePenLine className="w-4 h-4 text-primary shrink-0" />
-                      <span className="truncate">{item.label}</span>
+                      <span className="truncate">{t(item.labelKey)}</span>
                     </span>
                     <span className="text-sm text-muted-foreground shrink-0">
-                      {item.detail}
+                      {t(item.detailKey, item.params)}
                     </span>
                   </li>
                 ))}
@@ -200,9 +200,9 @@ export function AIAdjustDialog({
 
           <DialogFooter>
             <Button variant="outline" onClick={() => handleOpenChange(false)}>
-              Cancel
+              {t('aiAdjust.cancel')}
             </Button>
-            <Button onClick={handleApply}>Apply Changes</Button>
+            <Button onClick={handleApply}>{t('aiAdjust.applyChanges')}</Button>
           </DialogFooter>
         </DialogContent>
       </Dialog>
@@ -213,15 +213,14 @@ export function AIAdjustDialog({
     <Dialog open={open} onOpenChange={handleOpenChange}>
       <DialogContent className="sm:max-w-lg grid-rows-[auto_minmax(0,1fr)_auto] max-h-[calc(100dvh-2rem)] overflow-hidden">
         <DialogHeader>
-          <DialogTitle>AI CV Adjust</DialogTitle>
+          <DialogTitle>{t('aiAdjust.title')}</DialogTitle>
         </DialogHeader>
 
         <div className="flex min-h-0 flex-col gap-4 overflow-y-auto overscroll-contain p-2 -mx-1">
           <Field>
-            <FieldLabel>Adjust Scope</FieldLabel>
+            <FieldLabel>{t('aiAdjust.scopeLabel')}</FieldLabel>
             <FieldDescription>
-              Rewrite the whole CV or just one section to match the job
-              description.
+              {t('aiAdjust.scopeDescription')}
             </FieldDescription>
             <Select
               value={scope}
@@ -231,34 +230,35 @@ export function AIAdjustDialog({
                 <SelectValue />
               </SelectTrigger>
               <SelectContent align="start">
-                {AI_ADJUST_SCOPES.map((option) => (
-                  <SelectItem key={option.value} value={option.value}>
-                    {option.label}
-                  </SelectItem>
-                ))}
+                {(Object.keys(AI_ADJUST_SCOPE_KEYS) as AIAdjustScope[]).map(
+                  (value) => (
+                    <SelectItem key={value} value={value}>
+                      {t(AI_ADJUST_SCOPE_KEYS[value])}
+                    </SelectItem>
+                  ),
+                )}
               </SelectContent>
             </Select>
           </Field>
 
           <Field>
-            <FieldLabel>Job Description</FieldLabel>
+            <FieldLabel>{t('aiAdjust.jobDescriptionLabel')}</FieldLabel>
             <FieldDescription>
-              Paste the job posting, or upload a screenshot or photo of it.
+              {t('aiAdjust.jobDescriptionDescription')}
             </FieldDescription>
             <Textarea
               value={jobDescription}
               onChange={(e) => setJobDescription(e.target.value)}
-              placeholder="Paste the full job description here..."
+              placeholder={t('aiAdjust.jobDescriptionPlaceholder')}
               className="min-h-32 sm:min-h-40 max-h-40 sm:max-h-60 resize-y"
               aria-invalid={!!effectiveError}
             />
           </Field>
 
           <Field>
-            <FieldLabel>Job Description Image</FieldLabel>
+            <FieldLabel>{t('aiAdjust.imageLabel')}</FieldLabel>
             <FieldDescription>
-              Prefer to tailor from an image? Attach up to {MAX_ADJUST_IMAGES}{' '}
-              JPEG, PNG, or WebP screenshots.
+              {t('aiAdjust.imageDescription', { max: MAX_ADJUST_IMAGES })}
             </FieldDescription>
             <input
               ref={fileInputRef}
@@ -271,7 +271,7 @@ export function AIAdjustDialog({
             <div
               role="button"
               tabIndex={0}
-              aria-label="Upload job description image"
+              aria-label={t('aiAdjust.imageUploadAria')}
               onClick={() => fileInputRef.current?.click()}
               onKeyDown={(e) => {
                 if (e.key === 'Enter' || e.key === ' ') {
@@ -301,10 +301,10 @@ export function AIAdjustDialog({
                 <>
                   <ImagePlus className="w-6 h-6" aria-hidden="true" />
                   <span className="font-medium">
-                    Upload or drag &amp; drop job description image
+                    {t('aiAdjust.imageDropText')}
                   </span>
                   <span>
-                    JPEG, PNG, or WebP — up to {MAX_ADJUST_IMAGES} screenshots
+                    {t('aiAdjust.imageDropHint', { max: MAX_ADJUST_IMAGES })}
                   </span>
                 </>
               ) : (
@@ -315,7 +315,9 @@ export function AIAdjustDialog({
                         {/* eslint-disable-next-line @next/next/no-img-element */}
                         <img
                           src={`data:${image.mimeType};base64,${image.data}`}
-                          alt={`Job description image ${index + 1}`}
+                          alt={t('aiAdjust.imageAlt', {
+                            index: index + 1,
+                          })}
                           className="h-16 w-16 rounded-md border border-border object-cover"
                         />
                         <button
@@ -324,7 +326,9 @@ export function AIAdjustDialog({
                             e.stopPropagation();
                             handleRemoveImage(index);
                           }}
-                          aria-label={`Remove image ${index + 1}`}
+                          aria-label={t('aiAdjust.imageRemoveAria', {
+                            index: index + 1,
+                          })}
                           className="absolute -top-1.5 -right-1.5 rounded-full bg-background p-1 text-muted-foreground shadow-sm border border-border hover:text-foreground"
                         >
                           <X className="w-3 h-3" aria-hidden="true" />
@@ -333,8 +337,10 @@ export function AIAdjustDialog({
                     ))}
                   </ul>
                   <span className="font-medium">
-                    {images.length}/{MAX_ADJUST_IMAGES}&nbsp;attached — click or
-                    drag &amp; drop to add more
+                    {t('aiAdjust.imageAttachedText', {
+                      current: images.length,
+                      max: MAX_ADJUST_IMAGES,
+                    })}
                   </span>
                 </>
               )}
@@ -352,11 +358,11 @@ export function AIAdjustDialog({
             onClick={() => handleOpenChange(false)}
             disabled={isAdjusting}
           >
-            Cancel
+            {t('aiAdjust.cancel')}
           </Button>
           <Button onClick={handleSubmit} disabled={isAdjusting}>
             {isAdjusting && <Loader2 className="w-4 h-4 animate-spin" />}
-            {isAdjusting ? 'Adjusting...' : 'Adjust CV'}
+            {isAdjusting ? t('aiAdjust.adjusting') : t('aiAdjust.adjustCv')}
           </Button>
         </DialogFooter>
       </DialogContent>

@@ -1,37 +1,56 @@
 'use client';
 
+import { useI18n } from '@/components/I18nProvider';
 import { SectionFieldArray } from './shared';
 
-export const ExperienceForm = () => (
-  <SectionFieldArray
-    name="experience"
-    title="Work Experience"
-    description="Drag items using the handle to reorder your job history."
-    addLabel="Add New Experience"
-    variant="card"
-    itemLabel="Experience"
-    removeTitle="Remove Experience"
-    newItem={() => ({
-      role: '',
-      company: '',
-      date: '',
-      location: '',
-      description: '',
-    })}
-    fields={[
-      { name: 'role', label: 'Job Title', placeholder: 'Software Engineer' },
-      { name: 'company', label: 'Company', placeholder: 'Acme Inc.' },
-      { name: 'location', label: 'Location', placeholder: 'Remote / New York' },
-      { name: 'date', label: 'Dates', placeholder: 'Jan 2022 - Present' },
-      {
-        name: 'description',
-        as: 'textarea',
-        className: 'sm:col-span-2',
-        label: 'Description / Bullet Points',
-        placeholder:
-          '- Spearheaded migration to Next.js\n- Improved load speeds by 40%',
-        textareaClassName: 'h-32',
-      },
-    ]}
-  />
-);
+export const ExperienceForm = () => {
+  const { t } = useI18n();
+  return (
+    <SectionFieldArray
+      name="experience"
+      title={t('workExperience.title')}
+      description={t('workExperience.description')}
+      addLabel={t('workExperience.add')}
+      variant="card"
+      itemLabel={t('workExperience.itemLabel')}
+      removeTitle={t('workExperience.remove')}
+      newItem={() => ({
+        role: '',
+        company: '',
+        date: '',
+        location: '',
+        description: '',
+      })}
+      fields={[
+        {
+          name: 'role',
+          label: t('workExperience.roleLabel'),
+          placeholder: t('workExperience.rolePlaceholder'),
+        },
+        {
+          name: 'company',
+          label: t('workExperience.companyLabel'),
+          placeholder: t('workExperience.companyPlaceholder'),
+        },
+        {
+          name: 'location',
+          label: t('workExperience.locationLabel'),
+          placeholder: t('workExperience.locationPlaceholder'),
+        },
+        {
+          name: 'date',
+          label: t('workExperience.datesLabel'),
+          placeholder: t('workExperience.datesPlaceholder'),
+        },
+        {
+          name: 'description',
+          as: 'textarea',
+          className: 'sm:col-span-2',
+          label: t('workExperience.descriptionLabel'),
+          placeholder: t('workExperience.descriptionPlaceholder'),
+          textareaClassName: 'h-32',
+        },
+      ]}
+    />
+  );
+};

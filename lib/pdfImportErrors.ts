@@ -1,22 +1,23 @@
+import { TranslationKey } from '@/lib/i18n';
+
 export class ScannedPDFError extends Error {
   constructor() {
-    super(
-      'This PDF appears to be scanned images with no extractable text. Use a text-based PDF or run OCR first.',
-    );
+    super('ScannedPDFError');
     this.name = 'ScannedPDFError';
   }
 }
 
 export interface PDFImportErrorInfo {
-  title: string;
-  message: string;
+  titleKey: TranslationKey;
+  messageKey: TranslationKey;
+  rawMessage?: string;
 }
 
 export function getPDFImportErrorInfo(error: unknown): PDFImportErrorInfo {
   if (error instanceof ScannedPDFError) {
     return {
-      title: 'No text found',
-      message: error.message,
+      titleKey: 'import.errors.scannedTitle',
+      messageKey: 'import.errors.scannedMessage',
     };
   }
 
@@ -24,22 +25,21 @@ export function getPDFImportErrorInfo(error: unknown): PDFImportErrorInfo {
 
   if (name === 'PasswordException') {
     return {
-      title: 'Password protected',
-      message:
-        'This PDF is password-protected. Remove the password and try again.',
+      titleKey: 'import.errors.passwordTitle',
+      messageKey: 'import.errors.passwordMessage',
     };
   }
 
   if (error instanceof TypeError) {
     return {
-      title: 'Network error',
-      message:
-        'Could not reach the AI service. Check your connection and try again.',
+      titleKey: 'import.errors.networkTitle',
+      messageKey: 'import.errors.networkMessage',
     };
   }
 
   return {
-    title: 'Import failed',
-    message: error instanceof Error ? error.message : 'Could not read the PDF.',
+    titleKey: 'import.errors.failedTitle',
+    messageKey: 'import.errors.readFailed',
+    rawMessage: error instanceof Error ? error.message : undefined,
   };
 }

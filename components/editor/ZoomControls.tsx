@@ -1,6 +1,7 @@
 'use client';
 
 import { IconButton } from '@/components/ui/icon-button';
+import { useI18n } from '@/components/I18nProvider';
 import { Maximize2, Minus, Plus } from 'lucide-react';
 
 interface ZoomControlsProps {
@@ -20,11 +21,12 @@ export function ZoomControls({
   onZoomOut,
   onReset,
 }: ZoomControlsProps) {
+  const { t } = useI18n();
   return (
     <div className="absolute bottom-3 right-3 z-20 flex items-center gap-0.5 bg-card border border-border rounded-lg shadow-md p-1 print:hidden">
       <IconButton
         size="icon-sm"
-        aria-label="Zoom out"
+        aria-label={t('preview.zoomOut')}
         onClick={onZoomOut}
         disabled={scale <= minScale}
       >
@@ -35,14 +37,18 @@ export function ZoomControls({
       </span>
       <IconButton
         size="icon-sm"
-        aria-label="Zoom in"
+        aria-label={t('preview.zoomIn')}
         onClick={onZoomIn}
         disabled={scale >= maxScale}
       >
         <Plus className="w-3.5 h-3.5" />
       </IconButton>
       <div className="w-px h-4 bg-border mx-0.5" />
-      <IconButton size="icon-sm" aria-label="Fit to width" onClick={onReset}>
+      <IconButton
+        size="icon-sm"
+        aria-label={t('preview.fitToWidth')}
+        onClick={onReset}
+      >
         <Maximize2 className="w-3.5 h-3.5" />
       </IconButton>
     </div>

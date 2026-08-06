@@ -1,5 +1,6 @@
 import { useRef } from 'react';
 import { toast } from '@/components/ui/toast';
+import { useI18n } from '@/components/I18nProvider';
 import { extractTextFromPDF, parseCVWithAI } from '@/hooks/useCVImportPDF';
 import { getStoredAIAPIKey } from '@/lib/consts';
 import { getPDFImportErrorInfo } from '@/lib/pdfImportErrors';
@@ -10,6 +11,7 @@ export function useCVImportExport() {
   const pdfInputRef = useRef<HTMLInputElement>(null);
   const pendingFileRef = useRef<File | null>(null);
   const { aiProvider, aiModel } = useUIStore();
+  const { t } = useI18n();
 
   const handleImportPDF = (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0];
@@ -27,8 +29,8 @@ export function useCVImportExport() {
   const runPDFImport = async (file: File, apiKey?: string) => {
     const loadingToast = toast.add({
       type: 'loading',
-      title: 'Importing PDF',
-      description: 'Extracting text...',
+      title: t('import.importingPdf'),
+      description: t('import.extractingText'),
       timeout: 0,
     });
 
@@ -44,10 +46,10 @@ export function useCVImportExport() {
 
       toast.update(loadingToast, {
         type: 'loading',
-        title: 'Importing PDF',
+        title: t('import.importingPdf'),
         description: images.length
-          ? 'Parsing scanned pages with AI...'
-          : 'Parsing with AI...',
+          ? t('import.parsingScanned')
+          : t('import.parsingAi'),
       });
 
       const { data, warnings } = await parseCVWithAI(
@@ -61,27 +63,27 @@ export function useCVImportExport() {
 
       toast.update(loadingToast, {
         type: 'success',
-        title: 'PDF parsed',
+        title: t('import.pdfParsed'),
         description: warnings.length
-          ? `Review the result (${warnings.length} issue${
-              warnings.length === 1 ? '' : 's'
-            } found).`
-          : 'Review the result before applying.',
+          ? warnings.length === 1
+            ? t('import.reviewResultIssuesOne', { count: warnings.length })
+            : t('import.reviewResultIssuesMany', { count: warnings.length })
+          : t('import.reviewResult'),
         timeout: 5000,
       });
 
       useImportStore.getState().setPendingImport({ data, warnings });
     } catch (error) {
       console.error('PDF import error:', error);
-      const { title, message } = getPDFImportErrorInfo(error);
+      const { titleKey, messageKey, rawMessage } = getPDFImportErrorInfo(error);
       toast.update(loadingToast, {
         type: 'error',
-        title,
-        description: message,
+        title: t(titleKey),
+        description: rawMessage ?? t(messageKey),
         priority: 'high',
         timeout: 8000,
         actionProps: {
-          children: 'Retry',
+          children: t('common.retry'),
           onClick: retry,
         },
       });
