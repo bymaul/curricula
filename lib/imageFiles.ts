@@ -86,6 +86,37 @@ export async function downscaleImage(dataUrl: string): Promise<string | null> {
   }
 }
 
+export const PHOTO_SIZE = 512;
+
+/**
+ * Center-crops an image to a square and downscales it to a JPEG no larger
+ * than `PHOTO_SIZE` pixels per side, producing a compact headshot for resume
+ * templates. Returns null when the source cannot be decoded.
+ */
+export async function resizeSquarePhoto(
+  dataUrl: string,
+  size = PHOTO_SIZE,
+): Promise<string | null> {
+  try {
+    const image = await loadImage(dataUrl);
+    const side = Math.min(image.naturalWidth, image.naturalHeight);
+    if (side === 0) return null;
+    const sx = (image.naturalWidth - side) / 2;
+    const sy = (image.naturalHeight - side) / 2;
+
+    const canvas = document.createElement('canvas');
+    canvas.width = size;
+    canvas.height = size;
+    const ctx = canvas.getContext('2d');
+    if (!ctx) return null;
+
+    ctx.drawImage(image, sx, sy, side, side, 0, 0, size, size);
+    return canvas.toDataURL('image/jpeg', JPEG_QUALITY);
+  } catch {
+    return null;
+  }
+}
+
 /**
  * Reads image files (JPEG/PNG/WebP) into base64 `CVImagePart`s for the AI
  * vision pipeline, downscaling each to a JPEG so real-world screenshots stay

@@ -72,6 +72,7 @@ const id: Dictionary = {
   personalDetails: {
     title: 'Detail Pribadi',
     description: 'Mulai dengan informasi kontak dan ringkasan Anda.',
+    resumeSettings: 'CV',
     contactInformation: 'Informasi Kontak',
     fullName: 'Nama Lengkap',
     fullNamePlaceholder: 'mis. Alex Johnson',
@@ -91,6 +92,17 @@ const id: Dictionary = {
     professionalSummary: 'Ringkasan Profesional',
     summaryPlaceholder:
       'Gambaran singkat latar belakang profesional, pencapaian utama, dan keunggulan inti Anda...',
+    photoLabel: 'Foto',
+    photoHint:
+      'Opsional. Foto kepala persegi yang dipakai di pratinjau templat dan tautan berbagi.',
+    photoUpload: 'Unggah',
+    photoChange: 'Ganti',
+    photoRemove: 'Hapus',
+    photoErrorInvalid: 'Pilih gambar JPEG, PNG, atau WebP.',
+    photoErrorRead: 'Gambar tersebut tidak dapat dibaca.',
+    resumeLanguageLabel: 'Bahasa Resume',
+    resumeLanguageHint:
+      'Bahasa yang dipakai di templat CV dan tautan berbagi ini, terpisah dari bahasa aplikasi.',
   },
   workExperience: {
     title: 'Pengalaman Kerja',
