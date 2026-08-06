@@ -1,8 +1,25 @@
+import { z } from 'zod';
 import { CVData, cvDataStoredSchema } from '@/lib/schema';
+import { ResumeLanguage } from '@/lib/i18n/languages';
+import { RESUME_LANGUAGES } from '@/lib/i18n/languages';
 
-const SHARE_PREFIX = 'c1:';
+const SHARE_PREFIX_V2 = 'c2:';
+const LEGACY_SHARE_PREFIX = 'c1:';
 
 const CHUNK = 0x8000;
+
+const shareEnvelopeSchema = z.object({
+  v: z.literal(2),
+  language: z.enum(RESUME_LANGUAGES).default('en'),
+  photo: z.string().default(''),
+  data: cvDataStoredSchema,
+});
+
+export interface ShareResult {
+  data: CVData;
+  language: ResumeLanguage;
+  photo: string;
+}
 
 function bytesToBase64url(bytes: Uint8Array): string {
   let binary = '';
@@ -26,21 +43,50 @@ function base64urlToBytes(payload: string): Uint8Array<ArrayBuffer> {
   return bytes;
 }
 
-export async function buildSharePayload(data: CVData): Promise<string> {
-  const stream = new Blob([JSON.stringify(data)])
+function legacyResult(data: CVData): ShareResult {
+  return { data, language: 'en', photo: '' };
+}
+
+export async function buildSharePayload(
+  data: CVData,
+  options: { language?: ResumeLanguage; photo?: string } = {},
+): Promise<string> {
+  const envelope = {
+    v: 2,
+    language: options.language ?? 'en',
+    photo: options.photo ?? '',
+    data,
+  };
+  const stream = new Blob([JSON.stringify(envelope)])
     .stream()
     .pipeThrough(new CompressionStream('deflate-raw'));
   const compressed = new Uint8Array(await new Response(stream).arrayBuffer());
-  return SHARE_PREFIX + bytesToBase64url(compressed);
+  return SHARE_PREFIX_V2 + bytesToBase64url(compressed);
 }
 
 export async function parseSharePayload(
   payload: string,
-): Promise<CVData | null> {
+): Promise<ShareResult | null> {
   try {
     let json: string;
-    if (payload.startsWith(SHARE_PREFIX)) {
-      const bytes = base64urlToBytes(payload.slice(SHARE_PREFIX.length));
+    if (payload.startsWith(SHARE_PREFIX_V2)) {
+      const bytes = base64urlToBytes(payload.slice(SHARE_PREFIX_V2.length));
+      const stream = new Blob([bytes])
+        .stream()
+        .pipeThrough(new DecompressionStream('deflate-raw'));
+      json = await new Response(stream).text();
+      const parsed = JSON.parse(json);
+      const result = shareEnvelopeSchema.safeParse(parsed);
+      return result.success
+        ? {
+            data: result.data.data,
+            language: result.data.language,
+            photo: result.data.photo,
+          }
+        : null;
+    }
+    if (payload.startsWith(LEGACY_SHARE_PREFIX)) {
+      const bytes = base64urlToBytes(payload.slice(LEGACY_SHARE_PREFIX.length));
       const stream = new Blob([bytes])
         .stream()
         .pipeThrough(new DecompressionStream('deflate-raw'));
@@ -50,14 +96,17 @@ export async function parseSharePayload(
     }
     const parsed = JSON.parse(json);
     const result = cvDataStoredSchema.safeParse(parsed);
-    return result.success ? result.data : null;
+    return result.success ? legacyResult(result.data) : null;
   } catch {
     return null;
   }
 }
 
-export async function buildShareUrl(data: CVData): Promise<string> {
-  const payload = await buildSharePayload(data);
+export async function buildShareUrl(
+  data: CVData,
+  options: { language?: ResumeLanguage; photo?: string } = {},
+): Promise<string> {
+  const payload = await buildSharePayload(data, options);
   const { origin, pathname, search } = window.location;
   return `${origin}${pathname}${search}#resume=${payload}`;
 }

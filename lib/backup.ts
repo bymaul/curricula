@@ -1,5 +1,6 @@
 import { z } from 'zod';
 import { SECTION_IDS, SectionId } from '@/lib/consts';
+import { RESUME_LANGUAGES } from '@/lib/i18n/languages';
 import { cvDataStoredSchema } from '@/lib/schema';
 import type { ResumeRecord } from '@/store/useResumeStore';
 
@@ -21,6 +22,8 @@ export const backupSchema = z.object({
       data: cvDataStoredSchema,
       sectionOrder: z.array(sectionIdSchema),
       hiddenSections: z.array(sectionIdSchema),
+      language: z.enum(RESUME_LANGUAGES).default('en'),
+      photo: z.string().default(''),
       autoTitle: z.boolean(),
       updatedAt: z.number(),
     }),
@@ -46,6 +49,8 @@ export function serializeBackup(
       data: record.data,
       sectionOrder: record.sectionOrder,
       hiddenSections: record.hiddenSections,
+      language: record.language,
+      photo: record.photo,
       autoTitle: record.autoTitle,
       updatedAt: record.updatedAt,
     })),

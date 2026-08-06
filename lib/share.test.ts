@@ -31,18 +31,52 @@ function makeData(): CVData {
   };
 }
 
+function toBase64url(bytes: Uint8Array): string {
+  let binary = '';
+  for (let i = 0; i < bytes.length; i += 0x8000) {
+    binary += String.fromCharCode(...bytes.subarray(i, i + 0x8000));
+  }
+  return btoa(binary)
+    .replace(/\+/g, '-')
+    .replace(/\//g, '_')
+    .replace(/=+$/, '');
+}
+
 function encodeUncompressed(data: object): string {
-  const b64 = btoa(JSON.stringify(data));
-  return b64.replace(/\+/g, '-').replace(/\//g, '_').replace(/=+$/, '');
+  return toBase64url(new TextEncoder().encode(JSON.stringify(data)));
+}
+
+async function encodeCompressed(data: object, prefix: string): Promise<string> {
+  const stream = new Blob([JSON.stringify(data)])
+    .stream()
+    .pipeThrough(new CompressionStream('deflate-raw'));
+  const compressed = new Uint8Array(await new Response(stream).arrayBuffer());
+  return prefix + toBase64url(compressed);
 }
 
 describe('share payload', () => {
-  it('round-trips CV data through a compressed payload', async () => {
+  it('round-trips CV data through a compressed v2 payload', async () => {
     const data = makeData();
     const payload = await buildSharePayload(data);
 
-    expect(payload.startsWith('c1:')).toBe(true);
-    expect(await parseSharePayload(payload)).toEqual(data);
+    expect(payload.startsWith('c2:')).toBe(true);
+    expect(await parseSharePayload(payload)).toEqual({
+      data,
+      language: 'en',
+      photo: '',
+    });
+  });
+
+  it('round-trips language and photo options', async () => {
+    const data = makeData();
+    const photo = 'data:image/jpeg;base64,Zm9v';
+    const payload = await buildSharePayload(data, { language: 'id', photo });
+
+    expect(await parseSharePayload(payload)).toEqual({
+      data,
+      language: 'id',
+      photo,
+    });
   });
 
   it('creates a shorter payload than the uncompressed encoding', async () => {
@@ -52,11 +86,26 @@ describe('share payload', () => {
     expect(payload.length).toBeLessThan(encodeUncompressed(data).length);
   });
 
+  it('parses a legacy compressed payload with default language and photo', async () => {
+    const data = makeData();
+    const payload = await encodeCompressed(data, 'c1:');
+
+    expect(await parseSharePayload(payload)).toEqual({
+      data,
+      language: 'en',
+      photo: '',
+    });
+  });
+
   it('parses an uncompressed legacy payload', async () => {
     const data = makeData();
     const payload = encodeUncompressed(data);
 
-    expect(await parseSharePayload(payload)).toEqual(data);
+    expect(await parseSharePayload(payload)).toEqual({
+      data,
+      language: 'en',
+      photo: '',
+    });
   });
 
   it('round-trips an in-progress CV with empty fields', async () => {
@@ -76,7 +125,11 @@ describe('share payload', () => {
     };
 
     const payload = await buildSharePayload(incomplete);
-    expect(await parseSharePayload(payload)).toEqual(incomplete);
+    expect(await parseSharePayload(payload)).toEqual({
+      data: incomplete,
+      language: 'en',
+      photo: '',
+    });
   });
 
   it('returns null when the payload is missing a required field', async () => {
@@ -88,6 +141,7 @@ describe('share payload', () => {
   it('returns null for garbage payloads', async () => {
     expect(await parseSharePayload('not-a-payload')).toBeNull();
     expect(await parseSharePayload('c1:%bad%')).toBeNull();
+    expect(await parseSharePayload('c2:%bad%')).toBeNull();
     expect(await parseSharePayload('')).toBeNull();
   });
 
@@ -104,6 +158,6 @@ describe('share payload', () => {
     });
 
     const url = await buildShareUrl(makeData());
-    expect(url).toMatch(/^https:\/\/example\.com\/\?v=1#resume=c1:/);
+    expect(url).toMatch(/^https:\/\/example\.com\/\?v=1#resume=c2:/);
   });
 });

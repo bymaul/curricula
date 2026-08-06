@@ -103,6 +103,8 @@ export default function Home() {
             printRef={printRef}
             sectionOrder={activeResume?.sectionOrder}
             hiddenSections={activeResume?.hiddenSections}
+            language={activeResume?.language}
+            photo={activeResume?.photo}
             isVisible={isPreviewVisible}
             mobileActive={mobileView === 'preview'}
             onSectionClick={handlePreviewSectionClick}

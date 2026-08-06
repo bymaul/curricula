@@ -12,10 +12,13 @@ export function useShareLinkImport() {
     const match = window.location.hash.match(/^#resume=([A-Za-z0-9_-]+)$/);
     if (!match) return;
     let cancelled = false;
-    void parseSharePayload(match[1]).then((data) => {
-      if (cancelled || !data) return;
-      const name = data.name?.trim();
-      useResumeStore.getState().importResumeData(data, name);
+    void parseSharePayload(match[1]).then((result) => {
+      if (cancelled || !result) return;
+      const name = result.data.name?.trim();
+      useResumeStore.getState().importResumeData(result.data, name, {
+        language: result.language,
+        photo: result.photo,
+      });
       window.history.replaceState(
         null,
         '',
