@@ -12,6 +12,7 @@ import {
   computePageCount,
 } from '@/lib/pagination';
 import { CVData } from '@/lib/schema';
+import { ResumeLanguage } from '@/lib/i18n/languages';
 import { cn } from '@/lib/utils';
 import { useUIStore } from '@/store/useUIStore';
 import { FileText } from 'lucide-react';
@@ -27,6 +28,8 @@ interface ResumePreviewProps {
   printRef: RefObject<HTMLDivElement | null>;
   sectionOrder?: SectionId[];
   hiddenSections?: SectionId[];
+  language?: ResumeLanguage;
+  photo?: string;
   isVisible: boolean;
   mobileActive: boolean;
   onSectionClick?: (sectionId: SectionId) => void;
@@ -37,6 +40,8 @@ export function ResumePreview({
   printRef,
   sectionOrder,
   hiddenSections,
+  language,
+  photo,
   isVisible,
   mobileActive,
   onSectionClick,
@@ -172,6 +177,8 @@ export function ResumePreview({
                       cvData={cvData}
                       sectionOrder={sectionOrder}
                       hiddenSections={hiddenSections}
+                      language={language}
+                      photo={photo}
                       onSectionClick={onSectionClick}
                     />
                   </div>

@@ -1,6 +1,7 @@
 import { create } from 'zustand';
 import { persist } from 'zustand/middleware';
 import { DEFAULT_SECTION_ORDER, SectionId } from '@/lib/consts';
+import { ResumeLanguage } from '@/lib/i18n/languages';
 import { CVData, cvSchema, initialCVState } from '@/lib/schema';
 
 export interface ResumeRecord {
@@ -9,6 +10,8 @@ export interface ResumeRecord {
   data: CVData;
   sectionOrder: SectionId[];
   hiddenSections: SectionId[];
+  language: ResumeLanguage;
+  photo: string;
   autoTitle: boolean;
   updatedAt: number;
 }
@@ -38,7 +41,13 @@ interface ResumeState {
   deleteResume: (id: string) => void;
   renameResume: (id: string, title: string) => void;
   setActiveResume: (id: string) => void;
-  importResumeData: (data: CVData, title?: string) => void;
+  importResumeData: (
+    data: CVData,
+    title?: string,
+    options?: { language?: ResumeLanguage; photo?: string },
+  ) => void;
+  setResumeLanguage: (id: string, language: ResumeLanguage) => void;
+  setResumePhoto: (id: string, photo: string) => void;
   restoreBackup: (resumes: ResumeRecord[], activeId: string | null) => void;
   updateResumeData: (id: string, data: CVData) => void;
   moveSection: (fromIndex: number, toIndex: number) => void;
@@ -63,6 +72,7 @@ function makeId(): string {
 function makeResume(
   data: CVData = initialCVState,
   title?: string,
+  options: { language?: ResumeLanguage; photo?: string } = {},
 ): ResumeRecord {
   return {
     id: makeId(),
@@ -70,8 +80,18 @@ function makeResume(
     data,
     sectionOrder: [...DEFAULT_SECTION_ORDER],
     hiddenSections: [],
+    language: options.language ?? 'en',
+    photo: options.photo ?? '',
     autoTitle: true,
     updatedAt: now(),
+  };
+}
+
+function normalizeResume(record: ResumeRecord): ResumeRecord {
+  return {
+    ...record,
+    language: record.language ?? 'en',
+    photo: record.photo ?? '',
   };
 }
 
@@ -285,9 +305,9 @@ export const useResumeStore = create<ResumeState>()(
           };
         }),
 
-      importResumeData: (data, title) =>
+      importResumeData: (data, title, options) =>
         set((state) => {
-          const record = makeResume(data, title);
+          const record = makeResume(data, title, options);
           return {
             resumes: [...state.resumes, record],
             activeId: record.id,
@@ -298,18 +318,37 @@ export const useResumeStore = create<ResumeState>()(
           };
         }),
 
+      setResumeLanguage: (id, language) =>
+        set((state) => ({
+          resumes: state.resumes.map((r) =>
+            r.id === id && r.language !== language
+              ? { ...r, language, updatedAt: now() }
+              : r,
+          ),
+        })),
+
+      setResumePhoto: (id, photo) =>
+        set((state) => ({
+          resumes: state.resumes.map((r) =>
+            r.id === id && r.photo !== photo
+              ? { ...r, photo, updatedAt: now() }
+              : r,
+          ),
+        })),
+
       restoreBackup: (resumes, activeId) =>
         set((state) => {
           if (resumes.length === 0) return {};
-          const targetId = resumes.some((r) => r.id === activeId)
+          const normalized = resumes.map(normalizeResume);
+          const targetId = normalized.some((r) => r.id === activeId)
             ? activeId
-            : resumes[0].id;
+            : normalized[0].id;
           const histories: Record<string, ResumeHistory> = {};
-          for (const record of resumes) {
+          for (const record of normalized) {
             histories[record.id] = seedHistory(record);
           }
           return {
-            resumes: [...resumes],
+            resumes: normalized,
             activeId: targetId,
             histories,
             revision: state.revision + 1,
@@ -406,7 +445,7 @@ export const useResumeStore = create<ResumeState>()(
       }),
       merge: (persisted, current) => {
         const base = { ...current, ...(persisted as Partial<ResumeState>) };
-        let resumes = base.resumes ?? [];
+        let resumes = (base.resumes ?? []).map(normalizeResume);
         if (resumes.length === 0) {
           resumes = seedResumes();
         }

@@ -28,6 +28,8 @@ function makeRecord(overrides: Partial<ResumeRecord> = {}): ResumeRecord {
     data: makeData(),
     sectionOrder: [...DEFAULT_SECTION_ORDER],
     hiddenSections: ['skills'],
+    language: 'en',
+    photo: '',
     autoTitle: false,
     updatedAt: 123456,
     ...overrides,
@@ -44,6 +46,42 @@ describe('backup', () => {
     expect(parsed!.version).toBe(1);
     expect(parsed!.activeId).toBe('r1');
     expect(parsed!.resumes).toEqual([makeRecord()]);
+  });
+
+  it('round-trips language and photo on each resume', () => {
+    const record = makeRecord({
+      language: 'id',
+      photo: 'data:image/png;base64,eA==',
+    });
+    const parsed = parseBackup(serializeBackup([record], 'r1'));
+
+    expect(parsed!.resumes[0].language).toBe('id');
+    expect(parsed!.resumes[0].photo).toBe('data:image/png;base64,eA==');
+  });
+
+  it('defaults language and photo for legacy backups', () => {
+    const record = makeRecord();
+    const legacy = {
+      id: record.id,
+      title: record.title,
+      data: record.data,
+      sectionOrder: record.sectionOrder,
+      hiddenSections: record.hiddenSections,
+      autoTitle: record.autoTitle,
+      updatedAt: record.updatedAt,
+    };
+    const raw = JSON.stringify({
+      app: 'curricula',
+      version: 1,
+      exportedAt: 0,
+      activeId: 'r1',
+      resumes: [legacy],
+    });
+
+    const parsed = parseBackup(raw);
+    expect(parsed).not.toBeNull();
+    expect(parsed!.resumes[0].language).toBe('en');
+    expect(parsed!.resumes[0].photo).toBe('');
   });
 
   it('round-trips multiple resumes and a null active id', () => {

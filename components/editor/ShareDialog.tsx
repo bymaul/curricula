@@ -11,7 +11,9 @@ import {
 import { toast } from '@/components/ui/toast';
 import { useI18n } from '@/components/I18nProvider';
 import { buildShareUrl } from '@/lib/share';
+import { ResumeLanguage } from '@/lib/i18n/languages';
 import { CVData } from '@/lib/schema';
+import { useResumeStore } from '@/store/useResumeStore';
 import { Check, Copy, ExternalLink, Loader2, Share2 } from 'lucide-react';
 import { useEffect, useState } from 'react';
 
@@ -21,20 +23,28 @@ interface ShareDialogProps {
   cvData: CVData;
 }
 
-function ShareLinkContent({ cvData }: { cvData: CVData }) {
+function ShareLinkContent({
+  cvData,
+  language,
+  photo,
+}: {
+  cvData: CVData;
+  language: ResumeLanguage;
+  photo: string;
+}) {
   const [link, setLink] = useState<string | null>(null);
   const [copied, setCopied] = useState(false);
   const { t } = useI18n();
 
   useEffect(() => {
     let cancelled = false;
-    void buildShareUrl(cvData).then((url) => {
+    void buildShareUrl(cvData, { language, photo }).then((url) => {
       if (!cancelled) setLink(url);
     });
     return () => {
       cancelled = true;
     };
-  }, [cvData]);
+  }, [cvData, language, photo]);
 
   const handleCopy = async () => {
     if (!link) return;
@@ -97,6 +107,12 @@ function ShareLinkContent({ cvData }: { cvData: CVData }) {
 
 export function ShareDialog({ open, onOpenChange, cvData }: ShareDialogProps) {
   const { t } = useI18n();
+  const activeResume = useResumeStore((state) =>
+    state.resumes.find((r) => r.id === state.activeId),
+  );
+  const language = activeResume?.language ?? 'en';
+  const photo = activeResume?.photo ?? '';
+
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
       <DialogContent className="sm:max-w-md">
@@ -105,7 +121,9 @@ export function ShareDialog({ open, onOpenChange, cvData }: ShareDialogProps) {
           <DialogDescription>{t('share.description')}</DialogDescription>
         </DialogHeader>
 
-        {open && <ShareLinkContent cvData={cvData} />}
+        {open && (
+          <ShareLinkContent cvData={cvData} language={language} photo={photo} />
+        )}
       </DialogContent>
     </Dialog>
   );

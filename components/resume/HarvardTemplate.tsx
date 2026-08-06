@@ -1,15 +1,17 @@
 'use client';
 
 import React, { forwardRef } from 'react';
-import { useI18n } from '@/components/I18nProvider';
 import { DEFAULT_SECTION_ORDER, SectionId } from '@/lib/consts';
-import { TranslationKey } from '@/lib/i18n';
+import { translate, TranslationKey } from '@/lib/i18n';
+import { ResumeLanguage } from '@/lib/i18n/languages';
 import { CVData } from '@/lib/schema';
 
 interface TemplateProps {
   cvData: CVData;
   sectionOrder?: SectionId[];
   hiddenSections?: SectionId[];
+  language?: ResumeLanguage;
+  photo?: string;
   onSectionClick?: (sectionId: SectionId) => void;
 }
 
@@ -283,8 +285,12 @@ const SECTION_RENDERERS: Record<SectionId, SectionRenderer> = {
 };
 
 export const HarvardTemplate = forwardRef<HTMLDivElement, TemplateProps>(
-  ({ cvData, sectionOrder, hiddenSections, onSectionClick }, ref) => {
-    const { t } = useI18n();
+  (
+    { cvData, sectionOrder, hiddenSections, language, photo, onSectionClick },
+    ref,
+  ) => {
+    const t = (key: TranslationKey, params?: Record<string, string | number>) =>
+      translate(language ?? 'en', key, params);
 
     const order = (sectionOrder ?? DEFAULT_SECTION_ORDER).filter(
       (id) => !hiddenSections?.includes(id),
@@ -347,6 +353,15 @@ export const HarvardTemplate = forwardRef<HTMLDivElement, TemplateProps>(
                   }
                   className={`text-center mb-4 ${onSectionClick ? 'cursor-pointer hover:ring-1 hover:ring-primary/40 hover:rounded-sm focus:outline-none focus-visible:ring-2 focus-visible:ring-primary/40 focus-visible:rounded-sm' : ''}`}
                 >
+                  {photo ? (
+                    // eslint-disable-next-line @next/next/no-img-element
+                    <img
+                      src={photo}
+                      alt=""
+                      className="mx-auto mb-2 h-[3cm] w-[3cm] rounded-full object-cover"
+                    />
+                  ) : null}
+
                   <h1 className={`${TYPE.name} mb-1`}>
                     {cvData.name || t('template.yourName')}
                   </h1>

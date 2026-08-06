@@ -331,6 +331,8 @@ describe('useResumeStore import & backup', () => {
         data: makeData({ jobTitle: 'A' }),
         sectionOrder: [...DEFAULT_SECTION_ORDER],
         hiddenSections: ['skills'],
+        language: 'en',
+        photo: '',
         autoTitle: false,
         updatedAt: 1000,
       },
@@ -340,6 +342,8 @@ describe('useResumeStore import & backup', () => {
         data: makeData({ jobTitle: 'B' }),
         sectionOrder: [...DEFAULT_SECTION_ORDER],
         hiddenSections: [],
+        language: 'en',
+        photo: '',
         autoTitle: true,
         updatedAt: 2000,
       },
@@ -369,6 +373,8 @@ describe('useResumeStore import & backup', () => {
           data: makeData(),
           sectionOrder: [...DEFAULT_SECTION_ORDER],
           hiddenSections: [],
+          language: 'en',
+          photo: '',
           autoTitle: true,
           updatedAt: 1000,
         },
@@ -389,5 +395,85 @@ describe('useResumeStore import & backup', () => {
 
     expect(getState().resumes).toBe(resumesBefore);
     expect(getState().revision).toBe(revisionBefore);
+  });
+});
+
+describe('useResumeStore language & photo', () => {
+  it('defaults new resumes to English with no photo', () => {
+    getState().createResume();
+    expect(activeResume().language).toBe('en');
+    expect(activeResume().photo).toBe('');
+  });
+
+  it('imports shared data with language and photo options', () => {
+    getState().createResume();
+    getState().importResumeData(
+      makeData({ name: 'Grace Hopper' }),
+      'Shared CV',
+      { language: 'id', photo: 'data:image/jpeg;base64,Zm9v' },
+    );
+
+    const resume = activeResume();
+    expect(resume.language).toBe('id');
+    expect(resume.photo).toBe('data:image/jpeg;base64,Zm9v');
+    expect(resume.data.name).toBe('Grace Hopper');
+  });
+
+  it('sets the resume language without creating history', () => {
+    getState().createResume();
+    const id = activeId();
+    const historyBefore = getHistory().entries;
+
+    getState().setResumeLanguage(id, 'id');
+
+    expect(activeResume().language).toBe('id');
+    expect(activeResume().updatedAt).toBeGreaterThan(0);
+    expect(getHistory().entries).toBe(historyBefore);
+  });
+
+  it('sets the resume photo without creating history', () => {
+    getState().createResume();
+    const id = activeId();
+    const photo = 'data:image/webp;base64,AAAA';
+
+    getState().setResumePhoto(id, photo);
+
+    expect(activeResume().photo).toBe(photo);
+    expect(getHistory().entries).toHaveLength(1);
+  });
+
+  it('does not rewrite the resume when the value is unchanged', () => {
+    getState().createResume();
+    const id = activeId();
+    const updatedAt = activeResume().updatedAt;
+
+    getState().setResumeLanguage(id, 'en');
+    getState().setResumePhoto(id, '');
+
+    expect(activeResume().updatedAt).toBe(updatedAt);
+  });
+
+  it('backfills language and photo for legacy persisted resumes', () => {
+    getState().createResume();
+    const id = activeId();
+    const legacy = getState().resumes.map((r) => ({
+      id: r.id,
+      title: r.title,
+      data: r.data,
+      sectionOrder: r.sectionOrder,
+      hiddenSections: r.hiddenSections,
+      autoTitle: r.autoTitle,
+      updatedAt: r.updatedAt,
+    }));
+    localStorage.setItem(
+      STORAGE_KEY,
+      JSON.stringify({ state: { resumes: legacy, activeId: id }, version: 0 }),
+    );
+
+    useResumeStore.persist.rehydrate();
+
+    const resumed = useResumeStore.getState().resumes.find((r) => r.id === id);
+    expect(resumed?.language).toBe('en');
+    expect(resumed?.photo).toBe('');
   });
 });
