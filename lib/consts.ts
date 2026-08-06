@@ -44,21 +44,22 @@ export const RENDERABLE_SECTIONS: { id: SectionId; title: string }[] = [
 ];
 
 export type TabName =
-  | 'Personal'
-  | 'Experience'
-  | 'Projects'
-  | 'Education'
-  | 'Skills'
-  | 'Certifications';
+  | 'personal'
+  | 'experience'
+  | 'projects'
+  | 'education'
+  | 'skills'
+  | 'certifications';
 
 export const getSectionTabName = (sectionId: SectionId): TabName => {
-  if (sectionId === 'summary') return 'Personal';
-  return (RENDERABLE_SECTIONS.find((section) => section.id === sectionId)
-    ?.title ?? 'Personal') as TabName;
+  if (sectionId === 'summary') return 'personal';
+  return sectionId;
 };
 
-export const getSectionIdFromTab = (tab: string): SectionId | null =>
-  RENDERABLE_SECTIONS.find((section) => section.title === tab)?.id ?? null;
+export const getSectionIdFromTab = (tab: string): SectionId | null => {
+  if (tab === 'personal') return 'summary';
+  return RENDERABLE_SECTIONS.find((section) => section.id === tab)?.id ?? null;
+};
 
 export const DEFAULT_SECTION_ORDER: SectionId[] = RENDERABLE_SECTIONS.map(
   (s) => s.id,
@@ -68,7 +69,7 @@ export const SECTION_IDS: SectionId[] = RENDERABLE_SECTIONS.map((s) => s.id);
 
 export const SECTIONS: { name: TabName; fields: (keyof CVData)[] }[] = [
   {
-    name: 'Personal',
+    name: 'personal',
     fields: [
       'name',
       'jobTitle',
@@ -79,9 +80,9 @@ export const SECTIONS: { name: TabName; fields: (keyof CVData)[] }[] = [
       'summary',
     ],
   },
-  { name: 'Experience', fields: ['experience'] },
-  { name: 'Projects', fields: ['projects'] },
-  { name: 'Education', fields: ['education'] },
-  { name: 'Skills', fields: ['skills'] },
-  { name: 'Certifications', fields: ['certifications'] },
+  { name: 'experience', fields: ['experience'] },
+  { name: 'projects', fields: ['projects'] },
+  { name: 'education', fields: ['education'] },
+  { name: 'skills', fields: ['skills'] },
+  { name: 'certifications', fields: ['certifications'] },
 ];

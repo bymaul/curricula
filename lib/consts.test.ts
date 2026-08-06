@@ -65,22 +65,25 @@ describe('AI_ADJUST_SCOPES', () => {
 
 describe('section tab mapping', () => {
   it('maps the summary section to the Personal tab', () => {
-    expect(getSectionTabName('summary')).toBe('Personal');
+    expect(getSectionTabName('summary')).toBe('personal');
   });
 
-  it('maps content sections to their titles', () => {
-    expect(getSectionTabName('experience')).toBe('Experience');
-    expect(getSectionTabName('skills')).toBe('Skills');
-    expect(getSectionTabName('certifications')).toBe('Certifications');
+  it('maps content sections to their tab keys', () => {
+    expect(getSectionTabName('experience')).toBe('experience');
+    expect(getSectionTabName('skills')).toBe('skills');
+    expect(getSectionTabName('certifications')).toBe('certifications');
   });
 
   it('maps section tabs back to their section id', () => {
-    expect(getSectionIdFromTab('Experience')).toBe('experience');
-    expect(getSectionIdFromTab('Education')).toBe('education');
+    expect(getSectionIdFromTab('experience')).toBe('experience');
+    expect(getSectionIdFromTab('education')).toBe('education');
   });
 
-  it('returns null for the Personal tab and unknown tabs', () => {
-    expect(getSectionIdFromTab('Personal')).toBeNull();
+  it('maps the Personal tab to the summary section', () => {
+    expect(getSectionIdFromTab('personal')).toBe('summary');
+  });
+
+  it('returns null for unknown tabs', () => {
     expect(getSectionIdFromTab('Nope')).toBeNull();
   });
 });

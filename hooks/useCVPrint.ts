@@ -1,5 +1,7 @@
 import { toast } from '@/components/ui/toast';
+import { useI18n } from '@/components/I18nProvider';
 import { SECTIONS, TabName } from '@/lib/consts';
+import { TAB_KEYS } from '@/lib/i18n';
 import { CVData } from '@/lib/schema';
 import { useUIStore } from '@/store/useUIStore';
 import { useRef } from 'react';
@@ -7,6 +9,7 @@ import { UseFormReturn } from 'react-hook-form';
 import { useReactToPrint } from 'react-to-print';
 
 export function useCVPrint(cvData: CVData, methods: UseFormReturn<CVData>) {
+  const { t } = useI18n();
   const setActiveTab = useUIStore((state) => state.setActiveTab);
   const printRef = useRef<HTMLDivElement>(null);
 
@@ -23,7 +26,7 @@ export function useCVPrint(cvData: CVData, methods: UseFormReturn<CVData>) {
     const targetSection = SECTIONS.find((section) =>
       section.fields.includes(firstErrorField),
     );
-    const targetTab: TabName = targetSection?.name ?? 'Personal';
+    const targetTab: TabName = targetSection?.name ?? 'personal';
 
     setActiveTab(targetTab);
     return targetTab;
@@ -39,7 +42,7 @@ export function useCVPrint(cvData: CVData, methods: UseFormReturn<CVData>) {
       toast.add({
         type: 'warning',
         title: 'Validation Error',
-        description: `Please fix the errors in the ${targetTab} section before printing your CV.`,
+        description: `Please fix the errors in the ${t(TAB_KEYS[targetTab])} section before printing your CV.`,
       });
       return;
     }
