@@ -1,6 +1,10 @@
 import { afterEach, beforeEach, describe, expect, it } from 'vitest';
 import { MAX_CV_IMAGE_BASE64_CHARS, MAX_CV_IMAGES } from '@/lib/cvParsing';
-import { readImagePartsFromFiles } from '@/lib/imageFiles';
+import {
+  PHOTO_SIZE,
+  readImagePartsFromFiles,
+  resizeSquarePhoto,
+} from '@/lib/imageFiles';
 
 const JPEG_OUTPUT = 'data:image/jpeg;base64,SlBH';
 
@@ -16,6 +20,7 @@ let readResults: Array<string | Error> = [];
 let readCount = 0;
 let decodeFails = false;
 let canvasDims: Array<{ width: number; height: number }> = [];
+let drawImageCalls: Array<number[]> = [];
 
 class FakeFileReader implements FileReaderLike {
   result: string | ArrayBuffer | null = null;
@@ -52,7 +57,7 @@ class FakeImage {
 
 function makeCanvas() {
   const ctx = {
-    drawImage: () => {},
+    drawImage: (...args: number[]) => drawImageCalls.push(args),
   };
   const canvas = {
     width: 0,
@@ -81,6 +86,7 @@ beforeEach(() => {
   readCount = 0;
   decodeFails = false;
   canvasDims = [];
+  drawImageCalls = [];
   globalThis.FileReader = FakeFileReader as unknown as typeof FileReader;
   globalThis.Image = FakeImage as unknown as typeof Image;
   globalThis.document = {
@@ -175,5 +181,50 @@ describe('readImagePartsFromFiles', () => {
     ]);
     expect(parts).toEqual([]);
     expect(errors).toEqual(['Could not read broken.jpg.']);
+  });
+});
+
+describe('resizeSquarePhoto', () => {
+  it('center-crops a landscape image to a square JPEG', async () => {
+    const result = await resizeSquarePhoto(jpegDataUrl);
+    expect(result).toBe(JPEG_OUTPUT);
+    expect(canvasDims).toEqual([{ width: PHOTO_SIZE, height: PHOTO_SIZE }]);
+    const [img, sx, sy, sw, sh, dx, dy, dw, dh] = drawImageCalls[0];
+    expect(img).toBeInstanceOf(FakeImage);
+    expect({ sx, sy, sw, sh, dx, dy, dw, dh }).toEqual({
+      sx: 500,
+      sy: 0,
+      sw: 3000,
+      sh: 3000,
+      dx: 0,
+      dy: 0,
+      dw: PHOTO_SIZE,
+      dh: PHOTO_SIZE,
+    });
+  });
+
+  it('center-crops a portrait image with horizontal offsets', async () => {
+    globalThis.Image = class extends FakeImage {
+      naturalWidth = 2000;
+      naturalHeight = 3200;
+    } as unknown as typeof Image;
+    await resizeSquarePhoto(jpegDataUrl, 128);
+    const [img, sx, sy, sw, sh, dx, dy, dw, dh] = drawImageCalls[0];
+    expect(img).toBeInstanceOf(FakeImage);
+    expect({ sx, sy, sw, sh, dx, dy, dw, dh }).toEqual({
+      sx: 0,
+      sy: 600,
+      sw: 2000,
+      sh: 2000,
+      dx: 0,
+      dy: 0,
+      dw: 128,
+      dh: 128,
+    });
+  });
+
+  it('returns null when the image cannot be decoded', async () => {
+    decodeFails = true;
+    expect(await resizeSquarePhoto(jpegDataUrl)).toBeNull();
   });
 });

@@ -70,6 +70,7 @@ const en = {
   personalDetails: {
     title: 'Personal Details',
     description: 'Get started with your contact information and summary.',
+    resumeSettings: 'Resume',
     contactInformation: 'Contact Information',
     fullName: 'Full Name',
     fullNamePlaceholder: 'e.g. Alex Johnson',
@@ -89,6 +90,17 @@ const en = {
     professionalSummary: 'Professional Summary',
     summaryPlaceholder:
       'A brief overview of your professional background, key achievements, and core strengths...',
+    photoLabel: 'Photo',
+    photoHint:
+      'Optional. A square headshot used in the template preview and share links.',
+    photoUpload: 'Upload',
+    photoChange: 'Change',
+    photoRemove: 'Remove',
+    photoErrorInvalid: 'Please choose a JPEG, PNG, or WebP image.',
+    photoErrorRead: 'Could not read that image.',
+    resumeLanguageLabel: 'Resume Language',
+    resumeLanguageHint:
+      'The language used in this CV’s template and share link, independent of the app language.',
   },
   workExperience: {
     title: 'Work Experience',
