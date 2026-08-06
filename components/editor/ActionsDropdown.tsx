@@ -1,6 +1,7 @@
 'use client';
 
 import { useMediaQuery } from '@/hooks/useMediaQuery';
+import { DESKTOP_MEDIA_QUERY } from '@/lib/consts';
 import { cn } from '@/lib/utils';
 import { useDialogStore } from '@/store/useDialogStore';
 import {
@@ -36,7 +37,7 @@ export function ActionsDropdown({
   triggerClassName,
 }: ActionsDropdownProps) {
   const setDialog = useDialogStore((state) => state.setDialog);
-  const isMobile = !useMediaQuery('(min-width: 1024px)');
+  const isMobile = !useMediaQuery(DESKTOP_MEDIA_QUERY);
 
   const handleImportPDFClick = () => {
     pdfInputRef.current?.click();

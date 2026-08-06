@@ -10,7 +10,11 @@ import { useCVPrint } from '@/hooks/useCVPrint';
 import { useMediaQuery } from '@/hooks/useMediaQuery';
 import { useShareLinkImport } from '@/hooks/useShareLinkImport';
 import { CVData, cvSchema, initialCVState } from '@/lib/schema';
-import { getSectionTabName, SectionId } from '@/lib/consts';
+import {
+  DESKTOP_MEDIA_QUERY,
+  getSectionTabName,
+  SectionId,
+} from '@/lib/consts';
 import { useDialogStore } from '@/store/useDialogStore';
 import { useImportStore } from '@/store/useImportStore';
 import { useResumeStore } from '@/store/useResumeStore';
@@ -58,7 +62,7 @@ export default function Home() {
   const { printRef, handlePrintClick } = useCVPrint(cvData, methods);
   useShareLinkImport();
 
-  const isLargeScreen = useMediaQuery('(min-width: 1024px)');
+  const isLargeScreen = useMediaQuery(DESKTOP_MEDIA_QUERY);
   const isPreviewVisible = isLargeScreen || mobileView === 'preview';
   const activeResume = useResumeStore((state) =>
     state.resumes.find((r) => r.id === state.activeId),

@@ -8,21 +8,16 @@ import { useUIStore } from '@/store/useUIStore';
 
 export function useAISettings() {
   const { aiProvider, aiModel, setAIPrefs } = useUIStore();
-  const [provider, setProvider] = useState<AIProvider>(aiProvider);
-  const [modelName, setModelName] = useState(aiModel);
   const [apiKey, setApiKey] = useState(() => getStoredAIAPIKey());
 
   const onProviderChange = (value: AIProvider | null) => {
     if (value) {
-      setProvider(value);
-      setModelName('');
       setAIPrefs(value, '');
     }
   };
 
   const onModelChange = (value: string) => {
-    setModelName(value);
-    setAIPrefs(provider, value);
+    setAIPrefs(aiProvider, value);
   };
 
   const onKeyChange = (value: string) => {
@@ -35,8 +30,8 @@ export function useAISettings() {
   };
 
   return {
-    provider,
-    modelName,
+    provider: aiProvider,
+    modelName: aiModel,
     apiKey,
     onProviderChange,
     onModelChange,

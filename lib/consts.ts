@@ -1,5 +1,7 @@
 import { CVData } from './schema';
 
+export const DESKTOP_MEDIA_QUERY = '(min-width: 1024px)';
+
 export const AI_PROVIDERS = [
   { value: 'openai', label: 'OpenAI', defaultModel: 'gpt-5.6-luna' },
   { value: 'anthropic', label: 'Anthropic', defaultModel: 'claude-haiku-4-5' },
