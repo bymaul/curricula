@@ -1,10 +1,8 @@
 'use client';
 
-import {
-  DEFAULT_SECTION_ORDER,
-  RENDERABLE_SECTIONS,
-  TabName,
-} from '@/lib/consts';
+import { useI18n } from '@/components/I18nProvider';
+import { DEFAULT_SECTION_ORDER, TabName } from '@/lib/consts';
+import { TAB_KEYS } from '@/lib/i18n';
 import { CVData } from '@/lib/schema';
 import { cn, formatRelativeTime } from '@/lib/utils';
 import { useDialogStore } from '@/store/useDialogStore';
@@ -94,6 +92,7 @@ export function EditorSidebar({
   lastSavedAt,
 }: EditorSidebarProps) {
   const { activeTab, setActiveTab } = useUIStore();
+  const { t } = useI18n();
   const { dialogs, setDialog } = useDialogStore();
   const sectionOrder =
     useResumeStore(
@@ -108,16 +107,10 @@ export function EditorSidebar({
   const canUndo = (history?.cursor ?? 0) > 0;
   const canRedo = !!history && history.cursor < history.entries.length - 1;
 
-  const navTabs: { key: string; name: TabName }[] = [
-    { key: 'Personal', name: 'Personal' },
-    ...sectionOrder
-      .filter((id) => id !== 'summary')
-      .map((id) => ({
-        key: id,
-        name: (RENDERABLE_SECTIONS.find((section) => section.id === id)
-          ?.title ?? id) as TabName,
-      })),
-  ];
+  const navTabs: TabName[] = [
+    'personal',
+    ...sectionOrder.filter((id) => id !== 'summary'),
+  ] as TabName[];
 
   return (
     <section
@@ -132,12 +125,12 @@ export function EditorSidebar({
             onSubmit={(e) => e.preventDefault()}
             className="space-y-6 pt-4 pb-6"
           >
-            {activeTab === 'Personal' && <PersonalForm />}
-            {activeTab === 'Experience' && <ExperienceForm />}
-            {activeTab === 'Projects' && <ProjectsForm />}
-            {activeTab === 'Education' && <EducationForm />}
-            {activeTab === 'Skills' && <SkillsForm />}
-            {activeTab === 'Certifications' && <CertificationsForm />}
+            {activeTab === 'personal' && <PersonalForm />}
+            {activeTab === 'experience' && <ExperienceForm />}
+            {activeTab === 'projects' && <ProjectsForm />}
+            {activeTab === 'education' && <EducationForm />}
+            {activeTab === 'skills' && <SkillsForm />}
+            {activeTab === 'certifications' && <CertificationsForm />}
           </form>
         </ScrollArea>
       </div>
@@ -148,13 +141,13 @@ export function EditorSidebar({
       >
         <ScrollArea orientation="horizontal" className="min-w-0 flex-1 h-14">
           <div className="flex items-center gap-1 w-max h-full px-3">
-            {navTabs.map(({ key, name }) => {
-              const active = activeTab === name;
+            {navTabs.map((tab) => {
+              const active = activeTab === tab;
               return (
                 <button
-                  key={key}
+                  key={tab}
                   type="button"
-                  onClick={() => setActiveTab(name)}
+                  onClick={() => setActiveTab(tab)}
                   aria-current={active ? 'page' : undefined}
                   className={cn(
                     'shrink-0 h-9 px-2.5 rounded-md text-sm font-semibold transition-colors',
@@ -163,7 +156,7 @@ export function EditorSidebar({
                       : 'text-muted-foreground hover:text-foreground',
                   )}
                 >
-                  {name}
+                  {t(TAB_KEYS[tab])}
                 </button>
               );
             })}

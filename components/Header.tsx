@@ -2,6 +2,7 @@
 
 import { ChevronsUpDown, FileText } from 'lucide-react';
 import { GitHubLink } from './GitHubLink';
+import { LanguageSwitcher } from './LanguageSwitcher';
 import { Button } from './ui/button';
 import { Separator } from './ui/separator';
 import { useResumeStore } from '@/store/useResumeStore';
@@ -32,6 +33,8 @@ export function Header({ value, onChange }: HeaderProps) {
 
       <div className="flex items-center h-5 gap-2">
         <GitHubLink />
+        <Separator orientation="vertical" />
+        <LanguageSwitcher />
         <Separator orientation="vertical" />
         <Tabs
           value={value}
