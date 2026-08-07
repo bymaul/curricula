@@ -333,6 +333,7 @@ describe('useResumeStore import & backup', () => {
         hiddenSections: ['skills'],
         language: 'en',
         photo: '',
+        templateId: 'harvard',
         autoTitle: false,
         updatedAt: 1000,
       },
@@ -344,6 +345,7 @@ describe('useResumeStore import & backup', () => {
         hiddenSections: [],
         language: 'en',
         photo: '',
+        templateId: 'harvard',
         autoTitle: true,
         updatedAt: 2000,
       },
@@ -375,6 +377,7 @@ describe('useResumeStore import & backup', () => {
           hiddenSections: [],
           language: 'en',
           photo: '',
+          templateId: 'harvard',
           autoTitle: true,
           updatedAt: 1000,
         },
@@ -398,11 +401,12 @@ describe('useResumeStore import & backup', () => {
   });
 });
 
-describe('useResumeStore language & photo', () => {
-  it('defaults new resumes to English with no photo', () => {
+describe('useResumeStore language, photo & template', () => {
+  it('defaults new resumes to English with no photo and the Harvard template', () => {
     getState().createResume();
     expect(activeResume().language).toBe('en');
     expect(activeResume().photo).toBe('');
+    expect(activeResume().templateId).toBe('harvard');
   });
 
   it('imports shared data with language and photo options', () => {
@@ -416,6 +420,19 @@ describe('useResumeStore language & photo', () => {
     const resume = activeResume();
     expect(resume.language).toBe('id');
     expect(resume.photo).toBe('data:image/jpeg;base64,Zm9v');
+    expect(resume.data.name).toBe('Grace Hopper');
+  });
+
+  it('imports shared data with the template option', () => {
+    getState().createResume();
+    getState().importResumeData(
+      makeData({ name: 'Grace Hopper' }),
+      'Shared CV',
+      { template: 'modern' },
+    );
+
+    const resume = activeResume();
+    expect(resume.templateId).toBe('modern');
     expect(resume.data.name).toBe('Grace Hopper');
   });
 
@@ -442,6 +459,18 @@ describe('useResumeStore language & photo', () => {
     expect(getHistory().entries).toHaveLength(1);
   });
 
+  it('sets the resume template without creating history', () => {
+    getState().createResume();
+    const id = activeId();
+    const historyBefore = getHistory().entries;
+
+    getState().setResumeTemplate(id, 'modern');
+
+    expect(activeResume().templateId).toBe('modern');
+    expect(activeResume().updatedAt).toBeGreaterThan(0);
+    expect(getHistory().entries).toBe(historyBefore);
+  });
+
   it('does not rewrite the resume when the value is unchanged', () => {
     getState().createResume();
     const id = activeId();
@@ -449,11 +478,22 @@ describe('useResumeStore language & photo', () => {
 
     getState().setResumeLanguage(id, 'en');
     getState().setResumePhoto(id, '');
+    getState().setResumeTemplate(id, 'harvard');
 
     expect(activeResume().updatedAt).toBe(updatedAt);
   });
 
-  it('backfills language and photo for legacy persisted resumes', () => {
+  it('carries the template over when duplicating a resume', () => {
+    getState().createResume();
+    const id = activeId();
+    getState().setResumeTemplate(id, 'modern');
+
+    getState().duplicateResume(id);
+    const duplicated = getState().resumes.find((r) => r.id !== id)!;
+    expect(duplicated.templateId).toBe('modern');
+  });
+
+  it('backfills language, photo, and template for legacy persisted resumes', () => {
     getState().createResume();
     const id = activeId();
     const legacy = getState().resumes.map((r) => ({
@@ -475,5 +515,6 @@ describe('useResumeStore language & photo', () => {
     const resumed = useResumeStore.getState().resumes.find((r) => r.id === id);
     expect(resumed?.language).toBe('en');
     expect(resumed?.photo).toBe('');
+    expect(resumed?.templateId).toBe('harvard');
   });
 });

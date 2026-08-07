@@ -2,28 +2,16 @@
 
 import React, { forwardRef } from 'react';
 import { DEFAULT_SECTION_ORDER, SectionId } from '@/lib/consts';
-import { translate, TranslationKey } from '@/lib/i18n';
-import { ResumeLanguage } from '@/lib/i18n/languages';
+import { translate } from '@/lib/i18n';
 import { CVData } from '@/lib/schema';
-
-interface TemplateProps {
-  cvData: CVData;
-  sectionOrder?: SectionId[];
-  hiddenSections?: SectionId[];
-  language?: ResumeLanguage;
-  photo?: string;
-  onSectionClick?: (sectionId: SectionId) => void;
-}
-
-type T = (
-  key: TranslationKey,
-  params?: Record<string, string | number>,
-) => string;
-
-interface SectionContext {
-  onClick?: (sectionId: SectionId) => void;
-  t: T;
-}
+import {
+  PrintStyle,
+  TemplateProps,
+  T,
+  SectionContext,
+  formatUrl,
+  renderFormattedText,
+} from './shared';
 
 /**
  * Single source of truth for the Harvard template's type scale and spacing.
@@ -43,7 +31,6 @@ const TYPE = {
   itemMeta: 'text-[10pt] font-normal',
   itemSubtitle: 'text-[10pt] italic',
   body: 'text-[10pt]',
-  bullet: 'text-[10pt]',
 } as const;
 
 const SPACE = {
@@ -58,57 +45,6 @@ const SPACE = {
  * Parses a free-text field into paragraphs and "- " bullet groups.
  * Defined outside the component so it isn't re-created on every render.
  */
-function renderFormattedText(text: string) {
-  if (!text) return null;
-
-  const lines = text.split('\n');
-  const elements: React.ReactNode[] = [];
-  let currentBullets: string[] = [];
-
-  const flushBullets = (key: number) => {
-    if (currentBullets.length === 0) return;
-    elements.push(
-      <ul
-        key={`ul-${key}`}
-        className={`list-disc list-outside ml-5 mt-1 ${TYPE.bullet}`}
-      >
-        {currentBullets.map((bullet, idx) => (
-          <li key={idx} className="pl-1 mb-0.5">
-            {bullet}
-          </li>
-        ))}
-      </ul>,
-    );
-    currentBullets = [];
-  };
-
-  lines.forEach((line, i) => {
-    const trimmed = line.trim();
-    if (!trimmed) return;
-
-    if (trimmed.startsWith('-')) {
-      currentBullets.push(trimmed.replace(/^-\s*/, ''));
-    } else {
-      flushBullets(i);
-      elements.push(
-        <p key={`p-${i}`} className={`mt-1 text-justify ${TYPE.body}`}>
-          {trimmed}
-        </p>,
-      );
-    }
-  });
-
-  flushBullets(lines.length);
-
-  return <div>{elements}</div>;
-}
-
-const formatUrl = (url: string) => {
-  if (/^https?:\/\//i.test(url)) return url;
-  return `https://${url}`;
-};
-
-/** Section wrapper: heading + underline, consistent across the page. */
 function Section({
   id,
   title,
@@ -204,7 +140,7 @@ const SECTION_RENDERERS: Record<SectionId, SectionRenderer> = {
           <div key={index} className={`${SPACE.itemGap} break-inside-avoid`}>
             <EntryHeader title={exp.role} meta={exp.date} />
             <EntrySubheader left={exp.company} right={exp.location} />
-            {renderFormattedText(exp.description)}
+            {renderFormattedText(exp.description, TYPE.body)}
           </div>
         ))}
       </Section>
@@ -220,7 +156,7 @@ const SECTION_RENDERERS: Record<SectionId, SectionRenderer> = {
         {cvData.projects.map((proj, index) => (
           <div key={index} className={`${SPACE.itemGap} break-inside-avoid`}>
             <EntryHeader title={proj.name} meta={proj.date} />
-            {renderFormattedText(proj.description)}
+            {renderFormattedText(proj.description, TYPE.body)}
           </div>
         ))}
       </Section>
@@ -237,7 +173,7 @@ const SECTION_RENDERERS: Record<SectionId, SectionRenderer> = {
           <div key={index} className={`${SPACE.itemGap} break-inside-avoid`}>
             <EntryHeader title={edu.institution} meta={edu.date} />
             <EntrySubheader left={edu.degree} right={edu.location} />
-            {renderFormattedText(edu.description)}
+            {renderFormattedText(edu.description, TYPE.body)}
           </div>
         ))}
       </Section>
@@ -289,8 +225,7 @@ export const HarvardTemplate = forwardRef<HTMLDivElement, TemplateProps>(
     { cvData, sectionOrder, hiddenSections, language, photo, onSectionClick },
     ref,
   ) => {
-    const t = (key: TranslationKey, params?: Record<string, string | number>) =>
-      translate(language ?? 'en', key, params);
+    const t: T = (key, params) => translate(language ?? 'en', key, params);
 
     const order = (sectionOrder ?? DEFAULT_SECTION_ORDER).filter(
       (id) => !hiddenSections?.includes(id),
@@ -310,19 +245,7 @@ export const HarvardTemplate = forwardRef<HTMLDivElement, TemplateProps>(
 
     return (
       <div ref={ref} className="mx-auto shadow-2xl print:shadow-none bg-white">
-        <style type="text/css" media="print">
-          {`
-                  @page {
-                    size: A4;
-                    margin: 0mm;
-                  }
-
-                  thead { display: table-header-group; }
-                  tfoot { display: table-footer-group; }
-
-                  div { background-image: none !important; }
-                `}
-        </style>
+        <PrintStyle />
 
         <table className="w-full border-collapse">
           <thead>

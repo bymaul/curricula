@@ -64,6 +64,7 @@ describe('share payload', () => {
       data,
       language: 'en',
       photo: '',
+      template: 'harvard',
     });
   });
 
@@ -76,6 +77,19 @@ describe('share payload', () => {
       data,
       language: 'id',
       photo,
+      template: 'harvard',
+    });
+  });
+
+  it('round-trips the template option', async () => {
+    const data = makeData();
+    const payload = await buildSharePayload(data, { template: 'modern' });
+
+    expect(await parseSharePayload(payload)).toEqual({
+      data,
+      language: 'en',
+      photo: '',
+      template: 'modern',
     });
   });
 
@@ -94,6 +108,7 @@ describe('share payload', () => {
       data,
       language: 'en',
       photo: '',
+      template: 'harvard',
     });
   });
 
@@ -105,6 +120,7 @@ describe('share payload', () => {
       data,
       language: 'en',
       photo: '',
+      template: 'harvard',
     });
   });
 
@@ -129,6 +145,7 @@ describe('share payload', () => {
       data: incomplete,
       language: 'en',
       photo: '',
+      template: 'harvard',
     });
   });
 

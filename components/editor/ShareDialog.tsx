@@ -12,6 +12,7 @@ import { toast } from '@/components/ui/toast';
 import { useI18n } from '@/components/I18nProvider';
 import { buildShareUrl } from '@/lib/share';
 import { ResumeLanguage } from '@/lib/i18n/languages';
+import { TemplateId } from '@/lib/templates';
 import { CVData } from '@/lib/schema';
 import { useResumeStore } from '@/store/useResumeStore';
 import { Check, Copy, ExternalLink, Loader2, Share2 } from 'lucide-react';
@@ -27,10 +28,12 @@ function ShareLinkContent({
   cvData,
   language,
   photo,
+  template,
 }: {
   cvData: CVData;
   language: ResumeLanguage;
   photo: string;
+  template: TemplateId;
 }) {
   const [link, setLink] = useState<string | null>(null);
   const [copied, setCopied] = useState(false);
@@ -38,13 +41,13 @@ function ShareLinkContent({
 
   useEffect(() => {
     let cancelled = false;
-    void buildShareUrl(cvData, { language, photo }).then((url) => {
+    void buildShareUrl(cvData, { language, photo, template }).then((url) => {
       if (!cancelled) setLink(url);
     });
     return () => {
       cancelled = true;
     };
-  }, [cvData, language, photo]);
+  }, [cvData, language, photo, template]);
 
   const handleCopy = async () => {
     if (!link) return;
@@ -112,6 +115,7 @@ export function ShareDialog({ open, onOpenChange, cvData }: ShareDialogProps) {
   );
   const language = activeResume?.language ?? 'en';
   const photo = activeResume?.photo ?? '';
+  const template = activeResume?.templateId ?? 'harvard';
 
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
@@ -122,7 +126,12 @@ export function ShareDialog({ open, onOpenChange, cvData }: ShareDialogProps) {
         </DialogHeader>
 
         {open && (
-          <ShareLinkContent cvData={cvData} language={language} photo={photo} />
+          <ShareLinkContent
+            cvData={cvData}
+            language={language}
+            photo={photo}
+            template={template}
+          />
         )}
       </DialogContent>
     </Dialog>

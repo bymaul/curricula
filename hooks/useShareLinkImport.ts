@@ -18,6 +18,7 @@ export function useShareLinkImport() {
       useResumeStore.getState().importResumeData(result.data, name, {
         language: result.language,
         photo: result.photo,
+        template: result.template,
       });
       window.history.replaceState(
         null,

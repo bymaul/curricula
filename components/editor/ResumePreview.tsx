@@ -1,6 +1,7 @@
 'use client';
 
 import { HarvardTemplate } from '@/components/resume/HarvardTemplate';
+import { ModernTemplate } from '@/components/resume/ModernTemplate';
 import { useI18n } from '@/components/I18nProvider';
 import { ScrollArea, ScrollBar } from '@/components/ui/scroll-area';
 import { usePageScale } from '@/hooks/usePageScale';
@@ -13,6 +14,7 @@ import {
 } from '@/lib/pagination';
 import { CVData } from '@/lib/schema';
 import { ResumeLanguage } from '@/lib/i18n/languages';
+import { TemplateId } from '@/lib/templates';
 import { cn } from '@/lib/utils';
 import { useUIStore } from '@/store/useUIStore';
 import { FileText } from 'lucide-react';
@@ -23,6 +25,11 @@ const GUTTER_PX = 32;
 const FRAME_WIDTH_PX = PAGE_WIDTH_PX + GUTTER_PX * 2;
 const SCROLL_OFFSET_PX = 16;
 
+const TEMPLATE_COMPONENTS = {
+  harvard: HarvardTemplate,
+  modern: ModernTemplate,
+} as const;
+
 interface ResumePreviewProps {
   cvData: CVData;
   printRef: RefObject<HTMLDivElement | null>;
@@ -30,6 +37,7 @@ interface ResumePreviewProps {
   hiddenSections?: SectionId[];
   language?: ResumeLanguage;
   photo?: string;
+  templateId?: TemplateId;
   isVisible: boolean;
   mobileActive: boolean;
   onSectionClick?: (sectionId: SectionId) => void;
@@ -42,6 +50,7 @@ export function ResumePreview({
   hiddenSections,
   language,
   photo,
+  templateId = 'harvard',
   isVisible,
   mobileActive,
   onSectionClick,
@@ -95,6 +104,7 @@ export function ResumePreview({
 
   const activeTab = useUIStore((state) => state.activeTab);
   const { t } = useI18n();
+  const ResumeTemplate = TEMPLATE_COMPONENTS[templateId];
 
   useEffect(() => {
     if (!isVisible) return;
@@ -172,7 +182,7 @@ export function ResumePreview({
                   className="relative bg-white text-black shadow-2xl print:w-full! print:shadow-none"
                 >
                   <div className="overflow-hidden print:overflow-visible">
-                    <HarvardTemplate
+                    <ResumeTemplate
                       ref={printRef}
                       cvData={cvData}
                       sectionOrder={sectionOrder}
