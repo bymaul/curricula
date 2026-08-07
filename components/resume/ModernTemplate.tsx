@@ -24,7 +24,7 @@ const TYPE = {
   itemTitle: 'text-[10.5pt] font-bold text-slate-900',
   itemMeta: 'text-[9.5pt] font-normal text-slate-500',
   itemSub: 'text-[9.5pt] italic text-slate-600',
-  body: 'text-[9.5pt] leading-snug',
+  body: 'text-[9.5pt] leading-snug text-slate-700',
 } as const;
 
 type SectionRenderer = (
