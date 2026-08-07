@@ -162,7 +162,7 @@ describe('share payload', () => {
     expect(await parseSharePayload('')).toBeNull();
   });
 
-  it('builds a share URL from the current location', async () => {
+  it('builds a share URL pointing at the public CV viewer', async () => {
     Object.defineProperty(window, 'location', {
       value: {
         origin: 'https://example.com',
@@ -175,6 +175,6 @@ describe('share payload', () => {
     });
 
     const url = await buildShareUrl(makeData());
-    expect(url).toMatch(/^https:\/\/example\.com\/\?v=1#resume=c2:/);
+    expect(url).toMatch(/^https:\/\/example\.com\/cv#resume=c2:/);
   });
 });

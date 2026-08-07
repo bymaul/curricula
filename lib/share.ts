@@ -118,6 +118,6 @@ export async function buildShareUrl(
   options: ShareOptions = {},
 ): Promise<string> {
   const payload = await buildSharePayload(data, options);
-  const { origin, pathname, search } = window.location;
-  return `${origin}${pathname}${search}#resume=${payload}`;
+  const { origin } = window.location;
+  return `${origin}/cv#resume=${payload}`;
 }
