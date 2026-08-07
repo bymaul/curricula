@@ -112,6 +112,56 @@ export const PersonalForm = () => {
 
           <FieldGroup className="grid grid-cols-1 sm:grid-cols-2">
             <Field>
+              <FieldLabel>{t('personalDetails.photoLabel')}</FieldLabel>
+              <div className="flex items-center gap-4">
+                <div className="flex h-20 w-20 shrink-0 items-center justify-center overflow-hidden rounded-full border border-border bg-muted">
+                  {photo ? (
+                    // eslint-disable-next-line @next/next/no-img-element
+                    <img
+                      src={photo}
+                      alt=""
+                      className="h-full w-full object-cover"
+                    />
+                  ) : (
+                    <UserRound className="h-8 w-8 text-muted-foreground" />
+                  )}
+                </div>
+                <div className="flex flex-col gap-2">
+                  <Button
+                    type="button"
+                    variant="outline"
+                    size="sm"
+                    onClick={() => fileInputRef.current?.click()}
+                  >
+                    {photo
+                      ? t('personalDetails.photoChange')
+                      : t('personalDetails.photoUpload')}
+                  </Button>
+                  {photo ? (
+                    <Button
+                      type="button"
+                      variant="ghost"
+                      size="sm"
+                      onClick={() => activeId && setResumePhoto(activeId, '')}
+                    >
+                      {t('personalDetails.photoRemove')}
+                    </Button>
+                  ) : null}
+                  <input
+                    ref={fileInputRef}
+                    type="file"
+                    accept="image/jpeg,image/png,image/webp"
+                    className="hidden"
+                    onChange={handlePhotoChange}
+                  />
+                </div>
+              </div>
+              <p className="text-xs text-muted-foreground">
+                {t('personalDetails.photoHint')}
+              </p>
+            </Field>
+
+            <Field>
               <FieldLabel>
                 {t('personalDetails.resumeLanguageLabel')}
               </FieldLabel>
@@ -146,93 +196,44 @@ export const PersonalForm = () => {
         <FieldSet>
           <FieldLegend>{t('personalDetails.contactInformation')}</FieldLegend>
 
-          <div className="flex flex-col items-center gap-6 sm:flex-row sm:items-start">
-            <div className="flex w-40 shrink-0 flex-col items-center gap-3">
-              <div className="flex h-28 w-28 items-center justify-center overflow-hidden rounded-full border border-border bg-muted">
-                {photo ? (
-                  // eslint-disable-next-line @next/next/no-img-element
-                  <img
-                    src={photo}
-                    alt=""
-                    className="h-full w-full object-cover"
-                  />
-                ) : (
-                  <UserRound className="h-10 w-10 text-muted-foreground" />
-                )}
-              </div>
-              <div className="flex flex-col gap-1.5">
-                <Button
-                  type="button"
-                  variant="outline"
-                  size="sm"
-                  onClick={() => fileInputRef.current?.click()}
-                >
-                  {photo
-                    ? t('personalDetails.photoChange')
-                    : t('personalDetails.photoUpload')}
-                </Button>
-                {photo ? (
-                  <Button
-                    type="button"
-                    variant="ghost"
-                    size="sm"
-                    onClick={() => activeId && setResumePhoto(activeId, '')}
-                  >
-                    {t('personalDetails.photoRemove')}
-                  </Button>
-                ) : null}
-              </div>
-              <p className="text-center text-xs text-muted-foreground">
-                {t('personalDetails.photoHint')}
-              </p>
-              <input
-                ref={fileInputRef}
-                type="file"
-                accept="image/jpeg,image/png,image/webp"
-                className="hidden"
-                onChange={handlePhotoChange}
-              />
-            </div>
-
-            <FieldGroup className="grid flex-1 grid-cols-1 gap-5 sm:grid-cols-2">
-              <FormField
-                name="name"
-                label={t('personalDetails.fullName')}
-                placeholder={t('personalDetails.fullNamePlaceholder')}
-                register={register}
-                error={errorFor(errors.name?.message)}
-              />
-              <FormField
-                name="jobTitle"
-                label={t('personalDetails.jobTitle')}
-                placeholder={t('personalDetails.jobTitlePlaceholder')}
-                register={register}
-                error={errorFor(errors.jobTitle?.message)}
-              />
-              <FormField
-                name="email"
-                label={t('personalDetails.email')}
-                type="email"
-                placeholder={t('personalDetails.emailPlaceholder')}
-                register={register}
-                error={errorFor(errors.email?.message)}
-              />
-              <FormField
-                name="phone"
-                label={t('personalDetails.phone')}
-                placeholder={t('personalDetails.phonePlaceholder')}
-                register={register}
-                error={errorFor(errors.phone?.message)}
-              />
-              <FormField
-                name="location"
-                label={t('personalDetails.location')}
-                placeholder={t('personalDetails.locationPlaceholder')}
-                register={register}
-                className="sm:col-span-2"
-              />
-            </FieldGroup>
-          </div>
+          <FieldGroup className="grid grid-cols-1 sm:grid-cols-2">
+            <FormField
+              name="name"
+              label={t('personalDetails.fullName')}
+              placeholder={t('personalDetails.fullNamePlaceholder')}
+              register={register}
+              error={errorFor(errors.name?.message)}
+            />
+            <FormField
+              name="jobTitle"
+              label={t('personalDetails.jobTitle')}
+              placeholder={t('personalDetails.jobTitlePlaceholder')}
+              register={register}
+              error={errorFor(errors.jobTitle?.message)}
+            />
+            <FormField
+              name="email"
+              label={t('personalDetails.email')}
+              type="email"
+              placeholder={t('personalDetails.emailPlaceholder')}
+              register={register}
+              error={errorFor(errors.email?.message)}
+            />
+            <FormField
+              name="phone"
+              label={t('personalDetails.phone')}
+              placeholder={t('personalDetails.phonePlaceholder')}
+              register={register}
+              error={errorFor(errors.phone?.message)}
+            />
+            <FormField
+              name="location"
+              label={t('personalDetails.location')}
+              placeholder={t('personalDetails.locationPlaceholder')}
+              register={register}
+              className="sm:col-span-2"
+            />
+          </FieldGroup>
         </FieldSet>
 
         <FieldSeparator />
