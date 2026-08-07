@@ -115,7 +115,7 @@ export function CvViewer() {
         <div className="overflow-x-auto py-8 print:overflow-visible print:py-0">
           <div className="mx-auto w-full print:w-full!">
             <div
-              className="mx-auto bg-white shadow-2xl print:shadow-none"
+              className="mx-auto bg-white text-black shadow-2xl print:shadow-none"
               style={{ width: PAGE_WIDTH_PX }}
             >
               <ResumeTemplate cvData={data} language={lang} photo={photo} />
