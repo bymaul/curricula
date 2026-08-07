@@ -92,7 +92,6 @@ const id: Dictionary = {
     professionalSummary: 'Ringkasan Profesional',
     summaryPlaceholder:
       'Gambaran singkat latar belakang profesional, pencapaian utama, dan keunggulan inti Anda...',
-    photoLabel: 'Foto',
     photoHint:
       'Opsional. Foto kepala persegi yang dipakai di pratinjau templat dan tautan berbagi.',
     photoUpload: 'Unggah',
@@ -190,7 +189,6 @@ const id: Dictionary = {
     nameRequired: 'Nama wajib diisi',
     issuerRequired: 'Penerbit wajib diisi',
     fullNameRequired: 'Nama lengkap wajib diisi',
-    jobTitleRequired: 'Jabatan wajib diisi',
     emailInvalid: 'Alamat email tidak valid',
     emailRequired: 'Email wajib diisi',
     phoneRequired: 'Nomor telepon wajib diisi',

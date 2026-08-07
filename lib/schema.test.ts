@@ -37,6 +37,11 @@ describe('cvSchema', () => {
     expect(result.success).toBe(true);
   });
 
+  it('accepts an empty job title', () => {
+    const result = cvSchema.safeParse({ ...validCV, jobTitle: '' });
+    expect(result.success).toBe(true);
+  });
+
   it('rejects the empty initial state', () => {
     const result = cvSchema.safeParse(initialCVState);
     expect(result.success).toBe(false);

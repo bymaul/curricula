@@ -90,7 +90,6 @@ const en = {
     professionalSummary: 'Professional Summary',
     summaryPlaceholder:
       'A brief overview of your professional background, key achievements, and core strengths...',
-    photoLabel: 'Photo',
     photoHint:
       'Optional. A square headshot used in the template preview and share links.',
     photoUpload: 'Upload',
@@ -186,7 +185,6 @@ const en = {
     nameRequired: 'Name is required',
     issuerRequired: 'Issuer is required',
     fullNameRequired: 'Full Name is required',
-    jobTitleRequired: 'Job Title is required',
     emailInvalid: 'Invalid email address',
     emailRequired: 'Email is required',
     phoneRequired: 'Phone number is required',

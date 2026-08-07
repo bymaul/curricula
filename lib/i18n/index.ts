@@ -54,7 +54,6 @@ const VALIDATION_MESSAGE_KEYS: Record<string, TranslationKey> = {
   'Name is required': 'validation.nameRequired',
   'Issuer is required': 'validation.issuerRequired',
   'Full Name is required': 'validation.fullNameRequired',
-  'Job Title is required': 'validation.jobTitleRequired',
   'Invalid email address': 'validation.emailInvalid',
   'Email is required': 'validation.emailRequired',
   'Phone number is required': 'validation.phoneRequired',

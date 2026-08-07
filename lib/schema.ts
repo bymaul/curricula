@@ -39,7 +39,7 @@ export const certificationSchema = z.object({
 
 export const cvSchema = z.object({
   name: z.string().min(1, 'Full Name is required'),
-  jobTitle: z.string().min(1, 'Job Title is required'),
+  jobTitle: z.string(),
   email: z.string().email('Invalid email address').min(1, 'Email is required'),
   phone: z.string().min(1, 'Phone number is required'),
   location: z.string().optional(),
