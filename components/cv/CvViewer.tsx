@@ -7,15 +7,13 @@ import { Button } from '@/components/ui/button';
 import { TranslationKey, translate } from '@/lib/i18n';
 import { ResumeLanguage } from '@/lib/i18n/languages';
 import { PAGE_WIDTH_PX } from '@/lib/pagination';
-import { parseSharePayload, ShareResult } from '@/lib/share';
+import { matchShareHash, parseSharePayload, ShareResult } from '@/lib/share';
 import { Loader2, Pencil, Printer, TriangleAlert } from 'lucide-react';
 
 const TEMPLATE_COMPONENTS = {
   harvard: HarvardTemplate,
   modern: ModernTemplate,
 } as const;
-
-const HASH_RE = /^#resume=([A-Za-z0-9_-]+)$/;
 
 type ViewState =
   | { status: 'loading' }
@@ -28,18 +26,16 @@ function useCvViewer(): ViewState {
   useEffect(() => {
     let cancelled = false;
     void (async () => {
-      const match = window.location.hash.match(HASH_RE);
+      const payload = matchShareHash(window.location.hash);
       if (cancelled) return;
-      if (!match) {
+      if (!payload) {
         setView({ status: 'error' });
         return;
       }
-      const result = await parseSharePayload(match[1]);
+      const result = await parseSharePayload(payload);
       if (cancelled) return;
       setView(
-        result
-          ? { status: 'ready', result, payload: match[1] }
-          : { status: 'error' },
+        result ? { status: 'ready', result, payload } : { status: 'error' },
       );
     })();
     return () => {

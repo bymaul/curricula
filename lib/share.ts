@@ -7,6 +7,18 @@ import { DEFAULT_TEMPLATE_ID, TEMPLATE_IDS, TemplateId } from '@/lib/templates';
 const SHARE_PREFIX_V2 = 'c2:';
 const LEGACY_SHARE_PREFIX = 'c1:';
 
+/** Matches `#resume=<payload>` with an optional `c1:`/`c2:` prefix. */
+export const SHARE_HASH_RE = /^#resume=(?:c[12]:)?[A-Za-z0-9_-]+$/;
+
+/**
+ * Extracts a share payload from a location hash, or `null` when the hash
+ * does not look like a share link.
+ */
+export function matchShareHash(hash: string): string | null {
+  const match = hash.match(SHARE_HASH_RE);
+  return match ? hash.slice('#resume='.length) : null;
+}
+
 const CHUNK = 0x8000;
 
 const shareEnvelopeSchema = z.object({
