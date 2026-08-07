@@ -186,7 +186,6 @@ const en = {
     nameRequired: 'Name is required',
     issuerRequired: 'Issuer is required',
     fullNameRequired: 'Full Name is required',
-    jobTitleRequired: 'Job Title is required',
     emailInvalid: 'Invalid email address',
     emailRequired: 'Email is required',
     phoneRequired: 'Phone number is required',

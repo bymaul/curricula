@@ -190,7 +190,6 @@ const id: Dictionary = {
     nameRequired: 'Nama wajib diisi',
     issuerRequired: 'Penerbit wajib diisi',
     fullNameRequired: 'Nama lengkap wajib diisi',
-    jobTitleRequired: 'Jabatan wajib diisi',
     emailInvalid: 'Alamat email tidak valid',
     emailRequired: 'Email wajib diisi',
     phoneRequired: 'Nomor telepon wajib diisi',
