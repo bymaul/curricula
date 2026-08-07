@@ -11,6 +11,7 @@ const id: Dictionary = {
   },
   template: {
     yourName: 'Nama Anda',
+    contact: 'Kontak',
     summary: 'Ringkasan',
     experience: 'Pengalaman',
     projects: 'Proyek',
@@ -18,6 +19,14 @@ const id: Dictionary = {
     skills: 'Keahlian',
     certifications: 'Sertifikasi',
     editAria: 'Edit {title}',
+  },
+  templates: {
+    harvard: {
+      name: 'Harvard',
+    },
+    modern: {
+      name: 'Modern',
+    },
   },
   brand: {
     name: 'Curricula',
@@ -103,6 +112,8 @@ const id: Dictionary = {
     resumeLanguageLabel: 'Bahasa Resume',
     resumeLanguageHint:
       'Bahasa yang dipakai di templat CV dan tautan berbagi ini, terpisah dari bahasa aplikasi.',
+    templateLabel: 'Templat',
+    templateHint: 'Pilih tata letak CV ini.',
   },
   workExperience: {
     title: 'Pengalaman Kerja',

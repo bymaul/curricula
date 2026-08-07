@@ -22,12 +22,12 @@ export const viewport: Viewport = {
 export const metadata: Metadata = {
   title: 'Curricula',
   description:
-    'An offline-first, client-side CV builder featuring an immaculate classic Harvard table-layout typography for clean print and PDF generation.',
+    'An offline-first, client-side CV builder with multiple print-safe templates and clean PDF generation.',
   applicationName: 'Curricula',
   keywords: [
     'CV builder',
     'resume builder',
-    'Harvard CV template',
+    'CV templates',
     'offline CV editor',
     'PWA resume builder',
     'print-safe CV',

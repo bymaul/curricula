@@ -105,6 +105,7 @@ export default function Home() {
             hiddenSections={activeResume?.hiddenSections}
             language={activeResume?.language}
             photo={activeResume?.photo}
+            templateId={activeResume?.templateId}
             isVisible={isPreviewVisible}
             mobileActive={mobileView === 'preview'}
             onSectionClick={handlePreviewSectionClick}

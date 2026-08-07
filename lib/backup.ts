@@ -2,12 +2,19 @@ import { z } from 'zod';
 import { SECTION_IDS, SectionId } from '@/lib/consts';
 import { RESUME_LANGUAGES } from '@/lib/i18n/languages';
 import { cvDataStoredSchema } from '@/lib/schema';
+import { TEMPLATE_IDS, DEFAULT_TEMPLATE_ID, TemplateId } from '@/lib/templates';
 import type { ResumeRecord } from '@/store/useResumeStore';
 
 const sectionIdSchema = z
   .string()
   .refine((value): value is SectionId =>
     SECTION_IDS.includes(value as SectionId),
+  );
+
+const templateIdSchema = z
+  .string()
+  .refine((value): value is TemplateId =>
+    TEMPLATE_IDS.includes(value as TemplateId),
   );
 
 export const backupSchema = z.object({
@@ -24,6 +31,7 @@ export const backupSchema = z.object({
       hiddenSections: z.array(sectionIdSchema),
       language: z.enum(RESUME_LANGUAGES).default('en'),
       photo: z.string().default(''),
+      templateId: templateIdSchema.default(DEFAULT_TEMPLATE_ID),
       autoTitle: z.boolean(),
       updatedAt: z.number(),
     }),
@@ -51,6 +59,7 @@ export function serializeBackup(
       hiddenSections: record.hiddenSections,
       language: record.language,
       photo: record.photo,
+      templateId: record.templateId,
       autoTitle: record.autoTitle,
       updatedAt: record.updatedAt,
     })),

@@ -2,6 +2,7 @@ import { z } from 'zod';
 import { CVData, cvDataStoredSchema } from '@/lib/schema';
 import { ResumeLanguage } from '@/lib/i18n/languages';
 import { RESUME_LANGUAGES } from '@/lib/i18n/languages';
+import { DEFAULT_TEMPLATE_ID, TEMPLATE_IDS, TemplateId } from '@/lib/templates';
 
 const SHARE_PREFIX_V2 = 'c2:';
 const LEGACY_SHARE_PREFIX = 'c1:';
@@ -12,6 +13,7 @@ const shareEnvelopeSchema = z.object({
   v: z.literal(2),
   language: z.enum(RESUME_LANGUAGES).default('en'),
   photo: z.string().default(''),
+  template: z.enum(TEMPLATE_IDS).default(DEFAULT_TEMPLATE_ID),
   data: cvDataStoredSchema,
 });
 
@@ -19,6 +21,7 @@ export interface ShareResult {
   data: CVData;
   language: ResumeLanguage;
   photo: string;
+  template: TemplateId;
 }
 
 function bytesToBase64url(bytes: Uint8Array): string {
@@ -44,17 +47,24 @@ function base64urlToBytes(payload: string): Uint8Array<ArrayBuffer> {
 }
 
 function legacyResult(data: CVData): ShareResult {
-  return { data, language: 'en', photo: '' };
+  return { data, language: 'en', photo: '', template: DEFAULT_TEMPLATE_ID };
 }
+
+export type ShareOptions = {
+  language?: ResumeLanguage;
+  photo?: string;
+  template?: TemplateId;
+};
 
 export async function buildSharePayload(
   data: CVData,
-  options: { language?: ResumeLanguage; photo?: string } = {},
+  options: ShareOptions = {},
 ): Promise<string> {
   const envelope = {
     v: 2,
     language: options.language ?? 'en',
     photo: options.photo ?? '',
+    template: options.template ?? DEFAULT_TEMPLATE_ID,
     data,
   };
   const stream = new Blob([JSON.stringify(envelope)])
@@ -82,6 +92,7 @@ export async function parseSharePayload(
             data: result.data.data,
             language: result.data.language,
             photo: result.data.photo,
+            template: result.data.template,
           }
         : null;
     }
@@ -104,7 +115,7 @@ export async function parseSharePayload(
 
 export async function buildShareUrl(
   data: CVData,
-  options: { language?: ResumeLanguage; photo?: string } = {},
+  options: ShareOptions = {},
 ): Promise<string> {
   const payload = await buildSharePayload(data, options);
   const { origin, pathname, search } = window.location;

@@ -30,6 +30,7 @@ function makeRecord(overrides: Partial<ResumeRecord> = {}): ResumeRecord {
     hiddenSections: ['skills'],
     language: 'en',
     photo: '',
+    templateId: 'harvard',
     autoTitle: false,
     updatedAt: 123456,
     ...overrides,
@@ -59,7 +60,14 @@ describe('backup', () => {
     expect(parsed!.resumes[0].photo).toBe('data:image/png;base64,eA==');
   });
 
-  it('defaults language and photo for legacy backups', () => {
+  it('round-trips the template on each resume', () => {
+    const record = makeRecord({ templateId: 'modern' });
+    const parsed = parseBackup(serializeBackup([record], 'r1'));
+
+    expect(parsed!.resumes[0].templateId).toBe('modern');
+  });
+
+  it('defaults language, photo, and template for legacy backups', () => {
     const record = makeRecord();
     const legacy = {
       id: record.id,
@@ -82,6 +90,7 @@ describe('backup', () => {
     expect(parsed).not.toBeNull();
     expect(parsed!.resumes[0].language).toBe('en');
     expect(parsed!.resumes[0].photo).toBe('');
+    expect(parsed!.resumes[0].templateId).toBe('harvard');
   });
 
   it('round-trips multiple resumes and a null active id', () => {

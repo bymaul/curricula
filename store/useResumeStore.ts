@@ -3,6 +3,7 @@ import { persist } from 'zustand/middleware';
 import { DEFAULT_SECTION_ORDER, SectionId } from '@/lib/consts';
 import { ResumeLanguage } from '@/lib/i18n/languages';
 import { CVData, cvSchema, initialCVState } from '@/lib/schema';
+import { DEFAULT_TEMPLATE_ID, TemplateId } from '@/lib/templates';
 
 export interface ResumeRecord {
   id: string;
@@ -12,6 +13,7 @@ export interface ResumeRecord {
   hiddenSections: SectionId[];
   language: ResumeLanguage;
   photo: string;
+  templateId: TemplateId;
   autoTitle: boolean;
   updatedAt: number;
 }
@@ -44,10 +46,15 @@ interface ResumeState {
   importResumeData: (
     data: CVData,
     title?: string,
-    options?: { language?: ResumeLanguage; photo?: string },
+    options?: {
+      language?: ResumeLanguage;
+      photo?: string;
+      template?: TemplateId;
+    },
   ) => void;
   setResumeLanguage: (id: string, language: ResumeLanguage) => void;
   setResumePhoto: (id: string, photo: string) => void;
+  setResumeTemplate: (id: string, template: TemplateId) => void;
   restoreBackup: (resumes: ResumeRecord[], activeId: string | null) => void;
   updateResumeData: (id: string, data: CVData) => void;
   moveSection: (fromIndex: number, toIndex: number) => void;
@@ -72,7 +79,11 @@ function makeId(): string {
 function makeResume(
   data: CVData = initialCVState,
   title?: string,
-  options: { language?: ResumeLanguage; photo?: string } = {},
+  options: {
+    language?: ResumeLanguage;
+    photo?: string;
+    template?: TemplateId;
+  } = {},
 ): ResumeRecord {
   return {
     id: makeId(),
@@ -82,6 +93,7 @@ function makeResume(
     hiddenSections: [],
     language: options.language ?? 'en',
     photo: options.photo ?? '',
+    templateId: options.template ?? DEFAULT_TEMPLATE_ID,
     autoTitle: true,
     updatedAt: now(),
   };
@@ -92,6 +104,7 @@ function normalizeResume(record: ResumeRecord): ResumeRecord {
     ...record,
     language: record.language ?? 'en',
     photo: record.photo ?? '',
+    templateId: record.templateId ?? DEFAULT_TEMPLATE_ID,
   };
 }
 
@@ -332,6 +345,15 @@ export const useResumeStore = create<ResumeState>()(
           resumes: state.resumes.map((r) =>
             r.id === id && r.photo !== photo
               ? { ...r, photo, updatedAt: now() }
+              : r,
+          ),
+        })),
+
+      setResumeTemplate: (id, templateId) =>
+        set((state) => ({
+          resumes: state.resumes.map((r) =>
+            r.id === id && r.templateId !== templateId
+              ? { ...r, templateId, updatedAt: now() }
               : r,
           ),
         })),

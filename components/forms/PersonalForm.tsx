@@ -23,6 +23,7 @@ import { CVData } from '@/lib/schema';
 import { translateValidationMessage } from '@/lib/i18n';
 import { UI_LANGUAGES } from '@/lib/i18n/languages';
 import { SUPPORTED_IMAGE_TYPES, resizeSquarePhoto } from '@/lib/imageFiles';
+import { TEMPLATES, TemplateId } from '@/lib/templates';
 import { useResumeStore } from '@/store/useResumeStore';
 import { useFieldArray, useFormContext } from 'react-hook-form';
 import { UserRound } from 'lucide-react';
@@ -47,6 +48,12 @@ export const PersonalForm = () => {
   );
   const setResumePhoto = useResumeStore((state) => state.setResumePhoto);
   const setResumeLanguage = useResumeStore((state) => state.setResumeLanguage);
+  const templateId = useResumeStore(
+    (state) =>
+      state.resumes.find((r) => r.id === state.activeId)?.templateId ??
+      'harvard',
+  );
+  const setResumeTemplate = useResumeStore((state) => state.setResumeTemplate);
 
   const fileInputRef = useRef<HTMLInputElement>(null);
 
@@ -186,6 +193,33 @@ export const PersonalForm = () => {
               </Select>
               <p className="text-xs text-muted-foreground">
                 {t('personalDetails.resumeLanguageHint')}
+              </p>
+            </Field>
+
+            <Field className="sm:col-span-2">
+              <FieldLabel>{t('personalDetails.templateLabel')}</FieldLabel>
+              <Select
+                value={templateId}
+                onValueChange={(value) => {
+                  const template = value as TemplateId;
+                  if (activeId && TEMPLATES.some((t) => t.id === template)) {
+                    setResumeTemplate(activeId, template);
+                  }
+                }}
+              >
+                <SelectTrigger className="w-full">
+                  <SelectValue />
+                </SelectTrigger>
+                <SelectContent>
+                  {TEMPLATES.map((option) => (
+                    <SelectItem key={option.id} value={option.id}>
+                      {t(`templates.${option.id}.name`)}
+                    </SelectItem>
+                  ))}
+                </SelectContent>
+              </Select>
+              <p className="text-xs text-muted-foreground">
+                {t('personalDetails.templateHint')}
               </p>
             </Field>
           </FieldGroup>

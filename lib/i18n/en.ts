@@ -9,6 +9,7 @@ const en = {
   },
   template: {
     yourName: 'Your Name',
+    contact: 'Contact',
     summary: 'Summary',
     experience: 'Experience',
     projects: 'Projects',
@@ -16,6 +17,14 @@ const en = {
     skills: 'Skills',
     certifications: 'Certifications',
     editAria: 'Edit {title}',
+  },
+  templates: {
+    harvard: {
+      name: 'Harvard',
+    },
+    modern: {
+      name: 'Modern',
+    },
   },
   brand: {
     name: 'Curricula',
@@ -101,6 +110,8 @@ const en = {
     resumeLanguageLabel: 'Resume Language',
     resumeLanguageHint:
       'The language used in this CV’s template and share link, independent of the app language.',
+    templateLabel: 'Template',
+    templateHint: 'Choose how this CV is laid out.',
   },
   workExperience: {
     title: 'Work Experience',
