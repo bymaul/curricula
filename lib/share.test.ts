@@ -2,6 +2,7 @@ import { describe, expect, it } from 'vitest';
 import {
   buildSharePayload,
   buildShareUrl,
+  matchShareHash,
   parseSharePayload,
 } from '@/lib/share';
 import { CVData } from '@/lib/schema';
@@ -176,5 +177,40 @@ describe('share payload', () => {
 
     const url = await buildShareUrl(makeData());
     expect(url).toMatch(/^https:\/\/example\.com\/cv#resume=c2:/);
+  });
+});
+
+describe('matchShareHash', () => {
+  it('extracts a v2 payload with the c2: prefix', () => {
+    expect(matchShareHash('#resume=c2:AbCdEfGhIjK_l-mnOpQrStUvWxYz')).toBe(
+      'c2:AbCdEfGhIjK_l-mnOpQrStUvWxYz',
+    );
+  });
+
+  it('extracts a legacy c1: payload', () => {
+    expect(matchShareHash('#resume=c1:AbCdEfGhIjK_l-mnOpQrStUvWxYz')).toBe(
+      'c1:AbCdEfGhIjK_l-mnOpQrStUvWxYz',
+    );
+  });
+
+  it('extracts a bare base64url payload without a prefix', () => {
+    expect(matchShareHash('#resume=AbCdEfGhIjK_l-mnOpQrStUvWxYz')).toBe(
+      'AbCdEfGhIjK_l-mnOpQrStUvWxYz',
+    );
+  });
+
+  it('rejects hashes with characters outside the payload charset', () => {
+    expect(matchShareHash('#resume=c2:Ab+Ef')).toBeNull();
+    expect(matchShareHash('#resume=c2:Ab/Ef')).toBeNull();
+    expect(matchShareHash('#resume=c2:Ab=Ef')).toBeNull();
+  });
+
+  it('rejects non-share or malformed hashes', () => {
+    expect(matchShareHash('')).toBeNull();
+    expect(matchShareHash('#about')).toBeNull();
+    expect(matchShareHash('#resume=')).toBeNull();
+    expect(matchShareHash('#resume=c3:Ab')).toBeNull();
+    expect(matchShareHash('#resume=c2:')).toBeNull();
+    expect(matchShareHash('resume=c2:Ab')).toBeNull();
   });
 });
