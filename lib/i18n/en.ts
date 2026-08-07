@@ -90,6 +90,7 @@ const en = {
     professionalSummary: 'Professional Summary',
     summaryPlaceholder:
       'A brief overview of your professional background, key achievements, and core strengths...',
+    photoLabel: 'Photo',
     photoHint:
       'Optional. A square headshot used in the template preview and share links.',
     photoUpload: 'Upload',

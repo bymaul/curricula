@@ -92,6 +92,7 @@ const id: Dictionary = {
     professionalSummary: 'Ringkasan Profesional',
     summaryPlaceholder:
       'Gambaran singkat latar belakang profesional, pencapaian utama, dan keunggulan inti Anda...',
+    photoLabel: 'Foto',
     photoHint:
       'Opsional. Foto kepala persegi yang dipakai di pratinjau templat dan tautan berbagi.',
     photoUpload: 'Unggah',
