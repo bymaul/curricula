@@ -26,6 +26,16 @@ const en = {
       name: 'Modern',
     },
   },
+  cvViewer: {
+    title: 'CV',
+    description: 'View and print a shared CV.',
+    edit: 'Edit in Curricula',
+    print: 'Print',
+    loading: 'Loading CV…',
+    invalid: 'This CV link is invalid or incomplete.',
+    invalidAction: 'Open editor',
+    documentTitle: '{name} — CV',
+  },
   brand: {
     name: 'Curricula',
   },
@@ -248,12 +258,12 @@ const en = {
   share: {
     title: 'Share CV',
     description:
-      'Anyone with this link can open this CV in Curricula. Your data is encoded in the link itself and never leaves the browser.',
+      'Anyone with this link can view this CV as a shareable page and open it in the editor. Your data is encoded in the link itself and never leaves the browser.',
     building: 'Building share link…',
     linkAria: 'Share link',
     copied: 'Copied',
     copyLink: 'Copy link',
-    open: 'Open',
+    open: 'View',
     longLinkNote: 'The link can be long for detailed CVs.',
     opened: 'Opened shared CV.',
     openedWithName: 'Opened shared CV "{name}".',

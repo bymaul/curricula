@@ -28,6 +28,16 @@ const id: Dictionary = {
       name: 'Modern',
     },
   },
+  cvViewer: {
+    title: 'CV',
+    description: 'Lihat dan cetak CV yang dibagikan.',
+    edit: 'Edit di Curricula',
+    print: 'Cetak',
+    loading: 'Memuat CV…',
+    invalid: 'Tautan CV ini tidak valid atau tidak lengkap.',
+    invalidAction: 'Buka editor',
+    documentTitle: 'CV {name}',
+  },
   brand: {
     name: 'Curricula',
   },
@@ -253,12 +263,12 @@ const id: Dictionary = {
   share: {
     title: 'Bagikan CV',
     description:
-      'Siapa pun dengan tautan ini dapat membuka CV ini di Curricula. Data Anda dienkode dalam tautan itu sendiri dan tidak pernah meninggalkan browser.',
+      'Siapa pun dengan tautan ini dapat melihat CV ini sebagai halaman berbagi dan membukanya di editor. Data Anda dienkode dalam tautan itu sendiri dan tidak pernah meninggalkan browser.',
     building: 'Membuat tautan berbagi…',
     linkAria: 'Tautan berbagi',
     copied: 'Tersalin',
     copyLink: 'Salin tautan',
-    open: 'Buka',
+    open: 'Lihat',
     longLinkNote: 'Tautan bisa panjang untuk CV yang detail.',
     opened: 'CV bersama dibuka.',
     openedWithName: 'CV bersama "{name}" dibuka.',
