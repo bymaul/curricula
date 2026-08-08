@@ -87,6 +87,8 @@ const id: Dictionary = {
       saving: 'Menyimpan…',
       saved: 'Tersimpan {time}',
     },
+    storageFullWarning:
+      'Penyimpanan browser penuh — perubahan terbaru mungkin tidak tersimpan. Ekspor cadangan dan kosongkan ruang.',
   },
   personalDetails: {
     title: 'Detail Pribadi',

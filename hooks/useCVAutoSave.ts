@@ -1,6 +1,12 @@
 import { CVData } from '@/lib/schema';
 import { useResumeStore } from '@/store/useResumeStore';
-import { useEffect, useRef, useState, useSyncExternalStore } from 'react';
+import {
+  useEffect,
+  useMemo,
+  useRef,
+  useState,
+  useSyncExternalStore,
+} from 'react';
 import { UseFormReturn } from 'react-hook-form';
 
 const SAVE_DEBOUNCE_MS = 600;
@@ -29,7 +35,10 @@ export function useCVAutoSave(methods: UseFormReturn<CVData>) {
   const activeId = activeResume?.id ?? null;
 
   const cvData = watch();
-  const snapshot = JSON.stringify(cvData);
+  // `watch()` returns a stable reference between renders unless the form
+  // values changed, so the comparison string is only rebuilt on actual edits —
+  // not on every re-render (saveStatus ticks, revision bumps, etc.).
+  const snapshot = useMemo(() => JSON.stringify(cvData), [cvData]);
   const prevSnapshotRef = useRef(snapshot);
 
   useEffect(() => {

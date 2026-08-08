@@ -85,6 +85,8 @@ const en = {
       saving: 'Saving…',
       saved: 'Saved {time}',
     },
+    storageFullWarning:
+      'Browser storage is full — recent changes may not be saved. Export a backup and free up space.',
   },
   personalDetails: {
     title: 'Personal Details',

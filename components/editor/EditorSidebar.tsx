@@ -8,7 +8,9 @@ import { cn, formatRelativeTime } from '@/lib/utils';
 import { useDialogStore } from '@/store/useDialogStore';
 import { useResumeStore } from '@/store/useResumeStore';
 import { useUIStore } from '@/store/useUIStore';
+import { useStorageError } from '@/hooks/useStorageError';
 import {
+  AlertTriangle,
   CheckCircle2,
   History,
   ListOrdered,
@@ -98,6 +100,7 @@ export function EditorSidebar({
 }: EditorSidebarProps) {
   const { activeTab, setActiveTab } = useUIStore();
   const { t } = useI18n();
+  const storageError = useStorageError();
   const { dialogs, setDialog } = useDialogStore();
   const sectionOrder =
     useResumeStore(
@@ -176,6 +179,16 @@ export function EditorSidebar({
           <ListOrdered className="w-5 h-5" />
         </TooltipIconButton>
       </nav>
+
+      {storageError && (
+        <div
+          role="alert"
+          className="px-5 py-2 border-t border-border bg-amber-500/10 text-amber-700 text-xs flex items-center gap-2 shrink-0"
+        >
+          <AlertTriangle className="w-4 h-4 shrink-0" />
+          <span>{t('editor.storageFullWarning')}</span>
+        </div>
+      )}
 
       <footer className="px-5 py-4 border-t border-border bg-muted/30 flex items-center justify-between gap-2 shrink-0 z-10">
         <div className="flex items-center gap-2 min-w-0" aria-live="polite">

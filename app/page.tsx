@@ -17,11 +17,12 @@ import {
 } from '@/lib/consts';
 import { useDialogStore } from '@/store/useDialogStore';
 import { useImportStore } from '@/store/useImportStore';
+import { usePhotoStore } from '@/store/usePhotoStore';
 import { useResumeStore } from '@/store/useResumeStore';
 import { useUIStore } from '@/store/useUIStore';
 import { cn } from '@/lib/utils';
 import { zodResolver } from '@hookform/resolvers/zod';
-import { useState } from 'react';
+import { useEffect, useState } from 'react';
 import { FormProvider, useForm } from 'react-hook-form';
 import { Header } from '@/components/Header';
 
@@ -51,6 +52,22 @@ export default function Home() {
 
   const [mobileView, setMobileView] = useState<'edit' | 'preview'>('edit');
 
+  // The resume store defers hydration (skipHydration) so photos can be
+  // reattached from the photo store during its merge. Hydrate the photo store
+  // first, then the resume store.
+  const [storesHydrated, setStoresHydrated] = useState(false);
+  useEffect(() => {
+    let cancelled = false;
+    (async () => {
+      await usePhotoStore.persist.rehydrate();
+      await useResumeStore.persist.rehydrate();
+      if (!cancelled) setStoresHydrated(true);
+    })();
+    return () => {
+      cancelled = true;
+    };
+  }, []);
+
   const { dialogs, setDialog } = useDialogStore();
   const pendingImport = useImportStore((state) => state.pendingImport);
   const clearPendingImport = useImportStore(
@@ -73,7 +90,7 @@ export default function Home() {
     if (!isLargeScreen) setMobileView('edit');
   };
 
-  if (!mounted) return null;
+  if (!mounted || !storesHydrated) return null;
 
   return (
     <FormProvider {...methods}>

@@ -1,6 +1,8 @@
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
 import { DEFAULT_SECTION_ORDER } from '@/lib/consts';
 import { CVData } from '@/lib/schema';
+import { resetStorageStateForTests } from '@/lib/storage';
+import { usePhotoStore } from '@/store/usePhotoStore';
 import { ResumeRecord, useResumeStore } from '@/store/useResumeStore';
 
 const STORAGE_KEY = 'curricula-resumes';
@@ -42,6 +44,8 @@ function getHistory() {
 beforeEach(() => {
   vi.useFakeTimers();
   vi.setSystemTime(new Date('2026-01-01T00:00:00Z'));
+  resetStorageStateForTests();
+  usePhotoStore.setState({ photos: {} });
   useResumeStore.setState({
     resumes: [],
     activeId: null,
@@ -301,10 +305,11 @@ describe('useResumeStore history', () => {
     expect(getState().activeId).toBe(first);
   });
 
-  it('does not persist history or revision', () => {
+  it('does not persist history, revision, or photos', () => {
     getState().createResume();
     const id = activeId();
     getState().updateResumeData(id, makeData({ jobTitle: 'A' }));
+    getState().setResumePhoto(id, 'data:image/jpeg;base64,Zm9v');
     getState().undo();
 
     const persisted = JSON.parse(localStorage.getItem(STORAGE_KEY)!);
@@ -312,6 +317,7 @@ describe('useResumeStore history', () => {
     expect(persisted.state).toHaveProperty('activeId');
     expect(persisted.state).not.toHaveProperty('histories');
     expect(persisted.state).not.toHaveProperty('revision');
+    expect(persisted.state.resumes[0]).not.toHaveProperty('photo');
   });
 });
 
@@ -570,5 +576,119 @@ describe('useResumeStore language, photo & template', () => {
     expect(resumed.data.summary).toBe('short');
     expect(resumed.data.location).toBe('');
     expect(localStorage.getItem('curricula-data')).toBeNull();
+  });
+});
+
+describe('useResumeStore photo persistence', () => {
+  const PHOTO = 'data:image/jpeg;base64,Zm9v';
+  const PHOTO_STORAGE_KEY = 'curricula-photos';
+
+  it('persists photos in the dedicated photo store, not the resume payload', () => {
+    getState().createResume();
+    const id = activeId();
+    getState().setResumePhoto(id, PHOTO);
+
+    const persisted = JSON.parse(localStorage.getItem(STORAGE_KEY)!);
+    expect(persisted.state.resumes[0]).not.toHaveProperty('photo');
+
+    const photoPersisted = JSON.parse(localStorage.getItem(PHOTO_STORAGE_KEY)!);
+    expect(photoPersisted.state.photos[id]).toBe(PHOTO);
+  });
+
+  it('reattaches photos from the photo store after rehydration', () => {
+    getState().createResume();
+    const id = activeId();
+    getState().setResumePhoto(id, PHOTO);
+
+    // Simulate a fresh session: wipe memory and reload from storage. The wipe
+    // itself writes an empty payload to storage, so restore the real one that
+    // a reload would have read.
+    const persistedPayload = localStorage.getItem(STORAGE_KEY)!;
+    expect(JSON.parse(persistedPayload).state.resumes[0]).not.toHaveProperty(
+      'photo',
+    );
+    useResumeStore.setState({
+      resumes: [],
+      activeId: null,
+      histories: {},
+      revision: 0,
+    });
+    localStorage.setItem(STORAGE_KEY, persistedPayload);
+    useResumeStore.persist.rehydrate();
+
+    const resumed = getState().resumes.find((r) => r.id === id);
+    expect(resumed?.photo).toBe(PHOTO);
+    expect(getState().activeId).toBe(id);
+  });
+
+  it('migrates inline photos from the old storage layout', () => {
+    getState().createResume();
+    const id = activeId();
+    const legacy = {
+      ...getState().resumes.find((r) => r.id === id)!,
+      photo: PHOTO,
+    };
+    localStorage.setItem(
+      STORAGE_KEY,
+      JSON.stringify({
+        state: { resumes: [legacy], activeId: id },
+        version: 0,
+      }),
+    );
+
+    useResumeStore.persist.rehydrate();
+
+    const resumed = getState().resumes.find((r) => r.id === id);
+    expect(resumed?.photo).toBe(PHOTO);
+    expect(usePhotoStore.getState().photos[id]).toBe(PHOTO);
+  });
+
+  it('cleans up the stored photo when a resume is deleted', () => {
+    getState().createResume();
+    const first = activeId();
+    getState().createResume();
+    const second = activeId();
+    getState().setResumePhoto(second, PHOTO);
+    expect(usePhotoStore.getState().photos[second]).toBe(PHOTO);
+
+    getState().deleteResume(second);
+
+    expect(usePhotoStore.getState().photos[second]).toBeUndefined();
+    expect(getState().activeId).toBe(first);
+  });
+
+  it('copies the stored photo when duplicating a resume', () => {
+    getState().createResume();
+    const id = activeId();
+    getState().setResumePhoto(id, PHOTO);
+
+    getState().duplicateResume(id);
+    const copy = getState().resumes.find((r) => r.id !== id)!;
+
+    expect(copy.photo).toBe(PHOTO);
+    expect(usePhotoStore.getState().photos[copy.id]).toBe(PHOTO);
+  });
+
+  it('mirrors backup photos into the photo store', () => {
+    getState().createResume();
+    const backup: ResumeRecord[] = [
+      {
+        id: 'r1',
+        title: 'A',
+        data: makeData(),
+        sectionOrder: [...DEFAULT_SECTION_ORDER],
+        hiddenSections: [],
+        language: 'en',
+        photo: PHOTO,
+        templateId: 'harvard',
+        autoTitle: true,
+        updatedAt: 1000,
+      },
+    ];
+
+    getState().restoreBackup(backup, 'r1');
+
+    expect(usePhotoStore.getState().photos.r1).toBe(PHOTO);
+    expect(getState().resumes[0].photo).toBe(PHOTO);
   });
 });
