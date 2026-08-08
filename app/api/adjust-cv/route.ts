@@ -59,6 +59,7 @@ export async function POST(req: Request) {
       jobDescription: cleanJobDescription,
       imageParts: images?.length ? images : undefined,
       scope,
+      signal: req.signal,
     });
 
     return Response.json({ data, warnings });

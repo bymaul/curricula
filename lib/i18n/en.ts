@@ -291,6 +291,9 @@ const en = {
       networkTitle: 'Network error',
       networkMessage:
         'Could not reach the AI service. Check your connection and try again.',
+      timeoutTitle: 'Request timed out',
+      timeoutMessage:
+        'The AI service took too long to respond. Try again with a smaller or fewer images.',
       failedTitle: 'Import failed',
       readFailed: 'Could not read the PDF.',
       rateLimitTitle: 'Rate limited',

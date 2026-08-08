@@ -2,7 +2,7 @@ import { create } from 'zustand';
 import { persist } from 'zustand/middleware';
 import { DEFAULT_SECTION_ORDER, SectionId } from '@/lib/consts';
 import { ResumeLanguage } from '@/lib/i18n/languages';
-import { CVData, cvSchema, initialCVState } from '@/lib/schema';
+import { CVData, cvDataStoredSchema, initialCVState } from '@/lib/schema';
 import { DEFAULT_TEMPLATE_ID, TemplateId } from '@/lib/templates';
 
 export interface ResumeRecord {
@@ -112,8 +112,12 @@ function parseLegacyData(raw: string | null): CVData | null {
   if (!raw) return null;
   try {
     const parsed = JSON.parse(raw);
-    const result = cvSchema.safeParse(parsed);
-    return result.success ? result.data : null;
+    // Validate with the lenient storage schema: a CV saved mid-edit (e.g. a
+    // short or empty summary) must survive migration instead of being
+    // silently discarded. Missing fields fall back to initialCVState.
+    const result = cvDataStoredSchema.safeParse(parsed);
+    if (!result.success) return null;
+    return { ...initialCVState, ...result.data };
   } catch {
     return null;
   }
@@ -128,13 +132,23 @@ function seedResumes(): ResumeRecord[] {
   return [makeResume()];
 }
 
-function snapshotFromRecord(record: ResumeRecord): HistorySnapshot {
+function snapshot(
+  next: Pick<HistorySnapshot, 'data' | 'sectionOrder' | 'hiddenSections'>,
+  at: number,
+): HistorySnapshot {
   return {
-    data: record.data,
-    sectionOrder: [...record.sectionOrder],
-    hiddenSections: [...record.hiddenSections],
-    at: now(),
+    // Deep-copy the CV data so history entries never share mutable references
+    // with the live record. Any future in-place mutation of `record.data`
+    // would otherwise corrupt every snapshot simultaneously.
+    data: structuredClone(next.data),
+    sectionOrder: [...next.sectionOrder],
+    hiddenSections: [...next.hiddenSections],
+    at,
   };
+}
+
+function snapshotFromRecord(record: ResumeRecord): HistorySnapshot {
+  return snapshot(record, now());
 }
 
 function seedHistory(record: ResumeRecord): ResumeHistory {
@@ -173,9 +187,9 @@ function commitHistory(
   const canCoalesce =
     !truncated && last && entries.length > 1 && at - last.at < COALESCE_MS;
   if (canCoalesce) {
-    entries[entries.length - 1] = { ...next, at };
+    entries[entries.length - 1] = snapshot(next, at);
   } else {
-    entries.push({ ...next, at });
+    entries.push(snapshot(next, at));
   }
   if (entries.length > MAX_HISTORY_ENTRIES) {
     entries.splice(0, entries.length - MAX_HISTORY_ENTRIES);

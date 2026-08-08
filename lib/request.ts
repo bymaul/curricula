@@ -15,6 +15,14 @@ export class RateLimitError extends Error {
   }
 }
 
+/** Thrown when the client aborts a request via its own timeout. */
+export class RequestTimeoutError extends Error {
+  constructor() {
+    super('Request timed out');
+    this.name = 'RequestTimeoutError';
+  }
+}
+
 function readRetryAfter(response: Response): number {
   const value = response.headers.get('retry-after');
   const seconds = value === null ? NaN : Number(value);

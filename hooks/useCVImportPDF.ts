@@ -3,7 +3,7 @@ import { AIProvider } from '@/lib/consts';
 import { stripInvisibleChars } from '@/lib/cleanText';
 import type { CVImagePart } from '@/lib/cvParsing';
 import { ScannedPDFError } from '@/lib/pdfImportErrors';
-import { parseResponseJSON } from '@/lib/request';
+import { parseResponseJSON, RequestTimeoutError } from '@/lib/request';
 import type { PDFDocumentProxy } from 'pdfjs-dist';
 
 let pdfjsPromise: Promise<typeof import('pdfjs-dist')> | null = null;
@@ -11,6 +11,7 @@ let pdfjsPromise: Promise<typeof import('pdfjs-dist')> | null = null;
 const MIN_SCANNED_TEXT_CHARS = 150;
 const MAX_SCANNED_PAGES = 5;
 const MAX_SCAN_WIDTH = 1200;
+const PARSE_TIMEOUT_MS = 55_000;
 
 function getPDFJS() {
   if (!pdfjsPromise) {
@@ -116,11 +117,22 @@ export async function parseCVWithAI(
     body.images = input.images;
   }
 
-  const response = await fetch('/api/parse-cv', {
-    method: 'POST',
-    headers: { 'Content-Type': 'application/json' },
-    body: JSON.stringify(body),
-  });
+  const controller = new AbortController();
+  const timeoutId = setTimeout(() => controller.abort(), PARSE_TIMEOUT_MS);
 
-  return parseResponseJSON<CVParseResponse>(response);
+  try {
+    const response = await fetch('/api/parse-cv', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify(body),
+      signal: controller.signal,
+    });
+
+    return await parseResponseJSON<CVParseResponse>(response);
+  } catch (error) {
+    if (controller.signal.aborted) throw new RequestTimeoutError();
+    throw error;
+  } finally {
+    clearTimeout(timeoutId);
+  }
 }
