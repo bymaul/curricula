@@ -4,6 +4,7 @@ import { useI18n } from '@/components/I18nProvider';
 import { extractTextFromPDF, parseCVWithAI } from '@/hooks/useCVImportPDF';
 import { getStoredAIAPIKey } from '@/lib/consts';
 import { getPDFImportErrorInfo } from '@/lib/pdfImportErrors';
+import { RateLimitError } from '@/lib/request';
 import { useImportStore } from '@/store/useImportStore';
 import { useUIStore } from '@/store/useUIStore';
 
@@ -75,6 +76,24 @@ export function useCVImportExport() {
       useImportStore.getState().setPendingImport({ data, warnings });
     } catch (error) {
       console.error('PDF import error:', error);
+
+      if (error instanceof RateLimitError) {
+        toast.update(loadingToast, {
+          type: 'error',
+          title: t('import.errors.rateLimitTitle'),
+          description: t('import.errors.rateLimitMessage', {
+            seconds: error.retryAfterSeconds,
+          }),
+          priority: 'high',
+          timeout: 8000,
+          actionProps: {
+            children: t('common.retry'),
+            onClick: retry,
+          },
+        });
+        return;
+      }
+
       const { titleKey, messageKey, rawMessage } = getPDFImportErrorInfo(error);
       toast.update(loadingToast, {
         type: 'error',

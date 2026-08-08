@@ -298,6 +298,9 @@ const id: Dictionary = {
         'Tidak dapat menjangkau layanan AI. Periksa koneksi Anda dan coba lagi.',
       failedTitle: 'Impor gagal',
       readFailed: 'Tidak dapat membaca PDF.',
+      rateLimitTitle: 'Batas kecepatan terlampaui',
+      rateLimitMessage:
+        'Terlalu banyak permintaan. Tunggu {seconds} detik lalu coba lagi.',
     },
   },
   importPreview: {
@@ -371,6 +374,8 @@ const id: Dictionary = {
     timeoutError:
       'Permintaan AI habis waktu. Coba lagi dengan gambar yang lebih kecil atau lebih sedikit.',
     unexpectedError: 'Kesalahan tak terduga saat menyesuaikan CV',
+    rateLimited:
+      'Batas kecepatan terlampaui. Tunggu {seconds} detik lalu coba lagi.',
   },
   aiSettings: {
     title: 'Pengaturan AI',

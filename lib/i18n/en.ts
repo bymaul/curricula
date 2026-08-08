@@ -293,6 +293,9 @@ const en = {
         'Could not reach the AI service. Check your connection and try again.',
       failedTitle: 'Import failed',
       readFailed: 'Could not read the PDF.',
+      rateLimitTitle: 'Rate limited',
+      rateLimitMessage:
+        'Too many requests. Please wait {seconds} seconds and try again.',
     },
   },
   importPreview: {
@@ -366,6 +369,7 @@ const en = {
     timeoutError:
       'The AI request timed out. Try again with a smaller or fewer images.',
     unexpectedError: 'Unexpected error while adjusting CV',
+    rateLimited: 'Rate limited. Please wait {seconds} seconds and try again.',
   },
   aiSettings: {
     title: 'AI Settings',

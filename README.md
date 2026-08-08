@@ -59,11 +59,13 @@ Open [http://localhost:3000](http://localhost:3000).
 
 Copy `.env.example` to `.env.local` and adjust as needed:
 
-| Variable      | Description                                                                          |
-| ------------- | ------------------------------------------------------------------------------------ |
-| `AI_API_KEY`  | Server-side AI key used as a fallback for users without their own key                |
-| `AI_PROVIDER` | Provider for the bundled key: `openai` \| `anthropic` \| `google` (default `google`) |
-| `AI_MODEL`    | Optional model override (defaults to the provider default)                           |
+| Variable             | Description                                                                          |
+| -------------------- | ------------------------------------------------------------------------------------ |
+| `AI_API_KEY`         | Server-side AI key used as a fallback for users without their own key                |
+| `AI_PROVIDER`        | Provider for the bundled key: `openai` \| `anthropic` \| `google` (default `google`) |
+| `AI_MODEL`           | Optional model override (defaults to the provider default)                           |
+| `AI_ENFORCE_ORIGIN`  | Reject AI requests with a mismatched `Origin` header (default `true`)                |
+| `AI_ALLOWED_ORIGINS` | Comma-separated extra origins allowed through the origin gate                        |
 
 The bundled key is read only in server route handlers and never sent to the
 browser. Users can also supply their own key in **AI Settings**; that key is
