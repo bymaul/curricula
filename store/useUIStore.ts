@@ -2,8 +2,9 @@ import { create } from 'zustand';
 import { persist } from 'zustand/middleware';
 import { AIProvider, TabName } from '@/lib/consts';
 import { Language } from '@/lib/i18n/languages';
+import { createQuotaAwareStorage } from '@/lib/storage';
 
-interface UIState {
+export interface UIState {
   activeTab: TabName;
   setActiveTab: (tab: TabName) => void;
   aiProvider: AIProvider;
@@ -30,6 +31,10 @@ export const useUIStore = create<UIState>()(
     }),
     {
       name: 'curricula-ui-state',
+      storage:
+        createQuotaAwareStorage<
+          Pick<UIState, 'activeTab' | 'aiProvider' | 'aiModel' | 'uiLanguage'>
+        >(),
       partialize: (state) => ({
         activeTab: state.activeTab,
         aiProvider: state.aiProvider,

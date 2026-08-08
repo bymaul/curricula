@@ -3,7 +3,9 @@ import { persist } from 'zustand/middleware';
 import { DEFAULT_SECTION_ORDER, SectionId } from '@/lib/consts';
 import { ResumeLanguage } from '@/lib/i18n/languages';
 import { CVData, cvDataStoredSchema, initialCVState } from '@/lib/schema';
+import { createQuotaAwareStorage } from '@/lib/storage';
 import { DEFAULT_TEMPLATE_ID, TemplateId } from '@/lib/templates';
+import { usePhotoStore } from '@/store/usePhotoStore';
 
 export interface ResumeRecord {
   id: string;
@@ -33,7 +35,7 @@ export interface ResumeHistory {
 const COALESCE_MS = 2_000;
 const MAX_HISTORY_ENTRIES = 100;
 
-interface ResumeState {
+export interface ResumeState {
   resumes: ResumeRecord[];
   activeId: string | null;
   histories: Record<string, ResumeHistory>;
@@ -67,6 +69,12 @@ interface ResumeState {
 
 const LEGACY_KEY = 'curricula-data';
 const STORAGE_KEY = 'curricula-resumes';
+
+/** Shape of the resume store payload persisted to localStorage. */
+type PersistedResumeState = {
+  resumes: Array<Omit<ResumeRecord, 'photo'>>;
+  activeId: string | null;
+};
 
 const now = () => Date.now();
 
@@ -105,6 +113,21 @@ function normalizeResume(record: ResumeRecord): ResumeRecord {
     language: record.language ?? 'en',
     photo: record.photo ?? '',
     templateId: record.templateId ?? DEFAULT_TEMPLATE_ID,
+  };
+}
+
+/** Resume record without the photo, which persists in the dedicated store. */
+function withoutPhoto(record: ResumeRecord): Omit<ResumeRecord, 'photo'> {
+  return {
+    id: record.id,
+    title: record.title,
+    data: record.data,
+    sectionOrder: record.sectionOrder,
+    hiddenSections: record.hiddenSections,
+    language: record.language,
+    templateId: record.templateId,
+    autoTitle: record.autoTitle,
+    updatedAt: record.updatedAt,
   };
 }
 
@@ -284,6 +307,9 @@ export const useResumeStore = create<ResumeState>()(
             autoTitle: false,
             updatedAt: now(),
           };
+          if (copy.photo) {
+            usePhotoStore.getState().setPhoto(copy.id, copy.photo);
+          }
           const index = state.resumes.findIndex((r) => r.id === id);
           const resumes = [...state.resumes];
           resumes.splice(index + 1, 0, copy);
@@ -301,6 +327,7 @@ export const useResumeStore = create<ResumeState>()(
       deleteResume: (id) => {
         set((state) => {
           if (state.resumes.length <= 1) return {};
+          usePhotoStore.getState().removePhotos([id]);
           const resumes = state.resumes.filter((r) => r.id !== id);
           const activeId =
             state.activeId === id ? resumes[0].id : state.activeId;
@@ -335,6 +362,9 @@ export const useResumeStore = create<ResumeState>()(
       importResumeData: (data, title, options) =>
         set((state) => {
           const record = makeResume(data, title, options);
+          if (record.photo) {
+            usePhotoStore.getState().setPhoto(record.id, record.photo);
+          }
           return {
             resumes: [...state.resumes, record],
             activeId: record.id,
@@ -354,14 +384,16 @@ export const useResumeStore = create<ResumeState>()(
           ),
         })),
 
-      setResumePhoto: (id, photo) =>
+      setResumePhoto: (id, photo) => {
+        usePhotoStore.getState().setPhoto(id, photo);
         set((state) => ({
           resumes: state.resumes.map((r) =>
             r.id === id && r.photo !== photo
               ? { ...r, photo, updatedAt: now() }
               : r,
           ),
-        })),
+        }));
+      },
 
       setResumeTemplate: (id, templateId) =>
         set((state) => ({
@@ -376,6 +408,15 @@ export const useResumeStore = create<ResumeState>()(
         set((state) => {
           if (resumes.length === 0) return {};
           const normalized = resumes.map(normalizeResume);
+          // Backups carry photos inline on each record; mirror them into the
+          // dedicated photo store so the persisted CV payload stays lean.
+          const photos: Record<string, string> = {
+            ...usePhotoStore.getState().photos,
+          };
+          for (const record of normalized) {
+            photos[record.id] = record.photo ?? '';
+          }
+          usePhotoStore.setState({ photos });
           const targetId = normalized.some((r) => r.id === activeId)
             ? activeId
             : normalized[0].id;
@@ -475,13 +516,35 @@ export const useResumeStore = create<ResumeState>()(
     }),
     {
       name: STORAGE_KEY,
+      // Photos live in the dedicated photo store (see usePhotoStore); keeping
+      // them out of the resume payload keeps the per-keystroke autosave write
+      // small. Hydration is ordered manually after the photo store so photos
+      // can be reattached during merge.
+      skipHydration: true,
+      storage: createQuotaAwareStorage<PersistedResumeState>(),
       partialize: (state) => ({
-        resumes: state.resumes,
+        resumes: state.resumes.map(withoutPhoto),
         activeId: state.activeId,
       }),
       merge: (persisted, current) => {
         const base = { ...current, ...(persisted as Partial<ResumeState>) };
         let resumes = (base.resumes ?? []).map(normalizeResume);
+        // Migrate photos that were stored inline on resume records (previous
+        // storage layout) into the photo store, then reattach. The photo store
+        // wins when both layouts hold a value for the same resume.
+        const photos = { ...usePhotoStore.getState().photos };
+        for (const record of resumes) {
+          if (record.photo && !(record.id in photos)) {
+            photos[record.id] = record.photo;
+          }
+        }
+        if (Object.keys(photos).length > 0) {
+          usePhotoStore.setState({ photos });
+        }
+        resumes = resumes.map((record) => ({
+          ...record,
+          photo: photos[record.id] ?? '',
+        }));
         if (resumes.length === 0) {
           resumes = seedResumes();
         }
