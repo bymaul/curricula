@@ -295,7 +295,10 @@ const id: Dictionary = {
         'PDF ini dilindungi kata sandi. Hapus kata sandi dan coba lagi.',
       networkTitle: 'Kesalahan jaringan',
       networkMessage:
-        'Tidak dapat menjangkau layanan AI. Periksa koneksi Anda dan coba lagi.',
+        'Tidak dapat menghubungi layanan AI. Periksa koneksi Anda dan coba lagi.',
+      timeoutTitle: 'Permintaan habis waktu',
+      timeoutMessage:
+        'Layanan AI terlalu lama merespons. Coba lagi dengan gambar yang lebih kecil atau lebih sedikit.',
       failedTitle: 'Impor gagal',
       readFailed: 'Tidak dapat membaca PDF.',
       rateLimitTitle: 'Batas kecepatan terlampaui',

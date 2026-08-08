@@ -4,7 +4,7 @@ import { useI18n } from '@/components/I18nProvider';
 import { extractTextFromPDF, parseCVWithAI } from '@/hooks/useCVImportPDF';
 import { getStoredAIAPIKey } from '@/lib/consts';
 import { getPDFImportErrorInfo } from '@/lib/pdfImportErrors';
-import { RateLimitError } from '@/lib/request';
+import { RateLimitError, RequestTimeoutError } from '@/lib/request';
 import { useImportStore } from '@/store/useImportStore';
 import { useUIStore } from '@/store/useUIStore';
 
@@ -84,6 +84,21 @@ export function useCVImportExport() {
           description: t('import.errors.rateLimitMessage', {
             seconds: error.retryAfterSeconds,
           }),
+          priority: 'high',
+          timeout: 8000,
+          actionProps: {
+            children: t('common.retry'),
+            onClick: retry,
+          },
+        });
+        return;
+      }
+
+      if (error instanceof RequestTimeoutError) {
+        toast.update(loadingToast, {
+          type: 'error',
+          title: t('import.errors.timeoutTitle'),
+          description: t('import.errors.timeoutMessage'),
           priority: 'high',
           timeout: 8000,
           actionProps: {

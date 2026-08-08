@@ -49,6 +49,7 @@ export async function POST(req: Request) {
       system: systemPrompt,
       resumeText: cleanCVText,
       imageParts: images?.length ? images : undefined,
+      signal: req.signal,
     });
 
     return Response.json({ data, warnings });

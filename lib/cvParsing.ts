@@ -283,6 +283,7 @@ interface GenerateJSONWithRepairOptions {
   prompt: string;
   imageParts?: CVImagePart[];
   repairContext: string;
+  signal?: AbortSignal;
   maxRetries?: number;
   maxRepairAttempts?: number;
 }
@@ -299,6 +300,7 @@ async function generateJSONWithRepair({
   prompt,
   imageParts,
   repairContext,
+  signal,
   // Vision requests are slow and each call re-sends the images, so cap the
   // number of AI attempts to keep requests within the function time limit.
   maxRetries = imageParts?.length ? 0 : MAX_TRANSIENT_RETRIES,
@@ -321,6 +323,7 @@ async function generateJSONWithRepair({
         ],
         output: Output.object({ schema: cvParseSchema }),
         maxRetries,
+        abortSignal: signal,
       });
       return normalizeCVOutput(result.output);
     } catch (error) {
@@ -351,6 +354,7 @@ export interface ParseCVWithRepairOptions {
   system: string;
   resumeText: string;
   imageParts?: CVImagePart[];
+  signal?: AbortSignal;
   maxRetries?: number;
   maxRepairAttempts?: number;
 }
@@ -367,6 +371,7 @@ export async function parseCVWithRepair(
     system,
     resumeText,
     imageParts,
+    signal,
     maxRetries,
     maxRepairAttempts,
   } = options;
@@ -381,6 +386,7 @@ ${resumeText || '(empty — use the page images)'}`;
     system,
     prompt,
     imageParts,
+    signal,
     repairContext: `Resume text:\n${resumeText || '(empty — use the page images above)'}`,
     maxRetries,
     maxRepairAttempts,
@@ -394,6 +400,7 @@ export interface AdjustCVWithRepairOptions {
   jobDescription: string;
   imageParts?: CVImagePart[];
   scope?: AIAdjustScope;
+  signal?: AbortSignal;
   maxRetries?: number;
   maxRepairAttempts?: number;
 }
@@ -473,6 +480,7 @@ export async function adjustCVWithRepair(
     jobDescription,
     imageParts,
     scope,
+    signal,
     maxRetries,
     maxRepairAttempts,
   } = options;
@@ -490,6 +498,7 @@ export async function adjustCVWithRepair(
     system,
     prompt,
     imageParts,
+    signal,
     repairContext: input,
     maxRetries,
     maxRepairAttempts,

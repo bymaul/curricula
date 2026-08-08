@@ -110,6 +110,28 @@ describe('useResumeStore history', () => {
     expect(history.entries[1].data).toEqual(makeData());
   });
 
+  it('isolates history snapshots from in-place mutations of the live data', () => {
+    getState().createResume();
+    const id = activeId();
+    getState().updateResumeData(id, makeData());
+
+    // Simulate a future in-place mutation of the live record data. History
+    // snapshots must not share a reference, so this cannot leak backwards.
+    getState()
+      .resumes.find((r) => r.id === id)!
+      .data.experience.push({
+        role: 'Mutated',
+        company: 'Bad',
+        date: '2026',
+        description: 'Must not leak into history.',
+      });
+
+    getState().undo();
+
+    expect(getHistory().entries[1].data.experience).toEqual([]);
+    expect(activeResume().data.experience).toEqual([]);
+  });
+
   it('ignores no-op data updates', () => {
     getState().createResume();
     const id = activeId();
@@ -516,5 +538,37 @@ describe('useResumeStore language, photo & template', () => {
     expect(resumed?.language).toBe('en');
     expect(resumed?.photo).toBe('');
     expect(resumed?.templateId).toBe('harvard');
+  });
+
+  it('migrates legacy curricula-data even when it fails the strict schema', () => {
+    const legacyData = {
+      name: 'Old CV',
+      jobTitle: 'Engineer',
+      email: 'old@example.com',
+      phone: '123',
+      // Intentionally short — fails the strict cvSchema (min 10 chars) but
+      // must still survive migration.
+      summary: 'short',
+      links: [],
+      experience: [],
+      projects: [],
+      education: [],
+      skills: [],
+      certifications: [],
+    };
+    localStorage.setItem('curricula-data', JSON.stringify(legacyData));
+    localStorage.setItem(
+      STORAGE_KEY,
+      JSON.stringify({ state: { resumes: [], activeId: null }, version: 0 }),
+    );
+
+    useResumeStore.persist.rehydrate();
+
+    const resumed = useResumeStore.getState().resumes[0];
+    expect(resumed).toBeDefined();
+    expect(resumed.data.name).toBe('Old CV');
+    expect(resumed.data.summary).toBe('short');
+    expect(resumed.data.location).toBe('');
+    expect(localStorage.getItem('curricula-data')).toBeNull();
   });
 });
