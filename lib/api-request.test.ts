@@ -1,4 +1,4 @@
-import { beforeEach, describe, expect, it, vi } from 'vitest';
+import { beforeEach, afterEach, describe, expect, it, vi } from 'vitest';
 import z from 'zod';
 
 vi.mock('@/lib/ai', () => ({
@@ -14,6 +14,10 @@ vi.mock('@/lib/ai', () => ({
 vi.mock('@/lib/rateLimit', () => ({
   clientIP: vi.fn(() => '1.2.3.4'),
   rateLimitStatus: vi.fn(() => ({ limited: false, retryAfterSeconds: 0 })),
+  keyRateLimitStatus: vi.fn(() => ({
+    limited: false,
+    retryAfterSeconds: 0,
+  })),
   rateLimitResponse: vi.fn(
     (retryAfterSeconds: number) =>
       new Response(JSON.stringify({ error: 'rate limited' }), {
@@ -29,7 +33,11 @@ import {
   resolveAIKey,
   resolveAIModel,
 } from '@/lib/ai';
-import { rateLimitResponse, rateLimitStatus } from '@/lib/rateLimit';
+import {
+  keyRateLimitStatus,
+  rateLimitResponse,
+  rateLimitStatus,
+} from '@/lib/rateLimit';
 import { MAX_CV_IMAGE_BASE64_CHARS } from '@/lib/cvParsing';
 import {
   handleAIRequest,
@@ -41,10 +49,11 @@ const testSchema = providerConfigSchema.extend({
   ping: z.string().optional(),
 });
 
-function jsonRequest(body: unknown): Request {
+function jsonRequest(body: unknown, init?: { origin?: string }): Request {
   return new Request('http://test/api', {
     method: 'POST',
     body: JSON.stringify(body),
+    headers: init?.origin ? { Origin: init.origin } : undefined,
   });
 }
 
@@ -55,6 +64,14 @@ describe('handleAIRequest', () => {
       limited: false,
       retryAfterSeconds: 0,
     });
+    vi.mocked(keyRateLimitStatus).mockReturnValue({
+      limited: false,
+      retryAfterSeconds: 0,
+    });
+  });
+
+  afterEach(() => {
+    vi.unstubAllEnvs();
   });
 
   it('returns the rate limit response when rate limited', async () => {
@@ -83,6 +100,114 @@ describe('handleAIRequest', () => {
     expect(res.status).toBe(400);
     const body = await res.json();
     expect(body.error).toBe('Invalid payload');
+  });
+
+  it('does not leak validation details in the 400 body', async () => {
+    const res = await handleAIRequest(
+      jsonRequest({ ping: 42 }),
+      testSchema,
+      vi.fn(async () => new Response('unreachable')),
+    );
+
+    const body = await res.json();
+    expect(body).toEqual({ error: 'Invalid payload' });
+  });
+
+  it('rejects cross-origin requests with 403', async () => {
+    const res = await handleAIRequest(
+      jsonRequest(
+        { provider: 'openai', ping: 'pong' },
+        {
+          origin: 'https://evil.example',
+        },
+      ),
+      testSchema,
+      vi.fn(async () => new Response('unreachable')),
+    );
+
+    expect(res.status).toBe(403);
+    expect(rateLimitStatus).not.toHaveBeenCalled();
+  });
+
+  it('allows same-origin requests', async () => {
+    vi.mocked(resolveAIKey).mockReturnValue('sk-test-123');
+
+    const res = await handleAIRequest(
+      jsonRequest(
+        { provider: 'openai', ping: 'pong' },
+        { origin: 'http://test' },
+      ),
+      testSchema,
+      vi.fn(async () => new Response('ok')),
+    );
+
+    expect(res.status).toBe(200);
+  });
+
+  it('allows requests without an origin header', async () => {
+    vi.mocked(resolveAIKey).mockReturnValue('sk-test-123');
+
+    const res = await handleAIRequest(
+      jsonRequest({ provider: 'openai', ping: 'pong' }),
+      testSchema,
+      vi.fn(async () => new Response('ok')),
+    );
+
+    expect(res.status).toBe(200);
+  });
+
+  it('skips the origin gate when AI_ENFORCE_ORIGIN is off', async () => {
+    vi.stubEnv('AI_ENFORCE_ORIGIN', 'false');
+    vi.mocked(resolveAIKey).mockReturnValue('sk-test-123');
+
+    const res = await handleAIRequest(
+      jsonRequest(
+        { provider: 'openai', ping: 'pong' },
+        {
+          origin: 'https://evil.example',
+        },
+      ),
+      testSchema,
+      vi.fn(async () => new Response('ok')),
+    );
+
+    expect(res.status).toBe(200);
+  });
+
+  it('respects AI_ALLOWED_ORIGINS', async () => {
+    vi.stubEnv('AI_ALLOWED_ORIGINS', 'https://app.example, https://cv.example');
+    vi.mocked(resolveAIKey).mockReturnValue('sk-test-123');
+
+    const res = await handleAIRequest(
+      jsonRequest(
+        { provider: 'openai', ping: 'pong' },
+        {
+          origin: 'https://cv.example',
+        },
+      ),
+      testSchema,
+      vi.fn(async () => new Response('ok')),
+    );
+
+    expect(res.status).toBe(200);
+  });
+
+  it('applies the per-key rate limit after resolving the key', async () => {
+    vi.mocked(resolveAIKey).mockReturnValue('sk-test-123');
+    vi.mocked(keyRateLimitStatus).mockReturnValue({
+      limited: true,
+      retryAfterSeconds: 45,
+    });
+
+    const res = await handleAIRequest(
+      jsonRequest({ provider: 'openai', apiKey: 'sk-test-123' }),
+      testSchema,
+      vi.fn(async () => new Response('unreachable')),
+    );
+
+    expect(keyRateLimitStatus).toHaveBeenCalledWith('sk-test-123');
+    expect(rateLimitResponse).toHaveBeenCalledWith(45);
+    expect(res.status).toBe(429);
   });
 
   it('rejects requests without an AI key', async () => {

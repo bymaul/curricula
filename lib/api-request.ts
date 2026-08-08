@@ -8,7 +8,12 @@ import {
 import { AI_PROVIDERS, AIProvider } from '@/lib/consts';
 import { MAX_CV_IMAGE_BASE64_CHARS } from '@/lib/cvParsing';
 import { parseEnv } from '@/lib/env';
-import { clientIP, rateLimitResponse, rateLimitStatus } from '@/lib/rateLimit';
+import {
+  clientIP,
+  keyRateLimitStatus,
+  rateLimitResponse,
+  rateLimitStatus,
+} from '@/lib/rateLimit';
 
 const supportedMimeTypes = new Set(['image/jpeg', 'image/png', 'image/webp']);
 
@@ -41,22 +46,44 @@ interface AIRequestContext<Body> {
   model: AIModel;
 }
 
+/**
+ * Same-origin gate (throttle-only protection, no auth).
+ *
+ * When the Origin header is present it must match the request origin or one of
+ * the configured AI_ALLOWED_ORIGINS, otherwise the request is rejected with
+ * 403. Requests without an Origin header (curl, scripts, native clients) are
+ * left to the rate limiter.
+ */
+function enforceOrigin(req: Request): Response | null {
+  const { enforceOrigin, allowedOrigins } = parseEnv();
+  if (!enforceOrigin) return null;
+
+  const origin = req.headers.get('origin');
+  if (!origin) return null;
+
+  const requestOrigin = new URL(req.url).origin;
+  if (origin === requestOrigin || allowedOrigins.includes(origin)) return null;
+
+  return Response.json({ error: 'Forbidden' }, { status: 403 });
+}
+
 export async function handleAIRequest<Schema extends z.ZodType<ProviderConfig>>(
   req: Request,
   schema: Schema,
   handle: (ctx: AIRequestContext<z.output<Schema>>) => Promise<Response>,
 ): Promise<Response> {
   try {
+    const originResponse = enforceOrigin(req);
+    if (originResponse) return originResponse;
+
     const ip = clientIP(req);
     const { limited, retryAfterSeconds } = rateLimitStatus(ip);
     if (limited) return rateLimitResponse(retryAfterSeconds);
 
     const parsedBody = schema.safeParse(await req.json());
     if (!parsedBody.success) {
-      return Response.json(
-        { error: 'Invalid payload', details: parsedBody.error },
-        { status: 400 },
-      );
+      console.error('AI request validation failed:', parsedBody.error);
+      return Response.json({ error: 'Invalid payload' }, { status: 400 });
     }
 
     const key = resolveAIKey(parsedBody.data.apiKey);
@@ -65,6 +92,11 @@ export async function handleAIRequest<Schema extends z.ZodType<ProviderConfig>>(
         { error: 'AI is not configured. Add an API key in AI Settings.' },
         { status: 400 },
       );
+    }
+
+    const keyLimit = keyRateLimitStatus(key);
+    if (keyLimit.limited) {
+      return rateLimitResponse(keyLimit.retryAfterSeconds);
     }
 
     const model = createAIModel(

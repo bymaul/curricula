@@ -1,5 +1,5 @@
 import { describe, expect, it } from 'vitest';
-import { parseResponseJSON } from '@/lib/request';
+import { parseResponseJSON, RateLimitError } from '@/lib/request';
 
 describe('parseResponseJSON', () => {
   it('parses a successful JSON response', async () => {
@@ -26,6 +26,27 @@ describe('parseResponseJSON', () => {
     );
   });
 
+  it('throws a RateLimitError for 429 with the Retry-After hint', async () => {
+    const response = new Response(JSON.stringify({ error: 'limited' }), {
+      status: 429,
+      headers: { 'Retry-After': '45' },
+    });
+
+    await expect(parseResponseJSON(response)).rejects.toMatchObject({
+      name: 'RateLimitError',
+      retryAfterSeconds: 45,
+    });
+  });
+
+  it('defaults retryAfterSeconds when the Retry-After header is missing', async () => {
+    const response = new Response('', { status: 429 });
+
+    await expect(parseResponseJSON(response)).rejects.toMatchObject({
+      name: 'RateLimitError',
+      retryAfterSeconds: 60,
+    });
+  });
+
   it('falls back to a generic message when the error body is not JSON', async () => {
     const response = new Response('Internal Server Error', { status: 500 });
     await expect(parseResponseJSON(response)).rejects.toThrow(
@@ -42,10 +63,13 @@ describe('parseResponseJSON', () => {
     );
   });
 
-  it('falls back to a generic message for an empty error body', async () => {
+  it('exposes RateLimitError as an instanceof error', async () => {
     const response = new Response('', { status: 429 });
-    await expect(parseResponseJSON(response)).rejects.toThrow(
-      'Request failed (429)',
-    );
+    try {
+      await parseResponseJSON(response);
+    } catch (error) {
+      expect(error).toBeInstanceOf(RateLimitError);
+      expect((error as RateLimitError).retryAfterSeconds).toBe(60);
+    }
   });
 });

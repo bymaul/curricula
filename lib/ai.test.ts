@@ -74,10 +74,43 @@ describe('aiErrorResponse', () => {
     expect(response.status).toBe(429);
   });
 
-  it('returns 500 with the error message for other errors', async () => {
+  it('passes the provider Retry-After header through', async () => {
+    const response = aiErrorResponse({
+      statusCode: 429,
+      headers: new Headers({ 'retry-after': '37' }),
+    });
+    expect(response.status).toBe(429);
+    expect(response.headers.get('retry-after')).toBe('37');
+  });
+
+  it('maps 401/403 to a generic auth error without leaking details', async () => {
+    const response = aiErrorResponse({
+      statusCode: 401,
+      message: 'sk-invalid-secret rejected: API key is invalid',
+    });
+    expect(response.status).toBe(500);
+    await expect(response.json()).resolves.toEqual({
+      error: 'The AI provider rejected the API key. Check AI Settings.',
+    });
+  });
+
+  it('maps 404 to a generic model-not-found error', async () => {
+    const response = aiErrorResponse({
+      statusCode: 404,
+      message: 'model "gemini-9" not found',
+    });
+    expect(response.status).toBe(500);
+    await expect(response.json()).resolves.toEqual({
+      error: 'The AI model was not found. Check AI Settings.',
+    });
+  });
+
+  it('returns a generic message for other errors', async () => {
     const response = aiErrorResponse(new Error('boom'));
     expect(response.status).toBe(500);
-    await expect(response.json()).resolves.toEqual({ error: 'boom' });
+    await expect(response.json()).resolves.toEqual({
+      error: 'Error processing AI request',
+    });
   });
 
   it('uses a default message when none is provided', async () => {

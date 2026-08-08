@@ -14,6 +14,8 @@ describe('parseEnv', () => {
       apiKey: null,
       model: undefined,
       provider: 'google',
+      enforceOrigin: true,
+      allowedOrigins: [],
     });
   });
 
@@ -58,5 +60,38 @@ describe('parseEnv', () => {
   it('reads a valid provider', () => {
     vi.stubEnv('AI_PROVIDER', 'anthropic');
     expect(parseEnv().provider).toBe('anthropic');
+  });
+
+  it('enables the origin gate by default', () => {
+    expect(parseEnv().enforceOrigin).toBe(true);
+  });
+
+  it('disables the origin gate for falsey values', () => {
+    for (const value of ['false', '0', 'off', 'no', ' FALSE ']) {
+      vi.stubEnv('AI_ENFORCE_ORIGIN', value);
+      expect(parseEnv().enforceOrigin).toBe(false);
+    }
+  });
+
+  it('keeps the origin gate on for truthy values', () => {
+    vi.stubEnv('AI_ENFORCE_ORIGIN', 'true');
+    expect(parseEnv().enforceOrigin).toBe(true);
+    vi.stubEnv('AI_ENFORCE_ORIGIN', '1');
+    expect(parseEnv().enforceOrigin).toBe(true);
+  });
+
+  it('parses an empty allowed-origins list', () => {
+    expect(parseEnv().allowedOrigins).toEqual([]);
+  });
+
+  it('parses and trims the allowed-origins list', () => {
+    vi.stubEnv(
+      'AI_ALLOWED_ORIGINS',
+      ' https://a.example , https://b.example ,',
+    );
+    expect(parseEnv().allowedOrigins).toEqual([
+      'https://a.example',
+      'https://b.example',
+    ]);
   });
 });

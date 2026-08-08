@@ -3,7 +3,7 @@ import { useI18n } from '@/components/I18nProvider';
 import { CVData } from '@/lib/schema';
 import { AIAdjustScope, AIProvider } from '@/lib/consts';
 import type { CVImagePart } from '@/lib/cvParsing';
-import { parseResponseJSON } from '@/lib/request';
+import { parseResponseJSON, RateLimitError } from '@/lib/request';
 
 const ADJUST_TIMEOUT_MS = 55_000;
 
@@ -48,6 +48,8 @@ export function useAIAdjustCV() {
     } catch (err) {
       if (controller.signal.aborted) {
         setError(t('aiAdjust.timeoutError'));
+      } else if (err instanceof RateLimitError) {
+        setError(t('aiAdjust.rateLimited', { seconds: err.retryAfterSeconds }));
       } else {
         setError(
           err instanceof Error ? err.message : t('aiAdjust.unexpectedError'),
