@@ -223,6 +223,12 @@ export function AIAdjustDialog({
               {t('aiAdjust.scopeDescription')}
             </FieldDescription>
             <Select
+              items={(Object.keys(AI_ADJUST_SCOPE_KEYS) as AIAdjustScope[]).map(
+                (value) => ({
+                  value,
+                  label: t(AI_ADJUST_SCOPE_KEYS[value]),
+                }),
+              )}
               value={scope}
               onValueChange={(value) => value && setScope(value)}
             >

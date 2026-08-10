@@ -128,7 +128,7 @@ export function EditorSidebar({
       )}
     >
       <div className="flex-1 min-h-0">
-        <ScrollArea className="h-full px-2">
+        <ScrollArea key={activeTab} className="h-full px-2">
           <form
             onSubmit={(e) => e.preventDefault()}
             className="space-y-6 pt-4 pb-6"
