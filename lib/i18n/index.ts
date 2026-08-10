@@ -82,16 +82,25 @@ export function interpolate(
   );
 }
 
+function lookup(dictionary: Dictionary, key: string): string | undefined {
+  let value: unknown = dictionary;
+  for (const part of key.split('.')) {
+    value = (value as Record<string, unknown> | undefined)?.[part];
+    if (value === undefined) break;
+  }
+  return typeof value === 'string' ? value : undefined;
+}
+
 export function translate(
   lang: Language | ResumeLanguage,
   key: TranslationKey,
   params?: Record<string, string | number>,
 ): string {
   const dictionary = DICTIONARIES[lang] ?? en;
-  let value: unknown = dictionary;
-  for (const part of key.split('.')) {
-    value = (value as Record<string, unknown>)?.[part];
-  }
-  if (typeof value !== 'string') return key;
+  // English is the source of truth: if the active language is missing a key
+  // (dictionary drift), fall back to the English string instead of leaking a
+  // bare key into the UI.
+  const value = lookup(dictionary, key) ?? lookup(en, key);
+  if (value === undefined) return key;
   return interpolate(value, params);
 }

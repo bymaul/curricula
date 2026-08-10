@@ -7,6 +7,7 @@ import { CVImportPreviewDialog } from '@/components/import/CVImportPreviewDialog
 import { useCVAutoSave } from '@/hooks/useCVAutoSave';
 import { useCVImportExport } from '@/hooks/useCVImportExport';
 import { useCVPrint } from '@/hooks/useCVPrint';
+import { useKeyboardShortcuts } from '@/hooks/useKeyboardShortcuts';
 import { useMediaQuery } from '@/hooks/useMediaQuery';
 import { useShareLinkImport } from '@/hooks/useShareLinkImport';
 import { CVData, cvSchema, initialCVState } from '@/lib/schema';
@@ -74,13 +75,21 @@ export default function Home() {
     (state) => state.clearPendingImport,
   );
 
-  const { mounted, cvData, saveStatus, lastSavedAt } = useCVAutoSave(methods);
+  const { mounted, cvData, saveStatus, lastSavedAt, saveNow } =
+    useCVAutoSave(methods);
   const { pdfInputRef, handleImportPDF } = useCVImportExport();
   const { printRef, handlePrintClick } = useCVPrint(cvData, methods);
   useShareLinkImport();
+  const undo = useResumeStore((state) => state.undo);
+  const redo = useResumeStore((state) => state.redo);
+  useKeyboardShortcuts({
+    onUndo: undo,
+    onRedo: redo,
+    onSave: saveNow,
+    onPrint: handlePrintClick,
+  });
 
   const isLargeScreen = useMediaQuery(DESKTOP_MEDIA_QUERY);
-  const isPreviewVisible = isLargeScreen || mobileView === 'preview';
   const activeResume = useResumeStore((state) =>
     state.resumes.find((r) => r.id === state.activeId),
   );
@@ -123,7 +132,6 @@ export default function Home() {
             language={activeResume?.language}
             photo={activeResume?.photo}
             templateId={activeResume?.templateId}
-            isVisible={isPreviewVisible}
             mobileActive={mobileView === 'preview'}
             onSectionClick={handlePreviewSectionClick}
           />

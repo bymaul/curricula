@@ -464,19 +464,23 @@ describe('useResumeStore language, photo & template', () => {
     expect(resume.data.name).toBe('Grace Hopper');
   });
 
-  it('sets the resume language without creating history', () => {
+  it('records the resume language in history and undo restores it', () => {
     getState().createResume();
     const id = activeId();
-    const historyBefore = getHistory().entries;
 
     getState().setResumeLanguage(id, 'id');
 
     expect(activeResume().language).toBe('id');
-    expect(activeResume().updatedAt).toBeGreaterThan(0);
-    expect(getHistory().entries).toBe(historyBefore);
+    expect(getHistory().entries).toHaveLength(2);
+
+    getState().undo();
+    expect(activeResume().language).toBe('en');
+
+    getState().redo();
+    expect(activeResume().language).toBe('id');
   });
 
-  it('sets the resume photo without creating history', () => {
+  it('records the resume photo in history and undo restores it', () => {
     getState().createResume();
     const id = activeId();
     const photo = 'data:image/webp;base64,AAAA';
@@ -484,19 +488,50 @@ describe('useResumeStore language, photo & template', () => {
     getState().setResumePhoto(id, photo);
 
     expect(activeResume().photo).toBe(photo);
-    expect(getHistory().entries).toHaveLength(1);
+    expect(getHistory().entries).toHaveLength(2);
+
+    getState().undo();
+    expect(activeResume().photo).toBe('');
+    expect(usePhotoStore.getState().photos[id]).toBe('');
+
+    getState().redo();
+    expect(activeResume().photo).toBe(photo);
+    expect(usePhotoStore.getState().photos[id]).toBe(photo);
   });
 
-  it('sets the resume template without creating history', () => {
+  it('records the resume template in history and undo restores it', () => {
     getState().createResume();
     const id = activeId();
-    const historyBefore = getHistory().entries;
 
     getState().setResumeTemplate(id, 'modern');
 
     expect(activeResume().templateId).toBe('modern');
-    expect(activeResume().updatedAt).toBeGreaterThan(0);
-    expect(getHistory().entries).toBe(historyBefore);
+    expect(getHistory().entries).toHaveLength(2);
+
+    getState().undo();
+    expect(activeResume().templateId).toBe('harvard');
+
+    getState().redo();
+    expect(activeResume().templateId).toBe('modern');
+  });
+
+  it('records renames in history and undo restores the previous title', () => {
+    getState().createResume();
+    const id = activeId();
+
+    getState().renameResume(id, 'My Resume');
+
+    expect(activeResume().title).toBe('My Resume');
+    expect(activeResume().autoTitle).toBe(false);
+    expect(getHistory().entries).toHaveLength(2);
+
+    getState().undo();
+    expect(activeResume().title).toBe('Untitled CV');
+    expect(activeResume().autoTitle).toBe(true);
+
+    getState().redo();
+    expect(activeResume().title).toBe('My Resume');
+    expect(activeResume().autoTitle).toBe(false);
   });
 
   it('does not rewrite the resume when the value is unchanged', () => {
