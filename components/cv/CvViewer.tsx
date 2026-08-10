@@ -1,19 +1,13 @@
 'use client';
 
 import { useCallback, useEffect, useState } from 'react';
-import { HarvardTemplate } from '@/components/resume/HarvardTemplate';
-import { ModernTemplate } from '@/components/resume/ModernTemplate';
+import { TEMPLATE_COMPONENTS } from '@/components/resume/registry';
 import { Button } from '@/components/ui/button';
 import { TranslationKey, translate } from '@/lib/i18n';
 import { ResumeLanguage } from '@/lib/i18n/languages';
 import { PAGE_WIDTH_PX } from '@/lib/pagination';
 import { matchShareHash, parseSharePayload, ShareResult } from '@/lib/share';
 import { Loader2, Pencil, Printer, TriangleAlert } from 'lucide-react';
-
-const TEMPLATE_COMPONENTS = {
-  harvard: HarvardTemplate,
-  modern: ModernTemplate,
-} as const;
 
 type ViewState =
   | { status: 'loading' }

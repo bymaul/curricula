@@ -27,6 +27,9 @@ const id: Dictionary = {
     modern: {
       name: 'Modern',
     },
+    minimal: {
+      name: 'Minimal',
+    },
   },
   cvViewer: {
     title: 'CV',
