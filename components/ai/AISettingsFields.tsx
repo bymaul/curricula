@@ -54,7 +54,11 @@ export function AISettingsFields({
       <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
         <Field>
           <FieldLabel>{t('aiSettings.providerLabel')}</FieldLabel>
-          <Select value={provider} onValueChange={onProviderChange}>
+          <Select
+            items={AI_PROVIDERS}
+            value={provider}
+            onValueChange={onProviderChange}
+          >
             <SelectTrigger className="w-full">
               <SelectValue />
             </SelectTrigger>

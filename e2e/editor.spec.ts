@@ -112,6 +112,72 @@ test('switches templates and updates the preview', async ({
   }
 });
 
+test('shows select labels in the trigger instead of raw values', async ({
+  page,
+}) => {
+  await freshEditor(page);
+
+  const languageSelect = page
+    .getByRole('combobox')
+    .filter({ hasText: 'English' });
+  const templateSelect = page
+    .getByRole('combobox')
+    .filter({ hasText: 'Harvard' });
+
+  await expect(languageSelect.locator('[data-slot="select-value"]')).toHaveText(
+    'English',
+  );
+  await expect(templateSelect.locator('[data-slot="select-value"]')).toHaveText(
+    'Harvard',
+  );
+
+  // The trigger reflects the newly selected label.
+  await languageSelect.click();
+  await page.getByRole('option', { name: 'Bahasa Indonesia' }).click();
+  await expect(
+    page
+      .getByRole('combobox')
+      .filter({ hasText: 'Bahasa Indonesia' })
+      .locator('[data-slot="select-value"]'),
+  ).toHaveText('Bahasa Indonesia');
+});
+
+test('resets the form scroll when switching tabs', async ({ page }) => {
+  await freshEditor(page);
+
+  await page.getByRole('button', { name: 'Experience', exact: true }).click();
+  await page
+    .getByRole('button', { name: 'Add New Experience', exact: true })
+    .click();
+  await page
+    .getByRole('button', { name: 'Add New Experience', exact: true })
+    .click();
+
+  // Scroll the form to the bottom so the top of the next tab is out of view.
+  const formViewport = page
+    .locator('section [data-slot="scroll-area-viewport"]')
+    .first();
+  await formViewport.evaluate((el) => {
+    el.scrollTop = el.scrollHeight;
+  });
+  await expect
+    .poll(async () => formViewport.evaluate((el) => el.scrollTop))
+    .toBeGreaterThan(0);
+
+  await page.getByRole('button', { name: 'Personal', exact: true }).click();
+
+  // The form scroll resets to the top instead of persisting the previous
+  // tab's position: the last field (summary) is no longer in view.
+  await expect
+    .poll(async () => formViewport.evaluate((el) => el.scrollTop))
+    .toBe(0);
+  await expect(
+    page.getByPlaceholder(
+      'A brief overview of your professional background, key achievements, and core strengths...',
+    ),
+  ).not.toBeInViewport();
+});
+
 test('clicking a preview section focuses its tab', async ({
   page,
   isMobile,

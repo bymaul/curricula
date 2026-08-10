@@ -173,6 +173,7 @@ export const PersonalForm = () => {
                 {t('personalDetails.resumeLanguageLabel')}
               </FieldLabel>
               <Select
+                items={UI_LANGUAGES}
                 value={language}
                 onValueChange={(value) => {
                   if (activeId && (value === 'en' || value === 'id')) {
@@ -199,6 +200,10 @@ export const PersonalForm = () => {
             <Field className="sm:col-span-2">
               <FieldLabel>{t('personalDetails.templateLabel')}</FieldLabel>
               <Select
+                items={TEMPLATES.map((template) => ({
+                  value: template.id,
+                  label: t(`templates.${template.id}.name`),
+                }))}
                 value={templateId}
                 onValueChange={(value) => {
                   const template = value as TemplateId;
