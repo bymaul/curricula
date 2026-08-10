@@ -25,6 +25,9 @@ const en = {
     modern: {
       name: 'Modern',
     },
+    minimal: {
+      name: 'Minimal',
+    },
   },
   cvViewer: {
     title: 'CV',

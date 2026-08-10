@@ -1,6 +1,7 @@
 import type { ForwardRefExoticComponent, RefAttributes } from 'react';
 import type { TemplateId } from '@/lib/templates';
 import { HarvardTemplate } from './HarvardTemplate';
+import { MinimalTemplate } from './MinimalTemplate';
 import { ModernTemplate } from './ModernTemplate';
 import type { TemplateProps } from './shared';
 
@@ -16,4 +17,5 @@ export const TEMPLATE_COMPONENTS: Record<
 > = {
   harvard: HarvardTemplate,
   modern: ModernTemplate,
+  minimal: MinimalTemplate,
 };

@@ -132,6 +132,7 @@ export function ResumePreview({
   return (
     <section
       ref={setPanelRef}
+      data-template-id={templateId}
       className={cn(
         'flex-1 w-full bg-muted/10 border border-border rounded-xl shadow-inner flex-col h-full relative overflow-hidden touch-pan-x touch-pan-y print:border-none print:shadow-none print:bg-transparent print:overflow-visible',
         mobileActive ? 'flex' : 'hidden',
