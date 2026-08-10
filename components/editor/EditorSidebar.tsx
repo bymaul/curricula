@@ -198,6 +198,7 @@ export function EditorSidebar({
         <div className="flex items-center gap-1">
           <TooltipIconButton
             label={t('editor.undo')}
+            aria-keyshortcuts="Control+z Meta+z"
             onClick={undo}
             disabled={!canUndo}
           >
@@ -206,6 +207,7 @@ export function EditorSidebar({
 
           <TooltipIconButton
             label={t('editor.redo')}
+            aria-keyshortcuts="Control+Shift+z Control+y Meta+Shift+z Meta+y"
             onClick={redo}
             disabled={!canRedo}
           >

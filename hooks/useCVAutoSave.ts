@@ -1,6 +1,7 @@
 import { CVData } from '@/lib/schema';
 import { useResumeStore } from '@/store/useResumeStore';
 import {
+  useCallback,
   useEffect,
   useMemo,
   useRef,
@@ -76,5 +77,21 @@ export function useCVAutoSave(methods: UseFormReturn<CVData>) {
     return () => clearTimeout(timer);
   }, [saveStatus, snapshot, activeId, cvData, revision, updateResumeData]);
 
-  return { mounted, cvData, saveStatus, lastSavedAt };
+  // Manual save (Ctrl/Cmd+S): flush any pending changes immediately instead
+  // of waiting out the debounce. A no-op when the store is already in sync.
+  const saveNow = useCallback(() => {
+    if (!activeId) return;
+    const stored = useResumeStore
+      .getState()
+      .resumes.find((r) => r.id === activeId)?.data;
+    if (stored && JSON.stringify(stored) === snapshot) {
+      setSaveStatus('saved');
+      return;
+    }
+    updateResumeData(activeId, cvData);
+    setLastSavedAt(Date.now());
+    setSaveStatus('saved');
+  }, [activeId, cvData, snapshot, updateResumeData]);
+
+  return { mounted, cvData, saveStatus, lastSavedAt, saveNow };
 }

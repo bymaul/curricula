@@ -27,11 +27,11 @@ describe('useUIStore zoom scale', () => {
     expect(useUIStore.getState().scale).toBeNull();
   });
 
-  it('does not persist scale to localStorage', () => {
+  it('persists the scale to localStorage', () => {
     useUIStore.getState().setScale(0.75);
     useUIStore.getState().setActiveTab('experience');
     const stored = JSON.parse(localStorage.getItem(STORAGE_KEY) ?? '{}');
-    expect(stored.state.scale).toBeUndefined();
+    expect(stored.state.scale).toBe(0.75);
     expect(stored.state.activeTab).toBe('experience');
   });
 });

@@ -33,12 +33,16 @@ export const useUIStore = create<UIState>()(
       name: 'curricula-ui-state',
       storage:
         createQuotaAwareStorage<
-          Pick<UIState, 'activeTab' | 'aiProvider' | 'aiModel' | 'uiLanguage'>
+          Pick<
+            UIState,
+            'activeTab' | 'aiProvider' | 'aiModel' | 'scale' | 'uiLanguage'
+          >
         >(),
       partialize: (state) => ({
         activeTab: state.activeTab,
         aiProvider: state.aiProvider,
         aiModel: state.aiModel,
+        scale: state.scale,
         uiLanguage: state.uiLanguage,
       }),
     },

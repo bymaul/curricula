@@ -1,12 +1,16 @@
 'use client';
 
-import { HarvardTemplate } from '@/components/resume/HarvardTemplate';
-import { ModernTemplate } from '@/components/resume/ModernTemplate';
 import { useI18n } from '@/components/I18nProvider';
+import { TEMPLATE_COMPONENTS } from '@/components/resume/registry';
 import { ScrollArea, ScrollBar } from '@/components/ui/scroll-area';
+import { useMediaQuery } from '@/hooks/useMediaQuery';
 import { usePageScale } from '@/hooks/usePageScale';
 import { usePinchZoom } from '@/hooks/usePinchZoom';
-import { getSectionIdFromTab, SectionId } from '@/lib/consts';
+import {
+  DESKTOP_MEDIA_QUERY,
+  getSectionIdFromTab,
+  SectionId,
+} from '@/lib/consts';
 import {
   PAGE_HEIGHT_PX,
   PAGE_WIDTH_PX,
@@ -25,11 +29,6 @@ const GUTTER_PX = 32;
 const FRAME_WIDTH_PX = PAGE_WIDTH_PX + GUTTER_PX * 2;
 const SCROLL_OFFSET_PX = 16;
 
-const TEMPLATE_COMPONENTS = {
-  harvard: HarvardTemplate,
-  modern: ModernTemplate,
-} as const;
-
 interface ResumePreviewProps {
   cvData: CVData;
   printRef: RefObject<HTMLDivElement | null>;
@@ -38,7 +37,7 @@ interface ResumePreviewProps {
   language?: ResumeLanguage;
   photo?: string;
   templateId?: TemplateId;
-  isVisible: boolean;
+  /** Whether the mobile edit/preview toggle shows the preview pane. */
   mobileActive: boolean;
   onSectionClick?: (sectionId: SectionId) => void;
 }
@@ -51,10 +50,13 @@ export function ResumePreview({
   language,
   photo,
   templateId = 'harvard',
-  isVisible,
   mobileActive,
   onSectionClick,
 }: ResumePreviewProps) {
+  // Visible on desktop always, on mobile only when the preview toggle is on.
+  const isLargeScreen = useMediaQuery(DESKTOP_MEDIA_QUERY);
+  const isVisible = isLargeScreen || mobileActive;
+
   const {
     panelRef,
     frameRef,
