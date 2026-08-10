@@ -154,3 +154,26 @@ test('toggles the preview pane on mobile', async ({ page, isMobile }) => {
   await page.getByRole('tab', { name: 'Edit' }).click();
   await expect(preview(page)).toBeHidden();
 });
+
+test('print stylesheet hides editor chrome and keeps the CV', async ({
+  page,
+}) => {
+  await freshEditor(page);
+  await nameInput(page).fill('Grace Hopper');
+
+  // Emulate print media so Tailwind's print: variants apply.
+  await page.emulateMedia({ media: 'print' });
+
+  // Editor chrome is hidden: app header, sidebar, zoom controls, page badge.
+  await expect(page.locator('header')).toBeHidden();
+  await expect(page.locator('aside')).toBeHidden();
+  await expect(page.getByLabel('Zoom in')).toBeHidden();
+  await expect(page.getByLabel('Resume is 1 page long')).toBeHidden();
+
+  // The CV page itself stays visible.
+  await expect(preview(page)).toBeVisible();
+  await expect(preview(page)).toContainText('Grace Hopper');
+
+  // Back to screen media so the next test in the worker is unaffected.
+  await page.emulateMedia({ media: 'screen' });
+});
