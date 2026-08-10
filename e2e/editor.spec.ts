@@ -177,3 +177,35 @@ test('print stylesheet hides editor chrome and keeps the CV', async ({
   // Back to screen media so the next test in the worker is unaffected.
   await page.emulateMedia({ media: 'screen' });
 });
+
+test('service worker registers without CSP violations', async ({ page }) => {
+  // Attach before any navigation so violations during load are captured.
+  const cspViolations: string[] = [];
+  page.on('console', (msg) => {
+    if (msg.type() === 'error' && /Content Security Policy/i.test(msg.text())) {
+      cspViolations.push(msg.text());
+    }
+  });
+
+  await freshEditor(page);
+
+  // The serwist worker registers asynchronously; wait until it activates.
+  await expect
+    .poll(async () =>
+      page.evaluate(async () => {
+        if (!('serviceWorker' in navigator)) return 'unsupported';
+        const reg = await navigator.serviceWorker.getRegistration();
+        if (!reg) return 'none';
+        if (reg.active) return 'active';
+        if (reg.installing || reg.waiting) return 'pending';
+        return 'inactive';
+      }),
+    )
+    .toBe('active');
+
+  // Reload so a full navigation happens while the worker is in control,
+  // then confirm the CSP never blocked a resource.
+  await page.reload();
+  await expect(nameInput(page)).toBeVisible();
+  expect(cspViolations).toEqual([]);
+});
