@@ -69,10 +69,13 @@ export const imageSchema = z
   .refine((img) => img.data.length <= MAX_CV_IMAGE_BASE64_CHARS, {
     message: 'Image too large',
   })
-  .refine((img) => {
-    const bytes = decodeBase64(img.data);
-    return bytes !== null && hasImageSignature(bytes, img.mimeType);
-  }, { message: 'Invalid image data' });
+  .refine(
+    (img) => {
+      const bytes = decodeBase64(img.data);
+      return bytes !== null && hasImageSignature(bytes, img.mimeType);
+    },
+    { message: 'Invalid image data' },
+  );
 
 const providerValues = AI_PROVIDERS.map((provider) => provider.value) as [
   AIProvider,
@@ -155,7 +158,10 @@ export async function handleAIRequest<Schema extends z.ZodType<ProviderConfig>>(
 
     const { text, tooLarge } = await readBody(req);
     if (tooLarge) {
-      return Response.json({ error: 'Request body too large' }, { status: 413 });
+      return Response.json(
+        { error: 'Request body too large' },
+        { status: 413 },
+      );
     }
 
     let body: unknown;
