@@ -42,6 +42,7 @@ import { MAX_CV_IMAGE_BASE64_CHARS } from '@/lib/cvParsing';
 import {
   handleAIRequest,
   imageSchema,
+  MAX_REQUEST_BODY_CHARS,
   providerConfigSchema,
 } from '@/lib/api-request';
 
@@ -111,6 +112,51 @@ describe('handleAIRequest', () => {
 
     const body = await res.json();
     expect(body).toEqual({ error: 'Invalid payload' });
+  });
+
+  it('rejects malformed JSON with 400', async () => {
+    const req = new Request('http://test/api', {
+      method: 'POST',
+      body: 'not json',
+    });
+
+    const res = await handleAIRequest(req, testSchema, vi.fn());
+
+    expect(res.status).toBe(400);
+    await expect(res.json()).resolves.toEqual({ error: 'Invalid payload' });
+  });
+
+  it('rejects oversized bodies via content-length', async () => {
+    const res = await handleAIRequest(
+      new Request('http://test/api', {
+        method: 'POST',
+        headers: { 'content-length': String(MAX_REQUEST_BODY_CHARS + 1) },
+        body: '{}',
+      }),
+      testSchema,
+      vi.fn(async () => new Response('unreachable')),
+    );
+
+    expect(res.status).toBe(413);
+    await expect(res.json()).resolves.toEqual({
+      error: 'Request body too large',
+    });
+  });
+
+  it('rejects oversized bodies by actual size', async () => {
+    const res = await handleAIRequest(
+      new Request('http://test/api', {
+        method: 'POST',
+        body: JSON.stringify({ ping: 'x'.repeat(MAX_REQUEST_BODY_CHARS + 1) }),
+      }),
+      testSchema,
+      vi.fn(async () => new Response('unreachable')),
+    );
+
+    expect(res.status).toBe(413);
+    await expect(res.json()).resolves.toEqual({
+      error: 'Request body too large',
+    });
   });
 
   it('rejects cross-origin requests with 403', async () => {
@@ -293,15 +339,29 @@ describe('handleAIRequest', () => {
 });
 
 describe('imageSchema', () => {
-  it('accepts supported mime types', () => {
+  const jpegData = Buffer.from([0xff, 0xd8, 0xff, 0xe0, 0x00, 0x10]).toString(
+    'base64',
+  );
+  const pngData = Buffer.from([
+    0x89, 0x50, 0x4e, 0x47, 0x0d, 0x0a, 0x1a, 0x0a, 0x00, 0x00, 0x00, 0x0d,
+  ]).toString('base64');
+  const webpData = Buffer.from(
+    Array.from(Buffer.from('RIFF')).concat(
+      [0, 0, 0, 0],
+      Array.from(Buffer.from('WEBP')),
+      [0, 0, 0, 0],
+    ),
+  ).toString('base64');
+
+  it('accepts valid JPEG, PNG, and WebP payloads', () => {
     expect(
-      imageSchema.safeParse({ data: 'abc', mimeType: 'image/png' }).success,
+      imageSchema.safeParse({ data: jpegData, mimeType: 'image/jpeg' }).success,
     ).toBe(true);
     expect(
-      imageSchema.safeParse({ data: 'abc', mimeType: 'image/jpeg' }).success,
+      imageSchema.safeParse({ data: pngData, mimeType: 'image/png' }).success,
     ).toBe(true);
     expect(
-      imageSchema.safeParse({ data: 'abc', mimeType: 'image/webp' }).success,
+      imageSchema.safeParse({ data: webpData, mimeType: 'image/webp' }).success,
     ).toBe(true);
   });
 
@@ -313,8 +373,30 @@ describe('imageSchema', () => {
 
   it('rejects unsupported mime types', () => {
     expect(
-      imageSchema.safeParse({ data: 'abc', mimeType: 'image/gif' }).success,
+      imageSchema.safeParse({ data: pngData, mimeType: 'image/gif' }).success,
     ).toBe(false);
+  });
+
+  it('rejects data whose signature does not match the mime type', () => {
+    const result = imageSchema.safeParse({
+      data: jpegData,
+      mimeType: 'image/png',
+    });
+    expect(result.success).toBe(false);
+    if (!result.success) {
+      expect(JSON.stringify(result.error)).toContain('Invalid image data');
+    }
+  });
+
+  it('rejects data that is not valid base64', () => {
+    const result = imageSchema.safeParse({
+      data: 'not base64!!!',
+      mimeType: 'image/png',
+    });
+    expect(result.success).toBe(false);
+    if (!result.success) {
+      expect(JSON.stringify(result.error)).toContain('Invalid image data');
+    }
   });
 
   it('rejects oversized images', () => {
