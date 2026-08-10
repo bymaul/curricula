@@ -35,10 +35,23 @@ describe('translate', () => {
     expect(translate('es' as Language, 'tabs.personal')).toBe('Personal');
   });
 
-  it('returns the key itself when missing', () => {
+  it('returns the key itself when missing everywhere', () => {
     expect(translate('en', 'missing.key' as TranslationKey)).toBe(
       'missing.key',
     );
+  });
+
+  it('falls back to the English string when the active language lacks a key', () => {
+    const dict = DICTIONARIES.id;
+    const original = dict.brand.name;
+    // Simulate dictionary drift: a key present in English but missing in id.
+    // @ts-expect-error — mutation only for the test
+    delete dict.brand.name;
+    try {
+      expect(translate('id', 'brand.name')).toBe(original);
+    } finally {
+      dict.brand.name = original;
+    }
   });
 });
 

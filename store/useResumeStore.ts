@@ -24,6 +24,13 @@ export interface HistorySnapshot {
   data: CVData;
   sectionOrder: SectionId[];
   hiddenSections: SectionId[];
+  // Metadata is undoable too: rename, language, photo, and template changes
+  // are captured so undo/redo restores them alongside the CV data.
+  title: string;
+  autoTitle: boolean;
+  language: ResumeLanguage;
+  photo: string;
+  templateId: TemplateId;
   at: number;
 }
 
@@ -155,43 +162,53 @@ function seedResumes(): ResumeRecord[] {
   return [makeResume()];
 }
 
-function snapshot(
-  next: Pick<HistorySnapshot, 'data' | 'sectionOrder' | 'hiddenSections'>,
-  at: number,
-): HistorySnapshot {
+/** Mutable resume state captured by a history entry (everything but `at`). */
+type HistoryState = Omit<HistorySnapshot, 'at'>;
+
+function historyState(record: ResumeRecord): HistoryState {
   return {
     // Deep-copy the CV data so history entries never share mutable references
     // with the live record. Any future in-place mutation of `record.data`
     // would otherwise corrupt every snapshot simultaneously.
-    data: structuredClone(next.data),
-    sectionOrder: [...next.sectionOrder],
-    hiddenSections: [...next.hiddenSections],
-    at,
+    data: structuredClone(record.data),
+    sectionOrder: [...record.sectionOrder],
+    hiddenSections: [...record.hiddenSections],
+    title: record.title,
+    autoTitle: record.autoTitle,
+    language: record.language,
+    photo: record.photo,
+    templateId: record.templateId,
   };
 }
 
+function snapshot(state: HistoryState, at: number): HistorySnapshot {
+  return { ...state, at };
+}
+
 function snapshotFromRecord(record: ResumeRecord): HistorySnapshot {
-  return snapshot(record, now());
+  return snapshot(historyState(record), now());
 }
 
 function seedHistory(record: ResumeRecord): ResumeHistory {
   return { entries: [snapshotFromRecord(record)], cursor: 0 };
 }
 
-function nextStateEqual(
-  a: Pick<HistorySnapshot, 'data' | 'sectionOrder' | 'hiddenSections'>,
-  b: Pick<HistorySnapshot, 'data' | 'sectionOrder' | 'hiddenSections'>,
-): boolean {
+function nextStateEqual(a: HistoryState, b: HistoryState): boolean {
   return (
     JSON.stringify(a.data) === JSON.stringify(b.data) &&
     JSON.stringify(a.sectionOrder) === JSON.stringify(b.sectionOrder) &&
-    JSON.stringify(a.hiddenSections) === JSON.stringify(b.hiddenSections)
+    JSON.stringify(a.hiddenSections) === JSON.stringify(b.hiddenSections) &&
+    a.title === b.title &&
+    a.autoTitle === b.autoTitle &&
+    a.language === b.language &&
+    a.photo === b.photo &&
+    a.templateId === b.templateId
   );
 }
 
 function commitHistory(
   history: ResumeHistory | undefined,
-  next: Pick<HistorySnapshot, 'data' | 'sectionOrder' | 'hiddenSections'>,
+  next: HistoryState,
   at: number,
 ): ResumeHistory {
   const truncated = !!(history && history.cursor < history.entries.length - 1);
@@ -236,11 +253,19 @@ function applySnapshot(
     data: snapshot.data,
     sectionOrder: snapshot.sectionOrder,
     hiddenSections: snapshot.hiddenSections,
+    title: snapshot.title,
+    autoTitle: snapshot.autoTitle,
+    language: snapshot.language,
+    photo: snapshot.photo,
+    templateId: snapshot.templateId,
     updatedAt: now(),
-    title: record.autoTitle
-      ? snapshot.data.name?.trim() || 'Untitled CV'
-      : record.title,
   };
+  // Photos live in the dedicated photo store, so an undo that restores a
+  // previous photo must mirror the change there too or a later reload would
+  // reattach the wrong image.
+  if (snapshot.photo !== record.photo) {
+    usePhotoStore.getState().setPhoto(id, snapshot.photo);
+  }
   return {
     resumes: state.resumes.map((r) => (r.id === id ? updated : r)),
     histories: { ...state.histories, [id]: { ...history, cursor: index } },
@@ -268,13 +293,43 @@ function commitActiveSectionChange(
       ...state.histories,
       [activeId]: commitHistory(
         state.histories[activeId],
-        {
-          data: record.data,
-          sectionOrder: next.sectionOrder,
-          hiddenSections: next.hiddenSections,
-        },
+        historyState(next),
         now(),
       ),
+    },
+  };
+}
+
+/**
+ * Applies a metadata-only change (rename, language, photo, template) and
+ * records it in history so undo/redo restores it. No-ops when the patch does
+ * not actually change anything.
+ */
+function commitMetadataChange(
+  state: ResumeState,
+  id: string,
+  patch: Partial<
+    Pick<
+      ResumeRecord,
+      'title' | 'autoTitle' | 'language' | 'photo' | 'templateId'
+    >
+  >,
+): Partial<ResumeState> {
+  const record = state.resumes.find((r) => r.id === id);
+  if (!record) return {};
+  const next: ResumeRecord = { ...record, ...patch };
+  const unchanged =
+    next.title === record.title &&
+    next.autoTitle === record.autoTitle &&
+    next.language === record.language &&
+    next.photo === record.photo &&
+    next.templateId === record.templateId;
+  if (unchanged) return {};
+  return {
+    resumes: state.resumes.map((r) => (r.id === id ? next : r)),
+    histories: {
+      ...state.histories,
+      [id]: commitHistory(state.histories[id], historyState(next), now()),
     },
   };
 }
@@ -337,15 +392,15 @@ export const useResumeStore = create<ResumeState>()(
         });
       },
 
-      renameResume: (id, title) => {
-        set((state) => ({
-          resumes: state.resumes.map((r) =>
-            r.id === id
-              ? { ...r, title: title.trim() || r.title, autoTitle: false }
-              : r,
-          ),
-        }));
-      },
+      renameResume: (id, title) =>
+        set((state) => {
+          const record = state.resumes.find((r) => r.id === id);
+          if (!record) return {};
+          return commitMetadataChange(state, id, {
+            title: title.trim() || record.title,
+            autoTitle: false,
+          });
+        }),
 
       setActiveResume: (id) =>
         set((state) => {
@@ -376,33 +431,15 @@ export const useResumeStore = create<ResumeState>()(
         }),
 
       setResumeLanguage: (id, language) =>
-        set((state) => ({
-          resumes: state.resumes.map((r) =>
-            r.id === id && r.language !== language
-              ? { ...r, language, updatedAt: now() }
-              : r,
-          ),
-        })),
+        set((state) => commitMetadataChange(state, id, { language })),
 
       setResumePhoto: (id, photo) => {
         usePhotoStore.getState().setPhoto(id, photo);
-        set((state) => ({
-          resumes: state.resumes.map((r) =>
-            r.id === id && r.photo !== photo
-              ? { ...r, photo, updatedAt: now() }
-              : r,
-          ),
-        }));
+        set((state) => commitMetadataChange(state, id, { photo }));
       },
 
       setResumeTemplate: (id, templateId) =>
-        set((state) => ({
-          resumes: state.resumes.map((r) =>
-            r.id === id && r.templateId !== templateId
-              ? { ...r, templateId, updatedAt: now() }
-              : r,
-          ),
-        })),
+        set((state) => commitMetadataChange(state, id, { templateId })),
 
       restoreBackup: (resumes, activeId) =>
         set((state) => {
@@ -451,11 +488,7 @@ export const useResumeStore = create<ResumeState>()(
               ...state.histories,
               [id]: commitHistory(
                 state.histories[id],
-                {
-                  data,
-                  sectionOrder: record.sectionOrder,
-                  hiddenSections: record.hiddenSections,
-                },
+                historyState(updated),
                 now(),
               ),
             },
