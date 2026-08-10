@@ -4,6 +4,7 @@ import React from 'react';
 import { SectionId } from '@/lib/consts';
 import { TranslationKey } from '@/lib/i18n';
 import { ResumeLanguage } from '@/lib/i18n/languages';
+import { PRINT_CSS } from '@/lib/print';
 import { CVData } from '@/lib/schema';
 
 export interface TemplateProps {
@@ -85,17 +86,7 @@ export const formatUrl = (url: string) => {
 export function PrintStyle() {
   return (
     <style type="text/css" media="print">
-      {`
-          @page {
-            size: A4;
-            margin: 0mm;
-          }
-
-          thead { display: table-header-group; }
-          tfoot { display: table-footer-group; }
-
-          div { background-image: none !important; }
-        `}
+      {PRINT_CSS}
     </style>
   );
 }
