@@ -6,6 +6,7 @@ import {
 import { stripInvisibleChars } from '@/lib/cleanText';
 import {
   MAX_CV_IMAGES,
+  MAX_CV_TEXT_CHARS,
   normalizeCVText,
   parseCVWithRepair,
 } from '@/lib/cvParsing';
@@ -16,7 +17,7 @@ export const maxDuration = 60;
 
 const requestSchema = providerConfigSchema
   .extend({
-    cvText: z.string().optional(),
+    cvText: z.string().max(MAX_CV_TEXT_CHARS).optional(),
     images: z.array(imageSchema).max(MAX_CV_IMAGES).optional(),
   })
   .refine((body) => !!body.cvText?.trim() || (body.images?.length ?? 0) > 0, {
