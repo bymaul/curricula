@@ -1,6 +1,7 @@
 'use client';
 
 import { useCallback, useEffect, useState } from 'react';
+import { useRouter } from 'next/navigation';
 import { TEMPLATE_COMPONENTS } from '@/components/resume/registry';
 import { Button } from '@/components/ui/button';
 import { TranslationKey, translate } from '@/lib/i18n';
@@ -42,6 +43,7 @@ function useCvViewer(): ViewState {
 
 export function CvViewer() {
   const view = useCvViewer();
+  const router = useRouter();
   const lang: ResumeLanguage =
     view.status === 'ready' ? view.result.language : 'en';
   const t = useCallback(
@@ -72,7 +74,7 @@ export function CvViewer() {
       <div className="flex min-h-dvh flex-col items-center justify-center gap-4 px-4 text-center print:hidden">
         <TriangleAlert className="size-8 text-muted-foreground" />
         <p className="text-sm text-muted-foreground">{t('cvViewer.invalid')}</p>
-        <Button onClick={() => (window.location.href = '/')}>
+        <Button onClick={() => router.push('/')}>
           {t('cvViewer.invalidAction')}
         </Button>
       </div>
@@ -95,9 +97,7 @@ export function CvViewer() {
               <Printer />
               {t('cvViewer.print')}
             </Button>
-            <Button
-              onClick={() => (window.location.href = `/#resume=${payload}`)}
-            >
+            <Button onClick={() => router.push(`/#resume=${payload}`)}>
               <Pencil />
               {t('cvViewer.edit')}
             </Button>

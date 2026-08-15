@@ -9,6 +9,7 @@ export interface AIStatus {
 
 export function useAIStatus(enabled: boolean) {
   const [status, setStatus] = useState<AIStatus | null>(null);
+  const [error, setError] = useState(false);
 
   useEffect(() => {
     if (!enabled) return;
@@ -20,10 +21,16 @@ export function useAIStatus(enabled: boolean) {
         return response.json() as Promise<AIStatus>;
       })
       .then((data) => {
-        if (!cancelled) setStatus(data);
+        if (!cancelled) {
+          setStatus(data);
+          setError(false);
+        }
       })
       .catch(() => {
-        if (!cancelled) setStatus(null);
+        if (!cancelled) {
+          setStatus(null);
+          setError(true);
+        }
       });
 
     return () => {
@@ -31,5 +38,5 @@ export function useAIStatus(enabled: boolean) {
     };
   }, [enabled]);
 
-  return status;
+  return { status, error };
 }

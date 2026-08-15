@@ -23,7 +23,7 @@ export function AISettingsDialog({
   onOpenChange,
 }: AISettingsDialogProps) {
   const settings = useAISettings();
-  const status = useAIStatus(open);
+  const { status, error } = useAIStatus(open);
   const { t } = useI18n();
 
   return (
@@ -38,6 +38,7 @@ export function AISettingsDialog({
             {...settings}
             hasBundledKey={status?.hasBundledKey}
             bundledProvider={status?.provider ?? null}
+            statusError={error}
           />
         </div>
 

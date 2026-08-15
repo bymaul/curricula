@@ -277,6 +277,8 @@ const id: Dictionary = {
     longLinkNote: 'Tautan bisa panjang untuk CV yang detail.',
     opened: 'CV bersama dibuka.',
     openedWithName: 'CV bersama "{name}" dibuka.',
+    invalid:
+      'Tidak dapat membuka tautan berbagi ini. Mungkin rusak atau terpotong.',
     toast: {
       copied: 'Tautan berbagi disalin ke clipboard.',
       copyFailed: 'Tidak dapat menyalin tautan. Pilih secara manual.',
@@ -400,6 +402,8 @@ const id: Dictionary = {
       'Opsional — kosongkan untuk menggunakan kunci gratis bawaan.',
     apiKeyPlaceholder: 'sk-...',
     bundledFallback: 'AI',
+    statusError:
+      'Tidak dapat memeriksa kunci AI bawaan. Periksa koneksi Anda lalu coba lagi.',
   },
   changes: {
     labelSummary: 'Ringkasan',

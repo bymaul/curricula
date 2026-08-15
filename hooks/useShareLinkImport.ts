@@ -13,7 +13,16 @@ export function useShareLinkImport() {
     if (!payload) return;
     let cancelled = false;
     void parseSharePayload(payload).then((result) => {
-      if (cancelled || !result) return;
+      if (cancelled) return;
+      if (!result) {
+        toast.add({ type: 'error', description: t('share.invalid') });
+        window.history.replaceState(
+          null,
+          '',
+          window.location.pathname + window.location.search,
+        );
+        return;
+      }
       const name = result.data.name?.trim();
       useResumeStore.getState().importResumeData(result.data, name, {
         language: result.language,

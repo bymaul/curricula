@@ -21,6 +21,7 @@ interface AISettingsFieldsProps {
   onKeyChange: (value: string) => void;
   hasBundledKey?: boolean;
   bundledProvider?: AIProvider | null;
+  statusError?: boolean;
 }
 
 export function AISettingsFields({
@@ -32,6 +33,7 @@ export function AISettingsFields({
   onKeyChange,
   hasBundledKey,
   bundledProvider = null,
+  statusError = false,
 }: AISettingsFieldsProps) {
   const selectedProvider = AI_PROVIDERS.find((p) => p.value === provider);
   const { t } = useI18n();
@@ -51,6 +53,11 @@ export function AISettingsFields({
 
   return (
     <>
+      {statusError && (
+        <div className="rounded-lg border border-destructive/40 bg-destructive/10 px-3 py-2 text-sm text-destructive">
+          {t('aiSettings.statusError')}
+        </div>
+      )}
       <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
         <Field>
           <FieldLabel>{t('aiSettings.providerLabel')}</FieldLabel>

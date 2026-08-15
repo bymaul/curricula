@@ -57,7 +57,7 @@ export function AIAdjustDialog({
   cvData,
   onApply,
 }: AIAdjustDialogProps) {
-  const { isAdjusting, error, adjustCV } = useAIAdjustCV();
+  const { isAdjusting, error, adjustCV, abort } = useAIAdjustCV();
   const { aiProvider, aiModel } = useUIStore();
   const { t } = useI18n();
 
@@ -107,7 +107,10 @@ export function AIAdjustDialog({
   };
 
   const handleOpenChange = (next: boolean) => {
-    if (!next) resetState();
+    if (!next) {
+      if (isAdjusting) abort();
+      resetState();
+    }
     onOpenChange(next);
   };
 

@@ -174,7 +174,7 @@ export function EditorSidebar({
         <TooltipIconButton
           label={t('editor.reorderSections')}
           onClick={() => setDialog('sections', true)}
-          className="h-full w-12 rounded-none border-l border-border"
+          className="h-full w-12 rounded-none border-0 border-l border-border"
         >
           <ListOrdered className="w-5 h-5" />
         </TooltipIconButton>
