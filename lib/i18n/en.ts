@@ -272,6 +272,8 @@ const en = {
     longLinkNote: 'The link can be long for detailed CVs.',
     opened: 'Opened shared CV.',
     openedWithName: 'Opened shared CV "{name}".',
+    invalid:
+      'Could not open this share link. It may be corrupted or truncated.',
     toast: {
       copied: 'Share link copied to clipboard.',
       copyFailed: 'Could not copy the link. Select it manually.',
@@ -394,6 +396,8 @@ const en = {
       'Optional — leave blank to use the built-in free key.',
     apiKeyPlaceholder: 'sk-...',
     bundledFallback: 'AI',
+    statusError:
+      'Could not check the built-in AI key. Check your connection and try again.',
   },
   changes: {
     labelSummary: 'Summary',

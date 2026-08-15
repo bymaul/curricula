@@ -11,7 +11,7 @@ let pdfjsPromise: Promise<typeof import('pdfjs-dist')> | null = null;
 const MIN_SCANNED_TEXT_CHARS = 150;
 const MAX_SCANNED_PAGES = 5;
 const MAX_SCAN_WIDTH = 1200;
-const PARSE_TIMEOUT_MS = 55_000;
+const PARSE_TIMEOUT_MS = 58_000;
 
 function getPDFJS() {
   if (!pdfjsPromise) {
