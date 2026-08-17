@@ -22,7 +22,14 @@ import { TemplateId } from '@/lib/templates';
 import { cn } from '@/lib/utils';
 import { useUIStore } from '@/store/useUIStore';
 import { FileText } from 'lucide-react';
-import { RefObject, useEffect, useState } from 'react';
+import {
+  RefObject,
+  useCallback,
+  useEffect,
+  useLayoutEffect,
+  useRef,
+  useState,
+} from 'react';
 import { ZoomControls } from './ZoomControls';
 
 const GUTTER_PX = 32;
@@ -73,17 +80,101 @@ export function ResumePreview({
     isVisible,
   });
 
+  const anchorRef = useRef<{
+    docX: number;
+    docY: number;
+    viewX: number;
+    viewY: number;
+  } | null>(null);
+
+  const anchoredZoom = useCallback(
+    (next: number, clientX?: number, clientY?: number) => {
+      const panel = panelRef.current;
+      if (!panel || clientX == null || clientY == null) {
+        zoomTo(next);
+        return;
+      }
+      const viewport = panel.querySelector<HTMLElement>(
+        '[data-slot="scroll-area-viewport"]',
+      );
+      if (!viewport) {
+        zoomTo(next);
+        return;
+      }
+      const rect = viewport.getBoundingClientRect();
+      const vx = clientX - rect.left;
+      const vy = clientY - rect.top;
+      const docX = (viewport.scrollLeft + vx) / scale;
+      const docY = (viewport.scrollTop + vy) / scale;
+      anchorRef.current = { docX, docY, viewX: vx, viewY: vy };
+      zoomTo(next);
+    },
+    [scale, zoomTo, panelRef],
+  );
+
   const { containerRef } = usePinchZoom({
     scale,
     minScale,
     maxScale,
-    onZoomChange: zoomTo,
+    onZoomChange: anchoredZoom,
   });
 
   const setPanelRef = (node: HTMLDivElement | null) => {
     panelRef.current = node;
     containerRef.current = node;
   };
+
+  useLayoutEffect(() => {
+    if (!anchorRef.current) return;
+    const { docX, docY, viewX, viewY } = anchorRef.current;
+    anchorRef.current = null;
+    const panel = panelRef.current;
+    if (!panel) return;
+    const viewport = panel.querySelector<HTMLElement>(
+      '[data-slot="scroll-area-viewport"]',
+    );
+    if (!viewport) return;
+    viewport.scrollLeft = docX * scale - viewX;
+    viewport.scrollTop = docY * scale - viewY;
+  }, [scale, panelRef]);
+
+  const handleZoomIn = useCallback(() => {
+    const panel = panelRef.current;
+    if (!panel) {
+      zoomIn();
+      return;
+    }
+    const viewport = panel.querySelector<HTMLElement>(
+      '[data-slot="scroll-area-viewport"]',
+    );
+    if (!viewport) {
+      zoomIn();
+      return;
+    }
+    const rect = viewport.getBoundingClientRect();
+    const current = scale;
+    const next = Math.min(maxScale, +(current + 0.1).toFixed(2));
+    anchoredZoom(next, rect.left + rect.width / 2, rect.top + rect.height / 2);
+  }, [scale, maxScale, zoomIn, anchoredZoom, panelRef]);
+
+  const handleZoomOut = useCallback(() => {
+    const panel = panelRef.current;
+    if (!panel) {
+      zoomOut();
+      return;
+    }
+    const viewport = panel.querySelector<HTMLElement>(
+      '[data-slot="scroll-area-viewport"]',
+    );
+    if (!viewport) {
+      zoomOut();
+      return;
+    }
+    const rect = viewport.getBoundingClientRect();
+    const current = scale;
+    const next = Math.max(minScale, +(current - 0.1).toFixed(2));
+    anchoredZoom(next, rect.left + rect.width / 2, rect.top + rect.height / 2);
+  }, [scale, minScale, zoomOut, anchoredZoom, panelRef]);
 
   const [pageCount, setPageCount] = useState(1);
 
@@ -143,8 +234,8 @@ export function ResumePreview({
         scale={scale}
         minScale={minScale}
         maxScale={maxScale}
-        onZoomIn={zoomIn}
-        onZoomOut={zoomOut}
+        onZoomIn={handleZoomIn}
+        onZoomOut={handleZoomOut}
         onReset={zoomReset}
       />
 
