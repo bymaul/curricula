@@ -263,7 +263,7 @@ export const HarvardTemplate = forwardRef<HTMLDivElement, TemplateProps>(
               >
                 {/* --- HEADER SECTION --- */}
                 <div
-                  data-section-id="personal"
+                  data-section-id="summary"
                   onClick={onSectionClick ? handleHeaderClick : undefined}
                   onKeyDown={onSectionClick ? handleHeaderKeyDown : undefined}
                   tabIndex={onSectionClick ? 0 : undefined}
