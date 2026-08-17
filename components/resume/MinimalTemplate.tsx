@@ -242,7 +242,7 @@ export const MinimalTemplate = forwardRef<HTMLDivElement, TemplateProps>(
         <div className="px-[1.4cm] pt-[1cm] pb-[1cm]">
           {/* --- HEADER --- */}
           <div
-            data-section-id="personal"
+            data-section-id="summary"
             {...headerClickProps}
             aria-label={
               onSectionClick

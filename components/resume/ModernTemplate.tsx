@@ -302,7 +302,7 @@ export const ModernTemplate = forwardRef<HTMLDivElement, TemplateProps>(
                       <td className="w-[5.5cm] align-top bg-gray-100 px-[0.75cm] pt-[1cm] pb-[1cm]">
                         {/* --- SIDEBAR HEADER --- */}
                         <div
-                          data-section-id="personal"
+                          data-section-id="summary"
                           {...headerClickProps}
                           aria-label={
                             onSectionClick
