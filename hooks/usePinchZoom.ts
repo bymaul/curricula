@@ -6,7 +6,11 @@ interface UsePinchZoomOptions {
   scale: number;
   minScale: number;
   maxScale: number;
-  onZoomChange: (scale: number) => void;
+  onZoomChange: (
+    scale: number,
+    anchorClientX?: number,
+    anchorClientY?: number,
+  ) => void;
 }
 
 export function usePinchZoom<T extends HTMLElement>({
@@ -57,7 +61,12 @@ export function usePinchZoom<T extends HTMLElement>({
         const next =
           startRef.current.scale *
           (distance(e.touches) / startRef.current.distance);
-        optionsRef.current.onZoomChange(+clamp(next).toFixed(2));
+        const [a, b] = [e.touches[0], e.touches[1]];
+        optionsRef.current.onZoomChange(
+          +clamp(next).toFixed(2),
+          (a.clientX + b.clientX) / 2,
+          (a.clientY + b.clientY) / 2,
+        );
       }
     };
 
@@ -71,6 +80,8 @@ export function usePinchZoom<T extends HTMLElement>({
       const factor = Math.exp(-e.deltaY * 0.01);
       optionsRef.current.onZoomChange(
         +clamp(scaleRef.current * factor).toFixed(2),
+        e.clientX,
+        e.clientY,
       );
     };
 
