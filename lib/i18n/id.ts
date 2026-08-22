@@ -54,6 +54,7 @@ const id: Dictionary = {
     retry: 'Coba lagi',
     actions: 'Tindakan',
     language: 'Bahasa',
+    close: 'Tutup',
     closeToast: 'Tutup notifikasi',
     itemNumber: '{label} #{index}',
     time: {

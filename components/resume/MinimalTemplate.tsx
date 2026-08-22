@@ -11,6 +11,11 @@ import {
   SectionContext,
   formatUrl,
   renderFormattedText,
+  sectionClickProps,
+  headerClickProps,
+  INTERACTIVE_CLASSES,
+  ItemHeader,
+  ItemSub,
 } from './shared';
 
 const TYPE = {
@@ -30,25 +35,6 @@ type SectionRenderer = (
   context: SectionContext,
 ) => React.ReactNode;
 
-function sectionClickProps(id: SectionId, onClick: SectionContext['onClick']) {
-  return {
-    onClick: onClick
-      ? (event: React.MouseEvent<HTMLElement>) => {
-          if ((event.target as HTMLElement).closest('a')) return;
-          onClick(id);
-        }
-      : undefined,
-    onKeyDown: onClick
-      ? (event: React.KeyboardEvent<HTMLElement>) => {
-          if (event.key !== 'Enter' && event.key !== ' ') return;
-          event.preventDefault();
-          onClick(id);
-        }
-      : undefined,
-    tabIndex: onClick ? 0 : undefined,
-  };
-}
-
 /** Accent-free section heading, single column throughout. */
 function Section({
   id,
@@ -63,38 +49,16 @@ function Section({
   t: T;
   children: React.ReactNode;
 }) {
-  const clickProps = sectionClickProps(id, onClick);
   return (
     <section
       data-section-id={id}
-      {...clickProps}
+      {...sectionClickProps(id, onClick)}
       aria-label={onClick ? t('template.editAria', { title }) : undefined}
-      className={`mb-[10pt] ${onClick ? 'cursor-pointer hover:ring-1 hover:ring-primary/40 hover:rounded-sm focus:outline-none focus-visible:ring-2 focus-visible:ring-primary/40 focus-visible:rounded-sm' : ''}`}
+      className={`mb-[10pt] ${onClick ? INTERACTIVE_CLASSES : ''}`}
     >
       <h2 className={TYPE.heading}>{title}</h2>
       {children}
     </section>
-  );
-}
-
-/** Bold title on the left, meta (usually a date) on the right. */
-function ItemHeader({ title, meta }: { title: string; meta?: string }) {
-  return (
-    <div className={`flex justify-between ${TYPE.itemTitle}`}>
-      <span>{title}</span>
-      {meta && <span className={TYPE.itemMeta}>{meta}</span>}
-    </div>
-  );
-}
-
-/** Italic subtitle row, e.g. company/location or degree/location. */
-function ItemSub({ left, right }: { left?: string; right?: string }) {
-  if (!left && !right) return null;
-  return (
-    <div className={`flex justify-between ${TYPE.itemSub} mb-[2pt]`}>
-      <span>{left}</span>
-      <span>{right}</span>
-    </div>
   );
 }
 
@@ -120,8 +84,17 @@ const SECTION_RENDERERS: Record<SectionId, SectionRenderer> = {
       >
         {cvData.experience.map((exp, index) => (
           <div key={index} className="mb-[7pt] break-inside-avoid">
-            <ItemHeader title={exp.role} meta={exp.date} />
-            <ItemSub left={exp.company} right={exp.location} />
+            <ItemHeader
+              title={exp.role}
+              meta={exp.date}
+              titleClass={TYPE.itemTitle}
+              metaClass={TYPE.itemMeta}
+            />
+            <ItemSub
+              left={exp.company}
+              right={exp.location}
+              className={TYPE.itemSub}
+            />
             {renderFormattedText(exp.description, TYPE.body)}
           </div>
         ))}
@@ -137,7 +110,12 @@ const SECTION_RENDERERS: Record<SectionId, SectionRenderer> = {
       >
         {cvData.projects.map((proj, index) => (
           <div key={index} className="mb-[7pt] break-inside-avoid">
-            <ItemHeader title={proj.name} meta={proj.date} />
+            <ItemHeader
+              title={proj.name}
+              meta={proj.date}
+              titleClass={TYPE.itemTitle}
+              metaClass={TYPE.itemMeta}
+            />
             {renderFormattedText(proj.description, TYPE.body)}
           </div>
         ))}
@@ -153,8 +131,17 @@ const SECTION_RENDERERS: Record<SectionId, SectionRenderer> = {
       >
         {cvData.education.map((edu, index) => (
           <div key={index} className="mb-[7pt] break-inside-avoid">
-            <ItemHeader title={edu.institution} meta={edu.date} />
-            <ItemSub left={edu.degree} right={edu.location} />
+            <ItemHeader
+              title={edu.institution}
+              meta={edu.date}
+              titleClass={TYPE.itemTitle}
+              metaClass={TYPE.itemMeta}
+            />
+            <ItemSub
+              left={edu.degree}
+              right={edu.location}
+              className={TYPE.itemSub}
+            />
             {renderFormattedText(edu.description, TYPE.body)}
           </div>
         ))}
@@ -208,24 +195,6 @@ export const MinimalTemplate = forwardRef<HTMLDivElement, TemplateProps>(
 
     const context: SectionContext = { onClick: onSectionClick, t };
 
-    const handleHeaderClick = () => onSectionClick?.('summary');
-    const headerClickProps = {
-      onClick: onSectionClick
-        ? (event: React.MouseEvent<HTMLDivElement>) => {
-            if ((event.target as HTMLElement).closest('a')) return;
-            handleHeaderClick();
-          }
-        : undefined,
-      onKeyDown: onSectionClick
-        ? (event: React.KeyboardEvent<HTMLDivElement>) => {
-            if (event.key !== 'Enter' && event.key !== ' ') return;
-            event.preventDefault();
-            handleHeaderClick();
-          }
-        : undefined,
-      tabIndex: onSectionClick ? 0 : undefined,
-    };
-
     const contactItems: { text: string; href?: string }[] = [];
     if (cvData.email) contactItems.push({ text: cvData.email });
     if (cvData.phone) contactItems.push({ text: cvData.phone });
@@ -243,7 +212,7 @@ export const MinimalTemplate = forwardRef<HTMLDivElement, TemplateProps>(
           {/* --- HEADER --- */}
           <div
             data-section-id="summary"
-            {...headerClickProps}
+            {...headerClickProps(onSectionClick)}
             aria-label={
               onSectionClick
                 ? t('template.editAria', {
@@ -251,7 +220,7 @@ export const MinimalTemplate = forwardRef<HTMLDivElement, TemplateProps>(
                   })
                 : undefined
             }
-            className={`mb-[12pt] ${onSectionClick ? 'cursor-pointer hover:ring-1 hover:ring-primary/40 hover:rounded-sm focus:outline-none focus-visible:ring-2 focus-visible:ring-primary/40 focus-visible:rounded-sm' : ''}`}
+            className={`mb-[12pt] ${onSectionClick ? INTERACTIVE_CLASSES : ''}`}
           >
             {photo ? (
               // eslint-disable-next-line @next/next/no-img-element
