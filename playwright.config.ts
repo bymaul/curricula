@@ -3,10 +3,10 @@ import { defineConfig, devices } from '@playwright/test';
 const PORT = 3000;
 const BASE_URL = `http://localhost:${PORT}`;
 
+const isCI = !!process.env.CI;
+
 export default defineConfig({
   testDir: './e2e',
-  // The dev server compiles pages on first hit, so keep workers serial to
-  // avoid parallel cold-compiles racing each other.
   fullyParallel: false,
   workers: 1,
   timeout: 90_000,
@@ -21,9 +21,9 @@ export default defineConfig({
     { name: 'mobile', use: { ...devices['Pixel 7'] } },
   ],
   webServer: {
-    command: 'pnpm dev',
+    command: isCI ? 'pnpm start' : 'pnpm dev',
     url: BASE_URL,
-    reuseExistingServer: !process.env.CI,
+    reuseExistingServer: !isCI,
     timeout: 120_000,
   },
 });
