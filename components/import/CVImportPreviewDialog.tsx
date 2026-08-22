@@ -10,17 +10,12 @@ import {
   DialogTitle,
 } from '@/components/ui/dialog';
 import { useI18n } from '@/components/I18nProvider';
-import { CVData } from '@/lib/schema';
 import { getSectionTabName } from '@/lib/consts';
 import { TAB_KEYS } from '@/lib/i18n';
+import { useImportStore } from '@/store/useImportStore';
 import { TriangleAlertIcon } from 'lucide-react';
-
-interface CVImportPreviewDialogProps {
-  cvData: CVData | null;
-  warnings?: string[];
-  onApply: () => void;
-  onDiscard: () => void;
-}
+import { useFormContext } from 'react-hook-form';
+import type { CVData } from '@/lib/schema';
 
 function CountRow({ label, count }: { label: string; count: number }) {
   return (
@@ -31,17 +26,19 @@ function CountRow({ label, count }: { label: string; count: number }) {
   );
 }
 
-export function CVImportPreviewDialog({
-  cvData,
-  warnings = [],
-  onApply,
-  onDiscard,
-}: CVImportPreviewDialogProps) {
+export function CVImportPreviewDialog() {
   const { t } = useI18n();
-  const open = cvData !== null;
+  const pendingImport = useImportStore((state) => state.pendingImport);
+  const clearPendingImport = useImportStore(
+    (state) => state.clearPendingImport,
+  );
+  const { reset } = useFormContext<CVData>();
+  const open = pendingImport !== null;
+  const cvData = pendingImport?.data ?? null;
+  const warnings = pendingImport?.warnings ?? [];
 
   return (
-    <Dialog open={open} onOpenChange={(next) => !next && onDiscard()}>
+    <Dialog open={open} onOpenChange={(next) => !next && clearPendingImport()}>
       <DialogContent className="sm:max-w-md">
         <DialogHeader>
           <DialogTitle>{t('importPreview.title')}</DialogTitle>
@@ -113,10 +110,18 @@ export function CVImportPreviewDialog({
         )}
 
         <DialogFooter>
-          <Button variant="outline" onClick={onDiscard}>
+          <Button variant="outline" onClick={clearPendingImport}>
             {t('importPreview.discard')}
           </Button>
-          <Button onClick={onApply}>{t('importPreview.applyToEditor')}</Button>
+          <Button
+            onClick={() => {
+              if (!pendingImport) return;
+              reset(pendingImport.data);
+              clearPendingImport();
+            }}
+          >
+            {t('importPreview.applyToEditor')}
+          </Button>
         </DialogFooter>
       </DialogContent>
     </Dialog>

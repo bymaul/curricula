@@ -23,24 +23,19 @@ import {
   Upload,
 } from 'lucide-react';
 import { useRef, useState } from 'react';
+import { useFormContext } from 'react-hook-form';
 
 interface BackupDialogProps {
   open: boolean;
   onOpenChange: (open: boolean) => void;
-  cvData: CVData;
-  onApplyCVData: (data: CVData) => void;
 }
 
-export function BackupDialog({
-  open,
-  onOpenChange,
-  cvData,
-  onApplyCVData,
-}: BackupDialogProps) {
+export function BackupDialog({ open, onOpenChange }: BackupDialogProps) {
   const backupInputRef = useRef<HTMLInputElement>(null);
   const jsonInputRef = useRef<HTMLInputElement>(null);
   const [pendingRestore, setPendingRestore] = useState<BackupFile | null>(null);
   const { t } = useI18n();
+  const { getValues, reset } = useFormContext<CVData>();
 
   const handleDownload = () => {
     const { resumes, activeId } = useResumeStore.getState();
@@ -94,6 +89,7 @@ export function BackupDialog({
   };
 
   const handleExportJSON = () => {
+    const cvData = getValues();
     downloadFile(
       JSON.stringify(cvData, null, 2),
       `${cvData.name ? cvData.name.replace(/\s+/g, '_') : 'My'}_CV_Data.json`,
@@ -116,7 +112,7 @@ export function BackupDialog({
           });
           return;
         }
-        onApplyCVData(result.data);
+        reset(result.data);
         toast.add({
           type: 'success',
           description: t('backup.toast.cvImported'),

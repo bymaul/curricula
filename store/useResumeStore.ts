@@ -195,9 +195,8 @@ function seedHistory(record: ResumeRecord): ResumeHistory {
 
 function nextStateEqual(a: HistoryState, b: HistoryState): boolean {
   return (
-    JSON.stringify(a.data) === JSON.stringify(b.data) &&
-    JSON.stringify(a.sectionOrder) === JSON.stringify(b.sectionOrder) &&
-    JSON.stringify(a.hiddenSections) === JSON.stringify(b.hiddenSections) &&
+    JSON.stringify([a.data, a.sectionOrder, a.hiddenSections]) ===
+      JSON.stringify([b.data, b.sectionOrder, b.hiddenSections]) &&
     a.title === b.title &&
     a.autoTitle === b.autoTitle &&
     a.language === b.language &&
@@ -283,9 +282,8 @@ function commitActiveSectionChange(
   if (!record) return {};
   const next = { ...record, ...patch };
   const unchanged =
-    JSON.stringify(next.sectionOrder) === JSON.stringify(record.sectionOrder) &&
-    JSON.stringify(next.hiddenSections) ===
-      JSON.stringify(record.hiddenSections);
+    JSON.stringify([next.sectionOrder, next.hiddenSections]) ===
+    JSON.stringify([record.sectionOrder, record.hiddenSections]);
   if (unchanged) return {};
   return {
     resumes: resumes.map((r) => (r.id === activeId ? next : r)),

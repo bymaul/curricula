@@ -3,7 +3,6 @@
 import { useI18n } from '@/components/I18nProvider';
 import { DEFAULT_SECTION_ORDER, TabName } from '@/lib/consts';
 import { TAB_KEYS } from '@/lib/i18n';
-import { CVData } from '@/lib/schema';
 import { cn, formatRelativeTime } from '@/lib/utils';
 import { useDialogStore } from '@/store/useDialogStore';
 import { useResumeStore } from '@/store/useResumeStore';
@@ -42,8 +41,6 @@ interface EditorSidebarProps {
   className?: string;
   pdfInputRef: React.RefObject<HTMLInputElement | null>;
   fileActions: EditorFileActions;
-  cvData: CVData;
-  onApplyCVData: (data: CVData) => void;
   saveStatus: 'saving' | 'saved';
   lastSavedAt: number | null;
 }
@@ -93,8 +90,6 @@ export function EditorSidebar({
   className,
   pdfInputRef,
   fileActions,
-  cvData,
-  onApplyCVData,
   saveStatus,
   lastSavedAt,
 }: EditorSidebarProps) {
@@ -250,14 +245,11 @@ export function EditorSidebar({
       <ShareDialog
         open={dialogs.share}
         onOpenChange={(open) => setDialog('share', open)}
-        cvData={cvData}
       />
 
       <BackupDialog
         open={dialogs.backup}
         onOpenChange={(open) => setDialog('backup', open)}
-        cvData={cvData}
-        onApplyCVData={onApplyCVData}
       />
     </section>
   );

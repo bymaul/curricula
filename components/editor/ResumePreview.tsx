@@ -24,20 +24,57 @@ import { useUIStore } from '@/store/useUIStore';
 import { FileText } from 'lucide-react';
 import {
   RefObject,
+  memo,
   useCallback,
   useEffect,
   useLayoutEffect,
   useRef,
   useState,
 } from 'react';
+import { useFormContext, useWatch } from 'react-hook-form';
 import { ZoomControls } from './ZoomControls';
 
 const GUTTER_PX = 32;
 const FRAME_WIDTH_PX = PAGE_WIDTH_PX + GUTTER_PX * 2;
 const SCROLL_OFFSET_PX = 16;
 
+interface LiveTemplateProps {
+  printRef: RefObject<HTMLDivElement | null>;
+  sectionOrder?: SectionId[];
+  hiddenSections?: SectionId[];
+  language?: ResumeLanguage;
+  photo?: string;
+  templateId: TemplateId;
+  onSectionClick?: (sectionId: SectionId) => void;
+}
+
+function LiveTemplate({
+  printRef,
+  sectionOrder,
+  hiddenSections,
+  language,
+  photo,
+  templateId,
+  onSectionClick,
+}: LiveTemplateProps) {
+  const { control } = useFormContext<CVData>();
+  const cvData = useWatch({ control }) as CVData;
+  const ResumeTemplate = TEMPLATE_COMPONENTS[templateId];
+
+  return (
+    <ResumeTemplate
+      ref={printRef}
+      cvData={cvData}
+      sectionOrder={sectionOrder}
+      hiddenSections={hiddenSections}
+      language={language}
+      photo={photo}
+      onSectionClick={onSectionClick}
+    />
+  );
+}
+
 interface ResumePreviewProps {
-  cvData: CVData;
   printRef: RefObject<HTMLDivElement | null>;
   sectionOrder?: SectionId[];
   hiddenSections?: SectionId[];
@@ -49,8 +86,7 @@ interface ResumePreviewProps {
   onSectionClick?: (sectionId: SectionId) => void;
 }
 
-export function ResumePreview({
-  cvData,
+function ResumePreviewImpl({
   printRef,
   sectionOrder,
   hiddenSections,
@@ -188,7 +224,7 @@ export function ResumePreview({
     const ro = new ResizeObserver(update);
     ro.observe(el);
     return () => ro.disconnect();
-  }, [printRef, cvData]);
+  }, [printRef]);
 
   const pageBreaks = Array.from({ length: pageCount - 1 }, (_, i) => ({
     top: (i + 1) * PAGE_HEIGHT_PX,
@@ -197,7 +233,6 @@ export function ResumePreview({
 
   const activeTab = useUIStore((state) => state.activeTab);
   const { t } = useI18n();
-  const ResumeTemplate = TEMPLATE_COMPONENTS[templateId];
 
   useEffect(() => {
     if (!isVisible) return;
@@ -276,13 +311,13 @@ export function ResumePreview({
                   className="relative bg-white text-black shadow-2xl print:w-full! print:shadow-none"
                 >
                   <div className="overflow-hidden print:overflow-visible">
-                    <ResumeTemplate
-                      ref={printRef}
-                      cvData={cvData}
+                    <LiveTemplate
+                      printRef={printRef}
                       sectionOrder={sectionOrder}
                       hiddenSections={hiddenSections}
                       language={language}
                       photo={photo}
+                      templateId={templateId}
                       onSectionClick={onSectionClick}
                     />
                   </div>
@@ -314,3 +349,5 @@ export function ResumePreview({
     </section>
   );
 }
+
+export const ResumePreview = memo(ResumePreviewImpl);
