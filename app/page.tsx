@@ -2,6 +2,7 @@
 
 import dynamic from 'next/dynamic';
 import { EditorSidebar } from '@/components/editor/EditorSidebar';
+import { EditorSkeleton } from '@/components/editor/EditorSkeleton';
 import { ResumePreview } from '@/components/editor/ResumePreview';
 import { CVImportPreviewDialog } from '@/components/import/CVImportPreviewDialog';
 import { useCVAutoSave } from '@/hooks/useCVAutoSave';
@@ -97,7 +98,7 @@ export default function Home() {
     [isLargeScreen],
   );
 
-  if (!mounted || !storesHydrated) return null;
+  if (!mounted || !storesHydrated) return <EditorSkeleton />;
 
   return (
     <FormProvider {...methods}>
