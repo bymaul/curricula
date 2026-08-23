@@ -24,11 +24,12 @@ import { SAMPLE_CV_DATA } from '@/lib/sampleCv';
 import { translateValidationMessage } from '@/lib/i18n';
 import { UI_LANGUAGES } from '@/lib/i18n/languages';
 import { SUPPORTED_IMAGE_TYPES, resizeSquarePhoto } from '@/lib/imageFiles';
-import { TEMPLATES, TemplateId } from '@/lib/templates';
+import { TEMPLATES } from '@/lib/templates';
 import { useResumeStore } from '@/store/useResumeStore';
 import { useFieldArray, useFormContext, useWatch } from 'react-hook-form';
 import { Sparkles, UserRound } from 'lucide-react';
 import { FormField } from '../ui/form-field';
+import { TemplatePicker } from './TemplatePicker';
 import { AddItemButton, ItemRemoveButton, SectionHeading } from './shared';
 
 export const PersonalForm = () => {
@@ -56,6 +57,13 @@ export const PersonalForm = () => {
       'harvard',
   );
   const setResumeTemplate = useResumeStore((state) => state.setResumeTemplate);
+  const sectionOrder = useResumeStore(
+    (state) => state.resumes.find((r) => r.id === state.activeId)?.sectionOrder,
+  );
+  const hiddenSections = useResumeStore(
+    (state) =>
+      state.resumes.find((r) => r.id === state.activeId)?.hiddenSections,
+  );
 
   const fileInputRef = useRef<HTMLInputElement>(null);
 
@@ -243,30 +251,19 @@ export const PersonalForm = () => {
 
             <Field className="sm:col-span-2">
               <FieldLabel>{t('personalDetails.templateLabel')}</FieldLabel>
-              <Select
-                items={TEMPLATES.map((template) => ({
-                  value: template.id,
-                  label: t(`templates.${template.id}.name`),
-                }))}
+              <TemplatePicker
                 value={templateId}
-                onValueChange={(value) => {
-                  const template = value as TemplateId;
+                onChange={(template) => {
                   if (activeId && TEMPLATES.some((t) => t.id === template)) {
                     setResumeTemplate(activeId, template);
                   }
                 }}
-              >
-                <SelectTrigger className="w-full">
-                  <SelectValue />
-                </SelectTrigger>
-                <SelectContent>
-                  {TEMPLATES.map((option) => (
-                    <SelectItem key={option.id} value={option.id}>
-                      {t(`templates.${option.id}.name`)}
-                    </SelectItem>
-                  ))}
-                </SelectContent>
-              </Select>
+                cvData={cvValues}
+                sectionOrder={sectionOrder}
+                hiddenSections={hiddenSections}
+                language={language}
+                photo={photo}
+              />
               <p className="text-xs text-muted-foreground">
                 {t('personalDetails.templateHint')}
               </p>
