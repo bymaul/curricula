@@ -185,31 +185,17 @@ export function ResumesDialog({ open, onOpenChange }: ResumesDialogProps) {
           </div>
 
           <DialogFooter>
-            <Button
-              variant="ghost"
-              onClick={() => onOpenChange(false)}
-              className="sm:mr-auto"
-            >
+            <Button variant="outline" onClick={handleCreate}>
+              <Plus className="w-4 h-4" />
+              {t('resumes.newCv')}
+            </Button>
+            <Button variant="outline" onClick={handleCreateFromSample}>
+              <FileText className="w-4 h-4" />
+              {t('resumes.newFromExample')}
+            </Button>
+            <Button onClick={() => onOpenChange(false)}>
               {t('common.done')}
             </Button>
-            <div className="flex gap-2">
-              <Button
-                variant="outline"
-                onClick={handleCreate}
-                className="flex-1 sm:flex-none"
-              >
-                <Plus className="w-4 h-4" data-icon="inline-start" />
-                {t('resumes.newCv')}
-              </Button>
-              <Button
-                variant="outline"
-                onClick={handleCreateFromSample}
-                className="flex-1 sm:flex-none"
-              >
-                <FileText className="w-4 h-4" data-icon="inline-start" />
-                {t('resumes.newFromExample')}
-              </Button>
-            </div>
           </DialogFooter>
         </DialogContent>
       </Dialog>

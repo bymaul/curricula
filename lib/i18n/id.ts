@@ -238,7 +238,7 @@ const id: Dictionary = {
     duplicateAria: 'Duplikat {title}',
     deleteAria: 'Hapus {title}',
     newCv: 'CV Baru',
-    newFromExample: 'Dari contoh',
+    newFromExample: 'Mulai dari contoh',
     sampleTitle: 'CV Contoh',
     confirmDeleteTitle: 'Hapus resum?',
     confirmDeleteDescription:
