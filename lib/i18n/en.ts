@@ -52,6 +52,7 @@ const en = {
     retry: 'Retry',
     actions: 'Actions',
     language: 'Language',
+    theme: 'Theme',
     close: 'Close',
     closeToast: 'Close toast',
     itemNumber: '{label} #{index}',
@@ -67,6 +68,9 @@ const en = {
     untitledCv: 'Untitled CV',
     viewEdit: 'Edit',
     viewPreview: 'Preview',
+    themeSystem: 'System',
+    themeLight: 'Light',
+    themeDark: 'Dark',
   },
   editor: {
     manageResumes: 'Manage Resumes',

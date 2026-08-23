@@ -54,6 +54,7 @@ const id: Dictionary = {
     retry: 'Coba lagi',
     actions: 'Tindakan',
     language: 'Bahasa',
+    theme: 'Tema',
     close: 'Tutup',
     closeToast: 'Tutup notifikasi',
     itemNumber: '{label} #{index}',
@@ -69,6 +70,9 @@ const id: Dictionary = {
     untitledCv: 'CV Tanpa Judul',
     viewEdit: 'Edit',
     viewPreview: 'Pratinjau',
+    themeSystem: 'Sistem',
+    themeLight: 'Terang',
+    themeDark: 'Gelap',
   },
   editor: {
     manageResumes: 'Kelola Resum',

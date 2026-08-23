@@ -3,6 +3,7 @@
 import { ChevronsUpDown, FileText } from 'lucide-react';
 import { useI18n } from './I18nProvider';
 import { LanguageSwitcher } from './LanguageSwitcher';
+import { ThemeToggle } from './ThemeToggle';
 import { Button } from './ui/button';
 import { Separator } from './ui/separator';
 import { useResumeStore } from '@/store/useResumeStore';
@@ -35,6 +36,8 @@ export function Header({ value, onChange }: HeaderProps) {
       </h1>
 
       <div className="flex items-center h-5 gap-2">
+        <ThemeToggle />
+        <Separator orientation="vertical" />
         <LanguageSwitcher />
         <Separator orientation="vertical" />
         <Tabs
