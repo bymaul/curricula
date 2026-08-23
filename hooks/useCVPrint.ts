@@ -2,22 +2,26 @@ import { toast } from '@/components/ui/toast';
 import { useI18n } from '@/components/I18nProvider';
 import { SECTIONS, TabName } from '@/lib/consts';
 import { TAB_KEYS } from '@/lib/i18n';
-import { CVData } from '@/lib/schema';
+import type { CVData } from '@/lib/schema';
+import { useResumeStore } from '@/store/useResumeStore';
 import { useUIStore } from '@/store/useUIStore';
 import { useRef } from 'react';
 import { UseFormReturn } from 'react-hook-form';
 import { useReactToPrint } from 'react-to-print';
 
-export function useCVPrint(cvData: CVData, methods: UseFormReturn<CVData>) {
+export function useCVPrint(methods: UseFormReturn<CVData>) {
   const { t } = useI18n();
   const setActiveTab = useUIStore((state) => state.setActiveTab);
   const printRef = useRef<HTMLDivElement>(null);
+  const activeResume = useResumeStore((state) =>
+    state.resumes.find((r) => r.id === state.activeId),
+  );
 
   const executePrint = useReactToPrint({
     contentRef: printRef,
     documentTitle: t('print.documentTitle', {
-      name: cvData.name || t('common.my'),
-      jobTitle: cvData.jobTitle,
+      name: activeResume?.data.name || t('common.my'),
+      jobTitle: activeResume?.data.jobTitle ?? '',
     }),
   });
 

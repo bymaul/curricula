@@ -52,6 +52,7 @@ const en = {
     retry: 'Retry',
     actions: 'Actions',
     language: 'Language',
+    close: 'Close',
     closeToast: 'Close toast',
     itemNumber: '{label} #{index}',
     time: {

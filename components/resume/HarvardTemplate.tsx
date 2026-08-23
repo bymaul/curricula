@@ -11,6 +11,11 @@ import {
   SectionContext,
   formatUrl,
   renderFormattedText,
+  sectionClickProps,
+  headerClickProps,
+  INTERACTIVE_CLASSES,
+  ItemHeader,
+  ItemSub,
 } from './shared';
 
 /**
@@ -60,25 +65,12 @@ function Section({
   t: T;
   children: React.ReactNode;
 }) {
-  const handleClick = (event: React.MouseEvent<HTMLElement>) => {
-    if ((event.target as HTMLElement).closest('a')) return;
-    onClick?.(id);
-  };
-
-  const handleKeyDown = (event: React.KeyboardEvent<HTMLElement>) => {
-    if (event.key !== 'Enter' && event.key !== ' ') return;
-    event.preventDefault();
-    onClick?.(id);
-  };
-
   return (
     <section
       data-section-id={id}
-      onClick={onClick ? handleClick : undefined}
-      onKeyDown={onClick ? handleKeyDown : undefined}
-      tabIndex={onClick ? 0 : undefined}
+      {...sectionClickProps(id, onClick)}
       aria-label={onClick ? t('template.editAria', { title }) : undefined}
-      className={`${SPACE.sectionGap} ${avoidBreakAfter ? 'break-after-avoid' : ''} ${onClick ? 'cursor-pointer hover:ring-1 hover:ring-primary/40 hover:rounded-sm focus:outline-none focus-visible:ring-2 focus-visible:ring-primary/40 focus-visible:rounded-sm' : ''}`}
+      className={`${SPACE.sectionGap} ${avoidBreakAfter ? 'break-after-avoid' : ''} ${onClick ? INTERACTIVE_CLASSES : ''}`}
     >
       <h2
         className={`${TYPE.sectionTitle} border-b border-black ${SPACE.sectionTitleGap} break-after-avoid`}
@@ -87,27 +79,6 @@ function Section({
       </h2>
       {children}
     </section>
-  );
-}
-
-/** Bold title on the left, meta (usually a date) on the right. */
-function EntryHeader({ title, meta }: { title: string; meta?: string }) {
-  return (
-    <div className={`flex justify-between ${TYPE.itemTitle}`}>
-      <span>{title}</span>
-      {meta && <span className={TYPE.itemMeta}>{meta}</span>}
-    </div>
-  );
-}
-
-/** Italic subtitle row, e.g. company/location or degree/location. */
-function EntrySubheader({ left, right }: { left?: string; right?: string }) {
-  if (!left && !right) return null;
-  return (
-    <div className={`flex justify-between ${TYPE.itemSubtitle} mb-[2pt]`}>
-      <span>{left}</span>
-      <span>{right}</span>
-    </div>
   );
 }
 
@@ -138,8 +109,17 @@ const SECTION_RENDERERS: Record<SectionId, SectionRenderer> = {
       >
         {cvData.experience.map((exp, index) => (
           <div key={index} className={`${SPACE.itemGap} break-inside-avoid`}>
-            <EntryHeader title={exp.role} meta={exp.date} />
-            <EntrySubheader left={exp.company} right={exp.location} />
+            <ItemHeader
+              title={exp.role}
+              meta={exp.date}
+              titleClass={TYPE.itemTitle}
+              metaClass={TYPE.itemMeta}
+            />
+            <ItemSub
+              left={exp.company}
+              right={exp.location}
+              className={TYPE.itemSubtitle}
+            />
             {renderFormattedText(exp.description, TYPE.body)}
           </div>
         ))}
@@ -155,7 +135,12 @@ const SECTION_RENDERERS: Record<SectionId, SectionRenderer> = {
       >
         {cvData.projects.map((proj, index) => (
           <div key={index} className={`${SPACE.itemGap} break-inside-avoid`}>
-            <EntryHeader title={proj.name} meta={proj.date} />
+            <ItemHeader
+              title={proj.name}
+              meta={proj.date}
+              titleClass={TYPE.itemTitle}
+              metaClass={TYPE.itemMeta}
+            />
             {renderFormattedText(proj.description, TYPE.body)}
           </div>
         ))}
@@ -171,8 +156,17 @@ const SECTION_RENDERERS: Record<SectionId, SectionRenderer> = {
       >
         {cvData.education.map((edu, index) => (
           <div key={index} className={`${SPACE.itemGap} break-inside-avoid`}>
-            <EntryHeader title={edu.institution} meta={edu.date} />
-            <EntrySubheader left={edu.degree} right={edu.location} />
+            <ItemHeader
+              title={edu.institution}
+              meta={edu.date}
+              titleClass={TYPE.itemTitle}
+              metaClass={TYPE.itemMeta}
+            />
+            <ItemSub
+              left={edu.degree}
+              right={edu.location}
+              className={TYPE.itemSubtitle}
+            />
             {renderFormattedText(edu.description, TYPE.body)}
           </div>
         ))}
@@ -233,16 +227,6 @@ export const HarvardTemplate = forwardRef<HTMLDivElement, TemplateProps>(
 
     const context: SectionContext = { onClick: onSectionClick, t };
 
-    const handleHeaderClick = () => onSectionClick?.('summary');
-
-    const handleHeaderKeyDown = (
-      event: React.KeyboardEvent<HTMLDivElement>,
-    ) => {
-      if (event.key !== 'Enter' && event.key !== ' ') return;
-      event.preventDefault();
-      onSectionClick?.('summary');
-    };
-
     return (
       <div ref={ref} className="mx-auto shadow-2xl print:shadow-none bg-white">
         <PrintStyle />
@@ -264,9 +248,7 @@ export const HarvardTemplate = forwardRef<HTMLDivElement, TemplateProps>(
                 {/* --- HEADER SECTION --- */}
                 <div
                   data-section-id="summary"
-                  onClick={onSectionClick ? handleHeaderClick : undefined}
-                  onKeyDown={onSectionClick ? handleHeaderKeyDown : undefined}
-                  tabIndex={onSectionClick ? 0 : undefined}
+                  {...headerClickProps(onSectionClick)}
                   aria-label={
                     onSectionClick
                       ? t('template.editAria', {
@@ -274,7 +256,7 @@ export const HarvardTemplate = forwardRef<HTMLDivElement, TemplateProps>(
                         })
                       : undefined
                   }
-                  className={`text-center mb-4 ${onSectionClick ? 'cursor-pointer hover:ring-1 hover:ring-primary/40 hover:rounded-sm focus:outline-none focus-visible:ring-2 focus-visible:ring-primary/40 focus-visible:rounded-sm' : ''}`}
+                  className={`text-center mb-4 ${onSectionClick ? INTERACTIVE_CLASSES : ''}`}
                 >
                   {photo ? (
                     // eslint-disable-next-line @next/next/no-img-element

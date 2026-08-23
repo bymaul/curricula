@@ -43,23 +43,18 @@ import {
   X,
 } from 'lucide-react';
 import { useRef, useState } from 'react';
+import { useFormContext } from 'react-hook-form';
 
 interface AIAdjustDialogProps {
   open: boolean;
   onOpenChange: (open: boolean) => void;
-  cvData: CVData;
-  onApply: (data: CVData) => void;
 }
 
-export function AIAdjustDialog({
-  open,
-  onOpenChange,
-  cvData,
-  onApply,
-}: AIAdjustDialogProps) {
+export function AIAdjustDialog({ open, onOpenChange }: AIAdjustDialogProps) {
   const { isAdjusting, error, adjustCV, abort } = useAIAdjustCV();
   const { aiProvider, aiModel } = useUIStore();
   const { t } = useI18n();
+  const { getValues, reset } = useFormContext<CVData>();
 
   const [jobDescription, setJobDescription] = useState('');
   const [images, setImages] = useState<CVImagePart[]>([]);
@@ -123,9 +118,10 @@ export function AIAdjustDialog({
     }
 
     const apiKey = getStoredAIAPIKey() || undefined;
+    const source = getValues();
 
     const result = await adjustCV({
-      cvData,
+      cvData: source,
       jobDescription: stripInvisibleChars(jobDescription.trim()),
       provider: aiProvider,
       modelName: aiModel.trim() || undefined,
@@ -136,13 +132,13 @@ export function AIAdjustDialog({
 
     if (result) {
       setPendingResult(result);
-      setChangeSummary(summarizeCVChanges(cvData, result.data));
+      setChangeSummary(summarizeCVChanges(source, result.data));
     }
   };
 
   const handleApply = () => {
     if (!pendingResult) return;
-    onApply(pendingResult.data);
+    reset(pendingResult.data);
     toast.add({
       type: 'success',
       description: t('aiAdjust.toastAdjusted'),

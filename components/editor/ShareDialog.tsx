@@ -17,20 +17,18 @@ import { CVData } from '@/lib/schema';
 import { useResumeStore } from '@/store/useResumeStore';
 import { Check, Copy, ExternalLink, Loader2, Share2 } from 'lucide-react';
 import { useEffect, useState } from 'react';
+import { useFormContext, useWatch } from 'react-hook-form';
 
 interface ShareDialogProps {
   open: boolean;
   onOpenChange: (open: boolean) => void;
-  cvData: CVData;
 }
 
 function ShareLinkContent({
-  cvData,
   language,
   photo,
   template,
 }: {
-  cvData: CVData;
   language: ResumeLanguage;
   photo: string;
   template: TemplateId;
@@ -38,6 +36,8 @@ function ShareLinkContent({
   const [link, setLink] = useState<string | null>(null);
   const [copied, setCopied] = useState(false);
   const { t } = useI18n();
+  const { control } = useFormContext<CVData>();
+  const cvData = useWatch({ control }) as CVData;
 
   useEffect(() => {
     let cancelled = false;
@@ -108,7 +108,7 @@ function ShareLinkContent({
   );
 }
 
-export function ShareDialog({ open, onOpenChange, cvData }: ShareDialogProps) {
+export function ShareDialog({ open, onOpenChange }: ShareDialogProps) {
   const { t } = useI18n();
   const activeResume = useResumeStore((state) =>
     state.resumes.find((r) => r.id === state.activeId),
@@ -127,7 +127,6 @@ export function ShareDialog({ open, onOpenChange, cvData }: ShareDialogProps) {
 
         {open && (
           <ShareLinkContent
-            cvData={cvData}
             language={language}
             photo={photo}
             template={template}

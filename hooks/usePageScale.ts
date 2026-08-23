@@ -1,6 +1,12 @@
 'use client';
 
-import { useEffect, useLayoutEffect, useRef, useState } from 'react';
+import {
+  useCallback,
+  useEffect,
+  useLayoutEffect,
+  useRef,
+  useState,
+} from 'react';
 import { useUIStore } from '@/store/useUIStore';
 
 const MIN_SCALE = 0.3;
@@ -19,20 +25,22 @@ export function usePageScale({ frameWidthPx, isVisible }: UsePageScaleOptions) {
   const [frameHeight, setFrameHeight] = useState<number>();
   const activeScale = scale ?? 1;
 
-  const fitToWidth = () => {
+  // Auto-fit only runs while the user has not chosen a manual zoom level
+  // (scale === null); a browser resize must never override a manual zoom.
+  const fitToWidth = useCallback(() => {
+    if (useUIStore.getState().scale !== null) return;
     const panel = panelRef.current;
     if (!panel) return;
     const available = panel.clientWidth;
     if (available > 0) setScale(Math.min(1, available / frameWidthPx));
-  };
+  }, [frameWidthPx, setScale]);
 
   useLayoutEffect(() => {
     if (!isVisible) return;
-    if (scale === null) fitToWidth();
+    fitToWidth();
     window.addEventListener('resize', fitToWidth);
     return () => window.removeEventListener('resize', fitToWidth);
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [isVisible, frameWidthPx, scale, setScale]);
+  }, [isVisible, frameWidthPx, fitToWidth]);
 
   useEffect(() => {
     const frame = frameRef.current;
@@ -59,7 +67,10 @@ export function usePageScale({ frameWidthPx, isVisible }: UsePageScaleOptions) {
       const current = useUIStore.getState().scale ?? 1;
       setScale(Math.max(MIN_SCALE, +(current - 0.1).toFixed(2)));
     },
-    zoomReset: () => setScale(null),
+    zoomReset: () => {
+      setScale(null);
+      requestAnimationFrame(fitToWidth);
+    },
     minScale: MIN_SCALE,
     maxScale: MAX_SCALE,
   };

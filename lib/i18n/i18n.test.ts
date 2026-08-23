@@ -10,6 +10,7 @@ import {
 } from '@/lib/i18n';
 import { Language } from '@/lib/i18n/languages';
 import { AIAdjustScope, TabName } from '@/lib/consts';
+import { cvSchema } from '@/lib/schema';
 
 function leafKeys(value: unknown): string[] {
   if (typeof value === 'string') return [''];
@@ -128,11 +129,11 @@ describe('AI_ADJUST_SCOPE_KEYS', () => {
 describe('translateValidationMessage', () => {
   const t = (key: TranslationKey) => `[${key}]`;
 
-  it('maps known zod messages to translated keys', () => {
-    expect(translateValidationMessage(t, 'Role is required')).toBe(
+  it('translates schema validation keys via the translate fn', () => {
+    expect(translateValidationMessage(t, 'validation.roleRequired')).toBe(
       '[validation.roleRequired]',
     );
-    expect(translateValidationMessage(t, 'Invalid email address')).toBe(
+    expect(translateValidationMessage(t, 'validation.emailInvalid')).toBe(
       '[validation.emailInvalid]',
     );
   });
@@ -146,5 +147,54 @@ describe('translateValidationMessage', () => {
   it('returns undefined for empty input', () => {
     expect(translateValidationMessage(t, undefined)).toBeUndefined();
     expect(translateValidationMessage(t, '')).toBeUndefined();
+  });
+});
+
+describe('schema validation keys', () => {
+  it('uses translation keys for every cvSchema message', () => {
+    const result = cvSchema.safeParse({
+      name: 'Jane Doe',
+      jobTitle: '',
+      email: 'not-an-email',
+      phone: '',
+      summary: 'short',
+      links: [{ url: '' }],
+      experience: [{}],
+      projects: [{}],
+      education: [{}],
+      skills: [{ category: '', items: '' }],
+      certifications: [{}],
+    });
+    expect(result.success).toBe(false);
+    if (!result.success) {
+      const customMessages = result.error.issues
+        .map((issue) => issue.message)
+        .filter((message) => !message.startsWith('Invalid input:'));
+      expect(customMessages.length).toBeGreaterThan(0);
+      for (const message of customMessages) {
+        expect(EN_KEYS).toContain(message);
+      }
+    }
+  });
+
+  it('shows the required message before the format message for an empty email', () => {
+    const result = cvSchema.safeParse({
+      name: 'Jane Doe',
+      jobTitle: '',
+      email: '',
+      phone: '+1-555-0100',
+      summary: 'A sufficiently long summary.',
+      links: [],
+      experience: [],
+      projects: [],
+      education: [],
+      skills: [],
+      certifications: [],
+    });
+    expect(result.success).toBe(false);
+    if (!result.success) {
+      const emailIssue = result.error.issues.find((i) => i.path[0] === 'email');
+      expect(emailIssue?.message).toBe('validation.emailRequired');
+    }
   });
 });

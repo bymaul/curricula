@@ -10,21 +10,21 @@ import { useCVPrint } from '@/hooks/useCVPrint';
 import { useKeyboardShortcuts } from '@/hooks/useKeyboardShortcuts';
 import { useMediaQuery } from '@/hooks/useMediaQuery';
 import { useShareLinkImport } from '@/hooks/useShareLinkImport';
-import { CVData, cvSchema, initialCVState } from '@/lib/schema';
 import {
   DESKTOP_MEDIA_QUERY,
   getSectionTabName,
   SectionId,
 } from '@/lib/consts';
 import { useDialogStore } from '@/store/useDialogStore';
-import { useImportStore } from '@/store/useImportStore';
 import { usePhotoStore } from '@/store/usePhotoStore';
 import { useResumeStore } from '@/store/useResumeStore';
 import { useUIStore } from '@/store/useUIStore';
 import { cn } from '@/lib/utils';
 import { zodResolver } from '@hookform/resolvers/zod';
-import { useEffect, useState } from 'react';
+import { useCallback, useEffect, useState } from 'react';
 import { FormProvider, useForm } from 'react-hook-form';
+import type { CVData } from '@/lib/schema';
+import { cvSchema, initialCVState } from '@/lib/schema';
 import { Header } from '@/components/Header';
 
 const AIAdjustDialog = dynamic(
@@ -70,15 +70,10 @@ export default function Home() {
   }, []);
 
   const { dialogs, setDialog } = useDialogStore();
-  const pendingImport = useImportStore((state) => state.pendingImport);
-  const clearPendingImport = useImportStore(
-    (state) => state.clearPendingImport,
-  );
 
-  const { mounted, cvData, saveStatus, lastSavedAt, saveNow } =
-    useCVAutoSave(methods);
+  const { mounted, saveStatus, lastSavedAt, saveNow } = useCVAutoSave(methods);
   const { pdfInputRef, handleImportPDF } = useCVImportExport();
-  const { printRef, handlePrintClick } = useCVPrint(cvData, methods);
+  const { printRef, handlePrintClick } = useCVPrint(methods);
   useShareLinkImport();
   const undo = useResumeStore((state) => state.undo);
   const redo = useResumeStore((state) => state.redo);
@@ -94,10 +89,13 @@ export default function Home() {
     state.resumes.find((r) => r.id === state.activeId),
   );
 
-  const handlePreviewSectionClick = (sectionId: SectionId) => {
-    useUIStore.getState().setActiveTab(getSectionTabName(sectionId));
-    if (!isLargeScreen) setMobileView('edit');
-  };
+  const handleSectionClick = useCallback(
+    (sectionId: SectionId) => {
+      useUIStore.getState().setActiveTab(getSectionTabName(sectionId));
+      if (!isLargeScreen) setMobileView('edit');
+    },
+    [isLargeScreen],
+  );
 
   if (!mounted || !storesHydrated) return null;
 
@@ -118,14 +116,11 @@ export default function Home() {
               handlePrintClick,
               onImportPDF: handleImportPDF,
             }}
-            cvData={cvData}
-            onApplyCVData={(data) => methods.reset(data)}
             saveStatus={saveStatus}
             lastSavedAt={lastSavedAt}
           />
 
           <ResumePreview
-            cvData={cvData}
             printRef={printRef}
             sectionOrder={activeResume?.sectionOrder}
             hiddenSections={activeResume?.hiddenSections}
@@ -133,7 +128,7 @@ export default function Home() {
             photo={activeResume?.photo}
             templateId={activeResume?.templateId}
             mobileActive={mobileView === 'preview'}
-            onSectionClick={handlePreviewSectionClick}
+            onSectionClick={handleSectionClick}
           />
         </div>
       </main>
@@ -141,8 +136,6 @@ export default function Home() {
       <AIAdjustDialog
         open={dialogs.aiAdjust}
         onOpenChange={(open) => setDialog('aiAdjust', open)}
-        cvData={cvData}
-        onApply={(data) => methods.reset(data)}
       />
 
       <AISettingsDialog
@@ -155,17 +148,7 @@ export default function Home() {
         onOpenChange={(open) => setDialog('resumes', open)}
       />
 
-      <CVImportPreviewDialog
-        cvData={pendingImport?.data ?? null}
-        warnings={pendingImport?.warnings}
-        onApply={() => {
-          if (pendingImport) {
-            methods.reset(pendingImport.data);
-            clearPendingImport();
-          }
-        }}
-        onDiscard={clearPendingImport}
-      />
+      <CVImportPreviewDialog />
     </FormProvider>
   );
 }

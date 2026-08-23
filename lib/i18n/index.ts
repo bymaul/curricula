@@ -41,24 +41,9 @@ export const AI_ADJUST_SCOPE_KEYS: Record<AIAdjustScope, TranslationKey> = {
   skills: 'aiAdjust.scopeSkills',
 };
 
-const VALIDATION_MESSAGE_KEYS: Record<string, TranslationKey> = {
-  'URL is required': 'validation.urlRequired',
-  'Role is required': 'validation.roleRequired',
-  'Company is required': 'validation.companyRequired',
-  'Date is required': 'validation.dateRequired',
-  'Project name is required': 'validation.projectNameRequired',
-  'Degree is required': 'validation.degreeRequired',
-  'Institution is required': 'validation.institutionRequired',
-  'Category is required': 'validation.categoryRequired',
-  'Skills are required': 'validation.skillsRequired',
-  'Name is required': 'validation.nameRequired',
-  'Issuer is required': 'validation.issuerRequired',
-  'Full Name is required': 'validation.fullNameRequired',
-  'Invalid email address': 'validation.emailInvalid',
-  'Email is required': 'validation.emailRequired',
-  'Phone number is required': 'validation.phoneRequired',
-  'Summary must be at least 10 characters': 'validation.summaryMinLength',
-};
+function isTranslationKey(key: string): key is TranslationKey {
+  return lookup(en, key) !== undefined;
+}
 
 export function translateValidationMessage(
   translateFn: (
@@ -68,8 +53,8 @@ export function translateValidationMessage(
   message: string | undefined,
 ): string | undefined {
   if (!message) return undefined;
-  const key = VALIDATION_MESSAGE_KEYS[message];
-  return key ? translateFn(key) : message;
+  if (!isTranslationKey(message)) return message;
+  return translateFn(message);
 }
 
 export function interpolate(
