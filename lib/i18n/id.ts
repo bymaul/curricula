@@ -101,6 +101,10 @@ const id: Dictionary = {
   personalDetails: {
     title: 'Detail Pribadi',
     description: 'Mulai dengan informasi kontak dan ringkasan Anda.',
+    sampleCtaTitle: 'CV ini masih kosong',
+    sampleCtaDescription:
+      'Isi dengan konten contoh yang bisa Anda edit, atau mulai dari awal di bawah.',
+    sampleCtaLoad: 'Muat data contoh',
     resumeSettings: 'CV',
     contactInformation: 'Informasi Kontak',
     fullName: 'Nama Lengkap',
@@ -234,6 +238,8 @@ const id: Dictionary = {
     duplicateAria: 'Duplikat {title}',
     deleteAria: 'Hapus {title}',
     newCv: 'CV Baru',
+    newFromExample: 'Mulai dari contoh',
+    sampleTitle: 'CV Contoh',
     confirmDeleteTitle: 'Hapus resum?',
     confirmDeleteDescription:
       'Hapus "{title}"? Tindakan ini tidak dapat dibatalkan.',

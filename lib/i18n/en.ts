@@ -99,6 +99,10 @@ const en = {
   personalDetails: {
     title: 'Personal Details',
     description: 'Get started with your contact information and summary.',
+    sampleCtaTitle: 'This CV is empty',
+    sampleCtaDescription:
+      'Fill it with example content you can edit, or start from scratch below.',
+    sampleCtaLoad: 'Load example data',
     resumeSettings: 'Resume',
     contactInformation: 'Contact Information',
     fullName: 'Full Name',
@@ -230,6 +234,8 @@ const en = {
     duplicateAria: 'Duplicate {title}',
     deleteAria: 'Delete {title}',
     newCv: 'New CV',
+    newFromExample: 'Start from example',
+    sampleTitle: 'Example CV',
     confirmDeleteTitle: 'Delete resume?',
     confirmDeleteDescription: 'Delete "{title}"? This cannot be undone.',
   },

@@ -14,6 +14,7 @@ import { Input } from '@/components/ui/input';
 import { IconButton } from '@/components/ui/icon-button';
 import { ScrollArea } from '@/components/ui/scroll-area';
 import { useI18n } from '@/components/I18nProvider';
+import { SAMPLE_CV_DATA } from '@/lib/sampleCv';
 import { useResumeStore } from '@/store/useResumeStore';
 import { cn, formatRelativeTime } from '@/lib/utils';
 import { Check, Copy, FileText, Pencil, Plus, Trash2 } from 'lucide-react';
@@ -29,6 +30,7 @@ export function ResumesDialog({ open, onOpenChange }: ResumesDialogProps) {
   const activeId = useResumeStore((state) => state.activeId);
   const setActiveResume = useResumeStore((state) => state.setActiveResume);
   const createResume = useResumeStore((state) => state.createResume);
+  const importResumeData = useResumeStore((state) => state.importResumeData);
   const duplicateResume = useResumeStore((state) => state.duplicateResume);
   const deleteResume = useResumeStore((state) => state.deleteResume);
   const renameResume = useResumeStore((state) => state.renameResume);
@@ -53,6 +55,11 @@ export function ResumesDialog({ open, onOpenChange }: ResumesDialogProps) {
 
   const handleCreate = () => {
     createResume();
+    onOpenChange(false);
+  };
+
+  const handleCreateFromSample = () => {
+    importResumeData(SAMPLE_CV_DATA, t('resumes.sampleTitle'));
     onOpenChange(false);
   };
 
@@ -181,6 +188,10 @@ export function ResumesDialog({ open, onOpenChange }: ResumesDialogProps) {
             <Button variant="outline" onClick={handleCreate}>
               <Plus className="w-4 h-4" />
               {t('resumes.newCv')}
+            </Button>
+            <Button variant="outline" onClick={handleCreateFromSample}>
+              <FileText className="w-4 h-4" />
+              {t('resumes.newFromExample')}
             </Button>
             <Button onClick={() => onOpenChange(false)}>
               {t('common.done')}
