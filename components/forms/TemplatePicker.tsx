@@ -8,9 +8,7 @@ import { ResumeLanguage } from '@/lib/i18n/languages';
 import { TEMPLATES, TemplateId } from '@/lib/templates';
 import { cn } from '@/lib/utils';
 import { SectionId } from '@/lib/consts';
-import { KeyboardEvent, useRef } from 'react';
-
-const PREVIEW_SCALE = 0.12;
+import { KeyboardEvent, useEffect, useRef, useState } from 'react';
 
 interface TemplatePickerProps {
   value: TemplateId;
@@ -59,57 +57,113 @@ export function TemplatePicker({
       role="radiogroup"
       aria-label={t('personalDetails.templateLabel')}
       onKeyDown={handleKeyDown}
-      className="flex gap-3"
+      className="grid w-full grid-cols-3 gap-2"
     >
-      {TEMPLATES.map((template) => {
-        const selected = template.id === value;
-        const Preview = TEMPLATE_COMPONENTS[template.id];
-        return (
-          <button
-            key={template.id}
-            type="button"
-            role="radio"
-            aria-checked={selected}
-            data-value={template.id}
-            tabIndex={selected ? 0 : -1}
-            onClick={() => onChange(template.id)}
-            className={cn(
-              'group flex flex-col items-center gap-1.5 rounded-lg p-1.5 outline-none transition-colors',
-              'focus-visible:ring-2 focus-visible:ring-ring/60 focus-visible:rounded-lg',
-              selected
-                ? 'bg-primary/10 ring-2 ring-primary/50'
-                : 'hover:bg-muted cursor-pointer',
-            )}
-          >
-            <div className="relative w-[96px] aspect-[794/1123] overflow-hidden rounded-md border border-border bg-white">
-              <div
-                aria-hidden="true"
-                className="pointer-events-none select-none absolute top-0 left-0 origin-top-left text-black"
-                style={{
-                  width: PAGE_WIDTH_PX,
-                  transform: `scale(${PREVIEW_SCALE})`,
-                }}
-              >
-                <Preview
-                  cvData={cvData}
-                  sectionOrder={sectionOrder}
-                  hiddenSections={hiddenSections}
-                  language={language}
-                  photo={photo}
-                />
-              </div>
-            </div>
-            <span
-              className={cn(
-                'text-xs font-medium',
-                selected ? 'text-primary' : 'text-muted-foreground',
-              )}
-            >
-              {t(`templates.${template.id}.name`)}
-            </span>
-          </button>
-        );
-      })}
+      {TEMPLATES.map((template) => (
+        <TemplateCard
+          key={template.id}
+          template={template}
+          selected={template.id === value}
+          onSelect={() => onChange(template.id)}
+          cvData={cvData}
+          sectionOrder={sectionOrder}
+          hiddenSections={hiddenSections}
+          language={language}
+          photo={photo}
+        />
+      ))}
     </div>
+  );
+}
+
+function usePreviewScale() {
+  const ref = useRef<HTMLDivElement | null>(null);
+  const [scale, setScale] = useState(0);
+
+  useEffect(() => {
+    const el = ref.current;
+    if (!el) return;
+    const update = () => setScale(el.clientWidth / PAGE_WIDTH_PX);
+    update();
+    const observer = new ResizeObserver(update);
+    observer.observe(el);
+    return () => observer.disconnect();
+  }, []);
+
+  return { ref, scale };
+}
+
+interface TemplateCardProps {
+  template: (typeof TEMPLATES)[number];
+  selected: boolean;
+  onSelect: () => void;
+  cvData: CVData;
+  sectionOrder?: SectionId[];
+  hiddenSections?: SectionId[];
+  language?: ResumeLanguage;
+  photo?: string;
+}
+
+function TemplateCard({
+  template,
+  selected,
+  onSelect,
+  cvData,
+  sectionOrder,
+  hiddenSections,
+  language,
+  photo,
+}: TemplateCardProps) {
+  const { t } = useI18n();
+  const { ref, scale } = usePreviewScale();
+  const Preview = TEMPLATE_COMPONENTS[template.id];
+
+  return (
+    <button
+      type="button"
+      role="radio"
+      aria-checked={selected}
+      data-value={template.id}
+      tabIndex={selected ? 0 : -1}
+      onClick={onSelect}
+      className={cn(
+        'flex min-w-0 cursor-pointer flex-col items-center gap-1 rounded-lg p-1 outline-none transition-colors',
+        'focus-visible:ring-2 focus-visible:ring-ring/60',
+        selected
+          ? 'bg-primary/10 ring-2 ring-primary/50'
+          : 'hover:bg-muted focus-visible:rounded-lg',
+      )}
+    >
+      <div
+        ref={ref}
+        className="relative aspect-[794/1123] w-full overflow-hidden rounded-md border border-border bg-white"
+      >
+        <div
+          aria-hidden="true"
+          className="pointer-events-none absolute top-0 left-0 origin-top-left select-none text-black"
+          style={{
+            width: PAGE_WIDTH_PX,
+            transform: `scale(${scale})`,
+            visibility: scale > 0 ? 'visible' : 'hidden',
+          }}
+        >
+          <Preview
+            cvData={cvData}
+            sectionOrder={sectionOrder}
+            hiddenSections={hiddenSections}
+            language={language}
+            photo={photo}
+          />
+        </div>
+      </div>
+      <span
+        className={cn(
+          'max-w-full truncate text-[11px] font-medium sm:text-xs',
+          selected ? 'text-primary' : 'text-muted-foreground',
+        )}
+      >
+        {t(`templates.${template.id}.name`)}
+      </span>
+    </button>
   );
 }

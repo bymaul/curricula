@@ -234,7 +234,7 @@ const en = {
     duplicateAria: 'Duplicate {title}',
     deleteAria: 'Delete {title}',
     newCv: 'New CV',
-    newFromExample: 'Start from example',
+    newFromExample: 'From example',
     sampleTitle: 'Example CV',
     confirmDeleteTitle: 'Delete resume?',
     confirmDeleteDescription: 'Delete "{title}"? This cannot be undone.',

@@ -30,12 +30,12 @@ export function Header({ value, onChange }: HeaderProps) {
   const activeResumeTitle = activeResume?.title ?? t('header.untitledCv');
 
   return (
-    <header className="p-4 lg:p-0 flex items-center justify-between shrink-0 lg:mb-6 print:hidden">
-      <h1 className="text-lg font-bold tracking-tight shrink-0">
+    <header className="flex shrink-0 items-center justify-between gap-2 p-3 sm:p-4 lg:mb-6 lg:p-0 print:hidden">
+      <h1 className="shrink-0 text-base font-bold tracking-tight sm:text-lg">
         {t('brand.name')}
       </h1>
 
-      <div className="flex items-center h-5 gap-2">
+      <div className="flex h-5 items-center gap-1.5 sm:gap-2">
         <ThemeToggle />
         <Separator orientation="vertical" />
         <LanguageSwitcher />
