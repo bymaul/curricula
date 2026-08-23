@@ -90,11 +90,9 @@ test('switches templates and updates the preview', async ({
   await freshEditor(page);
   await nameInput(page).fill('Grace Hopper');
 
-  const templateSelect = (current: string) =>
-    page.getByRole('combobox').filter({ hasText: current });
+  const templateRadio = (name: string) => page.getByRole('radio', { name });
 
-  await templateSelect('Harvard').click();
-  await page.getByRole('option', { name: 'Modern' }).click();
+  await templateRadio('Modern').click();
   if (!isMobile) {
     await expect(page.locator('[data-template-id="modern"]')).toBeVisible();
     await expect(page.locator('[data-template-id="modern"]')).toContainText(
@@ -102,14 +100,15 @@ test('switches templates and updates the preview', async ({
     );
   }
 
-  await templateSelect('Modern').click();
-  await page.getByRole('option', { name: 'Minimal' }).click();
+  await templateRadio('Minimal').click();
   if (!isMobile) {
     await expect(page.locator('[data-template-id="minimal"]')).toBeVisible();
     await expect(page.locator('[data-template-id="minimal"]')).toContainText(
       'Grace Hopper',
     );
   }
+
+  await templateRadio('Harvard').click();
 });
 
 test('shows select labels in the trigger instead of raw values', async ({
@@ -120,16 +119,12 @@ test('shows select labels in the trigger instead of raw values', async ({
   const languageSelect = page
     .getByRole('combobox')
     .filter({ hasText: 'English' });
-  const templateSelect = page
-    .getByRole('combobox')
-    .filter({ hasText: 'Harvard' });
+  const templateRadio = page.getByRole('radio', { name: 'Harvard' });
 
   await expect(languageSelect.locator('[data-slot="select-value"]')).toHaveText(
     'English',
   );
-  await expect(templateSelect.locator('[data-slot="select-value"]')).toHaveText(
-    'Harvard',
-  );
+  await expect(templateRadio).toHaveAttribute('aria-checked', 'true');
 
   // The trigger reflects the newly selected label.
   await languageSelect.click();

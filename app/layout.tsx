@@ -14,7 +14,10 @@ const geistMono = Geist_Mono({
 });
 
 export const viewport: Viewport = {
-  themeColor: '#09090b',
+  themeColor: [
+    { media: '(prefers-color-scheme: light)', color: '#ffffff' },
+    { media: '(prefers-color-scheme: dark)', color: '#09090b' },
+  ],
   width: 'device-width',
   initialScale: 1,
 };
@@ -53,23 +56,31 @@ export const metadata: Metadata = {
   },
 };
 
+const THEME_BOOTSTRAP = `(function(){try{var s=JSON.parse(localStorage.getItem('curricula-ui-state')||'{}').state||{};var t=s.theme;var d=t==='dark'||(t!=='light'&&window.matchMedia('(prefers-color-scheme: dark)').matches);document.documentElement.classList.toggle('dark',d)}catch(e){}})()`;
+
 export default async function RootLayout({
   children,
 }: Readonly<{
   children: React.ReactNode;
 }>) {
-  await headers();
+  const nonce = (await headers()).get('x-nonce') ?? '';
   return (
     <html
       lang="en"
       className={cn(
-        'dark h-full antialiased',
+        'h-full antialiased',
         geistMono.variable,
         'font-sans',
         inter.variable,
       )}
       suppressHydrationWarning
     >
+      <head>
+        <script
+          nonce={nonce}
+          dangerouslySetInnerHTML={{ __html: THEME_BOOTSTRAP }}
+        />
+      </head>
       <body className="min-h-full flex flex-col">
         <Provider>
           {children}

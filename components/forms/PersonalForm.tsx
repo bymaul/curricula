@@ -1,6 +1,6 @@
 'use client';
 
-import { useRef } from 'react';
+import { useRef, useState } from 'react';
 import {
   Field,
   FieldGroup,
@@ -20,20 +20,23 @@ import {
 } from '@/components/ui/select';
 import { useI18n } from '@/components/I18nProvider';
 import { CVData } from '@/lib/schema';
+import { SAMPLE_CV_DATA } from '@/lib/sampleCv';
 import { translateValidationMessage } from '@/lib/i18n';
 import { UI_LANGUAGES } from '@/lib/i18n/languages';
 import { SUPPORTED_IMAGE_TYPES, resizeSquarePhoto } from '@/lib/imageFiles';
-import { TEMPLATES, TemplateId } from '@/lib/templates';
+import { TEMPLATES } from '@/lib/templates';
 import { useResumeStore } from '@/store/useResumeStore';
-import { useFieldArray, useFormContext } from 'react-hook-form';
-import { UserRound } from 'lucide-react';
+import { useFieldArray, useFormContext, useWatch } from 'react-hook-form';
+import { Sparkles, UserRound } from 'lucide-react';
 import { FormField } from '../ui/form-field';
+import { TemplatePicker } from './TemplatePicker';
 import { AddItemButton, ItemRemoveButton, SectionHeading } from './shared';
 
 export const PersonalForm = () => {
   const {
     register,
     control,
+    reset,
     formState: { errors },
   } = useFormContext<CVData>();
   const { t } = useI18n();
@@ -54,6 +57,13 @@ export const PersonalForm = () => {
       'harvard',
   );
   const setResumeTemplate = useResumeStore((state) => state.setResumeTemplate);
+  const sectionOrder = useResumeStore(
+    (state) => state.resumes.find((r) => r.id === state.activeId)?.sectionOrder,
+  );
+  const hiddenSections = useResumeStore(
+    (state) =>
+      state.resumes.find((r) => r.id === state.activeId)?.hiddenSections,
+  );
 
   const fileInputRef = useRef<HTMLInputElement>(null);
 
@@ -64,6 +74,21 @@ export const PersonalForm = () => {
 
   const errorFor = (message: string | undefined) =>
     translateValidationMessage(t, message);
+
+  const cvValues = useWatch({ control }) as CVData;
+  const isEmptyResume =
+    !cvValues.name &&
+    !cvValues.email &&
+    !cvValues.phone &&
+    !cvValues.summary &&
+    cvValues.experience.length === 0;
+  const [sampleDismissed, setSampleDismissed] = useState(false);
+  const showSampleCta = isEmptyResume && !sampleDismissed;
+
+  const loadSample = () => {
+    reset(SAMPLE_CV_DATA);
+    setSampleDismissed(true);
+  };
 
   const handlePhotoChange = async (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0];
@@ -112,6 +137,33 @@ export const PersonalForm = () => {
           description={t('personalDetails.description')}
         />
       </div>
+
+      {showSampleCta && (
+        <div className="mb-4 flex items-start gap-3 rounded-lg border border-primary/30 bg-primary/5 p-3">
+          <Sparkles className="w-4 h-4 mt-0.5 text-primary shrink-0" />
+          <div className="min-w-0 flex-1">
+            <p className="text-sm font-medium">
+              {t('personalDetails.sampleCtaTitle')}
+            </p>
+            <p className="text-xs text-muted-foreground mt-0.5">
+              {t('personalDetails.sampleCtaDescription')}
+            </p>
+            <div className="flex gap-2 mt-2.5">
+              <Button type="button" size="sm" onClick={loadSample}>
+                {t('personalDetails.sampleCtaLoad')}
+              </Button>
+              <Button
+                type="button"
+                size="sm"
+                variant="ghost"
+                onClick={() => setSampleDismissed(true)}
+              >
+                {t('common.cancel')}
+              </Button>
+            </div>
+          </div>
+        </div>
+      )}
 
       <FieldGroup>
         <FieldSet>
@@ -199,30 +251,19 @@ export const PersonalForm = () => {
 
             <Field className="sm:col-span-2">
               <FieldLabel>{t('personalDetails.templateLabel')}</FieldLabel>
-              <Select
-                items={TEMPLATES.map((template) => ({
-                  value: template.id,
-                  label: t(`templates.${template.id}.name`),
-                }))}
+              <TemplatePicker
                 value={templateId}
-                onValueChange={(value) => {
-                  const template = value as TemplateId;
+                onChange={(template) => {
                   if (activeId && TEMPLATES.some((t) => t.id === template)) {
                     setResumeTemplate(activeId, template);
                   }
                 }}
-              >
-                <SelectTrigger className="w-full">
-                  <SelectValue />
-                </SelectTrigger>
-                <SelectContent>
-                  {TEMPLATES.map((option) => (
-                    <SelectItem key={option.id} value={option.id}>
-                      {t(`templates.${option.id}.name`)}
-                    </SelectItem>
-                  ))}
-                </SelectContent>
-              </Select>
+                cvData={cvValues}
+                sectionOrder={sectionOrder}
+                hiddenSections={hiddenSections}
+                language={language}
+                photo={photo}
+              />
               <p className="text-xs text-muted-foreground">
                 {t('personalDetails.templateHint')}
               </p>

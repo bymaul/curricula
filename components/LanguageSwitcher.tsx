@@ -24,7 +24,7 @@ export function LanguageSwitcher() {
           <Button
             variant="ghost"
             size="icon-sm"
-            className="h-9 w-9"
+            className="h-8 w-8 sm:h-9 sm:w-9"
             aria-label={t('common.language')}
           >
             <Languages className="w-4 h-4" />

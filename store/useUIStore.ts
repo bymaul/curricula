@@ -4,6 +4,8 @@ import { AIProvider, TabName } from '@/lib/consts';
 import { Language } from '@/lib/i18n/languages';
 import { createQuotaAwareStorage } from '@/lib/storage';
 
+export type ThemeMode = 'system' | 'light' | 'dark';
+
 export interface UIState {
   activeTab: TabName;
   setActiveTab: (tab: TabName) => void;
@@ -14,6 +16,8 @@ export interface UIState {
   setScale: (scale: number | null) => void;
   uiLanguage: Language;
   setUILanguage: (lang: Language) => void;
+  theme: ThemeMode;
+  setTheme: (theme: ThemeMode) => void;
 }
 
 export const useUIStore = create<UIState>()(
@@ -28,6 +32,8 @@ export const useUIStore = create<UIState>()(
       setScale: (scale) => set({ scale }),
       uiLanguage: 'en',
       setUILanguage: (uiLanguage) => set({ uiLanguage }),
+      theme: 'system',
+      setTheme: (theme) => set({ theme }),
     }),
     {
       name: 'curricula-ui-state',
@@ -35,7 +41,12 @@ export const useUIStore = create<UIState>()(
         createQuotaAwareStorage<
           Pick<
             UIState,
-            'activeTab' | 'aiProvider' | 'aiModel' | 'scale' | 'uiLanguage'
+            | 'activeTab'
+            | 'aiProvider'
+            | 'aiModel'
+            | 'scale'
+            | 'uiLanguage'
+            | 'theme'
           >
         >(),
       partialize: (state) => ({
@@ -44,6 +55,7 @@ export const useUIStore = create<UIState>()(
         aiModel: state.aiModel,
         scale: state.scale,
         uiLanguage: state.uiLanguage,
+        theme: state.theme,
       }),
     },
   ),
