@@ -198,14 +198,9 @@ test('adds a custom section and renders its heading', async ({
   await page.getByRole('button', { name: 'Reorder sections' }).click();
   await page.getByRole('button', { name: 'Add section' }).click();
   await page.getByRole('menuitem', { name: 'Publications' }).click();
-  await page
-    .getByRole('dialog')
-    .getByRole('button', { name: 'Done' })
-    .click();
+  await page.getByRole('dialog').getByRole('button', { name: 'Done' }).click();
 
-  await sectionTabs
-    .getByRole('button', { name: 'Publications' })
-    .click();
+  await sectionTabs.getByRole('button', { name: 'Publications' }).click();
 
   if (!isMobile) {
     await expect(
