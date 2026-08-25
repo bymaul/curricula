@@ -1,6 +1,7 @@
 'use client';
 
 import { useI18n } from '@/components/I18nProvider';
+import { Award } from 'lucide-react';
 import { SectionFieldArray } from './shared';
 
 export const CertificationsForm = () => {
@@ -8,6 +9,7 @@ export const CertificationsForm = () => {
   return (
     <SectionFieldArray
       name="certifications"
+      emptyIcon={Award}
       title={t('certifications.title')}
       description={t('certifications.description')}
       addLabel={t('certifications.add')}

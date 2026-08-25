@@ -4,6 +4,7 @@ import { Button } from '@/components/ui/button';
 import {
   Dialog,
   DialogContent,
+  DialogDescription,
   DialogFooter,
   DialogHeader,
   DialogTitle,
@@ -14,6 +15,7 @@ import {
   FieldError,
   FieldLabel,
 } from '@/components/ui/field';
+import { WarningList } from '@/components/ui/warning-list';
 import {
   Select,
   SelectContent,
@@ -35,13 +37,8 @@ import { CVChangeSummary, summarizeCVChanges } from '@/lib/cvDiff';
 import { readImagePartsFromFiles } from '@/lib/imageFiles';
 import { CVData } from '@/lib/schema';
 import { useUIStore } from '@/store/useUIStore';
-import {
-  Loader2,
-  FilePenLine,
-  TriangleAlertIcon,
-  ImagePlus,
-  X,
-} from 'lucide-react';
+import { cn } from '@/lib/utils';
+import { Loader2, FilePenLine, ImagePlus, X } from 'lucide-react';
 import { useRef, useState } from 'react';
 import { useFormContext } from 'react-hook-form';
 
@@ -153,25 +150,14 @@ export function AIAdjustDialog({ open, onOpenChange }: AIAdjustDialogProps) {
         <DialogContent className="sm:max-w-lg grid-rows-[auto_minmax(0,1fr)_auto] max-h-[calc(100dvh-2rem)] overflow-hidden">
           <DialogHeader>
             <DialogTitle>{t('aiAdjust.reviewTitle')}</DialogTitle>
+            <DialogDescription>{t('import.reviewResult')}</DialogDescription>
           </DialogHeader>
 
-          <div className="flex min-h-0 flex-col gap-2 overflow-y-auto overscroll-contain p-2 -mx-1">
-            {pendingResult.warnings.length > 0 && (
-              <div className="rounded-lg border border-amber-500/40 bg-amber-500/10 px-3 py-2.5">
-                <div className="mb-1 flex items-center gap-2 text-sm font-medium text-amber-700 dark:text-amber-400">
-                  <TriangleAlertIcon
-                    className="size-4 shrink-0"
-                    aria-hidden="true"
-                  />
-                  {t('importPreview.reviewFields')}
-                </div>
-                <ul className="space-y-0.5 text-sm text-muted-foreground">
-                  {pendingResult.warnings.map((warning) => (
-                    <li key={warning}>- {warning}</li>
-                  ))}
-                </ul>
-              </div>
-            )}
+          <div className="flex min-h-0 flex-col gap-3 overflow-y-auto overscroll-contain p-2 -mx-1">
+            <WarningList
+              title={t('importPreview.reviewFields')}
+              warnings={pendingResult.warnings}
+            />
 
             {changeSummary.length === 0 ? (
               <p className="text-sm text-muted-foreground">
@@ -185,7 +171,7 @@ export function AIAdjustDialog({ open, onOpenChange }: AIAdjustDialogProps) {
                     className="flex items-center justify-between gap-2 px-3 py-2.5"
                   >
                     <span className="flex items-center gap-2 text-sm font-medium min-w-0">
-                      <FilePenLine className="w-4 h-4 text-primary shrink-0" />
+                      <FilePenLine className="size-4 text-primary shrink-0" />
                       <span className="truncate">{t(item.labelKey)}</span>
                     </span>
                     <span className="text-sm text-muted-foreground shrink-0">
@@ -213,9 +199,10 @@ export function AIAdjustDialog({ open, onOpenChange }: AIAdjustDialogProps) {
       <DialogContent className="sm:max-w-lg grid-rows-[auto_minmax(0,1fr)_auto] max-h-[calc(100dvh-2rem)] overflow-hidden">
         <DialogHeader>
           <DialogTitle>{t('aiAdjust.title')}</DialogTitle>
+          <DialogDescription>{t('aiAdjust.description')}</DialogDescription>
         </DialogHeader>
 
-        <div className="flex min-h-0 flex-col gap-4 overflow-y-auto overscroll-contain p-2 -mx-1">
+        <div className="flex min-h-0 flex-col gap-3 overflow-y-auto overscroll-contain p-2 -mx-1">
           <Field>
             <FieldLabel>{t('aiAdjust.scopeLabel')}</FieldLabel>
             <FieldDescription>
@@ -298,13 +285,14 @@ export function AIAdjustDialog({ open, onOpenChange }: AIAdjustDialogProps) {
                 setIsDragging(false);
                 void processFiles(e.dataTransfer.files);
               }}
-              className={`flex w-full cursor-pointer flex-col items-center justify-center gap-2 rounded-lg border-2 border-dashed px-4 py-6 text-center text-sm text-muted-foreground transition-colors disabled:opacity-50 border-border ${
-                isDragging ? 'bg-primary/10 text-primary' : 'hover:bg-muted'
-              }`}
+              className={cn(
+                'flex w-full cursor-pointer flex-col items-center justify-center gap-2 rounded-lg border-2 border-dashed px-4 py-6 text-center text-sm text-muted-foreground border-border transition-colors',
+                isDragging ? 'bg-primary/10 text-primary' : 'hover:bg-muted',
+              )}
             >
               {images.length === 0 ? (
                 <>
-                  <ImagePlus className="w-6 h-6" aria-hidden="true" />
+                  <ImagePlus className="size-6" aria-hidden="true" />
                   <span className="font-medium">
                     {t('aiAdjust.imageDropText')}
                   </span>
@@ -323,7 +311,7 @@ export function AIAdjustDialog({ open, onOpenChange }: AIAdjustDialogProps) {
                           alt={t('aiAdjust.imageAlt', {
                             index: index + 1,
                           })}
-                          className="h-16 w-16 rounded-md border border-border object-cover"
+                          className="h-16 w-16 rounded-lg border border-border object-cover"
                         />
                         <button
                           type="button"
@@ -334,9 +322,9 @@ export function AIAdjustDialog({ open, onOpenChange }: AIAdjustDialogProps) {
                           aria-label={t('aiAdjust.imageRemoveAria', {
                             index: index + 1,
                           })}
-                          className="absolute -top-1.5 -right-1.5 rounded-full bg-background p-1 text-muted-foreground shadow-sm border border-border hover:text-foreground"
+                          className="absolute -top-2 -right-2 flex h-6 w-6 items-center justify-center rounded-full bg-background text-muted-foreground shadow-sm border border-border transition-colors hover:text-foreground"
                         >
-                          <X className="w-3 h-3" aria-hidden="true" />
+                          <X className="size-3.5" aria-hidden="true" />
                         </button>
                       </li>
                     ))}
@@ -366,7 +354,7 @@ export function AIAdjustDialog({ open, onOpenChange }: AIAdjustDialogProps) {
             {t('aiAdjust.cancel')}
           </Button>
           <Button onClick={handleSubmit} disabled={isAdjusting}>
-            {isAdjusting && <Loader2 className="w-4 h-4 animate-spin" />}
+            {isAdjusting && <Loader2 className="size-4 animate-spin" />}
             {isAdjusting ? t('aiAdjust.adjusting') : t('aiAdjust.adjustCv')}
           </Button>
         </DialogFooter>

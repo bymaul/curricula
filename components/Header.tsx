@@ -2,7 +2,6 @@
 
 import { ChevronsUpDown, FileText } from 'lucide-react';
 import { useI18n } from './I18nProvider';
-import { LanguageSwitcher } from './LanguageSwitcher';
 import { ThemeToggle } from './ThemeToggle';
 import { Button } from './ui/button';
 import { Separator } from './ui/separator';
@@ -35,10 +34,8 @@ export function Header({ value, onChange }: HeaderProps) {
         {t('brand.name')}
       </h1>
 
-      <div className="flex h-5 items-center gap-1.5 sm:gap-2">
+      <div className="flex items-center gap-1.5 sm:gap-2">
         <ThemeToggle />
-        <Separator orientation="vertical" />
-        <LanguageSwitcher />
         <Separator orientation="vertical" />
         <Tabs
           value={value}
@@ -60,9 +57,9 @@ export function Header({ value, onChange }: HeaderProps) {
           onClick={() => setDialog('resumes', true)}
           className="hidden lg:inline-flex"
         >
-          <FileText className="w-4 h-4" data-icon="inline-start" />
+          <FileText className="size-4" data-icon="inline-start" />
           <span className="truncate">{activeResumeTitle}</span>
-          <ChevronsUpDown className="w-4 h-4" data-icon="inline-end" />
+          <ChevronsUpDown className="size-4" data-icon="inline-end" />
         </Button>
       </div>
     </header>

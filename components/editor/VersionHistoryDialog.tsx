@@ -4,6 +4,7 @@ import { Button } from '@/components/ui/button';
 import {
   Dialog,
   DialogContent,
+  DialogDescription,
   DialogHeader,
   DialogTitle,
 } from '@/components/ui/dialog';
@@ -38,17 +39,23 @@ export function VersionHistoryDialog({
       <DialogContent className="sm:max-w-md grid-rows-[auto_minmax(0,1fr)_auto] max-h-[calc(100dvh-2rem)] overflow-hidden">
         <DialogHeader>
           <DialogTitle>{t('versionHistory.title')}</DialogTitle>
+          <DialogDescription>
+            {t('versionHistory.description')}
+          </DialogDescription>
         </DialogHeader>
 
         <div className="min-h-0 -mx-1">
           <ScrollArea className="h-full p-2">
-            <p className="text-xs text-muted-foreground mb-3 px-1">
-              {t('versionHistory.description')}
-            </p>
             {reversed.length === 0 ? (
-              <p className="text-sm text-muted-foreground px-1">
-                {t('versionHistory.empty')}
-              </p>
+              <div className="flex flex-col items-center gap-2 px-1 py-10 text-center">
+                <History
+                  className="size-5 text-muted-foreground"
+                  aria-hidden="true"
+                />
+                <p className="max-w-xs text-sm text-muted-foreground">
+                  {t('versionHistory.empty')}
+                </p>
+              </div>
             ) : (
               <ul className="divide-y divide-border">
                 {reversed.map((entry, i) => {
@@ -67,7 +74,7 @@ export function VersionHistoryDialog({
                       <div className="min-w-0">
                         <p className="flex items-center gap-2 text-sm font-semibold truncate">
                           {isCurrent && (
-                            <History className="w-4 h-4 shrink-0 text-muted-foreground" />
+                            <History className="size-4 shrink-0 text-muted-foreground" />
                           )}
                           <span className="truncate">{title}</span>
                         </p>

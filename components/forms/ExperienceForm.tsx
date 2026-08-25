@@ -1,6 +1,7 @@
 'use client';
 
 import { useI18n } from '@/components/I18nProvider';
+import { Briefcase } from 'lucide-react';
 import { SectionFieldArray } from './shared';
 
 export const ExperienceForm = () => {
@@ -8,6 +9,7 @@ export const ExperienceForm = () => {
   return (
     <SectionFieldArray
       name="experience"
+      emptyIcon={Briefcase}
       title={t('workExperience.title')}
       description={t('workExperience.description')}
       addLabel={t('workExperience.add')}
@@ -48,7 +50,6 @@ export const ExperienceForm = () => {
           className: 'sm:col-span-2',
           label: t('workExperience.descriptionLabel'),
           placeholder: t('workExperience.descriptionPlaceholder'),
-          textareaClassName: 'h-32',
         },
       ]}
     />

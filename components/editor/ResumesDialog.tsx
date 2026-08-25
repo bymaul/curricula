@@ -83,7 +83,7 @@ export function ResumesDialog({ open, onOpenChange }: ResumesDialogProps) {
   return (
     <>
       <Dialog open={open} onOpenChange={onOpenChange}>
-        <DialogContent className="sm:max-w-md grid-rows-[auto_minmax(0,1fr)_auto] max-h-[calc(100dvh-2rem)] overflow-hidden">
+        <DialogContent className="sm:max-w-xl grid-rows-[auto_minmax(0,1fr)_auto] max-h-[calc(100dvh-2rem)] overflow-hidden">
           <DialogHeader>
             <DialogTitle>{t('resumes.title')}</DialogTitle>
             <DialogDescription>{t('resumes.description')}</DialogDescription>
@@ -126,7 +126,7 @@ export function ResumesDialog({ open, onOpenChange }: ResumesDialogProps) {
                         >
                           <FileText
                             className={cn(
-                              'w-4 h-4 shrink-0',
+                              'size-4 shrink-0',
                               active ? 'text-primary' : 'text-muted-foreground',
                             )}
                           />
@@ -150,7 +150,7 @@ export function ResumesDialog({ open, onOpenChange }: ResumesDialogProps) {
                               })}
                               onClick={() => startRename(r.id, r.title)}
                             >
-                              <Pencil className="w-4 h-4" />
+                              <Pencil className="size-4" />
                             </IconButton>
                             <IconButton
                               aria-label={t('resumes.duplicateAria', {
@@ -158,7 +158,7 @@ export function ResumesDialog({ open, onOpenChange }: ResumesDialogProps) {
                               })}
                               onClick={() => duplicateResume(r.id)}
                             >
-                              <Copy className="w-4 h-4" />
+                              <Copy className="size-4" />
                             </IconButton>
                             <IconButton
                               aria-label={t('resumes.deleteAria', {
@@ -168,13 +168,13 @@ export function ResumesDialog({ open, onOpenChange }: ResumesDialogProps) {
                               disabled={resumes.length <= 1}
                               className="hover:text-destructive hover:bg-destructive/10"
                             >
-                              <Trash2 className="w-4 h-4" />
+                              <Trash2 className="size-4" />
                             </IconButton>
                           </div>
                         )}
 
                         {active && (
-                          <Check className="w-4 h-4 mx-1 text-primary shrink-0" />
+                          <Check className="size-4 mx-1 text-primary shrink-0" />
                         )}
                       </div>
                     </div>
@@ -184,15 +184,17 @@ export function ResumesDialog({ open, onOpenChange }: ResumesDialogProps) {
             </ScrollArea>
           </div>
 
-          <DialogFooter>
-            <Button variant="outline" onClick={handleCreate}>
-              <Plus className="w-4 h-4" />
-              {t('resumes.newCv')}
-            </Button>
-            <Button variant="outline" onClick={handleCreateFromSample}>
-              <FileText className="w-4 h-4" />
-              {t('resumes.newFromExample')}
-            </Button>
+          <DialogFooter className="items-stretch sm:items-center">
+            <div className="flex flex-col gap-2 sm:flex-row">
+              <Button variant="outline" onClick={handleCreate}>
+                <Plus className="size-4" />
+                {t('resumes.newCv')}
+              </Button>
+              <Button variant="outline" onClick={handleCreateFromSample}>
+                <FileText className="size-4" />
+                {t('resumes.newFromExample')}
+              </Button>
+            </div>
             <Button onClick={() => onOpenChange(false)}>
               {t('common.done')}
             </Button>
@@ -213,7 +215,7 @@ export function ResumesDialog({ open, onOpenChange }: ResumesDialogProps) {
         }
         confirmLabel={
           <>
-            <Trash2 className="w-4 h-4" />
+            <Trash2 className="size-4" />
             {t('common.delete')}
           </>
         }
