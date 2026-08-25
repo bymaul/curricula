@@ -1,7 +1,12 @@
 'use client';
 
 import React, { forwardRef } from 'react';
-import { DEFAULT_SECTION_ORDER, SectionId } from '@/lib/consts';
+import {
+  BuiltinSectionId,
+  DEFAULT_SECTION_ORDER,
+  SectionId,
+} from '@/lib/consts';
+import { DEFAULT_DESIGN, designCssVars } from '@/lib/design';
 import { translate } from '@/lib/i18n';
 import { CVData } from '@/lib/schema';
 import {
@@ -11,6 +16,9 @@ import {
   SectionContext,
   formatUrl,
   renderFormattedText,
+  renderCustomItems,
+  resolveTemplateOrder,
+  isBuiltinSection,
   sectionClickProps,
   headerClickProps,
   INTERACTIVE_CLASSES,
@@ -18,18 +26,24 @@ import {
   ItemSub,
 } from './shared';
 
-type MainSectionId = Exclude<SectionId, 'skills' | 'certifications'>;
+type MainSectionId = Exclude<BuiltinSectionId, 'skills' | 'certifications'>;
 
 const TYPE = {
   name: 'text-[17pt] font-bold text-slate-900',
   jobTitle: 'text-[10.5pt] font-medium text-slate-600',
   contact: 'text-[9pt] text-slate-700',
   sidebarTitle: 'text-[9.5pt] font-bold uppercase tracking-wide text-slate-700',
-  mainTitle: 'text-[11pt] font-bold uppercase tracking-wide text-sky-700',
+  mainTitle:
+    'text-[11pt] font-bold uppercase tracking-wide [color:var(--cv-accent)]',
   itemTitle: 'text-[10.5pt] font-bold text-slate-900',
   itemMeta: 'text-[9.5pt] font-normal text-slate-500',
   itemSub: 'text-[9.5pt] italic text-slate-600',
   body: 'text-[9.5pt] leading-snug text-slate-700',
+} as const;
+
+const SPACE = {
+  sectionGap: '[margin-bottom:var(--cv-section-gap)]',
+  itemGap: '[margin-bottom:var(--cv-item-gap)]',
 } as const;
 
 type SectionRenderer = (
@@ -37,7 +51,6 @@ type SectionRenderer = (
   context: SectionContext,
 ) => React.ReactNode;
 
-/** Accent-underlined section heading for the main column. */
 function MainSection({
   id,
   title,
@@ -45,7 +58,7 @@ function MainSection({
   t,
   children,
 }: {
-  id: MainSectionId;
+  id: SectionId;
   title: string;
   onClick?: (sectionId: SectionId) => void;
   t: T;
@@ -56,7 +69,7 @@ function MainSection({
       data-section-id={id}
       {...sectionClickProps(id, onClick)}
       aria-label={onClick ? t('template.editAria', { title }) : undefined}
-      className={`mb-[10pt] ${onClick ? INTERACTIVE_CLASSES : ''}`}
+      className={`${SPACE.sectionGap} ${onClick ? INTERACTIVE_CLASSES : ''}`}
     >
       <h2
         className={`${TYPE.mainTitle} border-b border-slate-300 pb-[2pt] mb-[6pt] break-after-avoid`}
@@ -68,7 +81,6 @@ function MainSection({
   );
 }
 
-/** Understated heading for the sidebar. */
 function SidebarSection({
   id,
   title,
@@ -87,7 +99,7 @@ function SidebarSection({
       data-section-id={id}
       {...sectionClickProps(id, onClick)}
       aria-label={onClick ? t('template.editAria', { title }) : undefined}
-      className={`mb-4 ${onClick ? INTERACTIVE_CLASSES : ''}`}
+      className={`${SPACE.sectionGap} ${onClick ? INTERACTIVE_CLASSES : ''}`}
     >
       <h2
         className={`${TYPE.sidebarTitle} border-b border-slate-300 pb-[2pt] mb-[3pt]`}
@@ -120,7 +132,7 @@ const MAIN_SECTION_RENDERERS: Record<MainSectionId, SectionRenderer> = {
         t={t}
       >
         {cvData.experience.map((exp, index) => (
-          <div key={index} className="mb-[7pt] break-inside-avoid">
+          <div key={index} className={`${SPACE.itemGap} break-inside-avoid`}>
             <ItemHeader
               title={exp.role}
               meta={exp.date}
@@ -146,7 +158,7 @@ const MAIN_SECTION_RENDERERS: Record<MainSectionId, SectionRenderer> = {
         t={t}
       >
         {cvData.projects.map((proj, index) => (
-          <div key={index} className="mb-[7pt] break-inside-avoid">
+          <div key={index} className={`${SPACE.itemGap} break-inside-avoid`}>
             <ItemHeader
               title={proj.name}
               meta={proj.date}
@@ -167,7 +179,7 @@ const MAIN_SECTION_RENDERERS: Record<MainSectionId, SectionRenderer> = {
         t={t}
       >
         {cvData.education.map((edu, index) => (
-          <div key={index} className="mb-[7pt] break-inside-avoid">
+          <div key={index} className={`${SPACE.itemGap} break-inside-avoid`}>
             <ItemHeader
               title={edu.institution}
               meta={edu.date}
@@ -188,10 +200,22 @@ const MAIN_SECTION_RENDERERS: Record<MainSectionId, SectionRenderer> = {
 
 export const ModernTemplate = forwardRef<HTMLDivElement, TemplateProps>(
   (
-    { cvData, sectionOrder, hiddenSections, language, photo, onSectionClick },
+    {
+      cvData,
+      sectionOrder,
+      hiddenSections,
+      language,
+      photo,
+      design,
+      onSectionClick,
+    },
     ref,
   ) => {
     const t: T = (key, params) => translate(language ?? 'en', key, params);
+    const styleVars = designCssVars(design ?? DEFAULT_DESIGN, {
+      accentFallback: '#0369a1',
+      fontFallback: 'sans',
+    });
     const hidden = new Set(hiddenSections ?? []);
 
     const mainOrder = (sectionOrder ?? DEFAULT_SECTION_ORDER).filter(
@@ -249,7 +273,11 @@ export const ModernTemplate = forwardRef<HTMLDivElement, TemplateProps>(
     };
 
     return (
-      <div ref={ref} className="mx-auto shadow-2xl print:shadow-none bg-white">
+      <div
+        ref={ref}
+        style={{ ...styleVars, fontFamily: 'var(--cv-font)' }}
+        className="mx-auto shadow-2xl print:shadow-none bg-white"
+      >
         <PrintStyle />
 
         <table className="w-full border-collapse">
@@ -268,7 +296,6 @@ export const ModernTemplate = forwardRef<HTMLDivElement, TemplateProps>(
                   <tbody>
                     <tr>
                       <td className="w-[5.5cm] align-top bg-gray-100 px-[0.75cm] pt-[1cm] pb-[1cm]">
-                        {/* --- SIDEBAR HEADER --- */}
                         <div
                           data-section-id="summary"
                           {...headerClickProps(onSectionClick)}
@@ -301,7 +328,6 @@ export const ModernTemplate = forwardRef<HTMLDivElement, TemplateProps>(
                           )}
                         </div>
 
-                        {/* --- SIDEBAR CONTACT --- */}
                         <div className="mb-4">
                           <h2
                             className={`${TYPE.sidebarTitle} border-b border-slate-300 pb-[2pt] mb-[3pt]`}
@@ -329,26 +355,51 @@ export const ModernTemplate = forwardRef<HTMLDivElement, TemplateProps>(
                           </div>
                         </div>
 
-                        {/* --- SIDEBAR SECTIONS (skills/certifications) --- */}
                         {sidebarOrder.map((id) =>
                           id === 'skills' || id === 'certifications' ? (
                             <React.Fragment key={id}>
-                              {sidebarSections[id]?.()}
+                              {sidebarSections[
+                                id as 'skills' | 'certifications'
+                              ]?.()}
                             </React.Fragment>
                           ) : null,
                         )}
                       </td>
 
-                      {/* --- MAIN CONTENT --- */}
                       <td className="align-top px-[1cm] pt-[1cm] pb-[1cm]">
-                        {mainOrder.map((id) => (
-                          <React.Fragment key={id}>
-                            {MAIN_SECTION_RENDERERS[id as MainSectionId]?.(
-                              cvData,
-                              context,
-                            )}
-                          </React.Fragment>
-                        ))}
+                        {resolveTemplateOrder(mainOrder, cvData).map((id) => {
+                          const builtin = isBuiltinSection(id)
+                            ? MAIN_SECTION_RENDERERS[id as MainSectionId]?.(
+                                cvData,
+                                context,
+                              )
+                            : null;
+                          if (builtin)
+                            return (
+                              <React.Fragment key={id}>
+                                {builtin}
+                              </React.Fragment>
+                            );
+                          const section = cvData.customSections?.[id];
+                          if (!section) return null;
+                          return (
+                            <MainSection
+                              key={id}
+                              id={section.id}
+                              title={section.title}
+                              onClick={onSectionClick}
+                              t={t}
+                            >
+                              {renderCustomItems(section.items, {
+                                wrapper: SPACE.itemGap,
+                                title: TYPE.itemTitle,
+                                meta: TYPE.itemMeta,
+                                sub: TYPE.itemSub,
+                                body: TYPE.body,
+                              })}
+                            </MainSection>
+                          );
+                        })}
                       </td>
                     </tr>
                   </tbody>

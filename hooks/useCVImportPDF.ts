@@ -50,10 +50,6 @@ export interface ExtractedPDFText {
   images: CVImagePart[];
 }
 
-/**
- * Extracts text from a PDF client-side. If the text is too sparse (likely a
- * scanned/image PDF), renders the first pages as JPEGs for vision parsing.
- */
 export async function extractTextFromPDF(
   file: File,
 ): Promise<ExtractedPDFText> {
@@ -100,7 +96,6 @@ export interface CVParseResponse {
   warnings: string[];
 }
 
-/** Sends extracted PDF text (and optional page images) to the AI parser. */
 export async function parseCVWithAI(
   input: { text: string; images?: CVImagePart[] },
   params: ParseCVParams,

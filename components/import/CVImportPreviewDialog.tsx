@@ -10,10 +10,10 @@ import {
   DialogTitle,
 } from '@/components/ui/dialog';
 import { useI18n } from '@/components/I18nProvider';
-import { getSectionTabName } from '@/lib/consts';
+import { BuiltinTabName, getSectionTabName } from '@/lib/consts';
 import { TAB_KEYS } from '@/lib/i18n';
 import { useImportStore } from '@/store/useImportStore';
-import { TriangleAlertIcon } from 'lucide-react';
+import { WarningList } from '@/components/ui/warning-list';
 import { useFormContext } from 'react-hook-form';
 import type { CVData } from '@/lib/schema';
 
@@ -49,22 +49,10 @@ export function CVImportPreviewDialog() {
 
         {cvData && (
           <div className="space-y-4">
-            {warnings.length > 0 && (
-              <div className="rounded-lg border border-amber-500/40 bg-amber-500/10 px-3 py-2.5">
-                <div className="mb-1 flex items-center gap-2 text-sm font-medium text-amber-700 dark:text-amber-400">
-                  <TriangleAlertIcon
-                    className="size-4 shrink-0"
-                    aria-hidden="true"
-                  />
-                  {t('importPreview.reviewFields')}
-                </div>
-                <ul className="space-y-0.5 text-sm text-muted-foreground">
-                  {warnings.map((warning) => (
-                    <li key={warning}>- {warning}</li>
-                  ))}
-                </ul>
-              </div>
-            )}
+            <WarningList
+              title={t('importPreview.reviewFields')}
+              warnings={warnings}
+            />
 
             <div className="space-y-0.5">
               <p className="text-base font-semibold leading-tight">
@@ -82,15 +70,21 @@ export function CVImportPreviewDialog() {
 
             <div className="grid grid-cols-2 gap-2">
               <CountRow
-                label={t(TAB_KEYS[getSectionTabName('experience')])}
+                label={t(
+                  TAB_KEYS[getSectionTabName('experience') as BuiltinTabName],
+                )}
                 count={cvData.experience.length}
               />
               <CountRow
-                label={t(TAB_KEYS[getSectionTabName('projects')])}
+                label={t(
+                  TAB_KEYS[getSectionTabName('projects') as BuiltinTabName],
+                )}
                 count={cvData.projects.length}
               />
               <CountRow
-                label={t(TAB_KEYS[getSectionTabName('education')])}
+                label={t(
+                  TAB_KEYS[getSectionTabName('education') as BuiltinTabName],
+                )}
                 count={cvData.education.length}
               />
               <CountRow
@@ -98,7 +92,11 @@ export function CVImportPreviewDialog() {
                 count={cvData.skills.length}
               />
               <CountRow
-                label={t(TAB_KEYS[getSectionTabName('certifications')])}
+                label={t(
+                  TAB_KEYS[
+                    getSectionTabName('certifications') as BuiltinTabName
+                  ],
+                )}
                 count={cvData.certifications.length}
               />
               <CountRow

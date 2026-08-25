@@ -23,10 +23,6 @@ const PNG_SIGNATURE = Buffer.from([
 ]);
 const BASE64_RE = /^[A-Za-z0-9+/]*={0,2}$/;
 
-/**
- * Decodes strict base64 into bytes, or null when the payload is not valid
- * base64 (length mod 4 == 1 is impossible in base64).
- */
 function decodeBase64(data: string): Buffer | null {
   if (data.length === 0 || data.length % 4 === 1) return null;
   if (!BASE64_RE.test(data)) return null;
@@ -38,7 +34,6 @@ function decodeBase64(data: string): Buffer | null {
   }
 }
 
-/** Verifies the decoded bytes carry the file signature of the declared MIME type. */
 function hasImageSignature(bytes: Buffer, mimeType: string): boolean {
   if (mimeType === 'image/jpeg') {
     return (
@@ -97,7 +92,6 @@ interface AIRequestContext<Body> {
   model: AIModel;
 }
 
-/** Upper bound on the JSON request body (6 images x 1.5M chars + overhead). */
 export const MAX_REQUEST_BODY_CHARS = 10_500_000;
 
 interface ReadBodyResult {
@@ -105,7 +99,6 @@ interface ReadBodyResult {
   tooLarge: boolean;
 }
 
-/** Reads the request body text, rejecting oversized bodies before JSON parsing. */
 async function readBody(req: Request): Promise<ReadBodyResult> {
   const contentLength = Number(req.headers.get('content-length'));
   if (
@@ -122,14 +115,6 @@ async function readBody(req: Request): Promise<ReadBodyResult> {
   return { text, tooLarge: false };
 }
 
-/**
- * Same-origin gate (throttle-only protection, no auth).
- *
- * When the Origin header is present it must match the request origin or one of
- * the configured AI_ALLOWED_ORIGINS, otherwise the request is rejected with
- * 403. Requests without an Origin header (curl, scripts, native clients) are
- * left to the rate limiter.
- */
 function enforceOrigin(req: Request): Response | null {
   const { enforceOrigin, allowedOrigins } = parseEnv();
   if (!enforceOrigin) return null;

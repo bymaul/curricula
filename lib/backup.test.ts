@@ -1,6 +1,7 @@
 import { describe, expect, it } from 'vitest';
 import { parseBackup, serializeBackup } from '@/lib/backup';
 import { DEFAULT_SECTION_ORDER, SectionId } from '@/lib/consts';
+import { DEFAULT_DESIGN } from '@/lib/design';
 import { CVData } from '@/lib/schema';
 import type { ResumeRecord } from '@/store/useResumeStore';
 
@@ -31,6 +32,7 @@ function makeRecord(overrides: Partial<ResumeRecord> = {}): ResumeRecord {
     language: 'en',
     photo: '',
     templateId: 'harvard',
+    design: { ...DEFAULT_DESIGN },
     autoTitle: false,
     updatedAt: 123456,
     ...overrides,
@@ -67,6 +69,76 @@ describe('backup', () => {
     expect(parsed!.resumes[0].templateId).toBe('modern');
   });
 
+  it('round-trips the design on each resume', () => {
+    const record = makeRecord({
+      design: {
+        accentColor: 'burgundy',
+        fontFamily: 'serif',
+        density: 'compact',
+      },
+    });
+    const parsed = parseBackup(serializeBackup([record], 'r1'));
+
+    expect(parsed!.resumes[0].design).toEqual({
+      accentColor: 'burgundy',
+      fontFamily: 'serif',
+      density: 'compact',
+    });
+  });
+
+  it('falls back to the default design for a garbage value', () => {
+    const record = makeRecord();
+    const raw = serializeBackup([record], 'r1').replace(
+      '"accentColor":"default"',
+      '"accentColor":"neon"',
+    );
+
+    const parsed = parseBackup(raw);
+    expect(parsed!.resumes[0].design).toEqual(DEFAULT_DESIGN);
+  });
+
+  it('round-trips custom section ids in order and visibility', () => {
+    const record = makeRecord({
+      data: {
+        ...makeData(),
+        customSections: {
+          cs1: {
+            id: 'cs1',
+            title: 'Publications',
+            items: [
+              {
+                title: 'A Paper',
+                subtitle: '',
+                date: '2024',
+                location: '',
+                description: 'Details',
+              },
+            ],
+          },
+        },
+      },
+      sectionOrder: [...DEFAULT_SECTION_ORDER, 'cs1'],
+      hiddenSections: ['cs1'],
+    });
+
+    const parsed = parseBackup(serializeBackup([record], 'r1'));
+
+    expect(parsed).not.toBeNull();
+    expect(parsed!.resumes[0].data.customSections).toEqual(
+      record.data.customSections,
+    );
+    expect(parsed!.resumes[0].sectionOrder).toContain('cs1');
+    expect(parsed!.resumes[0].hiddenSections).toContain('cs1');
+  });
+
+  it('rejects an unknown builtin id that no custom section defines', () => {
+    const record = makeRecord();
+    const payload = JSON.parse(serializeBackup([record], 'r1'));
+    payload.resumes[0].sectionOrder = ['ghost-id', ...DEFAULT_SECTION_ORDER];
+
+    expect(parseBackup(JSON.stringify(payload))).toBeNull();
+  });
+
   it('defaults language, photo, and template for legacy backups', () => {
     const record = makeRecord();
     const legacy = {
@@ -91,6 +163,7 @@ describe('backup', () => {
     expect(parsed!.resumes[0].language).toBe('en');
     expect(parsed!.resumes[0].photo).toBe('');
     expect(parsed!.resumes[0].templateId).toBe('harvard');
+    expect(parsed!.resumes[0].design).toEqual(DEFAULT_DESIGN);
   });
 
   it('round-trips multiple resumes and a null active id', () => {

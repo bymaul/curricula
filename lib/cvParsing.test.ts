@@ -139,6 +139,7 @@ describe('normalizeCVOutput', () => {
         'education',
         'skills',
         'certifications',
+        'customSections',
       ].sort(),
     );
     expect(warnings.length).toBeGreaterThan(0);

@@ -9,16 +9,6 @@ interface KeyboardShortcutHandlers {
   onPrint: () => void;
 }
 
-/**
- * Global editor shortcuts:
- *  - Ctrl/Cmd+Z            undo
- *  - Ctrl/Cmd+Shift+Z / Y  redo
- *  - Ctrl/Cmd+S            save now (flush the autosave debounce)
- *  - Ctrl/Cmd+P            print the CV
- *
- * Inputs, textareas, selects, and content-editable elements are skipped so
- * typing in a form never triggers a history rewind or the print dialog.
- */
 export function useKeyboardShortcuts({
   onUndo,
   onRedo,

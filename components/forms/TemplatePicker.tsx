@@ -2,6 +2,7 @@
 
 import { useI18n } from '@/components/I18nProvider';
 import { TEMPLATE_COMPONENTS } from '@/components/resume/registry';
+import { DesignSettings } from '@/lib/design';
 import { PAGE_WIDTH_PX } from '@/lib/pagination';
 import { CVData } from '@/lib/schema';
 import { ResumeLanguage } from '@/lib/i18n/languages';
@@ -18,6 +19,7 @@ interface TemplatePickerProps {
   hiddenSections?: SectionId[];
   language?: ResumeLanguage;
   photo?: string;
+  design?: DesignSettings;
 }
 
 export function TemplatePicker({
@@ -28,6 +30,7 @@ export function TemplatePicker({
   hiddenSections,
   language,
   photo,
+  design,
 }: TemplatePickerProps) {
   const { t } = useI18n();
   const listRef = useRef<HTMLDivElement>(null);
@@ -70,6 +73,7 @@ export function TemplatePicker({
           hiddenSections={hiddenSections}
           language={language}
           photo={photo}
+          design={design}
         />
       ))}
     </div>
@@ -102,6 +106,7 @@ interface TemplateCardProps {
   hiddenSections?: SectionId[];
   language?: ResumeLanguage;
   photo?: string;
+  design?: DesignSettings;
 }
 
 function TemplateCard({
@@ -113,6 +118,7 @@ function TemplateCard({
   hiddenSections,
   language,
   photo,
+  design,
 }: TemplateCardProps) {
   const { t } = useI18n();
   const { ref, scale } = usePreviewScale();
@@ -128,7 +134,7 @@ function TemplateCard({
       onClick={onSelect}
       className={cn(
         'flex min-w-0 cursor-pointer flex-col items-center gap-1 rounded-lg p-1 outline-none transition-colors',
-        'focus-visible:ring-2 focus-visible:ring-ring/60',
+        'focus-visible:ring-3 focus-visible:ring-ring/50',
         selected
           ? 'bg-primary/10 ring-2 ring-primary/50'
           : 'hover:bg-muted focus-visible:rounded-lg',
@@ -153,12 +159,13 @@ function TemplateCard({
             hiddenSections={hiddenSections}
             language={language}
             photo={photo}
+            design={design}
           />
         </div>
       </div>
       <span
         className={cn(
-          'max-w-full truncate text-[11px] font-medium sm:text-xs',
+          'max-w-full truncate text-xs font-medium',
           selected ? 'text-primary' : 'text-muted-foreground',
         )}
       >

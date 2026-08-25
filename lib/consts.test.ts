@@ -83,8 +83,8 @@ describe('section tab mapping', () => {
     expect(getSectionIdFromTab('personal')).toBe('summary');
   });
 
-  it('returns null for unknown tabs', () => {
-    expect(getSectionIdFromTab('Nope')).toBeNull();
+  it('passes unknown tabs through as custom section ids', () => {
+    expect(getSectionIdFromTab('Nope')).toBe('Nope');
   });
 });
 

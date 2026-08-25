@@ -37,6 +37,26 @@ export const certificationSchema = z.object({
   date: z.string().min(1, 'validation.dateRequired'),
 });
 
+const customSectionItemSchema = z.object({
+  title: z.string(),
+  subtitle: z.string().optional(),
+  date: z.string().optional(),
+  location: z.string().optional(),
+  description: z.string(),
+});
+
+const customSectionShape = {
+  id: z.string().min(1),
+  title: z.string().min(1, 'validation.sectionTitleRequired'),
+  items: z.array(customSectionItemSchema),
+};
+
+export const customSectionSchema = z.object(customSectionShape);
+
+export type CustomSection = z.infer<typeof customSectionSchema>;
+export type CustomSectionItem = CustomSection['items'][number];
+export type CustomSectionsRecord = Record<string, CustomSection>;
+
 export const cvSchema = z.object({
   name: z.string().min(1, 'validation.fullNameRequired'),
   jobTitle: z.string(),
@@ -53,6 +73,7 @@ export const cvSchema = z.object({
   education: z.array(educationSchema),
   skills: z.array(skillCategorySchema),
   certifications: z.array(certificationSchema),
+  customSections: z.record(z.string(), customSectionSchema).optional(),
 });
 
 export type CVData = z.infer<typeof cvSchema>;
@@ -90,7 +111,21 @@ export const cvDataStoredSchema = z.object({
   certifications: z.array(
     z.object({ name: z.string(), issuer: z.string(), date: z.string() }),
   ),
+  customSections: z
+    .record(
+      z.string(),
+      z.object({
+        id: z.string(),
+        title: z.string(),
+        items: z.array(customSectionItemSchema),
+      }),
+    )
+    .optional(),
 });
+
+export function getCustomSections(data: CVData | undefined): CustomSection[] {
+  return Object.values(data?.customSections ?? {});
+}
 
 export const initialCVState: CVData = {
   name: '',
@@ -105,4 +140,5 @@ export const initialCVState: CVData = {
   education: [],
   skills: [],
   certifications: [],
+  customSections: {},
 };

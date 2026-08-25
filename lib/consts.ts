@@ -26,7 +26,7 @@ export const AI_ADJUST_SCOPES = [
 
 export type AIAdjustScope = (typeof AI_ADJUST_SCOPES)[number]['value'];
 
-export type SectionId =
+export type BuiltinSectionId =
   | 'summary'
   | 'experience'
   | 'projects'
@@ -34,7 +34,12 @@ export type SectionId =
   | 'skills'
   | 'certifications';
 
-export const RENDERABLE_SECTIONS: { id: SectionId; title: string }[] = [
+export type SectionId = BuiltinSectionId | (string & {});
+
+export const RENDERABLE_SECTIONS: {
+  id: BuiltinSectionId;
+  title: string;
+}[] = [
   { id: 'summary', title: 'Summary' },
   { id: 'experience', title: 'Experience' },
   { id: 'projects', title: 'Projects' },
@@ -43,13 +48,10 @@ export const RENDERABLE_SECTIONS: { id: SectionId; title: string }[] = [
   { id: 'certifications', title: 'Certifications' },
 ];
 
-export type TabName =
-  | 'personal'
-  | 'experience'
-  | 'projects'
-  | 'education'
-  | 'skills'
-  | 'certifications';
+export type BuiltinTabName =
+  'personal' | 'design' | Exclude<BuiltinSectionId, 'summary'>;
+
+export type TabName = BuiltinTabName | (string & {});
 
 export const getSectionTabName = (sectionId: SectionId): TabName => {
   if (sectionId === 'summary') return 'personal';
@@ -58,7 +60,8 @@ export const getSectionTabName = (sectionId: SectionId): TabName => {
 
 export const getSectionIdFromTab = (tab: string): SectionId | null => {
   if (tab === 'personal') return 'summary';
-  return RENDERABLE_SECTIONS.find((section) => section.id === tab)?.id ?? null;
+  const builtin = RENDERABLE_SECTIONS.find((section) => section.id === tab);
+  return builtin ? builtin.id : tab;
 };
 
 export const DEFAULT_SECTION_ORDER: SectionId[] = RENDERABLE_SECTIONS.map(

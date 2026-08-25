@@ -28,6 +28,7 @@ export function useShareLinkImport() {
         language: result.language,
         photo: result.photo,
         template: result.template,
+        design: result.design,
       });
       window.history.replaceState(
         null,

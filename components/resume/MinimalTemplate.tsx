@@ -1,7 +1,12 @@
 'use client';
 
 import React, { forwardRef } from 'react';
-import { DEFAULT_SECTION_ORDER, SectionId } from '@/lib/consts';
+import {
+  BuiltinSectionId,
+  DEFAULT_SECTION_ORDER,
+  SectionId,
+} from '@/lib/consts';
+import { DEFAULT_DESIGN, designCssVars } from '@/lib/design';
 import { translate } from '@/lib/i18n';
 import { CVData } from '@/lib/schema';
 import {
@@ -11,6 +16,9 @@ import {
   SectionContext,
   formatUrl,
   renderFormattedText,
+  renderCustomItems,
+  resolveTemplateOrder,
+  isBuiltinSection,
   sectionClickProps,
   headerClickProps,
   INTERACTIVE_CLASSES,
@@ -23,11 +31,16 @@ const TYPE = {
   jobTitle: 'text-[12pt] font-medium text-slate-600',
   contact: 'text-[9.5pt] text-slate-700',
   heading:
-    'text-[10.5pt] font-bold uppercase tracking-wide text-slate-900 border-b border-slate-300 pb-[2pt] mb-[6pt] break-after-avoid',
+    'text-[10.5pt] font-bold uppercase tracking-wide [color:var(--cv-accent)] border-b border-slate-300 pb-[2pt] mb-[6pt] break-after-avoid',
   itemTitle: 'text-[10.5pt] font-bold text-slate-900',
   itemMeta: 'text-[9.5pt] font-normal text-slate-500',
   itemSub: 'text-[9.5pt] italic text-slate-600',
   body: 'text-[9.5pt] leading-snug text-slate-800',
+} as const;
+
+const SPACE = {
+  sectionGap: '[margin-bottom:var(--cv-section-gap)]',
+  itemGap: '[margin-bottom:var(--cv-item-gap)]',
 } as const;
 
 type SectionRenderer = (
@@ -35,7 +48,6 @@ type SectionRenderer = (
   context: SectionContext,
 ) => React.ReactNode;
 
-/** Accent-free section heading, single column throughout. */
 function Section({
   id,
   title,
@@ -54,7 +66,7 @@ function Section({
       data-section-id={id}
       {...sectionClickProps(id, onClick)}
       aria-label={onClick ? t('template.editAria', { title }) : undefined}
-      className={`mb-[10pt] ${onClick ? INTERACTIVE_CLASSES : ''}`}
+      className={`${SPACE.sectionGap} ${onClick ? INTERACTIVE_CLASSES : ''}`}
     >
       <h2 className={TYPE.heading}>{title}</h2>
       {children}
@@ -62,7 +74,7 @@ function Section({
   );
 }
 
-const SECTION_RENDERERS: Record<SectionId, SectionRenderer> = {
+const SECTION_RENDERERS: Record<BuiltinSectionId, SectionRenderer> = {
   summary: (cvData, { onClick, t }) =>
     cvData.summary ? (
       <Section
@@ -83,7 +95,7 @@ const SECTION_RENDERERS: Record<SectionId, SectionRenderer> = {
         t={t}
       >
         {cvData.experience.map((exp, index) => (
-          <div key={index} className="mb-[7pt] break-inside-avoid">
+          <div key={index} className={`${SPACE.itemGap} break-inside-avoid`}>
             <ItemHeader
               title={exp.role}
               meta={exp.date}
@@ -109,7 +121,7 @@ const SECTION_RENDERERS: Record<SectionId, SectionRenderer> = {
         t={t}
       >
         {cvData.projects.map((proj, index) => (
-          <div key={index} className="mb-[7pt] break-inside-avoid">
+          <div key={index} className={`${SPACE.itemGap} break-inside-avoid`}>
             <ItemHeader
               title={proj.name}
               meta={proj.date}
@@ -130,7 +142,7 @@ const SECTION_RENDERERS: Record<SectionId, SectionRenderer> = {
         t={t}
       >
         {cvData.education.map((edu, index) => (
-          <div key={index} className="mb-[7pt] break-inside-avoid">
+          <div key={index} className={`${SPACE.itemGap} break-inside-avoid`}>
             <ItemHeader
               title={edu.institution}
               meta={edu.date}
@@ -169,7 +181,10 @@ const SECTION_RENDERERS: Record<SectionId, SectionRenderer> = {
         t={t}
       >
         {cvData.certifications.map((cert, index) => (
-          <div key={index} className="mb-[5pt] text-[9.5pt] break-inside-avoid">
+          <div
+            key={index}
+            className={`${SPACE.itemGap} text-[9.5pt] break-inside-avoid`}
+          >
             <div className="flex justify-between">
               <span className="font-semibold text-slate-900">{cert.name}</span>
               {cert.date && <span className={TYPE.itemMeta}>{cert.date}</span>}
@@ -183,10 +198,22 @@ const SECTION_RENDERERS: Record<SectionId, SectionRenderer> = {
 
 export const MinimalTemplate = forwardRef<HTMLDivElement, TemplateProps>(
   (
-    { cvData, sectionOrder, hiddenSections, language, photo, onSectionClick },
+    {
+      cvData,
+      sectionOrder,
+      hiddenSections,
+      language,
+      photo,
+      design,
+      onSectionClick,
+    },
     ref,
   ) => {
     const t: T = (key, params) => translate(language ?? 'en', key, params);
+    const styleVars = designCssVars(design ?? DEFAULT_DESIGN, {
+      accentFallback: '#0f172a',
+      fontFallback: 'sans',
+    });
     const hidden = new Set(hiddenSections ?? []);
 
     const order = (sectionOrder ?? DEFAULT_SECTION_ORDER).filter(
@@ -205,11 +232,14 @@ export const MinimalTemplate = forwardRef<HTMLDivElement, TemplateProps>(
     }
 
     return (
-      <div ref={ref} className="mx-auto shadow-2xl print:shadow-none bg-white">
+      <div
+        ref={ref}
+        style={{ ...styleVars, fontFamily: 'var(--cv-font)' }}
+        className="mx-auto shadow-2xl print:shadow-none bg-white"
+      >
         <PrintStyle />
 
         <div className="px-[1.4cm] pt-[1cm] pb-[1cm]">
-          {/* --- HEADER --- */}
           <div
             data-section-id="summary"
             {...headerClickProps(onSectionClick)}
@@ -266,12 +296,32 @@ export const MinimalTemplate = forwardRef<HTMLDivElement, TemplateProps>(
             )}
           </div>
 
-          {/* --- SECTIONS (single column, in section order) --- */}
-          {order.map((id) => (
-            <React.Fragment key={id}>
-              {SECTION_RENDERERS[id](cvData, context)}
-            </React.Fragment>
-          ))}
+          {resolveTemplateOrder(order, cvData).map((id) => {
+            const builtin = isBuiltinSection(id)
+              ? SECTION_RENDERERS[id](cvData, context)
+              : null;
+            if (builtin)
+              return <React.Fragment key={id}>{builtin}</React.Fragment>;
+            const section = cvData.customSections?.[id];
+            if (!section) return null;
+            return (
+              <Section
+                key={id}
+                id={section.id}
+                title={section.title}
+                onClick={onSectionClick}
+                t={t}
+              >
+                {renderCustomItems(section.items, {
+                  wrapper: SPACE.itemGap,
+                  title: TYPE.itemTitle,
+                  meta: TYPE.itemMeta,
+                  sub: TYPE.itemSub,
+                  body: TYPE.body,
+                })}
+              </Section>
+            );
+          })}
         </div>
       </div>
     );

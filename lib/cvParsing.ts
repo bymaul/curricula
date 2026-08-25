@@ -13,11 +13,6 @@ export const MAX_TRANSIENT_RETRIES = 2;
 
 const optionalString = z.string().optional();
 
-/**
- * Tolerant parse schema: every field is optional so a resume that is
- * genuinely missing data (no email, no phone, sparse summary) still parses.
- * `normalizeCVOutput` fills gaps afterwards.
- */
 export const cvParseSchema = z.object({
   name: optionalString,
   jobTitle: optionalString,
@@ -96,7 +91,6 @@ function isRecord(value: unknown): value is Record<string, unknown> {
   return !!value && typeof value === 'object' && !Array.isArray(value);
 }
 
-/** Collapses blank lines and caps the resume text to control cost. */
 export function normalizeCVText(text: string): string {
   const collapsed = text.replace(/\n{3,}/g, '\n\n').trim();
   if (collapsed.length <= MAX_CV_TEXT_CHARS) return collapsed;
@@ -105,7 +99,6 @@ export function normalizeCVText(text: string): string {
   return cut.slice(0, lastSpace > 0 ? lastSpace : MAX_CV_TEXT_CHARS).trim();
 }
 
-/** Pulls the first balanced JSON object out of text (handles fences/prose). */
 export function extractJSON(text: string): unknown | null {
   const fenced = text.match(/```(?:json)?\s*([\s\S]*?)```/);
   const candidate = fenced ? fenced[1] : text;
@@ -146,10 +139,6 @@ export function extractJSON(text: string): unknown | null {
   return null;
 }
 
-/**
- * Coerces arbitrary AI output into a valid CVData and derives review
- * warnings for fields the model could not find.
- */
 export function normalizeCVOutput(raw: unknown): CVParseResult {
   const obj = isRecord(raw) ? raw : {};
 
@@ -288,12 +277,6 @@ interface GenerateJSONWithRepairOptions {
   maxRepairAttempts?: number;
 }
 
-/**
- * Core AI call: structured JSON output with transient retries and a schema
- * repair loop. On `NoObjectGeneratedError` it first salvages valid JSON from
- * the raw text, then re-prompts the model with the previous output and
- * validation errors (images re-included each time).
- */
 async function generateJSONWithRepair({
   model,
   system,
@@ -301,8 +284,6 @@ async function generateJSONWithRepair({
   imageParts,
   repairContext,
   signal,
-  // Vision requests are slow and each call re-sends the images, so cap the
-  // number of AI attempts to keep requests within the function time limit.
   maxRetries = imageParts?.length ? 0 : MAX_TRANSIENT_RETRIES,
   maxRepairAttempts = imageParts?.length ? 1 : MAX_REPAIR_ATTEMPTS,
 }: GenerateJSONWithRepairOptions): Promise<CVParseResult> {
@@ -359,10 +340,6 @@ export interface ParseCVWithRepairOptions {
   maxRepairAttempts?: number;
 }
 
-/**
- * Parses resume text (and optional page images) into structured CV data.
- * See `generateJSONWithRepair` for the retry/repair behavior.
- */
 export async function parseCVWithRepair(
   options: ParseCVWithRepairOptions,
 ): Promise<CVParseResult> {
@@ -438,12 +415,6 @@ function scopeFieldHasValue(
   return typeof value === 'string' ? value.trim().length > 0 : value != null;
 }
 
-/**
- * Scoped adjusts cannot trust the model to leave unrelated fields alone.
- * Merge the targeted field from the AI result back into the original CV and
- * keep every other field from the source. If the model returned nothing for
- * the targeted section, keep the source untouched and surface a warning.
- */
 function applyScope(
   scope: Exclude<AIAdjustScope, 'full'>,
   cvData: CVData,
@@ -465,11 +436,6 @@ function applyScope(
   return { data: { ...cvData, [field]: candidate }, warnings: [] };
 }
 
-/**
- * Rewrites a CV to align with a job description, returning the adjusted
- * `CVData` plus review warnings. See `generateJSONWithRepair` for the
- * retry/repair behavior.
- */
 export async function adjustCVWithRepair(
   options: AdjustCVWithRepairOptions,
 ): Promise<CVParseResult> {
@@ -504,6 +470,11 @@ export async function adjustCVWithRepair(
     maxRepairAttempts,
   });
 
-  if (!scope || scope === 'full') return result;
+  if (!scope || scope === 'full') {
+    return {
+      data: { ...result.data, customSections: cvData.customSections },
+      warnings: result.warnings,
+    };
+  }
   return applyScope(scope, cvData, result);
 }

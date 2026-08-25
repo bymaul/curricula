@@ -54,9 +54,6 @@ export default function Home() {
 
   const [mobileView, setMobileView] = useState<'edit' | 'preview'>('edit');
 
-  // The resume store defers hydration (skipHydration) so photos can be
-  // reattached from the photo store during its merge. Hydrate the photo store
-  // first, then the resume store.
   const [storesHydrated, setStoresHydrated] = useState(false);
   useEffect(() => {
     let cancelled = false;
@@ -127,6 +124,7 @@ export default function Home() {
             hiddenSections={activeResume?.hiddenSections}
             language={activeResume?.language}
             photo={activeResume?.photo}
+            design={activeResume?.design}
             templateId={activeResume?.templateId}
             mobileActive={mobileView === 'preview'}
             onSectionClick={handleSectionClick}

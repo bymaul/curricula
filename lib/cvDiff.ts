@@ -25,6 +25,25 @@ const ARRAY_SECTIONS: { key: keyof CVData; labelKey: TranslationKey }[] = [
   { key: 'links', labelKey: 'changes.labelLinks' },
 ];
 
+function countCustomSectionChanges(
+  original: CVData,
+  adjusted: CVData,
+): { changed: number; count: number } {
+  const a = original.customSections ?? {};
+  const b = adjusted.customSections ?? {};
+  const keys = new Set([...Object.keys(a), ...Object.keys(b)]);
+  let changed = 0;
+  for (const key of keys) {
+    if (
+      JSON.stringify(a[key]?.items ?? null) !==
+      JSON.stringify(b[key]?.items ?? null)
+    ) {
+      changed += 1;
+    }
+  }
+  return { changed, count: keys.size };
+}
+
 function countChangedItems(
   original: unknown[],
   adjusted: unknown[],
@@ -76,6 +95,15 @@ export function summarizeCVChanges(
           ? 'changes.detailEntryCount'
           : 'changes.detailEntriesUpdated',
       params,
+    });
+  }
+
+  const custom = countCustomSectionChanges(original, adjusted);
+  if (custom.changed > 0) {
+    summaries.push({
+      labelKey: 'changes.labelCustomSections',
+      detailKey: 'changes.detailEntriesUpdated',
+      params: { changed: custom.changed, count: custom.count },
     });
   }
 

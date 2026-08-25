@@ -5,7 +5,6 @@ import { createQuotaAwareStorage } from '@/lib/storage';
 const STORAGE_KEY = 'curricula-photos';
 
 export interface PhotoState {
-  /** Resume id → photo data URL. Kept out of the per-keystroke CV payload. */
   photos: Record<string, string>;
   setPhoto: (id: string, photo: string) => void;
   removePhotos: (ids: string[]) => void;

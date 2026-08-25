@@ -130,7 +130,6 @@ describe('createQuotaAwareStorage', () => {
     expect(listener).toHaveBeenCalledTimes(1);
     expect(listener.mock.calls[0][0]?.name).toBe('QuotaExceededError');
 
-    // A later successful write clears the warning.
     storage.setItem('curricula-resumes', {
       state: { resumes: [{}] },
       version: 0,

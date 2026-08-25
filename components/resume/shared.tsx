@@ -1,11 +1,12 @@
 'use client';
 
 import React from 'react';
-import { SectionId } from '@/lib/consts';
+import { DesignSettings } from '@/lib/design';
+import { BuiltinSectionId, SectionId } from '@/lib/consts';
 import { TranslationKey } from '@/lib/i18n';
 import { ResumeLanguage } from '@/lib/i18n/languages';
 import { PRINT_CSS } from '@/lib/print';
-import { CVData } from '@/lib/schema';
+import { CVData, CustomSectionItem } from '@/lib/schema';
 
 export interface TemplateProps {
   cvData: CVData;
@@ -13,6 +14,7 @@ export interface TemplateProps {
   hiddenSections?: SectionId[];
   language?: ResumeLanguage;
   photo?: string;
+  design?: DesignSettings;
   onSectionClick?: (sectionId: SectionId) => void;
 }
 
@@ -26,12 +28,6 @@ export interface SectionContext {
   t: T;
 }
 
-/**
- * Parses a free-text field into paragraphs and "- " bullet groups.
- * Defined here so every template shares the same formatting rules.
- * `textClassName` is applied to paragraphs and bullet lists so each
- * template can keep its own type scale.
- */
 export function renderFormattedText(text: string, textClassName = '') {
   if (!text) return null;
 
@@ -83,7 +79,7 @@ export const formatUrl = (url: string) => {
 };
 
 export const INTERACTIVE_CLASSES =
-  'cursor-pointer hover:ring-1 hover:ring-primary/40 hover:rounded-sm focus:outline-none focus-visible:ring-2 focus-visible:ring-primary/40 focus-visible:rounded-sm';
+  'cursor-pointer hover:outline-dashed hover:outline-1 hover:-outline-offset-1 hover:outline-black/25 focus:outline-none focus-visible:outline-dashed focus-visible:outline-2 focus-visible:-outline-offset-1 focus-visible:outline-black/40';
 
 export function sectionClickProps(
   id: SectionId,
@@ -111,7 +107,6 @@ export function headerClickProps(onClick?: (sectionId: SectionId) => void) {
   return sectionClickProps('summary', onClick);
 }
 
-/** Bold title on the left, meta (usually a date) on the right. */
 export function ItemHeader({
   title,
   meta,
@@ -131,7 +126,6 @@ export function ItemHeader({
   );
 }
 
-/** Italic subtitle row, e.g. company/location or degree/location. */
 export function ItemSub({
   left,
   right,
@@ -150,11 +144,66 @@ export function ItemSub({
   );
 }
 
-/** Shared print CSS so every template paginates identically in the browser. */
 export function PrintStyle() {
   return (
     <style type="text/css" media="print">
       {PRINT_CSS}
     </style>
   );
+}
+
+export function resolveTemplateOrder(order: SectionId[], cvData: CVData) {
+  const known = new Set(order);
+  const missing = Object.keys(cvData.customSections ?? {}).filter(
+    (id) => !known.has(id),
+  );
+  return [...order, ...missing];
+}
+
+export function isBuiltinSection(id: SectionId): id is BuiltinSectionId {
+  return SECTION_BUILTIN_SET.has(id as BuiltinSectionId);
+}
+
+const SECTION_BUILTIN_SET = new Set<BuiltinSectionId>([
+  'summary',
+  'experience',
+  'projects',
+  'education',
+  'skills',
+  'certifications',
+]);
+
+interface CustomItemClassNames {
+  wrapper?: string;
+  title?: string;
+  meta?: string;
+  sub?: string;
+  body?: string;
+}
+
+export function renderCustomItems(
+  items: CustomSectionItem[],
+  classNames: CustomItemClassNames,
+) {
+  return items.map((item, index) => (
+    <div
+      key={index}
+      className={`${classNames.wrapper ?? 'mb-[7pt]'} break-inside-avoid`}
+    >
+      {(item.title || item.date) && (
+        <ItemHeader
+          title={item.title}
+          meta={item.date}
+          titleClass={classNames.title}
+          metaClass={classNames.meta}
+        />
+      )}
+      <ItemSub
+        left={item.subtitle}
+        right={item.location}
+        className={classNames.sub}
+      />
+      {renderFormattedText(item.description ?? '', classNames.body)}
+    </div>
+  ));
 }

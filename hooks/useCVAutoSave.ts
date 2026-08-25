@@ -30,7 +30,6 @@ export function useCVAutoSave(methods: UseFormReturn<CVData>) {
   const revision = useResumeStore((state) => state.revision);
   const activeId = useResumeStore((state) => state.activeId);
 
-  // Latest form values, kept in a ref so typing never re-renders the page.
   const latestRef = useRef<CVData>(methods.getValues());
   const timerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
 
