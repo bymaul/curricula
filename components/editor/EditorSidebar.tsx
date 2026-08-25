@@ -1,8 +1,9 @@
 'use client';
 
 import { useI18n } from '@/components/I18nProvider';
-import { DEFAULT_SECTION_ORDER, TabName } from '@/lib/consts';
-import { TAB_KEYS } from '@/lib/i18n';
+import { DEFAULT_SECTION_ORDER, SectionId, TabName } from '@/lib/consts';
+import { getCustomSections } from '@/lib/schema';
+import { navTabLabel } from '@/lib/i18n';
 import { cn, formatRelativeTime } from '@/lib/utils';
 import { useDialogStore } from '@/store/useDialogStore';
 import { useResumeStore } from '@/store/useResumeStore';
@@ -17,8 +18,10 @@ import {
   Redo2,
   Undo2,
 } from 'lucide-react';
-import { useEffect, useState } from 'react';
+import { useEffect, useMemo, useRef, useState } from 'react';
 import { CertificationsForm } from '../forms/CertificationsForm';
+import { CustomSectionForm } from '../forms/CustomSectionForm';
+import { DesignForm } from '../forms/DesignForm';
 import { EducationForm } from '../forms/EducationForm';
 import { ExperienceForm } from '../forms/ExperienceForm';
 import { PersonalForm } from '../forms/PersonalForm';
@@ -61,27 +64,28 @@ function SaveStatus({
     return () => clearInterval(interval);
   }, [saveStatus]);
 
+  const labelClass =
+    'text-xs font-semibold uppercase tracking-wider text-muted-foreground';
+
   if (saveStatus === 'saving') {
     return (
       <>
-        <Loader2 className="w-4 h-4 text-amber-500 animate-spin" />
-        <span className="text-[10px] text-muted-foreground font-medium uppercase tracking-wider">
-          {t('editor.saveStatus.saving')}
-        </span>
+        <Loader2 className="size-4 text-warning animate-spin" />
+        <span className={labelClass}>{t('editor.saveStatus.saving')}</span>
       </>
     );
   }
 
   return (
     <>
-      <CheckCircle2 className="w-4 h-4 text-green-500" />
-      <span className="text-[10px] text-muted-foreground font-medium uppercase tracking-wider">
-        {lastSavedAt
-          ? t('editor.saveStatus.saved', {
-              time: formatRelativeTime(lastSavedAt, now, t),
-            })
-          : ''}
-      </span>
+      <CheckCircle2 className="size-4 text-success" />
+      {lastSavedAt && (
+        <span className={labelClass}>
+          {t('editor.saveStatus.saved', {
+            time: formatRelativeTime(lastSavedAt, now, t),
+          })}
+        </span>
+      )}
     </>
   );
 }
@@ -97,11 +101,14 @@ export function EditorSidebar({
   const { t } = useI18n();
   const storageError = useStorageError();
   const { dialogs, setDialog } = useDialogStore();
-  const sectionOrder =
-    useResumeStore(
-      (state) =>
-        state.resumes.find((r) => r.id === state.activeId)?.sectionOrder,
-    ) ?? DEFAULT_SECTION_ORDER;
+  const activeResume = useResumeStore((state) =>
+    state.resumes.find((r) => r.id === state.activeId),
+  );
+  const sectionOrder = activeResume?.sectionOrder ?? DEFAULT_SECTION_ORDER;
+  const customSections = useMemo(
+    () => getCustomSections(activeResume?.data),
+    [activeResume?.data],
+  );
   const undo = useResumeStore((state) => state.undo);
   const redo = useResumeStore((state) => state.redo);
   const history = useResumeStore((state) =>
@@ -111,9 +118,37 @@ export function EditorSidebar({
   const canRedo = !!history && history.cursor < history.entries.length - 1;
 
   const navTabs: TabName[] = [
+    'design',
     'personal',
     ...sectionOrder.filter((id) => id !== 'summary'),
   ] as TabName[];
+
+  const activeCustomSection =
+    customSections.find((s) => s.id === activeTab) ?? null;
+
+  useEffect(() => {
+    if (activeTab === 'personal' || activeTab === 'design') return;
+    if (customSections.some((s) => s.id === activeTab)) return;
+    if (sectionOrder.includes(activeTab as SectionId)) return;
+    setActiveTab('personal');
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [activeTab, customSections.length]);
+
+  const navRef = useRef<HTMLElement>(null);
+  useEffect(() => {
+    const viewport = navRef.current?.querySelector<HTMLElement>(
+      '[data-slot="scroll-area-viewport"]',
+    );
+    if (!viewport) return;
+    const onWheel = (event: WheelEvent) => {
+      if (Math.abs(event.deltaY) <= Math.abs(event.deltaX)) return;
+      if (viewport.scrollWidth <= viewport.clientWidth) return;
+      event.preventDefault();
+      viewport.scrollLeft += event.deltaY;
+    };
+    viewport.addEventListener('wheel', onWheel, { passive: false });
+    return () => viewport.removeEventListener('wheel', onWheel);
+  }, []);
 
   return (
     <section
@@ -123,27 +158,32 @@ export function EditorSidebar({
       )}
     >
       <div className="flex-1 min-h-0">
-        <ScrollArea key={activeTab} className="h-full px-2">
+        <ScrollArea key={activeTab} className="h-full">
           <form
             onSubmit={(e) => e.preventDefault()}
             className="space-y-6 pt-4 pb-6"
           >
             {activeTab === 'personal' && <PersonalForm />}
+            {activeTab === 'design' && <DesignForm />}
             {activeTab === 'experience' && <ExperienceForm />}
             {activeTab === 'projects' && <ProjectsForm />}
             {activeTab === 'education' && <EducationForm />}
             {activeTab === 'skills' && <SkillsForm />}
             {activeTab === 'certifications' && <CertificationsForm />}
+            {activeCustomSection && (
+              <CustomSectionForm section={activeCustomSection} />
+            )}
           </form>
         </ScrollArea>
       </div>
 
       <nav
+        ref={navRef}
         className="border-t border-border bg-muted/30 shrink-0 overflow-hidden flex items-stretch"
         aria-label={t('editor.cvSectionsAriaLabel')}
       >
         <ScrollArea orientation="horizontal" className="min-w-0 flex-1 h-14">
-          <div className="flex items-center gap-1 w-max h-full px-3">
+          <div className="flex items-stretch gap-1 w-max h-full px-4">
             {navTabs.map((tab) => {
               const active = activeTab === tab;
               return (
@@ -153,13 +193,13 @@ export function EditorSidebar({
                   onClick={() => setActiveTab(tab)}
                   aria-current={active ? 'page' : undefined}
                   className={cn(
-                    'shrink-0 h-9 px-2.5 rounded-md text-sm font-semibold transition-colors',
+                    'relative shrink-0 flex items-center px-2.5 text-sm font-semibold transition-colors',
                     active
-                      ? 'text-foreground font-semibold'
+                      ? 'text-foreground after:absolute after:inset-x-2 after:bottom-2 after:h-0.5 after:rounded-full after:bg-primary'
                       : 'text-muted-foreground hover:text-foreground',
                   )}
                 >
-                  {t(TAB_KEYS[tab])}
+                  {navTabLabel(tab, customSections, t)}
                 </button>
               );
             })}
@@ -171,21 +211,21 @@ export function EditorSidebar({
           onClick={() => setDialog('sections', true)}
           className="h-full w-12 rounded-none border-0 border-l border-border"
         >
-          <ListOrdered className="w-5 h-5" />
+          <ListOrdered className="size-5" />
         </TooltipIconButton>
       </nav>
 
       {storageError && (
         <div
           role="alert"
-          className="px-5 py-2 border-t border-border bg-amber-500/10 text-amber-700 text-xs flex items-center gap-2 shrink-0"
+          className="px-4 py-2 border-t border-border bg-warning/10 text-warning text-xs flex items-center gap-2 shrink-0"
         >
-          <AlertTriangle className="w-4 h-4 shrink-0" />
+          <AlertTriangle className="size-4 shrink-0" />
           <span>{t('editor.storageFullWarning')}</span>
         </div>
       )}
 
-      <footer className="px-5 py-4 border-t border-border bg-muted/30 flex items-center justify-between gap-2 shrink-0 z-10">
+      <footer className="px-4 py-4 border-t border-border bg-muted/30 flex items-center justify-between gap-2 shrink-0 z-10">
         <div className="flex items-center gap-2 min-w-0" aria-live="polite">
           <SaveStatus saveStatus={saveStatus} lastSavedAt={lastSavedAt} />
         </div>
@@ -197,7 +237,7 @@ export function EditorSidebar({
             onClick={undo}
             disabled={!canUndo}
           >
-            <Undo2 className="w-4 h-4" />
+            <Undo2 className="size-4" />
           </TooltipIconButton>
 
           <TooltipIconButton
@@ -206,14 +246,14 @@ export function EditorSidebar({
             onClick={redo}
             disabled={!canRedo}
           >
-            <Redo2 className="w-4 h-4" />
+            <Redo2 className="size-4" />
           </TooltipIconButton>
 
           <TooltipIconButton
             label={t('editor.versionHistory')}
             onClick={() => setDialog('history', true)}
           >
-            <History className="w-4 h-4" />
+            <History className="size-4" />
           </TooltipIconButton>
 
           <input

@@ -82,11 +82,11 @@ export function CvViewer() {
   }
 
   const { result, payload } = view;
-  const { data, photo, template } = result;
+  const { data, photo, template, design } = result;
   const ResumeTemplate = TEMPLATE_COMPONENTS[template];
 
   return (
-    <div className="min-h-dvh bg-muted/20 text-foreground print:min-h-0 print:bg-white">
+    <div className="min-h-dvh bg-muted/10 text-foreground print:min-h-0 print:bg-white">
       <header className="sticky top-0 z-10 border-b border-border bg-background/95 backdrop-blur print:hidden">
         <div className="mx-auto flex w-full max-w-5xl items-center justify-between gap-3 px-4 py-3">
           <div className="truncate text-sm font-semibold">
@@ -112,7 +112,12 @@ export function CvViewer() {
               className="mx-auto bg-white text-black shadow-2xl print:shadow-none"
               style={{ width: PAGE_WIDTH_PX }}
             >
-              <ResumeTemplate cvData={data} language={lang} photo={photo} />
+              <ResumeTemplate
+                cvData={data}
+                language={lang}
+                photo={photo}
+                design={design}
+              />
             </div>
           </div>
         </div>

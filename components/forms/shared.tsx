@@ -19,14 +19,14 @@ import {
 } from '@dnd-kit/sortable';
 import { CSS } from '@dnd-kit/utilities';
 import { GripVertical, Plus, Trash2 } from 'lucide-react';
-import { ReactNode } from 'react';
+import { ComponentType, ReactNode } from 'react';
 import { useI18n } from '@/components/I18nProvider';
 import { FormField } from '@/components/ui/form-field';
 import { CVData } from '@/lib/schema';
 import { translateValidationMessage } from '@/lib/i18n';
 import {
+  FieldArrayPath,
   FieldPath,
-  PathValue,
   useFieldArray,
   useFormContext,
 } from 'react-hook-form';
@@ -39,11 +39,11 @@ export function DragHandle({
     <div
       {...props}
       className={cn(
-        'cursor-grab touch-none text-muted-foreground hover:text-foreground p-1',
+        'cursor-grab touch-none text-muted-foreground hover:text-foreground transition-colors p-1.5 -m-0.5',
         className,
       )}
     >
-      <GripVertical className="w-4 h-4" />
+      <GripVertical className="size-4" />
     </div>
   );
 }
@@ -69,7 +69,7 @@ export function ItemRemoveButton({
         className,
       )}
     >
-      <Trash2 className="w-4 h-4" />
+      <Trash2 className="size-4" />
     </Button>
   );
 }
@@ -84,7 +84,7 @@ export function SectionHeading({
   return (
     <div>
       <h2 className="text-xl font-bold tracking-tight">{title}</h2>
-      <p className="text-xs text-muted-foreground mt-1">{description}</p>
+      <p className="text-sm text-muted-foreground mt-1">{description}</p>
     </div>
   );
 }
@@ -112,7 +112,7 @@ export function AddItemButton({
         className,
       )}
     >
-      <Plus className="w-4 h-4" /> {children}
+      <Plus className="size-4" /> {children}
     </Button>
   );
 }
@@ -173,17 +173,17 @@ export function SortableCard({
     <div
       ref={setNodeRef}
       style={style}
-      className="mb-4 p-4 border border-border rounded-xl bg-card shadow-sm relative group space-y-4"
+      className="mb-4 p-4 border border-border rounded-xl bg-card shadow-sm relative space-y-4"
     >
       <ItemRemoveButton
         onClick={onRemove}
         title={removeTitle}
-        className="absolute top-3 right-3 h-7 w-7"
+        className="absolute top-2.5 right-2.5 h-8 w-8"
       />
 
       <div className="flex items-center gap-2 border-b border-border pb-3 pr-10">
         <DragHandle {...attributes} {...listeners} />
-        <span className="text-xs font-bold text-muted-foreground uppercase tracking-wider">
+        <span className="text-xs font-semibold text-muted-foreground uppercase tracking-wider">
           {label}
         </span>
       </div>
@@ -215,7 +215,7 @@ export function SortableRow({
       ref={setNodeRef}
       style={style}
       className={cn(
-        'mb-3 p-3.5 border border-border rounded-xl bg-card shadow-sm relative flex items-end gap-3',
+        'mb-4 p-4 border border-border rounded-xl bg-card shadow-sm relative flex items-end gap-3',
         className,
       )}
     >
@@ -229,14 +229,6 @@ export function SortableRow({
   );
 }
 
-type SectionFieldName =
-  | 'experience'
-  | 'projects'
-  | 'education'
-  | 'skills'
-  | 'certifications'
-  | 'links';
-
 interface SectionFieldDef {
   name: string;
   label: string;
@@ -246,13 +238,17 @@ interface SectionFieldDef {
   textareaClassName?: string;
 }
 
-type SectionFieldValue = PathValue<CVData, SectionFieldName>;
-type SectionFieldItem = SectionFieldValue extends readonly (infer U)[]
-  ? U
-  : never;
+type CvListItem =
+  | CVData['experience'][number]
+  | CVData['projects'][number]
+  | CVData['education'][number]
+  | CVData['skills'][number]
+  | CVData['certifications'][number]
+  | CVData['links'][number]
+  | NonNullable<CVData['customSections']>[number]['items'][number];
 
 interface SectionFieldArrayProps {
-  name: SectionFieldName;
+  name: FieldArrayPath<CVData>;
   title: string;
   description: string;
   addLabel: string;
@@ -260,7 +256,9 @@ interface SectionFieldArrayProps {
   removeTitle: string;
   itemLabel?: string;
   fields: SectionFieldDef[];
-  newItem: () => SectionFieldItem;
+  newItem: () => CvListItem;
+  emptyIcon?: ComponentType<{ className?: string }>;
+  showHeading?: boolean;
 }
 
 export function SectionFieldArray({
@@ -273,6 +271,8 @@ export function SectionFieldArray({
   itemLabel,
   fields,
   newItem,
+  emptyIcon: EmptyIcon,
+  showHeading = true,
 }: SectionFieldArrayProps) {
   const {
     control,
@@ -285,24 +285,46 @@ export function SectionFieldArray({
     append,
     remove,
     move,
-  } = useFieldArray({ control, name });
+  } = useFieldArray({
+    control,
+    name: name as FieldArrayPath<CVData>,
+  });
 
-  const itemErrors = errors[name] as unknown as
-    | Record<
-        number,
-        Record<string, { message?: string } | undefined> | undefined
-      >
-    | undefined;
-  const errorFor = (index: number, fieldName: string) =>
-    translateValidationMessage(t, itemErrors?.[index]?.[fieldName]?.message);
+  const resolveErrors = (index: number, fieldName: string) => {
+    let branch: unknown = errors;
+    for (const segment of name.split('.')) {
+      branch = (branch as Record<string, unknown>)?.[segment];
+    }
+    branch = (branch as unknown[])?.[index];
+    return translateValidationMessage(
+      t,
+      (branch as Record<string, { message?: string } | undefined>)?.[fieldName]
+        ?.message,
+    );
+  };
   const pathFor = (index: number, fieldName: string) =>
     `${name}.${index}.${fieldName}` as FieldPath<CVData>;
 
   return (
-    <div className="space-y-4 p-2">
-      <SectionHeading title={title} description={description} />
+    <div className="space-y-4 px-4 py-2">
+      {showHeading && (
+        <SectionHeading title={title} description={description} />
+      )}
 
       <SortableList ids={rows.map((f) => f.id)} onMove={move}>
+        {rows.length === 0 && (
+          <div className="mb-4 flex flex-col items-center gap-2 rounded-xl border border-dashed px-4 py-10 text-center">
+            {EmptyIcon && (
+              <EmptyIcon
+                className="size-5 text-muted-foreground"
+                aria-hidden="true"
+              />
+            )}
+            <p className="max-w-xs text-sm text-muted-foreground">
+              {t('common.emptySection', { label: itemLabel ?? name })}
+            </p>
+          </div>
+        )}
         {rows.map((row, index) => {
           const body = fields.map((def) => (
             <FormField
@@ -313,7 +335,7 @@ export function SectionFieldArray({
               label={def.label}
               placeholder={def.placeholder}
               register={register}
-              error={errorFor(index, def.name)}
+              error={resolveErrors(index, def.name)}
               textareaClassName={def.textareaClassName}
             />
           ));

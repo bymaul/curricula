@@ -11,6 +11,7 @@ import {
   getSectionIdFromTab,
   SectionId,
 } from '@/lib/consts';
+import { DesignSettings } from '@/lib/design';
 import {
   PAGE_HEIGHT_PX,
   PAGE_WIDTH_PX,
@@ -44,6 +45,7 @@ interface LiveTemplateProps {
   hiddenSections?: SectionId[];
   language?: ResumeLanguage;
   photo?: string;
+  design?: DesignSettings;
   templateId: TemplateId;
   onSectionClick?: (sectionId: SectionId) => void;
 }
@@ -54,6 +56,7 @@ function LiveTemplate({
   hiddenSections,
   language,
   photo,
+  design,
   templateId,
   onSectionClick,
 }: LiveTemplateProps) {
@@ -69,6 +72,7 @@ function LiveTemplate({
       hiddenSections={hiddenSections}
       language={language}
       photo={photo}
+      design={design}
       onSectionClick={onSectionClick}
     />
   );
@@ -80,8 +84,8 @@ interface ResumePreviewProps {
   hiddenSections?: SectionId[];
   language?: ResumeLanguage;
   photo?: string;
+  design?: DesignSettings;
   templateId?: TemplateId;
-  /** Whether the mobile edit/preview toggle shows the preview pane. */
   mobileActive: boolean;
   onSectionClick?: (sectionId: SectionId) => void;
 }
@@ -92,11 +96,11 @@ function ResumePreviewImpl({
   hiddenSections,
   language,
   photo,
+  design,
   templateId = 'harvard',
   mobileActive,
   onSectionClick,
 }: ResumePreviewProps) {
-  // Visible on desktop always, on mobile only when the preview toggle is on.
   const isLargeScreen = useMediaQuery(DESKTOP_MEDIA_QUERY);
   const isVisible = isLargeScreen || mobileActive;
 
@@ -282,7 +286,7 @@ function ResumePreviewImpl({
             : t('preview.pageCountAriaMany', { count: pageCount })
         }
       >
-        <FileText className="w-3.5 h-3.5 text-muted-foreground" />
+        <FileText className="size-3.5 text-muted-foreground" />
         <span className="text-xs font-semibold tabular-nums text-muted-foreground">
           {pageCount} {pageCount === 1 ? t('preview.page') : t('preview.pages')}
         </span>
@@ -317,6 +321,7 @@ function ResumePreviewImpl({
                       hiddenSections={hiddenSections}
                       language={language}
                       photo={photo}
+                      design={design}
                       templateId={templateId}
                       onSectionClick={onSectionClick}
                     />

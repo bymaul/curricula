@@ -1,6 +1,7 @@
 import { create } from 'zustand';
 import { persist } from 'zustand/middleware';
-import { DEFAULT_SECTION_ORDER, SectionId } from '@/lib/consts';
+import { DEFAULT_SECTION_ORDER, SECTION_IDS, SectionId } from '@/lib/consts';
+import { DesignSettings, normalizeDesign } from '@/lib/design';
 import { ResumeLanguage } from '@/lib/i18n/languages';
 import { CVData, cvDataStoredSchema, initialCVState } from '@/lib/schema';
 import { createQuotaAwareStorage } from '@/lib/storage';
@@ -16,6 +17,7 @@ export interface ResumeRecord {
   language: ResumeLanguage;
   photo: string;
   templateId: TemplateId;
+  design: DesignSettings;
   autoTitle: boolean;
   updatedAt: number;
 }
@@ -24,13 +26,12 @@ export interface HistorySnapshot {
   data: CVData;
   sectionOrder: SectionId[];
   hiddenSections: SectionId[];
-  // Metadata is undoable too: rename, language, photo, and template changes
-  // are captured so undo/redo restores them alongside the CV data.
   title: string;
   autoTitle: boolean;
   language: ResumeLanguage;
   photo: string;
   templateId: TemplateId;
+  design: DesignSettings;
   at: number;
 }
 
@@ -59,16 +60,21 @@ export interface ResumeState {
       language?: ResumeLanguage;
       photo?: string;
       template?: TemplateId;
+      design?: DesignSettings;
     },
   ) => void;
   setResumeLanguage: (id: string, language: ResumeLanguage) => void;
   setResumePhoto: (id: string, photo: string) => void;
   setResumeTemplate: (id: string, template: TemplateId) => void;
+  setResumeDesign: (id: string, design: DesignSettings) => void;
   restoreBackup: (resumes: ResumeRecord[], activeId: string | null) => void;
   updateResumeData: (id: string, data: CVData) => void;
   moveSection: (fromIndex: number, toIndex: number) => void;
   toggleSectionVisibility: (sectionId: SectionId) => void;
   resetSectionOrder: () => void;
+  addCustomSection: (title: string) => void;
+  renameCustomSection: (id: string, title: string) => void;
+  removeCustomSection: (id: string) => void;
   undo: () => void;
   redo: () => void;
   restoreHistory: (id: string, index: number) => void;
@@ -77,7 +83,6 @@ export interface ResumeState {
 const LEGACY_KEY = 'curricula-data';
 const STORAGE_KEY = 'curricula-resumes';
 
-/** Shape of the resume store payload persisted to localStorage. */
 type PersistedResumeState = {
   resumes: Array<Omit<ResumeRecord, 'photo'>>;
   activeId: string | null;
@@ -98,32 +103,49 @@ function makeResume(
     language?: ResumeLanguage;
     photo?: string;
     template?: TemplateId;
+    design?: DesignSettings;
   } = {},
 ): ResumeRecord {
   return {
     id: makeId(),
     title: title?.trim() || data.name?.trim() || 'Untitled CV',
     data,
-    sectionOrder: [...DEFAULT_SECTION_ORDER],
+    sectionOrder: [
+      ...DEFAULT_SECTION_ORDER,
+      ...Object.keys(data.customSections ?? {}),
+    ],
     hiddenSections: [],
     language: options.language ?? 'en',
     photo: options.photo ?? '',
     templateId: options.template ?? DEFAULT_TEMPLATE_ID,
+    design: normalizeDesign(options.design),
     autoTitle: true,
     updatedAt: now(),
   };
 }
 
 function normalizeResume(record: ResumeRecord): ResumeRecord {
+  const customIds = Object.keys(record.data?.customSections ?? {});
+  const validIds = new Set<string>([...SECTION_IDS, ...customIds]);
+  const sectionOrder = (
+    record.sectionOrder ?? [...DEFAULT_SECTION_ORDER]
+  ).filter((id) => validIds.has(id));
+  for (const id of customIds) {
+    if (!sectionOrder.includes(id)) sectionOrder.push(id);
+  }
   return {
     ...record,
+    sectionOrder,
+    hiddenSections: (record.hiddenSections ?? []).filter((id) =>
+      validIds.has(id),
+    ),
     language: record.language ?? 'en',
     photo: record.photo ?? '',
     templateId: record.templateId ?? DEFAULT_TEMPLATE_ID,
+    design: normalizeDesign(record.design),
   };
 }
 
-/** Resume record without the photo, which persists in the dedicated store. */
 function withoutPhoto(record: ResumeRecord): Omit<ResumeRecord, 'photo'> {
   return {
     id: record.id,
@@ -133,6 +155,7 @@ function withoutPhoto(record: ResumeRecord): Omit<ResumeRecord, 'photo'> {
     hiddenSections: record.hiddenSections,
     language: record.language,
     templateId: record.templateId,
+    design: record.design,
     autoTitle: record.autoTitle,
     updatedAt: record.updatedAt,
   };
@@ -142,9 +165,6 @@ function parseLegacyData(raw: string | null): CVData | null {
   if (!raw) return null;
   try {
     const parsed = JSON.parse(raw);
-    // Validate with the lenient storage schema: a CV saved mid-edit (e.g. a
-    // short or empty summary) must survive migration instead of being
-    // silently discarded. Missing fields fall back to initialCVState.
     const result = cvDataStoredSchema.safeParse(parsed);
     if (!result.success) return null;
     return { ...initialCVState, ...result.data };
@@ -162,14 +182,10 @@ function seedResumes(): ResumeRecord[] {
   return [makeResume()];
 }
 
-/** Mutable resume state captured by a history entry (everything but `at`). */
 type HistoryState = Omit<HistorySnapshot, 'at'>;
 
 function historyState(record: ResumeRecord): HistoryState {
   return {
-    // Deep-copy the CV data so history entries never share mutable references
-    // with the live record. Any future in-place mutation of `record.data`
-    // would otherwise corrupt every snapshot simultaneously.
     data: structuredClone(record.data),
     sectionOrder: [...record.sectionOrder],
     hiddenSections: [...record.hiddenSections],
@@ -178,6 +194,7 @@ function historyState(record: ResumeRecord): HistoryState {
     language: record.language,
     photo: record.photo,
     templateId: record.templateId,
+    design: { ...record.design },
   };
 }
 
@@ -201,7 +218,8 @@ function nextStateEqual(a: HistoryState, b: HistoryState): boolean {
     a.autoTitle === b.autoTitle &&
     a.language === b.language &&
     a.photo === b.photo &&
-    a.templateId === b.templateId
+    a.templateId === b.templateId &&
+    JSON.stringify(a.design) === JSON.stringify(b.design)
   );
 }
 
@@ -257,11 +275,9 @@ function applySnapshot(
     language: snapshot.language,
     photo: snapshot.photo,
     templateId: snapshot.templateId,
+    design: snapshot.design,
     updatedAt: now(),
   };
-  // Photos live in the dedicated photo store, so an undo that restores a
-  // previous photo must mirror the change there too or a later reload would
-  // reattach the wrong image.
   if (snapshot.photo !== record.photo) {
     usePhotoStore.getState().setPhoto(id, snapshot.photo);
   }
@@ -276,40 +292,42 @@ function commitActiveSectionChange(
   state: ResumeState,
   patch: Partial<Pick<ResumeRecord, 'sectionOrder' | 'hiddenSections'>>,
 ): Partial<ResumeState> {
-  const { resumes, activeId } = state;
+  const { activeId } = state;
   if (!activeId) return {};
-  const record = resumes.find((r) => r.id === activeId);
+  return commitResumeChange(state, activeId, patch);
+}
+
+function commitResumeChange(
+  state: ResumeState,
+  id: string,
+  patch: Partial<
+    Pick<ResumeRecord, 'data' | 'sectionOrder' | 'hiddenSections'>
+  >,
+): Partial<ResumeState> {
+  const record = state.resumes.find((r) => r.id === id);
   if (!record) return {};
-  const next = { ...record, ...patch };
+  const next: ResumeRecord = { ...record, ...patch };
   const unchanged =
-    JSON.stringify([next.sectionOrder, next.hiddenSections]) ===
-    JSON.stringify([record.sectionOrder, record.hiddenSections]);
+    JSON.stringify([next.data, next.sectionOrder, next.hiddenSections]) ===
+    JSON.stringify([record.data, record.sectionOrder, record.hiddenSections]);
   if (unchanged) return {};
   return {
-    resumes: resumes.map((r) => (r.id === activeId ? next : r)),
+    resumes: state.resumes.map((r) => (r.id === id ? next : r)),
     histories: {
       ...state.histories,
-      [activeId]: commitHistory(
-        state.histories[activeId],
-        historyState(next),
-        now(),
-      ),
+      [id]: commitHistory(state.histories[id], historyState(next), now()),
     },
+    revision: state.revision + 1,
   };
 }
 
-/**
- * Applies a metadata-only change (rename, language, photo, template) and
- * records it in history so undo/redo restores it. No-ops when the patch does
- * not actually change anything.
- */
 function commitMetadataChange(
   state: ResumeState,
   id: string,
   patch: Partial<
     Pick<
       ResumeRecord,
-      'title' | 'autoTitle' | 'language' | 'photo' | 'templateId'
+      'title' | 'autoTitle' | 'language' | 'photo' | 'templateId' | 'design'
     >
   >,
 ): Partial<ResumeState> {
@@ -321,7 +339,8 @@ function commitMetadataChange(
     next.autoTitle === record.autoTitle &&
     next.language === record.language &&
     next.photo === record.photo &&
-    next.templateId === record.templateId;
+    next.templateId === record.templateId &&
+    JSON.stringify(next.design) === JSON.stringify(record.design);
   if (unchanged) return {};
   return {
     resumes: state.resumes.map((r) => (r.id === id ? next : r)),
@@ -439,12 +458,13 @@ export const useResumeStore = create<ResumeState>()(
       setResumeTemplate: (id, templateId) =>
         set((state) => commitMetadataChange(state, id, { templateId })),
 
+      setResumeDesign: (id, design) =>
+        set((state) => commitMetadataChange(state, id, { design })),
+
       restoreBackup: (resumes, activeId) =>
         set((state) => {
           if (resumes.length === 0) return {};
           const normalized = resumes.map(normalizeResume);
-          // Backups carry photos inline on each record; mirror them into the
-          // dedicated photo store so the persisted CV payload stays lean.
           const photos: Record<string, string> = {
             ...usePhotoStore.getState().photos,
           };
@@ -516,11 +536,80 @@ export const useResumeStore = create<ResumeState>()(
         }),
 
       resetSectionOrder: () =>
-        set((state) =>
-          commitActiveSectionChange(state, {
-            sectionOrder: [...DEFAULT_SECTION_ORDER],
-          }),
-        ),
+        set((state) => {
+          const record = state.resumes.find((r) => r.id === state.activeId);
+          if (!record) return {};
+          return commitActiveSectionChange(state, {
+            sectionOrder: [
+              ...DEFAULT_SECTION_ORDER,
+              ...Object.keys(record.data.customSections ?? {}),
+            ],
+          });
+        }),
+
+      addCustomSection: (title) =>
+        set((state) => {
+          const id = state.activeId;
+          const trimmed = title.trim();
+          if (!id || !trimmed) return {};
+          const record = state.resumes.find((r) => r.id === id);
+          if (!record) return {};
+          const section = { id: makeId(), title: trimmed, items: [] };
+          return commitResumeChange(state, id, {
+            data: {
+              ...record.data,
+              customSections: {
+                ...(record.data.customSections ?? {}),
+                [section.id]: section,
+              },
+            },
+            sectionOrder: [...record.sectionOrder, section.id],
+          });
+        }),
+
+      renameCustomSection: (sectionId, title) =>
+        set((state) => {
+          const id = state.activeId;
+          const trimmed = title.trim();
+          if (!id || !trimmed) return {};
+          const record = state.resumes.find((r) => r.id === id);
+          if (!record) return {};
+          return commitResumeChange(state, id, {
+            data: {
+              ...record.data,
+              customSections: {
+                ...(record.data.customSections ?? {}),
+                [sectionId]: {
+                  ...(record.data.customSections ?? {})[sectionId],
+                  title: trimmed,
+                  id: sectionId,
+                },
+              },
+            },
+          });
+        }),
+
+      removeCustomSection: (sectionId) =>
+        set((state) => {
+          const id = state.activeId;
+          if (!id) return {};
+          const record = state.resumes.find((r) => r.id === id);
+          if (!record) return {};
+          return commitResumeChange(state, id, {
+            data: {
+              ...record.data,
+              customSections: Object.fromEntries(
+                Object.entries(record.data.customSections ?? {}).filter(
+                  ([key]) => key !== sectionId,
+                ),
+              ),
+            },
+            sectionOrder: record.sectionOrder.filter((x) => x !== sectionId),
+            hiddenSections: record.hiddenSections.filter(
+              (x) => x !== sectionId,
+            ),
+          });
+        }),
 
       undo: () =>
         set((state) => {
@@ -547,10 +636,6 @@ export const useResumeStore = create<ResumeState>()(
     }),
     {
       name: STORAGE_KEY,
-      // Photos live in the dedicated photo store (see usePhotoStore); keeping
-      // them out of the resume payload keeps the per-keystroke autosave write
-      // small. Hydration is ordered manually after the photo store so photos
-      // can be reattached during merge.
       skipHydration: true,
       storage: createQuotaAwareStorage<PersistedResumeState>(),
       partialize: (state) => ({
@@ -560,9 +645,6 @@ export const useResumeStore = create<ResumeState>()(
       merge: (persisted, current) => {
         const base = { ...current, ...(persisted as Partial<ResumeState>) };
         let resumes = (base.resumes ?? []).map(normalizeResume);
-        // Migrate photos that were stored inline on resume records (previous
-        // storage layout) into the photo store, then reattach. The photo store
-        // wins when both layouts hold a value for the same resume.
         const photos = { ...usePhotoStore.getState().photos };
         for (const record of resumes) {
           if (record.photo && !(record.id in photos)) {

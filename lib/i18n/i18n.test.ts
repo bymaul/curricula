@@ -9,7 +9,7 @@ import {
   TranslationKey,
 } from '@/lib/i18n';
 import { Language } from '@/lib/i18n/languages';
-import { AIAdjustScope, TabName } from '@/lib/consts';
+import { AIAdjustScope, BuiltinTabName } from '@/lib/consts';
 import { cvSchema } from '@/lib/schema';
 
 function leafKeys(value: unknown): string[] {
@@ -45,7 +45,6 @@ describe('translate', () => {
   it('falls back to the English string when the active language lacks a key', () => {
     const dict = DICTIONARIES.id;
     const original = dict.brand.name;
-    // Simulate dictionary drift: a key present in English but missing in id.
     // @ts-expect-error — mutation only for the test
     delete dict.brand.name;
     try {
@@ -83,8 +82,9 @@ describe('dictionary parity', () => {
 });
 
 describe('TAB_KEYS', () => {
-  const TAB_NAMES: TabName[] = [
+  const TAB_NAMES: BuiltinTabName[] = [
     'personal',
+    'design',
     'experience',
     'projects',
     'education',

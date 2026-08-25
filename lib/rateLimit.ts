@@ -3,10 +3,6 @@ const WINDOW_MAX = 10;
 const DAY_MS = 86_400_000;
 const DAY_MAX = 100;
 
-// Per-key limits are more generous than per-IP: the bundled key is shared by
-// every user of a deployment, so a tight per-key cap would throttle legit
-// traffic. The point of the per-key cap is to bound how much a single leaked
-// or bundled key can burn in a day.
 const KEY_WINDOW_MAX = 30;
 const KEY_DAY_MAX = 500;
 
@@ -18,9 +14,6 @@ interface WindowState {
 const windows = new Map<string, WindowState>();
 const days = new Map<string, WindowState>();
 
-// Trusted proxy headers first: `cf-connecting-ip` (Cloudflare) and `x-real-ip`
-// are set by the proxy and are not client-spoofable. `x-forwarded-for` is a
-// client-supplied chain and is only used as a last resort.
 const IP_HEADER_PRIORITY = [
   'cf-connecting-ip',
   'x-real-ip',
@@ -33,7 +26,6 @@ function prune(map: Map<string, WindowState>, now: number) {
   }
 }
 
-// Compact 64-bit hash so raw API keys never sit in the rate-limit map.
 function hashKey(key: string): string {
   let h1 = 0xdeadbeef;
   let h2 = 0x41c6ce57;
@@ -109,10 +101,6 @@ export function rateLimitStatus(ip: string): LimitResult {
   return checkAndIncrement(ip, WINDOW_MAX, DAY_MAX, now);
 }
 
-/**
- * Per-API-key rate limit. Meant to run alongside the per-IP limit so that
- * rotating IPs cannot bypass the cap on a single (e.g. bundled) key.
- */
 export function keyRateLimitStatus(key: string): LimitResult {
   const now = Date.now();
   prune(windows, now);

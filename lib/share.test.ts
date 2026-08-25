@@ -5,6 +5,7 @@ import {
   matchShareHash,
   parseSharePayload,
 } from '@/lib/share';
+import { DEFAULT_DESIGN } from '@/lib/design';
 import { CVData } from '@/lib/schema';
 
 function makeData(): CVData {
@@ -66,6 +67,7 @@ describe('share payload', () => {
       language: 'en',
       photo: '',
       template: 'harvard',
+      design: { ...DEFAULT_DESIGN },
     });
   });
 
@@ -79,6 +81,7 @@ describe('share payload', () => {
       language: 'id',
       photo,
       template: 'harvard',
+      design: { ...DEFAULT_DESIGN },
     });
   });
 
@@ -91,6 +94,22 @@ describe('share payload', () => {
       language: 'en',
       photo: '',
       template: 'modern',
+      design: { ...DEFAULT_DESIGN },
+    });
+  });
+
+  it('round-trips the design option', async () => {
+    const data = makeData();
+    const payload = await buildSharePayload(data, {
+      design: { accentColor: 'teal', fontFamily: 'sans', density: 'relaxed' },
+    });
+
+    expect(await parseSharePayload(payload)).toEqual({
+      data,
+      language: 'en',
+      photo: '',
+      template: 'harvard',
+      design: { accentColor: 'teal', fontFamily: 'sans', density: 'relaxed' },
     });
   });
 
@@ -110,6 +129,7 @@ describe('share payload', () => {
       language: 'en',
       photo: '',
       template: 'harvard',
+      design: { ...DEFAULT_DESIGN },
     });
   });
 
@@ -122,6 +142,7 @@ describe('share payload', () => {
       language: 'en',
       photo: '',
       template: 'harvard',
+      design: { ...DEFAULT_DESIGN },
     });
   });
 
@@ -147,6 +168,7 @@ describe('share payload', () => {
       language: 'en',
       photo: '',
       template: 'harvard',
+      design: { ...DEFAULT_DESIGN },
     });
   });
 

@@ -25,8 +25,6 @@ export function usePageScale({ frameWidthPx, isVisible }: UsePageScaleOptions) {
   const [frameHeight, setFrameHeight] = useState<number>();
   const activeScale = scale ?? 1;
 
-  // Auto-fit only runs while the user has not chosen a manual zoom level
-  // (scale === null); a browser resize must never override a manual zoom.
   const fitToWidth = useCallback(() => {
     if (useUIStore.getState().scale !== null) return;
     const panel = panelRef.current;

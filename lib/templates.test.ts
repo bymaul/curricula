@@ -6,11 +6,6 @@ import { TEMPLATES, TEMPLATE_IDS } from '@/lib/templates';
 
 type TemplateNameKey = keyof (typeof DICTIONARIES)['en']['templates'];
 
-/**
- * Guards the "no drift" invariant between the template id list, the render
- * component registry, and the localized display names. Adding a template id
- * without a component (or a name key in any locale) fails here.
- */
 describe('template registry coherence', () => {
   it('has a render component for every template id', () => {
     for (const id of TEMPLATE_IDS) {

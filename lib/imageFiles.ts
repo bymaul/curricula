@@ -51,20 +51,12 @@ function loadImage(dataUrl: string): Promise<HTMLImageElement> {
   });
 }
 
-/**
- * Downscales an image to a JPEG at most `MAX_SCAN_WIDTH` pixels wide, keeping
- * uploaded job description images small enough for thumbnails and the AI
- * request payload. Returns null when the source cannot be decoded.
- */
 export async function downscaleImage(dataUrl: string): Promise<string | null> {
   try {
     const image = await loadImage(dataUrl);
     const scale = Math.min(
       2,
       MAX_SCAN_WIDTH / image.naturalWidth,
-      // Vision models slow down sharply on multi-megapixel inputs (a full-page
-      // job posting screenshot can be several thousand pixels tall), so cap
-      // the total pixel count to keep the AI call within the function limit.
       Math.sqrt(
         MAX_TOTAL_PIXELS /
           Math.max(1, image.naturalWidth * image.naturalHeight),
@@ -88,11 +80,6 @@ export async function downscaleImage(dataUrl: string): Promise<string | null> {
 
 export const PHOTO_SIZE = 512;
 
-/**
- * Center-crops an image to a square and downscales it to a JPEG no larger
- * than `PHOTO_SIZE` pixels per side, producing a compact headshot for resume
- * templates. Returns null when the source cannot be decoded.
- */
 export async function resizeSquarePhoto(
   dataUrl: string,
   size = PHOTO_SIZE,
@@ -117,11 +104,6 @@ export async function resizeSquarePhoto(
   }
 }
 
-/**
- * Reads image files (JPEG/PNG/WebP) into base64 `CVImagePart`s for the AI
- * vision pipeline, downscaling each to a JPEG so real-world screenshots stay
- * within the parse-CV payload limits.
- */
 export async function readImagePartsFromFiles(
   files: FileList | readonly File[],
   options?: { maxImages?: number },

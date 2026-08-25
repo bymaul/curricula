@@ -1,7 +1,7 @@
 import en, { Dictionary } from './en';
 import id from './id';
 import { Language, ResumeLanguage } from './languages';
-import { AIAdjustScope, TabName } from '@/lib/consts';
+import { AIAdjustScope, BuiltinTabName, TabName } from '@/lib/consts';
 
 export type { Language, ResumeLanguage } from './languages';
 export { UI_LANGUAGES, RESUME_LANGUAGES } from './languages';
@@ -23,14 +23,29 @@ type Join<T extends string[], Sep extends string> = T extends [
 
 export type TranslationKey = Join<LeafPaths<Dictionary>, '.'>;
 
-export const TAB_KEYS: Record<TabName, TranslationKey> = {
+export const TAB_KEYS: Record<BuiltinTabName, TranslationKey> = {
   personal: 'tabs.personal',
+  design: 'tabs.design',
   experience: 'tabs.experience',
   projects: 'tabs.projects',
   education: 'tabs.education',
   skills: 'tabs.skills',
   certifications: 'tabs.certifications',
 };
+
+export function tabKey(tab: TabName): TranslationKey | undefined {
+  return (TAB_KEYS as Record<string, TranslationKey>)[tab];
+}
+
+export function navTabLabel(
+  tab: TabName,
+  customSections: ReadonlyArray<{ id: string; title: string }>,
+  t: (key: TranslationKey, params?: Record<string, string | number>) => string,
+): string {
+  const key = tabKey(tab);
+  if (key) return t(key);
+  return customSections.find((s) => s.id === tab)?.title ?? '';
+}
 
 export const AI_ADJUST_SCOPE_KEYS: Record<AIAdjustScope, TranslationKey> = {
   full: 'aiAdjust.scopeFull',
@@ -82,9 +97,6 @@ export function translate(
   params?: Record<string, string | number>,
 ): string {
   const dictionary = DICTIONARIES[lang] ?? en;
-  // English is the source of truth: if the active language is missing a key
-  // (dictionary drift), fall back to the English string instead of leaking a
-  // bare key into the UI.
   const value = lookup(dictionary, key) ?? lookup(en, key);
   if (value === undefined) return key;
   return interpolate(value, params);

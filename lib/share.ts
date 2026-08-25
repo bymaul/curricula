@@ -1,5 +1,6 @@
 import { z } from 'zod';
 import { CVData, cvDataStoredSchema } from '@/lib/schema';
+import { DEFAULT_DESIGN, designSchema, DesignSettings } from '@/lib/design';
 import { ResumeLanguage } from '@/lib/i18n/languages';
 import { RESUME_LANGUAGES } from '@/lib/i18n/languages';
 import { DEFAULT_TEMPLATE_ID, TEMPLATE_IDS, TemplateId } from '@/lib/templates';
@@ -7,13 +8,8 @@ import { DEFAULT_TEMPLATE_ID, TEMPLATE_IDS, TemplateId } from '@/lib/templates';
 const SHARE_PREFIX_V2 = 'c2:';
 const LEGACY_SHARE_PREFIX = 'c1:';
 
-/** Matches `#resume=<payload>` with an optional `c1:`/`c2:` prefix. */
 export const SHARE_HASH_RE = /^#resume=(?:c[12]:)?[A-Za-z0-9_-]+$/;
 
-/**
- * Extracts a share payload from a location hash, or `null` when the hash
- * does not look like a share link.
- */
 export function matchShareHash(hash: string): string | null {
   const match = hash.match(SHARE_HASH_RE);
   return match ? hash.slice('#resume='.length) : null;
@@ -26,6 +22,7 @@ const shareEnvelopeSchema = z.object({
   language: z.enum(RESUME_LANGUAGES).default('en'),
   photo: z.string().default(''),
   template: z.enum(TEMPLATE_IDS).default(DEFAULT_TEMPLATE_ID),
+  design: designSchema.catch(DEFAULT_DESIGN),
   data: cvDataStoredSchema,
 });
 
@@ -34,6 +31,7 @@ export interface ShareResult {
   language: ResumeLanguage;
   photo: string;
   template: TemplateId;
+  design: DesignSettings;
 }
 
 function bytesToBase64url(bytes: Uint8Array): string {
@@ -59,13 +57,20 @@ function base64urlToBytes(payload: string): Uint8Array<ArrayBuffer> {
 }
 
 function legacyResult(data: CVData): ShareResult {
-  return { data, language: 'en', photo: '', template: DEFAULT_TEMPLATE_ID };
+  return {
+    data,
+    language: 'en',
+    photo: '',
+    template: DEFAULT_TEMPLATE_ID,
+    design: { ...DEFAULT_DESIGN },
+  };
 }
 
 export type ShareOptions = {
   language?: ResumeLanguage;
   photo?: string;
   template?: TemplateId;
+  design?: DesignSettings;
 };
 
 export async function buildSharePayload(
@@ -77,6 +82,7 @@ export async function buildSharePayload(
     language: options.language ?? 'en',
     photo: options.photo ?? '',
     template: options.template ?? DEFAULT_TEMPLATE_ID,
+    design: options.design ?? DEFAULT_DESIGN,
     data,
   };
   const stream = new Blob([JSON.stringify(envelope)])
@@ -105,6 +111,7 @@ export async function parseSharePayload(
             language: result.data.language,
             photo: result.data.photo,
             template: result.data.template,
+            design: result.data.design,
           }
         : null;
     }

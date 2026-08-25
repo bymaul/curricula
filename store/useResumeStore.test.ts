@@ -1,5 +1,6 @@
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
 import { DEFAULT_SECTION_ORDER } from '@/lib/consts';
+import { DEFAULT_DESIGN } from '@/lib/design';
 import { CVData } from '@/lib/schema';
 import { resetStorageStateForTests } from '@/lib/storage';
 import { usePhotoStore } from '@/store/usePhotoStore';
@@ -41,6 +42,14 @@ function getHistory() {
   return getState().histories[getState().activeId!];
 }
 
+function firstCustomId(): string {
+  return Object.keys(activeResume().data.customSections ?? {})[0];
+}
+
+function firstCustomTitle(): string {
+  return Object.values(activeResume().data.customSections ?? {})[0].title;
+}
+
 beforeEach(() => {
   vi.useFakeTimers();
   vi.setSystemTime(new Date('2026-01-01T00:00:00Z'));
@@ -77,6 +86,7 @@ describe('useResumeStore history', () => {
       education: [],
       skills: [],
       certifications: [],
+      customSections: {},
     });
   });
 
@@ -119,8 +129,6 @@ describe('useResumeStore history', () => {
     const id = activeId();
     getState().updateResumeData(id, makeData());
 
-    // Simulate a future in-place mutation of the live record data. History
-    // snapshots must not share a reference, so this cannot leak backwards.
     getState()
       .resumes.find((r) => r.id === id)!
       .data.experience.push({
@@ -362,6 +370,7 @@ describe('useResumeStore import & backup', () => {
         language: 'en',
         photo: '',
         templateId: 'harvard',
+        design: { ...DEFAULT_DESIGN },
         autoTitle: false,
         updatedAt: 1000,
       },
@@ -374,6 +383,7 @@ describe('useResumeStore import & backup', () => {
         language: 'en',
         photo: '',
         templateId: 'harvard',
+        design: { ...DEFAULT_DESIGN },
         autoTitle: true,
         updatedAt: 2000,
       },
@@ -406,6 +416,7 @@ describe('useResumeStore import & backup', () => {
           language: 'en',
           photo: '',
           templateId: 'harvard',
+          design: { ...DEFAULT_DESIGN },
           autoTitle: true,
           updatedAt: 1000,
         },
@@ -515,6 +526,185 @@ describe('useResumeStore language, photo & template', () => {
     expect(activeResume().templateId).toBe('modern');
   });
 
+  it('defaults new resumes to the default design', () => {
+    getState().createResume();
+    expect(activeResume().design).toEqual(DEFAULT_DESIGN);
+  });
+
+  it('imports shared data with the design option', () => {
+    getState().createResume();
+    const design = {
+      accentColor: 'teal',
+      fontFamily: 'serif',
+      density: 'relaxed',
+    } as const;
+
+    getState().importResumeData(
+      makeData({ name: 'Grace Hopper' }),
+      'Shared CV',
+      { design },
+    );
+
+    expect(activeResume().design).toEqual(design);
+  });
+
+  it('records the resume design in history and undo restores it', () => {
+    getState().createResume();
+    const id = activeId();
+
+    getState().setResumeDesign(id, {
+      accentColor: 'blue',
+      fontFamily: 'serif',
+      density: 'compact',
+    });
+
+    expect(activeResume().design.accentColor).toBe('blue');
+    expect(getHistory().entries).toHaveLength(2);
+
+    getState().undo();
+    expect(activeResume().design).toEqual(DEFAULT_DESIGN);
+
+    getState().redo();
+    expect(activeResume().design.accentColor).toBe('blue');
+  });
+
+  it('does not rewrite the resume when the design is unchanged', () => {
+    getState().createResume();
+    const id = activeId();
+    const updatedAt = activeResume().updatedAt;
+
+    getState().setResumeDesign(id, { ...DEFAULT_DESIGN });
+
+    expect(activeResume().updatedAt).toBe(updatedAt);
+  });
+
+  it('carries the template over when duplicating a resume', () => {
+    getState().createResume();
+    const id = activeId();
+    getState().setResumeTemplate(id, 'modern');
+
+    getState().duplicateResume(id);
+    const duplicated = getState().resumes.find((r) => r.id !== id)!;
+    expect(duplicated.templateId).toBe('modern');
+  });
+});
+
+describe('useResumeStore custom sections', () => {
+  it('bumps revision on structural changes so the editor form resyncs', () => {
+    getState().createResume();
+    const before = getState().revision;
+
+    getState().addCustomSection('Publications');
+    expect(getState().revision).toBe(before + 1);
+
+    const sectionId = firstCustomId();
+    vi.advanceTimersByTime(5000);
+    getState().renameCustomSection(sectionId, 'Papers');
+    expect(getState().revision).toBe(before + 2);
+  });
+
+  it('adds a section to data and appends its id to the order in one step', () => {
+    getState().createResume();
+
+    getState().addCustomSection('Publications');
+
+    const sections = activeResume().data.customSections ?? {};
+    const [sectionId, section] = Object.entries(sections)[0];
+    expect(section.title).toBe('Publications');
+    expect(activeResume().sectionOrder).toContain(sectionId);
+
+    const history = getHistory();
+    expect(history.entries).toHaveLength(2);
+  });
+
+  it('ignores empty titles', () => {
+    getState().createResume();
+
+    getState().addCustomSection('   ');
+
+    expect(activeResume().data.customSections).toEqual({});
+    expect(getHistory().entries).toHaveLength(1);
+  });
+
+  it('renames a section without touching order', () => {
+    getState().createResume();
+    getState().addCustomSection('Publications');
+    const sectionId = firstCustomId();
+    vi.advanceTimersByTime(5000);
+
+    getState().renameCustomSection(sectionId, 'Papers & Talks');
+
+    expect(firstCustomTitle()).toBe('Papers & Talks');
+    expect(getHistory().entries).toHaveLength(3);
+  });
+
+  it('removes a section together with its order and hidden entries', () => {
+    getState().createResume();
+    getState().addCustomSection('Languages');
+    const sectionId = firstCustomId();
+    vi.advanceTimersByTime(5000);
+
+    getState().removeCustomSection(sectionId);
+
+    expect(activeResume().data.customSections).toEqual({});
+    expect(activeResume().sectionOrder).not.toContain(sectionId);
+    expect(getHistory().entries).toHaveLength(3);
+  });
+
+  it('undoes an add by removing data and the nav entry together', () => {
+    getState().createResume();
+    getState().addCustomSection('Awards');
+    const sectionId = firstCustomId();
+
+    getState().undo();
+
+    expect(activeResume().data.customSections).toEqual({});
+    expect(activeResume().sectionOrder).not.toContain(sectionId);
+  });
+
+  it('keeps custom ids when resetting the order', () => {
+    getState().createResume();
+    getState().addCustomSection('Interests');
+    const sectionId = firstCustomId();
+    vi.advanceTimersByTime(5000);
+
+    getState().resetSectionOrder();
+
+    const order = activeResume().sectionOrder;
+    expect(order[order.length - 1]).toBe(sectionId);
+    expect(order.slice(0, -1)).toEqual([...DEFAULT_SECTION_ORDER]);
+  });
+
+  it('appends missing custom ids and prunes dangling ids on rehydrate', () => {
+    getState().createResume();
+    getState().addCustomSection('Volunteer');
+    const kept = Object.values(activeResume().data.customSections ?? {})[0];
+    const id = activeId();
+
+    const stale = {
+      ...getState().resumes.find((r) => r.id === id)!,
+      sectionOrder: [...DEFAULT_SECTION_ORDER, 'ghost-id'],
+      hiddenSections: ['ghost-id'],
+      data: {
+        ...makeData(),
+        customSections: { [kept.id]: kept },
+      },
+    };
+    localStorage.setItem(
+      STORAGE_KEY,
+      JSON.stringify({
+        state: { resumes: [stale], activeId: id },
+        version: 0,
+      }),
+    );
+    useResumeStore.persist.rehydrate();
+
+    const resumed = getState().resumes.find((r) => r.id === id)!;
+    expect(resumed.sectionOrder).not.toContain('ghost-id');
+    expect(resumed.hiddenSections).not.toContain('ghost-id');
+    expect(resumed.sectionOrder[resumed.sectionOrder.length - 1]).toBe(kept.id);
+  });
+
   it('records renames in history and undo restores the previous title', () => {
     getState().createResume();
     const id = activeId();
@@ -546,16 +736,6 @@ describe('useResumeStore language, photo & template', () => {
     expect(activeResume().updatedAt).toBe(updatedAt);
   });
 
-  it('carries the template over when duplicating a resume', () => {
-    getState().createResume();
-    const id = activeId();
-    getState().setResumeTemplate(id, 'modern');
-
-    getState().duplicateResume(id);
-    const duplicated = getState().resumes.find((r) => r.id !== id)!;
-    expect(duplicated.templateId).toBe('modern');
-  });
-
   it('backfills language, photo, and template for legacy persisted resumes', () => {
     getState().createResume();
     const id = activeId();
@@ -579,6 +759,7 @@ describe('useResumeStore language, photo & template', () => {
     expect(resumed?.language).toBe('en');
     expect(resumed?.photo).toBe('');
     expect(resumed?.templateId).toBe('harvard');
+    expect(resumed?.design).toEqual(DEFAULT_DESIGN);
   });
 
   it('migrates legacy curricula-data even when it fails the strict schema', () => {
@@ -587,8 +768,6 @@ describe('useResumeStore language, photo & template', () => {
       jobTitle: 'Engineer',
       email: 'old@example.com',
       phone: '123',
-      // Intentionally short — fails the strict cvSchema (min 10 chars) but
-      // must still survive migration.
       summary: 'short',
       links: [],
       experience: [],
@@ -635,9 +814,6 @@ describe('useResumeStore photo persistence', () => {
     const id = activeId();
     getState().setResumePhoto(id, PHOTO);
 
-    // Simulate a fresh session: wipe memory and reload from storage. The wipe
-    // itself writes an empty payload to storage, so restore the real one that
-    // a reload would have read.
     const persistedPayload = localStorage.getItem(STORAGE_KEY)!;
     expect(JSON.parse(persistedPayload).state.resumes[0]).not.toHaveProperty(
       'photo',
@@ -716,6 +892,7 @@ describe('useResumeStore photo persistence', () => {
         language: 'en',
         photo: PHOTO,
         templateId: 'harvard',
+        design: { ...DEFAULT_DESIGN },
         autoTitle: true,
         updatedAt: 1000,
       },

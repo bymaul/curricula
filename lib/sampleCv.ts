@@ -1,10 +1,5 @@
 import { CVData } from '@/lib/schema';
 
-/**
- * A realistic, schema-valid example CV used by the "start from example"
- * actions. Content is intentionally generic and English-only; the resume's
- * own language stays editable afterwards.
- */
 export const SAMPLE_CV_DATA: CVData = {
   name: 'Alex Rivera',
   jobTitle: 'Senior Frontend Engineer',
@@ -64,4 +59,28 @@ export const SAMPLE_CV_DATA: CVData = {
       date: '2022',
     },
   ],
+  customSections: {
+    'sample-publications': {
+      id: 'sample-publications',
+      title: 'Publications',
+      items: [
+        {
+          title: 'Shipping Accessible Components at Scale',
+          subtitle: 'Smashing Magazine',
+          date: '2023',
+          location: '',
+          description:
+            '- Co-authored a guide to building accessible design systems\n- Read by over 100k developers in the first year',
+        },
+        {
+          title: 'Offline-First Web Apps in Practice',
+          subtitle: 'CSS-Tricks',
+          date: '2021',
+          location: '',
+          description:
+            '- Wrote about service worker strategies for field-research tools',
+        },
+      ],
+    },
+  },
 };

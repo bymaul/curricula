@@ -117,12 +117,9 @@ describe('keyRateLimitStatus', () => {
   });
 
   it('limits per key independently of the IP limit', () => {
-    // The per-IP window (10) is exhausted for this IP.
     for (let i = 0; i < 10; i++) rateLimitStatus('5.5.5.5');
-    // A fresh key is still under its own cap.
     for (let i = 0; i < 30; i++) keyRateLimitStatus('sk-fresh');
     expect(keyRateLimitStatus('sk-fresh').limited).toBe(true);
-    // A different key is not affected.
     expect(keyRateLimitStatus('sk-other').limited).toBe(false);
   });
 

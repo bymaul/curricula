@@ -1,7 +1,12 @@
 'use client';
 
 import React, { forwardRef } from 'react';
-import { DEFAULT_SECTION_ORDER, SectionId } from '@/lib/consts';
+import {
+  BuiltinSectionId,
+  DEFAULT_SECTION_ORDER,
+  SectionId,
+} from '@/lib/consts';
+import { DEFAULT_DESIGN, designCssVars } from '@/lib/design';
 import { translate } from '@/lib/i18n';
 import { CVData } from '@/lib/schema';
 import {
@@ -11,6 +16,9 @@ import {
   SectionContext,
   formatUrl,
   renderFormattedText,
+  renderCustomItems,
+  resolveTemplateOrder,
+  isBuiltinSection,
   sectionClickProps,
   headerClickProps,
   INTERACTIVE_CLASSES,
@@ -18,20 +26,11 @@ import {
   ItemSub,
 } from './shared';
 
-/**
- * Single source of truth for the Harvard template's type scale and spacing.
- * Change a value here instead of hunting through the JSX.
- *
- * Sizes follow the classic "Harvard resume" convention:
- * - Name is the only large element on the page.
- * - Everything else sits in a tight 9.5-11pt band so the page reads as one
- *   voice rather than a mix of headings.
- */
 const TYPE = {
   name: 'text-[16pt] font-bold uppercase tracking-wide',
   jobTitle: 'text-[11pt] font-medium',
   contact: 'text-[9.5pt]',
-  sectionTitle: 'text-[11pt] font-bold uppercase',
+  sectionTitle: 'text-[11pt] font-bold uppercase [color:var(--cv-accent)]',
   itemTitle: 'text-[10.5pt] font-bold',
   itemMeta: 'text-[10pt] font-normal',
   itemSubtitle: 'text-[10pt] italic',
@@ -41,15 +40,11 @@ const TYPE = {
 const SPACE = {
   pageMargin: 'px-[2cm]',
   pageCap: 'h-[1.5cm]',
-  sectionGap: 'mb-[10pt]',
-  itemGap: 'mb-[7pt]',
+  sectionGap: '[margin-bottom:var(--cv-section-gap)]',
+  itemGap: '[margin-bottom:var(--cv-item-gap)]',
   sectionTitleGap: 'mb-[3pt] pb-[1pt]',
 } as const;
 
-/**
- * Parses a free-text field into paragraphs and "- " bullet groups.
- * Defined outside the component so it isn't re-created on every render.
- */
 function Section({
   id,
   title,
@@ -73,7 +68,7 @@ function Section({
       className={`${SPACE.sectionGap} ${avoidBreakAfter ? 'break-after-avoid' : ''} ${onClick ? INTERACTIVE_CLASSES : ''}`}
     >
       <h2
-        className={`${TYPE.sectionTitle} border-b border-black ${SPACE.sectionTitleGap} break-after-avoid`}
+        className={`${TYPE.sectionTitle} border-b [border-color:var(--cv-accent)] ${SPACE.sectionTitleGap} break-after-avoid`}
       >
         {title}
       </h2>
@@ -87,7 +82,7 @@ type SectionRenderer = (
   context: SectionContext,
 ) => React.ReactNode;
 
-const SECTION_RENDERERS: Record<SectionId, SectionRenderer> = {
+const SECTION_RENDERERS: Record<BuiltinSectionId, SectionRenderer> = {
   summary: (cvData, { onClick, t }) =>
     cvData.summary ? (
       <Section
@@ -216,10 +211,22 @@ const SECTION_RENDERERS: Record<SectionId, SectionRenderer> = {
 
 export const HarvardTemplate = forwardRef<HTMLDivElement, TemplateProps>(
   (
-    { cvData, sectionOrder, hiddenSections, language, photo, onSectionClick },
+    {
+      cvData,
+      sectionOrder,
+      hiddenSections,
+      language,
+      photo,
+      design,
+      onSectionClick,
+    },
     ref,
   ) => {
     const t: T = (key, params) => translate(language ?? 'en', key, params);
+    const styleVars = designCssVars(design ?? DEFAULT_DESIGN, {
+      accentFallback: '#000000',
+      fontFallback: 'serif',
+    });
 
     const order = (sectionOrder ?? DEFAULT_SECTION_ORDER).filter(
       (id) => !hiddenSections?.includes(id),
@@ -228,7 +235,11 @@ export const HarvardTemplate = forwardRef<HTMLDivElement, TemplateProps>(
     const context: SectionContext = { onClick: onSectionClick, t };
 
     return (
-      <div ref={ref} className="mx-auto shadow-2xl print:shadow-none bg-white">
+      <div
+        ref={ref}
+        style={styleVars}
+        className="mx-auto shadow-2xl print:shadow-none bg-white"
+      >
         <PrintStyle />
 
         <table className="w-full border-collapse">
@@ -243,9 +254,9 @@ export const HarvardTemplate = forwardRef<HTMLDivElement, TemplateProps>(
           <tbody>
             <tr>
               <td
-                className={`${SPACE.pageMargin} align-top font-serif text-black leading-snug`}
+                className={`${SPACE.pageMargin} align-top text-black leading-snug`}
+                style={{ fontFamily: 'var(--cv-font)' }}
               >
-                {/* --- HEADER SECTION --- */}
                 <div
                   data-section-id="summary"
                   {...headerClickProps(onSectionClick)}
@@ -301,12 +312,32 @@ export const HarvardTemplate = forwardRef<HTMLDivElement, TemplateProps>(
                   </div>
                 </div>
 
-                {/* --- CONTENT SECTIONS (ordered) --- */}
-                {order.map((id) => (
-                  <React.Fragment key={id}>
-                    {SECTION_RENDERERS[id](cvData, context)}
-                  </React.Fragment>
-                ))}
+                {resolveTemplateOrder(order, cvData).map((id) => {
+                  const builtin = isBuiltinSection(id)
+                    ? SECTION_RENDERERS[id](cvData, context)
+                    : null;
+                  if (builtin)
+                    return <React.Fragment key={id}>{builtin}</React.Fragment>;
+                  const section = cvData.customSections?.[id];
+                  if (!section) return null;
+                  return (
+                    <Section
+                      key={id}
+                      id={section.id}
+                      title={section.title}
+                      onClick={onSectionClick}
+                      t={t}
+                    >
+                      {renderCustomItems(section.items, {
+                        wrapper: SPACE.itemGap,
+                        title: TYPE.itemTitle,
+                        meta: TYPE.itemMeta,
+                        sub: TYPE.itemSubtitle,
+                        body: TYPE.body,
+                      })}
+                    </Section>
+                  );
+                })}
               </td>
             </tr>
           </tbody>

@@ -1,7 +1,7 @@
 import { toast } from '@/components/ui/toast';
 import { useI18n } from '@/components/I18nProvider';
-import { SECTIONS, TabName } from '@/lib/consts';
-import { TAB_KEYS } from '@/lib/i18n';
+import { SECTIONS, SectionId, TabName } from '@/lib/consts';
+import { tabKey } from '@/lib/i18n';
 import type { CVData } from '@/lib/schema';
 import { useResumeStore } from '@/store/useResumeStore';
 import { useUIStore } from '@/store/useUIStore';
@@ -33,7 +33,13 @@ export function useCVPrint(methods: UseFormReturn<CVData>) {
     const targetSection = SECTIONS.find((section) =>
       section.fields.includes(firstErrorField),
     );
-    const targetTab: TabName = targetSection?.name ?? 'personal';
+    let targetTab: TabName = targetSection?.name ?? 'personal';
+    if (!targetSection && firstErrorField === 'customSections') {
+      const customId = Object.values(
+        activeResume?.data.customSections ?? {},
+      ).find((s) => s.items.length > 0)?.id;
+      if (customId) targetTab = customId as SectionId;
+    }
 
     setActiveTab(targetTab);
     return targetTab;
@@ -50,7 +56,9 @@ export function useCVPrint(methods: UseFormReturn<CVData>) {
         type: 'warning',
         title: t('editor.validationError'),
         description: t('editor.validationErrorDescription', {
-          section: t(TAB_KEYS[targetTab]),
+          section:
+            activeResume?.data.customSections?.[targetTab]?.title ??
+            (tabKey(targetTab) ? t(tabKey(targetTab)!) : ''),
         }),
       });
       return;

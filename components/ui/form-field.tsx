@@ -1,6 +1,11 @@
 'use client';
 
-import { Field, FieldLabel, FieldError } from '@/components/ui/field';
+import {
+  Field,
+  FieldDescription,
+  FieldError,
+  FieldLabel,
+} from '@/components/ui/field';
 import { Input } from '@/components/ui/input';
 import { Textarea } from '@/components/ui/textarea';
 import { FieldPath, FieldValues, UseFormRegister } from 'react-hook-form';
@@ -15,6 +20,7 @@ type FormFieldProps<T extends FieldValues> = {
   className?: string;
   as?: 'input' | 'textarea';
   textareaClassName?: string;
+  description?: string;
 };
 
 export function FormField<T extends FieldValues>({
@@ -27,6 +33,7 @@ export function FormField<T extends FieldValues>({
   className,
   as = 'input',
   textareaClassName,
+  description,
 }: FormFieldProps<T>) {
   return (
     <Field className={className}>
@@ -47,6 +54,7 @@ export function FormField<T extends FieldValues>({
         />
       )}
       {error && <FieldError>{error}</FieldError>}
+      {description && <FieldDescription>{description}</FieldDescription>}
     </Field>
   );
 }

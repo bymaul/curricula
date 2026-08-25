@@ -61,8 +61,6 @@ export function aiErrorResponse(error: unknown): Response {
 
   const message = err?.message ?? '';
 
-  // Provider rate limits: pass the provider's Retry-After through so clients
-  // can show "wait N seconds" instead of a generic failure.
   if (err?.statusCode === 429 || message.includes('429')) {
     const retryAfter = extractRetryAfter(err.headers);
     const headers =
@@ -76,8 +74,6 @@ export function aiErrorResponse(error: unknown): Response {
     );
   }
 
-  // Map provider errors to safe generic messages. Full details stay in the
-  // server logs (see console.error above); never echo provider internals.
   if (
     err?.statusCode === 401 ||
     err?.statusCode === 403 ||

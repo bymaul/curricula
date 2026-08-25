@@ -4,7 +4,6 @@ interface ErrorPayload {
 
 const DEFAULT_RETRY_AFTER_SECONDS = 60;
 
-/** Thrown when the server responds 429. Carries the Retry-After hint. */
 export class RateLimitError extends Error {
   readonly retryAfterSeconds: number;
 
@@ -15,7 +14,6 @@ export class RateLimitError extends Error {
   }
 }
 
-/** Thrown when the client aborts a request via its own timeout. */
 export class RequestTimeoutError extends Error {
   constructor() {
     super('Request timed out');
