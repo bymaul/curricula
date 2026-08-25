@@ -1,6 +1,7 @@
 'use client';
 
 import { useI18n } from '@/components/I18nProvider';
+import { FolderGit2 } from 'lucide-react';
 import { SectionFieldArray } from './shared';
 
 export const ProjectsForm = () => {
@@ -8,6 +9,7 @@ export const ProjectsForm = () => {
   return (
     <SectionFieldArray
       name="projects"
+      emptyIcon={FolderGit2}
       title={t('projects.title')}
       description={t('projects.description')}
       addLabel={t('projects.add')}

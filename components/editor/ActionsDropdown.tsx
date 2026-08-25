@@ -2,13 +2,16 @@
 
 import { useMediaQuery } from '@/hooks/useMediaQuery';
 import { useI18n } from '@/components/I18nProvider';
+import { UI_LANGUAGES, Language } from '@/lib/i18n/languages';
 import { DESKTOP_MEDIA_QUERY } from '@/lib/consts';
 import { cn } from '@/lib/utils';
 import { useDialogStore } from '@/store/useDialogStore';
+import { useUIStore } from '@/store/useUIStore';
 import {
   DatabaseBackup,
   EllipsisVertical,
   FileText,
+  Languages,
   Printer,
   Settings2,
   Share2,
@@ -17,10 +20,16 @@ import {
 } from 'lucide-react';
 import { Button } from '../ui/button';
 import {
+  DROPDOWN_ITEM_CLASS,
   DropdownMenu,
   DropdownMenuContent,
   DropdownMenuItem,
+  DropdownMenuRadioGroup,
+  DropdownMenuRadioItem,
   DropdownMenuSeparator,
+  DropdownMenuSub,
+  DropdownMenuSubContent,
+  DropdownMenuSubTrigger,
   DropdownMenuTrigger,
 } from '../ui/dropdown-menu';
 
@@ -30,16 +39,15 @@ interface ActionsDropdownProps {
   triggerClassName?: string;
 }
 
-const ITEM_CLASSNAME = 'gap-3 py-2.5 px-3 text-sm cursor-pointer rounded-md';
-
 export function ActionsDropdown({
   pdfInputRef,
   handlePrintClick,
   triggerClassName,
 }: ActionsDropdownProps) {
   const setDialog = useDialogStore((state) => state.setDialog);
+  const setUILanguage = useUIStore((state) => state.setUILanguage);
+  const { lang, t } = useI18n();
   const isMobile = !useMediaQuery(DESKTOP_MEDIA_QUERY);
-  const { t } = useI18n();
 
   const handleImportPDFClick = () => {
     pdfInputRef.current?.click();
@@ -52,10 +60,10 @@ export function ActionsDropdown({
           <Button
             variant="ghost"
             size="icon-sm"
-            className={cn('h-9 lg:h-8', triggerClassName)}
+            className={cn('size-9 lg:size-8', triggerClassName)}
             aria-label={t('common.actions')}
           >
-            <EllipsisVertical className="w-4 h-4" />
+            <EllipsisVertical className="size-4" />
           </Button>
         }
       />
@@ -64,9 +72,9 @@ export function ActionsDropdown({
           <>
             <DropdownMenuItem
               onClick={() => setDialog('resumes', true)}
-              className={ITEM_CLASSNAME}
+              className={DROPDOWN_ITEM_CLASS}
             >
-              <FileText className="w-4 h-4 text-muted-foreground" />
+              <FileText className="size-4 text-muted-foreground" />
               {t('editor.manageResumes')}
             </DropdownMenuItem>
             <DropdownMenuSeparator />
@@ -74,45 +82,71 @@ export function ActionsDropdown({
         )}
         <DropdownMenuItem
           onClick={handleImportPDFClick}
-          className={ITEM_CLASSNAME}
+          className={DROPDOWN_ITEM_CLASS}
         >
-          <Upload className="w-4 h-4 text-muted-foreground" />
+          <Upload className="size-4 text-muted-foreground" />
           {t('editor.importPdf')}
         </DropdownMenuItem>
         <DropdownMenuItem
           onClick={() => setDialog('aiAdjust', true)}
-          className={ITEM_CLASSNAME}
+          className={DROPDOWN_ITEM_CLASS}
         >
-          <Sparkles className="w-4 h-4 text-primary" />
+          <Sparkles className="size-4 text-primary" />
           {t('editor.aiAdjust')}
         </DropdownMenuItem>
         <DropdownMenuItem
           onClick={() => setDialog('aiSettings', true)}
-          className={ITEM_CLASSNAME}
+          className={DROPDOWN_ITEM_CLASS}
         >
-          <Settings2 className="w-4 h-4 text-muted-foreground" />
+          <Settings2 className="size-4 text-muted-foreground" />
           {t('editor.aiSettings')}
         </DropdownMenuItem>
         <DropdownMenuSeparator />
         <DropdownMenuItem
           onClick={() => setDialog('share', true)}
-          className={ITEM_CLASSNAME}
+          className={DROPDOWN_ITEM_CLASS}
         >
-          <Share2 className="w-4 h-4 text-muted-foreground" />
+          <Share2 className="size-4 text-muted-foreground" />
           {t('editor.shareLink')}
         </DropdownMenuItem>
-        <DropdownMenuItem onClick={handlePrintClick} className={ITEM_CLASSNAME}>
-          <Printer className="w-4 h-4 text-muted-foreground" />
+        <DropdownMenuItem
+          onClick={handlePrintClick}
+          className={DROPDOWN_ITEM_CLASS}
+        >
+          <Printer className="size-4 text-muted-foreground" />
           {t('editor.printPdf')}
         </DropdownMenuItem>
         <DropdownMenuSeparator />
         <DropdownMenuItem
           onClick={() => setDialog('backup', true)}
-          className={ITEM_CLASSNAME}
+          className={DROPDOWN_ITEM_CLASS}
         >
-          <DatabaseBackup className="w-4 h-4 text-muted-foreground" />
+          <DatabaseBackup className="size-4 text-muted-foreground" />
           {t('editor.backupRestore')}
         </DropdownMenuItem>
+        <DropdownMenuSeparator />
+        <DropdownMenuSub>
+          <DropdownMenuSubTrigger className={DROPDOWN_ITEM_CLASS}>
+            <Languages className="size-4 text-muted-foreground" />
+            {t('common.language')}
+          </DropdownMenuSubTrigger>
+          <DropdownMenuSubContent className="w-44">
+            <DropdownMenuRadioGroup
+              value={lang}
+              onValueChange={(value) => setUILanguage(value as Language)}
+            >
+              {UI_LANGUAGES.map((option) => (
+                <DropdownMenuRadioItem
+                  key={option.value}
+                  value={option.value}
+                  className={cn(DROPDOWN_ITEM_CLASS, 'pr-8')}
+                >
+                  {option.label}
+                </DropdownMenuRadioItem>
+              ))}
+            </DropdownMenuRadioGroup>
+          </DropdownMenuSubContent>
+        </DropdownMenuSub>
       </DropdownMenuContent>
     </DropdownMenu>
   );

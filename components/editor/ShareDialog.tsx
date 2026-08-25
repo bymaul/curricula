@@ -5,12 +5,16 @@ import {
   Dialog,
   DialogContent,
   DialogDescription,
+  DialogFooter,
   DialogHeader,
   DialogTitle,
 } from '@/components/ui/dialog';
+import { FieldDescription } from '@/components/ui/field';
+import { Textarea } from '@/components/ui/textarea';
 import { toast } from '@/components/ui/toast';
 import { useI18n } from '@/components/I18nProvider';
 import { buildShareUrl } from '@/lib/share';
+import { DesignSettings } from '@/lib/design';
 import { ResumeLanguage } from '@/lib/i18n/languages';
 import { TemplateId } from '@/lib/templates';
 import { CVData } from '@/lib/schema';
@@ -28,10 +32,12 @@ function ShareLinkContent({
   language,
   photo,
   template,
+  design,
 }: {
   language: ResumeLanguage;
   photo: string;
   template: TemplateId;
+  design: DesignSettings;
 }) {
   const [link, setLink] = useState<string | null>(null);
   const [copied, setCopied] = useState(false);
@@ -41,13 +47,15 @@ function ShareLinkContent({
 
   useEffect(() => {
     let cancelled = false;
-    void buildShareUrl(cvData, { language, photo, template }).then((url) => {
-      if (!cancelled) setLink(url);
-    });
+    void buildShareUrl(cvData, { language, photo, template, design }).then(
+      (url) => {
+        if (!cancelled) setLink(url);
+      },
+    );
     return () => {
       cancelled = true;
     };
-  }, [cvData, language, photo, template]);
+  }, [cvData, language, photo, template, design]);
 
   const handleCopy = async () => {
     if (!link) return;
@@ -71,7 +79,7 @@ function ShareLinkContent({
   if (!link) {
     return (
       <div className="flex items-center justify-center gap-2 py-8 text-sm text-muted-foreground">
-        <Loader2 className="w-4 h-4 animate-spin" />
+        <Loader2 className="size-4 animate-spin" />
         {t('share.building')}
       </div>
     );
@@ -79,31 +87,27 @@ function ShareLinkContent({
 
   return (
     <>
-      <textarea
+      <Textarea
         readOnly
         value={link}
         aria-label={t('share.linkAria')}
-        className="h-24 w-full resize-none rounded-lg border border-input bg-transparent px-2.5 py-2 text-xs break-all leading-relaxed outline-none focus-visible:border-ring focus-visible:ring-3 focus-visible:ring-ring/50"
+        className="h-24 resize-none text-xs break-all"
         onFocus={(e) => e.currentTarget.select()}
       />
-      <div className="grid grid-cols-2 gap-2">
+      <FieldDescription className="flex items-center gap-1.5">
+        <Share2 className="size-3.5 shrink-0" />
+        {t('share.longLinkNote')}
+      </FieldDescription>
+      <DialogFooter>
         <Button variant="outline" onClick={handleCopy} disabled={copied}>
-          {copied ? (
-            <Check className="w-4 h-4" />
-          ) : (
-            <Copy className="w-4 h-4" />
-          )}
+          {copied ? <Check className="size-4" /> : <Copy className="size-4" />}
           {copied ? t('share.copied') : t('share.copyLink')}
         </Button>
         <Button onClick={() => window.open(link, '_blank')}>
-          <ExternalLink className="w-4 h-4" />
+          <ExternalLink className="size-4" />
           {t('share.open')}
         </Button>
-      </div>
-      <p className="flex items-center gap-1.5 text-xs text-muted-foreground">
-        <Share2 className="w-3.5 h-3.5 shrink-0" />
-        {t('share.longLinkNote')}
-      </p>
+      </DialogFooter>
     </>
   );
 }
@@ -116,6 +120,7 @@ export function ShareDialog({ open, onOpenChange }: ShareDialogProps) {
   const language = activeResume?.language ?? 'en';
   const photo = activeResume?.photo ?? '';
   const template = activeResume?.templateId ?? 'harvard';
+  const design = activeResume?.design;
 
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
@@ -125,11 +130,12 @@ export function ShareDialog({ open, onOpenChange }: ShareDialogProps) {
           <DialogDescription>{t('share.description')}</DialogDescription>
         </DialogHeader>
 
-        {open && (
+        {open && design && (
           <ShareLinkContent
             language={language}
             photo={photo}
             template={template}
+            design={design}
           />
         )}
       </DialogContent>

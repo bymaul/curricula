@@ -141,11 +141,11 @@ export function BackupDialog({ open, onOpenChange }: BackupDialogProps) {
 
           <div className="space-y-4">
             <div className="space-y-2">
-              <h3 className="text-[10px] font-semibold uppercase tracking-wider text-muted-foreground">
+              <h3 className="text-xs font-semibold uppercase tracking-wider text-muted-foreground">
                 {t('backup.allCvs')}
               </h3>
               <Button onClick={handleDownload} className="w-full">
-                <FolderDown className="w-4 h-4" />
+                <FolderDown className="size-4" />
                 {t('backup.downloadBackup')}
               </Button>
               <Button
@@ -153,13 +153,13 @@ export function BackupDialog({ open, onOpenChange }: BackupDialogProps) {
                 onClick={() => backupInputRef.current?.click()}
                 className="w-full"
               >
-                <Upload className="w-4 h-4" />
+                <Upload className="size-4" />
                 {t('backup.restoreFromFile')}
               </Button>
             </div>
 
             <div className="space-y-2">
-              <h3 className="text-[10px] font-semibold uppercase tracking-wider text-muted-foreground">
+              <h3 className="text-xs font-semibold uppercase tracking-wider text-muted-foreground">
                 {t('backup.currentCv')}
               </h3>
               <Button
@@ -167,7 +167,7 @@ export function BackupDialog({ open, onOpenChange }: BackupDialogProps) {
                 onClick={handleExportJSON}
                 className="w-full"
               >
-                <Download className="w-4 h-4" />
+                <Download className="size-4" />
                 {t('backup.exportJson')}
               </Button>
               <Button
@@ -175,7 +175,7 @@ export function BackupDialog({ open, onOpenChange }: BackupDialogProps) {
                 onClick={() => jsonInputRef.current?.click()}
                 className="w-full"
               >
-                <FileJson className="w-4 h-4" />
+                <FileJson className="size-4" />
                 {t('backup.importJson')}
               </Button>
             </div>
@@ -212,7 +212,7 @@ export function BackupDialog({ open, onOpenChange }: BackupDialogProps) {
         )}
         confirmLabel={
           <>
-            <RefreshCcw className="w-4 h-4" />
+            <RefreshCcw className="size-4" />
             {t('backup.confirmRestoreAction')}
           </>
         }
@@ -221,7 +221,7 @@ export function BackupDialog({ open, onOpenChange }: BackupDialogProps) {
         <ul className="max-h-48 overflow-auto rounded-lg border border-border divide-y divide-border">
           {pendingRestore?.resumes.map((resume) => (
             <li key={resume.id} className="flex items-center gap-2 px-3 py-2">
-              <FileJson className="w-4 h-4 shrink-0 text-muted-foreground" />
+              <FileJson className="size-4 shrink-0 text-muted-foreground" />
               <span className="min-w-0 truncate text-sm font-medium">
                 {resume.title}
               </span>

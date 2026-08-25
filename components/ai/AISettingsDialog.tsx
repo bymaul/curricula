@@ -5,6 +5,7 @@ import { Button } from '@/components/ui/button';
 import {
   Dialog,
   DialogContent,
+  DialogDescription,
   DialogFooter,
   DialogHeader,
   DialogTitle,
@@ -31,16 +32,15 @@ export function AISettingsDialog({
       <DialogContent className="sm:max-w-lg">
         <DialogHeader>
           <DialogTitle>{t('aiSettings.title')}</DialogTitle>
+          <DialogDescription>{t('aiSettings.description')}</DialogDescription>
         </DialogHeader>
 
-        <div className="flex flex-col gap-4 p-2 -mx-1">
-          <AISettingsFields
-            {...settings}
-            hasBundledKey={status?.hasBundledKey}
-            bundledProvider={status?.provider ?? null}
-            statusError={error}
-          />
-        </div>
+        <AISettingsFields
+          {...settings}
+          hasBundledKey={status?.hasBundledKey}
+          bundledProvider={status?.provider ?? null}
+          statusError={error}
+        />
 
         <DialogFooter>
           <Button onClick={() => onOpenChange(false)}>

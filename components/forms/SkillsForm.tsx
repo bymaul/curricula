@@ -1,6 +1,7 @@
 'use client';
 
 import { useI18n } from '@/components/I18nProvider';
+import { Wrench } from 'lucide-react';
 import { SectionFieldArray } from './shared';
 
 export const SkillsForm = () => {
@@ -8,6 +9,7 @@ export const SkillsForm = () => {
   return (
     <SectionFieldArray
       name="skills"
+      emptyIcon={Wrench}
       title={t('skills.title')}
       description={t('skills.description')}
       addLabel={t('skills.addCategory')}

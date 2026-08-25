@@ -11,7 +11,6 @@ export function EditorSkeleton() {
         <div className="h-6 w-24 rounded-md bg-muted animate-pulse" />
         <div className="flex items-center gap-2">
           <div className="h-9 w-9 rounded-lg bg-muted animate-pulse" />
-          <div className="h-9 w-9 rounded-lg bg-muted animate-pulse hidden sm:block" />
           <div className="h-9 w-40 rounded-lg bg-muted animate-pulse hidden lg:block" />
         </div>
       </div>

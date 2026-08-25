@@ -1,6 +1,14 @@
 'use client';
 
-import { Field, FieldDescription, FieldLabel } from '@/components/ui/field';
+import {
+  Field,
+  FieldDescription,
+  FieldGroup,
+  FieldLabel,
+  FieldLegend,
+  FieldSeparator,
+  FieldSet,
+} from '@/components/ui/field';
 import { Input } from '@/components/ui/input';
 import {
   Select,
@@ -58,53 +66,62 @@ export function AISettingsFields({
           {t('aiSettings.statusError')}
         </div>
       )}
-      <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-        <Field>
-          <FieldLabel>{t('aiSettings.providerLabel')}</FieldLabel>
-          <Select
-            items={AI_PROVIDERS}
-            value={provider}
-            onValueChange={onProviderChange}
-          >
-            <SelectTrigger className="w-full">
-              <SelectValue />
-            </SelectTrigger>
-            <SelectContent align="start">
-              {AI_PROVIDERS.map((p) => (
-                <SelectItem key={p.value} value={p.value}>
-                  {p.label}
-                </SelectItem>
-              ))}
-            </SelectContent>
-          </Select>
-        </Field>
+      <FieldGroup>
+        <FieldSet>
+          <FieldLegend>{t('aiSettings.modelSectionLabel')}</FieldLegend>
 
-        <Field>
-          <FieldLabel>{t('aiSettings.modelLabel')}</FieldLabel>
-          <FieldDescription>
-            {t('aiSettings.modelDescription', {
-              model: selectedProvider?.defaultModel ?? '',
-            })}
-          </FieldDescription>
-          <Input
-            value={modelName}
-            onChange={(e) => onModelChange(e.target.value)}
-            placeholder={selectedProvider?.defaultModel}
-          />
-        </Field>
-      </div>
+          <Field>
+            <FieldLabel>{t('aiSettings.providerLabel')}</FieldLabel>
+            <Select
+              items={AI_PROVIDERS}
+              value={provider}
+              onValueChange={onProviderChange}
+            >
+              <SelectTrigger className="w-full">
+                <SelectValue />
+              </SelectTrigger>
+              <SelectContent align="start">
+                {AI_PROVIDERS.map((p) => (
+                  <SelectItem key={p.value} value={p.value}>
+                    {p.label}
+                  </SelectItem>
+                ))}
+              </SelectContent>
+            </Select>
+          </Field>
 
-      <Field>
-        <FieldLabel>{t('aiSettings.apiKeyLabel')}</FieldLabel>
-        <FieldDescription>{apiKeyDescription}</FieldDescription>
-        <Input
-          type="password"
-          value={apiKey}
-          onChange={(e) => onKeyChange(e.target.value)}
-          placeholder={t('aiSettings.apiKeyPlaceholder')}
-          autoComplete="off"
-        />
-      </Field>
+          <Field>
+            <FieldLabel>{t('aiSettings.modelLabel')}</FieldLabel>
+            <Input
+              value={modelName}
+              onChange={(e) => onModelChange(e.target.value)}
+              placeholder={selectedProvider?.defaultModel}
+            />
+            <FieldDescription>
+              {t('aiSettings.modelDescription', {
+                model: selectedProvider?.defaultModel ?? '',
+              })}
+            </FieldDescription>
+          </Field>
+        </FieldSet>
+
+        <FieldSeparator />
+
+        <FieldSet>
+          <FieldLegend>{t('aiSettings.apiKeyLabel')}</FieldLegend>
+
+          <Field>
+            <Input
+              type="password"
+              value={apiKey}
+              onChange={(e) => onKeyChange(e.target.value)}
+              placeholder={t('aiSettings.apiKeyPlaceholder')}
+              autoComplete="off"
+            />
+            <FieldDescription>{apiKeyDescription}</FieldDescription>
+          </Field>
+        </FieldSet>
+      </FieldGroup>
     </>
   );
 }

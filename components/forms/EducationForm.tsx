@@ -1,6 +1,7 @@
 'use client';
 
 import { useI18n } from '@/components/I18nProvider';
+import { GraduationCap } from 'lucide-react';
 import { SectionFieldArray } from './shared';
 
 export const EducationForm = () => {
@@ -8,6 +9,7 @@ export const EducationForm = () => {
   return (
     <SectionFieldArray
       name="education"
+      emptyIcon={GraduationCap}
       title={t('education.title')}
       description={t('education.description')}
       addLabel={t('education.add')}
