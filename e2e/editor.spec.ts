@@ -2,16 +2,6 @@ import { expect, test, type Page } from '@playwright/test';
 
 const NAME_PLACEHOLDER = 'e.g. Alex Johnson';
 
-/**
- * Navigate to the editor with a clean slate: wipe localStorage on the first
- * visit, then reload so the resume store rehydrates from empty and seeds one
- * fresh resume. Reloading after the wipe (instead of an init script) keeps
- * later reloads inside a test (e.g. the persistence check) intact.
- *
- * The readiness check is the header + name input (rendered after hydration),
- * not the preview: on mobile the preview is hidden behind the edit/preview
- * toggle.
- */
 async function freshEditor(page: Page): Promise<void> {
   await page.goto('/');
   await page.evaluate(() => localStorage.clear());
@@ -22,10 +12,8 @@ async function freshEditor(page: Page): Promise<void> {
 
 const nameInput = (page: Page) => page.getByPlaceholder(NAME_PLACEHOLDER);
 
-/** The preview pane (hidden behind the mobile toggle on small screens). */
 const preview = (page: Page) => page.locator('[data-template-id]');
 
-/** Waits for the autosave debounce to flush so history/persistence settled. */
 async function expectSaved(page: Page): Promise<void> {
   await expect(page.getByText('Saved', { exact: false })).toBeVisible();
 }
@@ -36,7 +24,6 @@ test('loads the editor with a fresh resume', async ({ page, isMobile }) => {
   await expect(page.getByRole('heading', { name: 'Curricula' })).toBeVisible();
   await expect(nameInput(page)).toHaveValue('');
   if (!isMobile) {
-    // The default template renders the placeholder name.
     await expect(preview(page)).toBeVisible();
     await expect(preview(page)).toContainText('Your Name');
   }
@@ -65,23 +52,23 @@ test('undoes and redoes edits with keyboard shortcuts', async ({ page }) => {
   await input.fill('Grace Hopper');
   await expectSaved(page);
 
-  // The shortcut handler skips inputs/textareas, so move focus away first.
   await page.getByRole('heading', { name: 'Curricula' }).click();
 
   await page.keyboard.press('Control+z');
   await expect(input).toHaveValue('');
   await expect(preview(page)).not.toContainText('Grace Hopper');
 
-  // Redo via Ctrl+Shift+Z.
   await page.keyboard.press('Control+Shift+z');
   await expect(input).toHaveValue('Grace Hopper');
 
-  // Undo again, then redo via Ctrl+Y (macOS-style alternative).
   await page.keyboard.press('Control+z');
   await expect(input).toHaveValue('');
   await page.keyboard.press('Control+y');
   await expect(input).toHaveValue('Grace Hopper');
 });
+
+const openDesignTab = (page: Page) =>
+  page.getByRole('button', { name: 'Design', exact: true }).click();
 
 test('switches templates and updates the preview', async ({
   page,
@@ -89,6 +76,7 @@ test('switches templates and updates the preview', async ({
 }) => {
   await freshEditor(page);
   await nameInput(page).fill('Grace Hopper');
+  await openDesignTab(page);
 
   const templateRadio = (name: string) => page.getByRole('radio', { name });
 
@@ -115,6 +103,7 @@ test('shows select labels in the trigger instead of raw values', async ({
   page,
 }) => {
   await freshEditor(page);
+  await openDesignTab(page);
 
   const languageSelect = page
     .getByRole('combobox')
@@ -126,7 +115,6 @@ test('shows select labels in the trigger instead of raw values', async ({
   );
   await expect(templateRadio).toHaveAttribute('aria-checked', 'true');
 
-  // The trigger reflects the newly selected label.
   await languageSelect.click();
   await page.getByRole('option', { name: 'Bahasa Indonesia' }).click();
   await expect(
@@ -148,7 +136,6 @@ test('resets the form scroll when switching tabs', async ({ page }) => {
     .getByRole('button', { name: 'Add New Experience', exact: true })
     .click();
 
-  // Scroll the form to the bottom so the top of the next tab is out of view.
   const formViewport = page
     .locator('section [data-slot="scroll-area-viewport"]')
     .first();
@@ -161,8 +148,6 @@ test('resets the form scroll when switching tabs', async ({ page }) => {
 
   await page.getByRole('button', { name: 'Personal', exact: true }).click();
 
-  // The form scroll resets to the top instead of persisting the previous
-  // tab's position: the last field (summary) is no longer in view.
   await expect
     .poll(async () => formViewport.evaluate((el) => el.scrollTop))
     .toBe(0);
@@ -180,7 +165,6 @@ test('clicking a preview section focuses its tab', async ({
   test.skip(isMobile, 'preview is hidden behind the mobile toggle');
   await freshEditor(page);
 
-  // Add an experience entry so its section renders in the preview.
   await page.getByRole('button', { name: 'Experience', exact: true }).click();
   await page
     .getByRole('button', { name: 'Add New Experience', exact: true })
@@ -188,8 +172,6 @@ test('clicking a preview section focuses its tab', async ({
   await page.getByPlaceholder('Software Engineer').fill('Analytical Engineer');
   await page.getByPlaceholder('Jan 2022 - Present').fill('2022 - Present');
 
-  // Back to the personal tab, then click the experience section in the
-  // preview (desktop only) and verify the editor switches tabs.
   await page.getByRole('button', { name: 'Personal', exact: true }).click();
   const experienceTab = page.getByRole('button', {
     name: 'Experience',
@@ -201,6 +183,28 @@ test('clicking a preview section focuses its tab', async ({
     .locator('[data-template-id="harvard"] [data-section-id="experience"]')
     .click();
   await expect(experienceTab).toHaveAttribute('aria-current', 'page');
+});
+
+test('adds a custom section and renders its heading', async ({
+  page,
+  isMobile,
+}) => {
+  await freshEditor(page);
+
+  await page.getByRole('button', { name: 'Reorder sections' }).click();
+  await page.getByRole('button', { name: 'Add section' }).click();
+  await page.getByRole('menuitem', { name: 'Publications' }).click();
+  await page.getByRole('button', { name: 'Done' }).click();
+
+  await page.getByRole('button', { name: 'Publications' }).click();
+
+  if (!isMobile) {
+    await expect(
+      page
+        .locator('[data-template-id]')
+        .getByRole('heading', { name: 'Publications' }),
+    ).toBeVisible();
+  }
 });
 
 test('toggles the preview pane on mobile', async ({ page, isMobile }) => {
@@ -222,25 +226,20 @@ test('print stylesheet hides editor chrome and keeps the CV', async ({
   await freshEditor(page);
   await nameInput(page).fill('Grace Hopper');
 
-  // Emulate print media so Tailwind's print: variants apply.
   await page.emulateMedia({ media: 'print' });
 
-  // Editor chrome is hidden: app header, sidebar, zoom controls, page badge.
   await expect(page.locator('header')).toBeHidden();
   await expect(page.locator('aside')).toBeHidden();
   await expect(page.getByLabel('Zoom in')).toBeHidden();
   await expect(page.getByLabel('Resume is 1 page long')).toBeHidden();
 
-  // The CV page itself stays visible.
   await expect(preview(page)).toBeVisible();
   await expect(preview(page)).toContainText('Grace Hopper');
 
-  // Back to screen media so the next test in the worker is unaffected.
   await page.emulateMedia({ media: 'screen' });
 });
 
 test('service worker registers without CSP violations', async ({ page }) => {
-  // Attach before any navigation so violations during load are captured.
   const cspViolations: string[] = [];
   page.on('console', (msg) => {
     if (msg.type() === 'error' && /Content Security Policy/i.test(msg.text())) {
@@ -250,7 +249,6 @@ test('service worker registers without CSP violations', async ({ page }) => {
 
   await freshEditor(page);
 
-  // The serwist worker registers asynchronously; wait until it activates.
   await expect
     .poll(async () =>
       page.evaluate(async () => {
@@ -264,8 +262,6 @@ test('service worker registers without CSP violations', async ({ page }) => {
     )
     .toBe('active');
 
-  // Reload so a full navigation happens while the worker is in control,
-  // then confirm the CSP never blocked a resource.
   await page.reload();
   await expect(nameInput(page)).toBeVisible();
   expect(cspViolations).toEqual([]);
