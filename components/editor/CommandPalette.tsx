@@ -97,7 +97,11 @@ export function CommandPalette({
 
   const dialogAction = (key: DialogKey) => run(() => setDialog(key, true));
 
-  const tabs: TabName[] = ['design', 'personal', ...sectionOrder];
+  const tabs: TabName[] = [
+    'design',
+    'personal',
+    ...sectionOrder.filter((id) => id !== 'summary'),
+  ];
 
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
