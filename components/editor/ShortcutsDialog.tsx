@@ -10,17 +10,11 @@ import {
 } from '@/components/ui/dialog';
 import { useMemo } from 'react';
 import type { TranslationKey } from '@/lib/i18n';
+import { isApplePlatform } from '@/lib/platform';
 
 interface ShortcutRow {
   keys: string[];
   labelKey: TranslationKey;
-}
-
-function useIsApplePlatform(): boolean {
-  return useMemo(() => {
-    if (typeof navigator === 'undefined') return false;
-    return /Mac|iPhone|iPad|iPod/i.test(navigator.userAgent);
-  }, []);
 }
 
 function Kbd({ children }: { children: string }) {
@@ -39,7 +33,7 @@ export function ShortcutsDialog({
   onOpenChange: (open: boolean) => void;
 }) {
   const { t } = useI18n();
-  const isApple = useIsApplePlatform();
+  const isApple = useMemo(() => isApplePlatform(), []);
   const mod = isApple ? '⌘' : 'Ctrl';
 
   const rows: ShortcutRow[] = [

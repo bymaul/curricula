@@ -23,6 +23,7 @@ import {
   DatabaseBackup,
   FilePlus2,
   FolderOpen,
+  Keyboard,
   Printer,
   Settings2,
   Share2,
@@ -111,6 +112,10 @@ export function CommandPalette({
               <CommandItem onSelect={() => dialogAction('aiSettings')}>
                 <Settings2 />
                 {t('editor.aiSettings')}
+              </CommandItem>
+              <CommandItem onSelect={() => dialogAction('shortcuts')}>
+                <Keyboard />
+                {t('editor.keyboardShortcuts')}
               </CommandItem>
             </CommandGroup>
 
