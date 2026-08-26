@@ -279,6 +279,16 @@ const en = {
     currentCv: 'Current CV',
     exportJson: 'Export JSON',
     importJson: 'Import JSON',
+    importJsonTitle: 'Import CV JSON',
+    importJsonDescription:
+      'Paste CV data as JSON, or load a .json file exported from Curricula. Importing replaces the current CV.',
+    importJsonAria: 'CV JSON',
+    importJsonPlaceholder:
+      'Paste your CV JSON here, e.g. {"name": "Jane Doe", "experience": []}',
+    importJsonChooseFile: 'Or choose a .json file',
+    importJsonAction: 'Import',
+    importJsonInvalid: 'This does not match the CV format.',
+    importJsonSyntaxError: 'That text is not valid JSON.',
     restoreFileAria: 'Restore from backup file',
     importFileAria: 'Import CV data (JSON file)',
     confirmRestoreTitle: 'Restore backup?',
@@ -295,10 +305,7 @@ const en = {
       restoredMany: 'Restored {count} resumes from backup.',
       invalidFile:
         'Invalid backup file. It is corrupted or from an older version.',
-      invalidCv:
-        'Invalid CV format. The file is corrupted or from an older version.',
       cvImported: 'CV Data imported successfully!',
-      readFailed: 'Could not read file. Please upload a valid JSON backup.',
     },
   },
   share: {

@@ -284,6 +284,16 @@ const id: Dictionary = {
     currentCv: 'CV Saat Ini',
     exportJson: 'Ekspor JSON',
     importJson: 'Impor JSON',
+    importJsonTitle: 'Impor CV JSON',
+    importJsonDescription:
+      'Tempel data CV sebagai JSON, atau muat berkas .json yang diekspor dari Curricula. Imporan akan menggantikan CV saat ini.',
+    importJsonAria: 'JSON CV',
+    importJsonPlaceholder:
+      'Tempel JSON CV di sini, mis. {"name": "Jane Doe", "experience": []}',
+    importJsonChooseFile: 'Atau pilih berkas .json',
+    importJsonAction: 'Impor',
+    importJsonInvalid: 'Ini tidak sesuai dengan format CV.',
+    importJsonSyntaxError: 'Teks tersebut bukan JSON yang valid.',
     restoreFileAria: 'Pulihkan dari file cadangan',
     importFileAria: 'Impor data CV (file JSON)',
     confirmRestoreTitle: 'Pulihkan cadangan?',
@@ -300,10 +310,7 @@ const id: Dictionary = {
       restoredMany: '{count} resum dipulihkan dari cadangan.',
       invalidFile:
         'File cadangan tidak valid. File rusak atau berasal dari versi lama.',
-      invalidCv:
-        'Format CV tidak valid. File rusak atau berasal dari versi lama.',
       cvImported: 'Data CV berhasil diimpor!',
-      readFailed: 'Tidak dapat membaca file. Unggah cadangan JSON yang valid.',
     },
   },
   share: {
