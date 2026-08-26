@@ -36,7 +36,7 @@ storage.
   from the browser
 - **Backup & restore** - download every CV as a single backup file, or
   restore from one (data, section order, and visibility included); single-CV
-  JSON export/import lives here too
+  JSON export/import lives here too (paste JSON text or upload a file)
 - **Share links** - share any CV as a compressed link; the data travels in the
   URL itself and is opened as a new resume on the recipient's device
 - **UI languages** - English and Bahasa Indonesia interface, plus per-resume

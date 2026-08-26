@@ -11,8 +11,9 @@ import {
 } from '@/components/ui/dialog';
 import { toast } from '@/components/ui/toast';
 import { useI18n } from '@/components/I18nProvider';
+import { CvJsonImportDialog } from '@/components/import/CvJsonImportDialog';
 import { BackupFile, parseBackup, serializeBackup } from '@/lib/backup';
-import { CVData, cvSchema } from '@/lib/schema';
+import { CVData } from '@/lib/schema';
 import { downloadFile } from '@/lib/utils';
 import { useResumeStore } from '@/store/useResumeStore';
 import {
@@ -32,8 +33,8 @@ interface BackupDialogProps {
 
 export function BackupDialog({ open, onOpenChange }: BackupDialogProps) {
   const backupInputRef = useRef<HTMLInputElement>(null);
-  const jsonInputRef = useRef<HTMLInputElement>(null);
   const [pendingRestore, setPendingRestore] = useState<BackupFile | null>(null);
+  const [importOpen, setImportOpen] = useState(false);
   const { t } = useI18n();
   const { getValues, reset } = useFormContext<CVData>();
 
@@ -96,38 +97,12 @@ export function BackupDialog({ open, onOpenChange }: BackupDialogProps) {
     );
   };
 
-  const handleImportJSON = (e: React.ChangeEvent<HTMLInputElement>) => {
-    const file = e.target.files?.[0];
-    if (!file) return;
-    const reader = new FileReader();
-    reader.onload = (event) => {
-      try {
-        const parsed = JSON.parse(event.target?.result as string);
-        const result = cvSchema.safeParse(parsed);
-        if (!result.success) {
-          toast.add({
-            type: 'error',
-            description: t('backup.toast.invalidCv'),
-            priority: 'high',
-          });
-          return;
-        }
-        reset(result.data);
-        toast.add({
-          type: 'success',
-          description: t('backup.toast.cvImported'),
-        });
-      } catch {
-        toast.add({
-          type: 'error',
-          description: t('backup.toast.readFailed'),
-          priority: 'high',
-        });
-      } finally {
-        e.target.value = '';
-      }
-    };
-    reader.readAsText(file);
+  const handleImportedCv = (data: CVData) => {
+    reset(data);
+    toast.add({
+      type: 'success',
+      description: t('backup.toast.cvImported'),
+    });
   };
 
   return (
@@ -172,7 +147,7 @@ export function BackupDialog({ open, onOpenChange }: BackupDialogProps) {
               </Button>
               <Button
                 variant="outline"
-                onClick={() => jsonInputRef.current?.click()}
+                onClick={() => setImportOpen(true)}
                 className="w-full"
               >
                 <FileJson className="size-4" />
@@ -189,16 +164,14 @@ export function BackupDialog({ open, onOpenChange }: BackupDialogProps) {
             aria-label={t('backup.restoreFileAria')}
             className="hidden"
           />
-          <input
-            type="file"
-            accept=".json,application/json"
-            ref={jsonInputRef}
-            onChange={handleImportJSON}
-            aria-label={t('backup.importFileAria')}
-            className="hidden"
-          />
         </DialogContent>
       </Dialog>
+
+      <CvJsonImportDialog
+        open={importOpen}
+        onOpenChange={setImportOpen}
+        onImport={handleImportedCv}
+      />
 
       <ConfirmDialog
         open={pendingRestore !== null}
