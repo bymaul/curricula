@@ -10,6 +10,7 @@ import { CVImportPreviewDialog } from '@/components/import/CVImportPreviewDialog
 import { useCVAutoSave } from '@/hooks/useCVAutoSave';
 import { useCVImportExport } from '@/hooks/useCVImportExport';
 import { useCVPrint } from '@/hooks/useCVPrint';
+import { useHorizontalSwipe } from '@/hooks/useHorizontalSwipe';
 import { useKeyboardShortcuts } from '@/hooks/useKeyboardShortcuts';
 import { useMediaQuery } from '@/hooks/useMediaQuery';
 import { useShareLinkImport } from '@/hooks/useShareLinkImport';
@@ -114,11 +115,26 @@ export default function Home() {
     [isLargeScreen],
   );
 
+  const swipeHandlers = useHorizontalSwipe((direction) => {
+    setMobileView((current) =>
+      direction === 'left'
+        ? current === 'edit'
+          ? 'preview'
+          : current
+        : current === 'preview'
+          ? 'edit'
+          : current,
+    );
+  });
+
   if (!mounted || !storesHydrated) return <EditorSkeleton />;
 
   return (
     <FormProvider {...methods}>
-      <main className="h-dvh w-full bg-background text-foreground flex flex-col lg:p-6 overflow-hidden print:h-auto print:block print:p-0 print:overflow-visible print:bg-white">
+      <main
+        {...swipeHandlers}
+        className="h-dvh w-full bg-background text-foreground flex flex-col lg:p-6 overflow-hidden print:h-auto print:block print:p-0 print:overflow-visible print:bg-white"
+      >
         <Header value={mobileView} onChange={setMobileView} />
 
         <div className="flex-1 min-h-0 w-full flex flex-col lg:flex-row gap-4 lg:gap-6 px-4 pb-4 lg:px-0 lg:pb-0 print:p-0 print:block">
