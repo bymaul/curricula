@@ -24,8 +24,6 @@ export function useKeyboardShortcuts({
       const mod = event.ctrlKey || event.metaKey;
       const key = event.key.toLowerCase();
 
-      // Checked before the typing guard so Cmd/Ctrl+K also closes the
-      // command palette from its own search input.
       if (mod && key === 'k' && onTogglePalette) {
         event.preventDefault();
         onTogglePalette();

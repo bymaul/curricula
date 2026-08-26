@@ -277,8 +277,13 @@ const id: Dictionary = {
     placeholder: 'Ketik perintah atau cari…',
     noResults: 'Tidak ada hasil.',
     switchTo: 'Beralih ke "{title}"',
+    active: 'aktif',
+    footerNavigate: 'Navigasi',
+    footerSelect: 'Pilih',
+    footerClose: 'Tutup',
     groups: {
       actions: 'Tindakan',
+      appearance: 'Tampilan',
       resumes: 'Resum',
       sections: 'Menuju bagian',
     },
