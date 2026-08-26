@@ -1,6 +1,6 @@
 'use client';
 
-import { ChevronsUpDown, FileText } from 'lucide-react';
+import { ChevronsUpDown, FileText, Search } from 'lucide-react';
 import { useI18n } from './I18nProvider';
 import { ThemeToggle } from './ThemeToggle';
 import { Button } from './ui/button';
@@ -35,6 +35,16 @@ export function Header({ value, onChange }: HeaderProps) {
       </h1>
 
       <div className="flex items-center gap-1.5 sm:gap-2">
+        <Button
+          variant="ghost"
+          size="icon-sm"
+          className="size-9"
+          aria-label={t('editor.commandPalette')}
+          aria-keyshortcuts="Control+k Meta+k"
+          onClick={() => setDialog('palette', true)}
+        >
+          <Search className="size-4" />
+        </Button>
         <ThemeToggle />
         <Separator orientation="vertical" />
         <Tabs

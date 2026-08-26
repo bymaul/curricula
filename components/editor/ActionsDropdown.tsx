@@ -5,20 +5,20 @@ import { useI18n } from '@/components/I18nProvider';
 import { UI_LANGUAGES, Language } from '@/lib/i18n/languages';
 import { DESKTOP_MEDIA_QUERY } from '@/lib/consts';
 import { cn } from '@/lib/utils';
+import { isApplePlatform } from '@/lib/platform';
 import { useDialogStore } from '@/store/useDialogStore';
 import { useUIStore } from '@/store/useUIStore';
 import {
   DatabaseBackup,
   EllipsisVertical,
   FileText,
-  Keyboard,
   Languages,
   Printer,
-  Settings2,
   Share2,
   Sparkles,
   Upload,
 } from 'lucide-react';
+import { useMemo } from 'react';
 import { Button } from '../ui/button';
 import {
   DROPDOWN_ITEM_CLASS,
@@ -28,6 +28,7 @@ import {
   DropdownMenuRadioGroup,
   DropdownMenuRadioItem,
   DropdownMenuSeparator,
+  DropdownMenuShortcut,
   DropdownMenuSub,
   DropdownMenuSubContent,
   DropdownMenuSubTrigger,
@@ -49,6 +50,8 @@ export function ActionsDropdown({
   const setUILanguage = useUIStore((state) => state.setUILanguage);
   const { lang, t } = useI18n();
   const isMobile = !useMediaQuery(DESKTOP_MEDIA_QUERY);
+  const isApple = useMemo(() => isApplePlatform(), []);
+  const mod = isApple ? '⌘' : 'Ctrl';
 
   const handleImportPDFClick = () => {
     pdfInputRef.current?.click();
@@ -82,6 +85,22 @@ export function ActionsDropdown({
           </>
         )}
         <DropdownMenuItem
+          onClick={handlePrintClick}
+          className={DROPDOWN_ITEM_CLASS}
+        >
+          <Printer className="size-4 text-muted-foreground" />
+          {t('editor.printPdf')}
+          <DropdownMenuShortcut>{mod}P</DropdownMenuShortcut>
+        </DropdownMenuItem>
+        <DropdownMenuItem
+          onClick={() => setDialog('share', true)}
+          className={DROPDOWN_ITEM_CLASS}
+        >
+          <Share2 className="size-4 text-muted-foreground" />
+          {t('editor.shareLink')}
+        </DropdownMenuItem>
+        <DropdownMenuSeparator />
+        <DropdownMenuItem
           onClick={handleImportPDFClick}
           className={DROPDOWN_ITEM_CLASS}
         >
@@ -95,28 +114,6 @@ export function ActionsDropdown({
           <Sparkles className="size-4 text-primary" />
           {t('editor.aiAdjust')}
         </DropdownMenuItem>
-        <DropdownMenuItem
-          onClick={() => setDialog('aiSettings', true)}
-          className={DROPDOWN_ITEM_CLASS}
-        >
-          <Settings2 className="size-4 text-muted-foreground" />
-          {t('editor.aiSettings')}
-        </DropdownMenuItem>
-        <DropdownMenuSeparator />
-        <DropdownMenuItem
-          onClick={() => setDialog('share', true)}
-          className={DROPDOWN_ITEM_CLASS}
-        >
-          <Share2 className="size-4 text-muted-foreground" />
-          {t('editor.shareLink')}
-        </DropdownMenuItem>
-        <DropdownMenuItem
-          onClick={handlePrintClick}
-          className={DROPDOWN_ITEM_CLASS}
-        >
-          <Printer className="size-4 text-muted-foreground" />
-          {t('editor.printPdf')}
-        </DropdownMenuItem>
         <DropdownMenuSeparator />
         <DropdownMenuItem
           onClick={() => setDialog('backup', true)}
@@ -124,13 +121,6 @@ export function ActionsDropdown({
         >
           <DatabaseBackup className="size-4 text-muted-foreground" />
           {t('editor.backupRestore')}
-        </DropdownMenuItem>
-        <DropdownMenuItem
-          onClick={() => setDialog('shortcuts', true)}
-          className={DROPDOWN_ITEM_CLASS}
-        >
-          <Keyboard className="size-4 text-muted-foreground" />
-          {t('editor.keyboardShortcuts')}
         </DropdownMenuItem>
         <DropdownMenuSeparator />
         <DropdownMenuSub>
