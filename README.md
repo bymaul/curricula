@@ -3,9 +3,10 @@
 An offline-first PWA resume/CV builder featuring an immaculate classic Harvard
 table-layout typography for clean print and PDF generation.
 
-Everything runs client-side: your CV data lives in `localStorage`, the editor
-works offline, and printing to PDF uses your browser's own print engine - no
-accounts, no cloud storage.
+Everything runs client-side: your CV data lives in your browser
+(IndexedDB, with a `localStorage` fallback), the editor works offline, and
+printing to PDF uses your browser's own print engine - no accounts, no cloud
+storage.
 
 ## Features
 

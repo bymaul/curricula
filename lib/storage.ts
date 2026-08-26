@@ -33,6 +33,16 @@ export function getStorageError(): StorageError | null {
   return lastError;
 }
 
+export function reportStorageError(error: {
+  name?: string;
+  message?: string;
+}): void {
+  const name = error?.name ?? 'UnknownError';
+  if (!QUOTA_ERROR_NAMES.has(name) || lastError !== null) return;
+  lastError = { name, message: error?.message ?? '', at: Date.now() };
+  notify(lastError);
+}
+
 export function clearStorageError(): void {
   if (lastError === null) return;
   lastError = null;
@@ -74,16 +84,7 @@ export function createQuotaAwareStorage<S>(): PersistStorage<S> {
         clearStorageError();
       } catch (error) {
         lastPayloadByKey.delete(name);
-        const err = error as { name?: string; message?: string };
-        const name_ = err?.name ?? 'UnknownError';
-        if (QUOTA_ERROR_NAMES.has(name_) && lastError === null) {
-          lastError = {
-            name: name_,
-            message: err?.message ?? '',
-            at: Date.now(),
-          };
-          notify(lastError);
-        }
+        reportStorageError(error as { name?: string; message?: string });
       }
     },
     removeItem: (name) => {

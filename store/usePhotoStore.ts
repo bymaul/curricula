@@ -1,6 +1,6 @@
 import { create } from 'zustand';
 import { persist } from 'zustand/middleware';
-import { createQuotaAwareStorage } from '@/lib/storage';
+import { createIdbStorage } from '@/lib/idbStorage';
 
 const STORAGE_KEY = 'curricula-photos';
 
@@ -30,7 +30,7 @@ export const usePhotoStore = create<PhotoState>()(
     }),
     {
       name: STORAGE_KEY,
-      storage: createQuotaAwareStorage<PhotoState>(),
+      storage: createIdbStorage<PhotoState>(),
     },
   ),
 );
