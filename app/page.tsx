@@ -68,6 +68,14 @@ export default function Home() {
   });
 
   const [mobileView, setMobileView] = useState<'edit' | 'preview'>('edit');
+  const [paneDirection, setPaneDirection] = useState<'forward' | 'back'>(
+    'forward',
+  );
+
+  const switchMobileView = useCallback((next: 'edit' | 'preview') => {
+    setPaneDirection(next === 'preview' ? 'forward' : 'back');
+    setMobileView((current) => (current === next ? current : next));
+  }, []);
 
   const [storesHydrated, setStoresHydrated] = useState(false);
   useEffect(() => {
@@ -110,22 +118,27 @@ export default function Home() {
   const handleSectionClick = useCallback(
     (sectionId: SectionId) => {
       useUIStore.getState().setActiveTab(getSectionTabName(sectionId));
-      if (!isLargeScreen) setMobileView('edit');
+      if (!isLargeScreen) switchMobileView('edit');
     },
-    [isLargeScreen],
+    [isLargeScreen, switchMobileView],
   );
 
   const swipeHandlers = useHorizontalSwipe((direction) => {
-    setMobileView((current) =>
-      direction === 'left'
-        ? current === 'edit'
-          ? 'preview'
-          : current
-        : current === 'preview'
-          ? 'edit'
-          : current,
-    );
+    if (direction === 'left') {
+      switchMobileView('preview');
+    } else {
+      switchMobileView('edit');
+    }
   });
+
+  // Mobile-only, direction-aware transition when a pane becomes visible.
+  // The animation class is absent while the pane is hidden, so re-adding it
+  // on every switch replays the entrance.
+  const paneMotion = isLargeScreen
+    ? ''
+    : paneDirection === 'back'
+      ? 'motion-safe:animate-in motion-safe:fade-in motion-safe:slide-in-from-left-6 motion-safe:duration-200 motion-safe:ease-out'
+      : 'motion-safe:animate-in motion-safe:fade-in motion-safe:slide-in-from-right-6 motion-safe:duration-200 motion-safe:ease-out';
 
   if (!mounted || !storesHydrated) return <EditorSkeleton />;
 
@@ -135,7 +148,7 @@ export default function Home() {
         {...swipeHandlers}
         className="h-dvh w-full bg-background text-foreground flex flex-col lg:p-6 overflow-hidden print:h-auto print:block print:p-0 print:overflow-visible print:bg-white"
       >
-        <Header value={mobileView} onChange={setMobileView} />
+        <Header value={mobileView} onChange={switchMobileView} />
 
         <div className="flex-1 min-h-0 w-full flex flex-col lg:flex-row gap-4 lg:gap-6 px-4 pb-4 lg:px-0 lg:pb-0 print:p-0 print:block">
           <EditorSidebar
@@ -143,6 +156,7 @@ export default function Home() {
               'h-full',
               mobileView === 'edit' ? 'flex' : 'hidden',
               'lg:flex',
+              paneMotion,
             )}
             pdfInputRef={pdfInputRef}
             fileActions={{
@@ -162,6 +176,7 @@ export default function Home() {
             design={activeResume?.design}
             templateId={activeResume?.templateId}
             mobileActive={mobileView === 'preview'}
+            className={paneMotion}
             onSectionClick={handleSectionClick}
           />
         </div>

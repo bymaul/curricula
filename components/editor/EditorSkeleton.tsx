@@ -16,7 +16,7 @@ export function EditorSkeleton() {
       </div>
 
       <div className="flex-1 min-h-0 w-full flex flex-col lg:flex-row gap-4 lg:gap-6 px-4 pb-4 lg:px-0 lg:pb-0">
-        <div className="w-full lg:w-[35%] xl:w-[30%] h-64 lg:h-full rounded-xl border border-border bg-card shadow-lg shrink-0 p-4 space-y-4 overflow-hidden">
+        <div className="w-full lg:w-[35%] xl:w-[30%] h-full rounded-xl border border-border bg-card shadow-lg shrink-0 p-4 space-y-4 overflow-hidden">
           <div className="h-7 w-1/3 rounded-md bg-muted animate-pulse" />
           <div className="space-y-3">
             {[0, 1, 2].map((row) => (

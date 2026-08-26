@@ -2,7 +2,7 @@
 
 import { useRef } from 'react';
 
-const SWIPE_MIN_DELTA_PX = 64;
+const SWIPE_MIN_DELTA_PX = 56;
 
 function isSwipeBlocked(target: EventTarget | null): boolean {
   if (!(target instanceof HTMLElement)) return true;
@@ -30,40 +30,60 @@ export function useHorizontalSwipe(
   onSwipe: (direction: SwipeDirection) => void,
 ) {
   const originRef = useRef<{ x: number; y: number } | null>(null);
+  const firedRef = useRef(false);
+
+  const reset = () => {
+    originRef.current = null;
+    firedRef.current = false;
+  };
+
+  const evaluate = (clientX: number, clientY: number) => {
+    const origin = originRef.current;
+    if (!origin || firedRef.current) return;
+
+    const dx = clientX - origin.x;
+    const dy = clientY - origin.y;
+    if (
+      Math.abs(dx) < SWIPE_MIN_DELTA_PX ||
+      Math.abs(dx) < Math.abs(dy) * 1.5
+    ) {
+      return;
+    }
+
+    firedRef.current = true;
+    originRef.current = null;
+    onSwipe(dx < 0 ? 'left' : 'right');
+  };
 
   return {
     onTouchStart: (event: React.TouchEvent) => {
+      reset();
       if (
         event.touches.length !== 1 ||
         isSwipeBlocked(event.touches[0].target)
       ) {
-        originRef.current = null;
         return;
       }
       const touch = event.touches[0];
       originRef.current = { x: touch.clientX, y: touch.clientY };
     },
     onTouchMove: (event: React.TouchEvent) => {
-      if (event.touches.length !== 1) originRef.current = null;
-    },
-    onTouchEnd: (event: React.TouchEvent) => {
-      const origin = originRef.current;
-      originRef.current = null;
-      if (!origin || event.changedTouches.length !== 1) return;
-
-      const touch = event.changedTouches[0];
-      const dx = touch.clientX - origin.x;
-      const dy = touch.clientY - origin.y;
-      if (
-        Math.abs(dx) < SWIPE_MIN_DELTA_PX ||
-        Math.abs(dx) < Math.abs(dy) * 1.5
-      ) {
+      if (event.touches.length !== 1) {
+        reset();
         return;
       }
-      onSwipe(dx < 0 ? 'left' : 'right');
+      const touch = event.touches[0];
+      // Fire mid-gesture as soon as the threshold is crossed so the view
+      // flips while the finger is still down instead of waiting for lift.
+      evaluate(touch.clientX, touch.clientY);
     },
-    onTouchCancel: () => {
-      originRef.current = null;
+    onTouchEnd: (event: React.TouchEvent) => {
+      if (!firedRef.current && event.changedTouches.length === 1) {
+        const touch = event.changedTouches[0];
+        evaluate(touch.clientX, touch.clientY);
+      }
+      reset();
     },
+    onTouchCancel: reset,
   };
 }

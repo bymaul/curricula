@@ -82,6 +82,7 @@ interface ResumePreviewProps {
   design?: DesignSettings;
   templateId?: TemplateId;
   mobileActive: boolean;
+  className?: string;
   onSectionClick?: (sectionId: SectionId) => void;
 }
 
@@ -94,6 +95,7 @@ function ResumePreviewImpl({
   design,
   templateId = 'harvard',
   mobileActive,
+  className,
   onSectionClick,
 }: ResumePreviewProps) {
   const isLargeScreen = useMediaQuery(DESKTOP_MEDIA_QUERY);
@@ -264,7 +266,8 @@ function ResumePreviewImpl({
       className={cn(
         'flex-1 w-full bg-muted/10 border border-border rounded-xl shadow-inner flex-col h-full relative overflow-hidden touch-pan-x touch-pan-y print:border-none print:shadow-none print:bg-transparent print:overflow-visible',
         mobileActive ? 'flex' : 'hidden',
-        'lg:flex print:flex!',
+        'lg:flex',
+        className,
       )}
     >
       <ZoomControls
