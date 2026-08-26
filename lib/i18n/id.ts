@@ -293,6 +293,12 @@ const id: Dictionary = {
     newCv: 'CV Baru',
     newFromExample: 'Mulai dari contoh',
     sampleTitle: 'CV Contoh',
+    searchPlaceholder: 'Cari CV…',
+    searchAria: 'Cari CV',
+    sortAria: 'Urutkan CV',
+    sortRecent: 'Baru diperbarui',
+    sortName: 'Nama A-Z',
+    noMatches: 'Tidak ada CV yang cocok dengan pencarian.',
     confirmDeleteTitle: 'Hapus resum?',
     confirmDeleteDescription:
       'Hapus "{title}"? Tindakan ini tidak dapat dibatalkan.',
