@@ -33,7 +33,10 @@ export function useHorizontalSwipe(
 
   return {
     onTouchStart: (event: React.TouchEvent) => {
-      if (event.touches.length !== 1 || isSwipeBlocked(event.touches[0].target)) {
+      if (
+        event.touches.length !== 1 ||
+        isSwipeBlocked(event.touches[0].target)
+      ) {
         originRef.current = null;
         return;
       }
