@@ -34,7 +34,7 @@ export function Header({ value, onChange }: HeaderProps) {
         {t('brand.name')}
       </h1>
 
-      <div className="flex items-center gap-1.5 sm:gap-2">
+      <div className="flex h-5 items-center gap-1.5 sm:gap-2">
         <Button
           variant="ghost"
           size="icon-sm"
@@ -45,6 +45,7 @@ export function Header({ value, onChange }: HeaderProps) {
         >
           <Search className="size-4" />
         </Button>
+        <Separator orientation="vertical" />
         <ThemeToggle />
         <Separator orientation="vertical" />
         <Tabs

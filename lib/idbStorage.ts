@@ -97,8 +97,6 @@ export function createIdbStorage<S>(
 ): PersistStorage<S> {
   const dbName = options.dbName ?? DB_NAME;
 
-  // Without IndexedDB (SSR, old private-mode Safari, test runners) delegate to
-  // the quota-aware localStorage storage so writes stay synchronous.
   if (!hasIndexedDB()) {
     return getFallback<S>();
   }
@@ -116,9 +114,7 @@ export function createIdbStorage<S>(
             const parsed = parseRaw(raw as string);
             if (parsed !== null) return parsed as StorageValue<S>;
           }
-        } catch {
-          // fall through to the legacy copy below
-        }
+        } catch {}
       }
       return parseRaw(readLegacyRaw(name)) as StorageValue<S> | null;
     },
@@ -146,14 +142,9 @@ export function createIdbStorage<S>(
       lastPayloadByKey.set(name, payload);
       clearStorageError();
 
-      // One-way migration: once IDB holds the data, drop the legacy copy so
-      // quota pressure disappears. The write above succeeded first, so the
-      // data is safe.
       try {
         localStorage.removeItem(name);
-      } catch {
-        // ignore
-      }
+      } catch {}
     },
 
     async removeItem(name) {
@@ -163,15 +154,11 @@ export function createIdbStorage<S>(
         try {
           const tx = db.transaction(STORE_NAME, 'readwrite');
           await requestToPromise(tx.objectStore(STORE_NAME).delete(name));
-        } catch {
-          // best effort
-        }
+        } catch {}
       }
       try {
         localStorage.removeItem(name);
-      } catch {
-        // ignore
-      }
+      } catch {}
     },
   };
 }
