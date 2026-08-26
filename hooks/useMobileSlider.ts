@@ -32,12 +32,18 @@ interface MobileSliderOptions {
   enabled: boolean;
   view: 'edit' | 'preview';
   onViewChange: (view: 'edit' | 'preview') => void;
+  /** Called when a drag engages so the pane gap can be revealed. */
+  onEngage?: () => void;
+  /** Called when the strip settles back or commits so the gap can close. */
+  onSettle?: () => void;
 }
 
 export function useMobileSlider({
   enabled,
   view,
   onViewChange,
+  onEngage,
+  onSettle,
 }: MobileSliderOptions) {
   const trackRef = useRef<HTMLDivElement>(null);
   const stripRef = useRef<HTMLDivElement>(null);
@@ -106,6 +112,7 @@ export function useMobileSlider({
         return;
       }
       g.engaged = true;
+      onEngage?.();
     }
 
     const min = -g.width;
@@ -135,8 +142,10 @@ export function useMobileSlider({
 
     if ((distanceOk || flickOk) && target !== view) {
       onViewChange(target);
+      onSettle?.();
     } else {
       apply(g.base, true);
+      onSettle?.();
     }
   };
 
@@ -145,7 +154,10 @@ export function useMobileSlider({
     const wasEngaged = g.engaged;
     g.started = false;
     g.engaged = false;
-    if (wasEngaged) apply(g.base, true);
+    if (wasEngaged) {
+      apply(g.base, true);
+      onSettle?.();
+    }
   };
 
   return {

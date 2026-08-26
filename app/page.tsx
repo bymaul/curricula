@@ -23,8 +23,9 @@ import { useDialogStore } from '@/store/useDialogStore';
 import { usePhotoStore } from '@/store/usePhotoStore';
 import { useResumeStore } from '@/store/useResumeStore';
 import { useUIStore } from '@/store/useUIStore';
+import { cn } from '@/lib/utils';
 import { zodResolver } from '@hookform/resolvers/zod';
-import { useCallback, useEffect, useState } from 'react';
+import { useCallback, useEffect, useRef, useState } from 'react';
 import { FormProvider, useForm } from 'react-hook-form';
 import type { CVData } from '@/lib/schema';
 import { cvSchema, initialCVState } from '@/lib/schema';
@@ -118,6 +119,18 @@ export default function Home() {
     [isLargeScreen, switchMobileView],
   );
 
+  const [paneGapOpen, setPaneGapOpen] = useState(false);
+  const gapTimerRef = useRef<number | null>(null);
+
+  const closeGapAfterSettle = useCallback(() => {
+    if (gapTimerRef.current !== null) window.clearTimeout(gapTimerRef.current);
+    // Keep the seam visible while the strip settles, then collapse it.
+    gapTimerRef.current = window.setTimeout(() => {
+      gapTimerRef.current = null;
+      setPaneGapOpen(false);
+    }, 300);
+  }, []);
+
   const {
     trackRef,
     stripRef,
@@ -126,7 +139,23 @@ export default function Home() {
     enabled: !isLargeScreen,
     view: mobileView,
     onViewChange: switchMobileView,
+    onEngage: () => {
+      if (gapTimerRef.current !== null) {
+        window.clearTimeout(gapTimerRef.current);
+        gapTimerRef.current = null;
+      }
+      setPaneGapOpen(true);
+    },
+    onSettle: closeGapAfterSettle,
   });
+
+  useEffect(
+    () => () => {
+      if (gapTimerRef.current !== null)
+        window.clearTimeout(gapTimerRef.current);
+    },
+    [],
+  );
 
   if (!mounted || !storesHydrated) return <EditorSkeleton />;
 
@@ -152,7 +181,12 @@ export default function Home() {
                 data-pane="edit"
                 inert={!isLargeScreen && mobileView !== 'edit'}
                 aria-hidden={!isLargeScreen && mobileView !== 'edit'}
-                className="h-full w-1/2 shrink-0 pr-3 lg:pr-0 lg:contents print:contents"
+                className={cn(
+                  'h-full w-1/2 shrink-0 lg:contents print:contents',
+                  !isLargeScreen &&
+                    '[transition-property:margin] motion-safe:ease-out motion-safe:duration-200',
+                  !isLargeScreen && paneGapOpen && 'mr-3',
+                )}
               >
                 <EditorSidebar
                   className="h-full"
@@ -170,7 +204,12 @@ export default function Home() {
                 data-pane="preview"
                 inert={!isLargeScreen && mobileView !== 'preview'}
                 aria-hidden={!isLargeScreen && mobileView !== 'preview'}
-                className="h-full w-1/2 shrink-0 pl-3 lg:pl-0 lg:contents print:contents"
+                className={cn(
+                  'h-full w-1/2 shrink-0 lg:contents print:contents',
+                  !isLargeScreen &&
+                    '[transition-property:margin] motion-safe:ease-out motion-safe:duration-200',
+                  !isLargeScreen && paneGapOpen && 'ml-3',
+                )}
               >
                 <ResumePreview
                   printRef={printRef}
