@@ -4,7 +4,7 @@ import { DEFAULT_SECTION_ORDER, SECTION_IDS, SectionId } from '@/lib/consts';
 import { DesignSettings, normalizeDesign } from '@/lib/design';
 import { ResumeLanguage } from '@/lib/i18n/languages';
 import { CVData, cvDataStoredSchema, initialCVState } from '@/lib/schema';
-import { createQuotaAwareStorage } from '@/lib/storage';
+import { createIdbStorage } from '@/lib/idbStorage';
 import { DEFAULT_TEMPLATE_ID, TemplateId } from '@/lib/templates';
 import { usePhotoStore } from '@/store/usePhotoStore';
 
@@ -637,7 +637,7 @@ export const useResumeStore = create<ResumeState>()(
     {
       name: STORAGE_KEY,
       skipHydration: true,
-      storage: createQuotaAwareStorage<PersistedResumeState>(),
+      storage: createIdbStorage<PersistedResumeState>(),
       partialize: (state) => ({
         resumes: state.resumes.map(withoutPhoto),
         activeId: state.activeId,

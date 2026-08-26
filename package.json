@@ -63,6 +63,7 @@
     "esbuild": "^0.28.1",
     "eslint": "^9",
     "eslint-config-next": "16.3.0",
+    "fake-indexeddb": "^6.2.5",
     "prettier": "^3.9.6",
     "serwist": "^9.5.12",
     "tailwindcss": "^4",
