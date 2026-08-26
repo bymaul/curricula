@@ -1,5 +1,6 @@
 'use client';
 
+import { useMemo } from 'react';
 import { useI18n } from '@/components/I18nProvider';
 import { navTabLabel } from '@/lib/i18n';
 import {
@@ -9,14 +10,16 @@ import {
   CommandInput,
   CommandItem,
   CommandList,
+  CommandSeparator,
 } from '@/components/ui/command';
 import { Dialog, DialogContent, DialogTitle } from '@/components/ui/dialog';
 import { getCustomSections } from '@/lib/schema';
 import { SAMPLE_CV_DATA } from '@/lib/sampleCv';
 import { DEFAULT_SECTION_ORDER, TabName } from '@/lib/consts';
+import { isApplePlatform } from '@/lib/platform';
 import { useDialogStore, DialogKey } from '@/store/useDialogStore';
 import { useResumeStore } from '@/store/useResumeStore';
-import { useUIStore } from '@/store/useUIStore';
+import { ThemeMode, useUIStore } from '@/store/useUIStore';
 import type { EditorFileActions } from './EditorSidebar';
 import {
   ArrowLeftRight,
@@ -24,10 +27,13 @@ import {
   FilePlus2,
   FolderOpen,
   Keyboard,
+  Monitor,
+  Moon,
   Printer,
   Settings2,
   Share2,
   Sparkles,
+  Sun,
   Upload,
   Wand2,
 } from 'lucide-react';
@@ -39,6 +45,24 @@ interface CommandPaletteProps {
   pdfInputRef: React.RefObject<HTMLInputElement | null>;
 }
 
+const THEME_OPTIONS: {
+  value: ThemeMode;
+  icon: typeof Sun;
+  labelKey: 'header.themeSystem' | 'header.themeLight' | 'header.themeDark';
+}[] = [
+  { value: 'system', icon: Monitor, labelKey: 'header.themeSystem' },
+  { value: 'light', icon: Sun, labelKey: 'header.themeLight' },
+  { value: 'dark', icon: Moon, labelKey: 'header.themeDark' },
+];
+
+function Kbd({ children }: { children: string }) {
+  return (
+    <kbd className="ml-auto inline-flex min-w-5 items-center justify-center rounded border border-border bg-muted px-1 py-0.5 font-mono text-[10px] font-medium text-muted-foreground">
+      {children}
+    </kbd>
+  );
+}
+
 export function CommandPalette({
   open,
   onOpenChange,
@@ -48,6 +72,8 @@ export function CommandPalette({
   const { t } = useI18n();
   const setDialog = useDialogStore((state) => state.setDialog);
   const setActiveTab = useUIStore((state) => state.setActiveTab);
+  const theme = useUIStore((state) => state.theme);
+  const setTheme = useUIStore((state) => state.setTheme);
   const activeId = useResumeStore((state) => state.activeId);
   const resumes = useResumeStore((state) => state.resumes);
   const sectionOrder =
@@ -58,6 +84,9 @@ export function CommandPalette({
   const customSections = getCustomSections(
     resumes.find((r) => r.id === activeId)?.data,
   );
+
+  const isApple = useMemo(() => isApplePlatform(), []);
+  const mod = isApple ? '⌘' : 'Ctrl';
 
   const close = () => onOpenChange(false);
 
@@ -90,6 +119,7 @@ export function CommandPalette({
               <CommandItem onSelect={() => run(fileActions.handlePrintClick)}>
                 <Printer />
                 {t('editor.printPdf')}
+                <Kbd>{`${mod}P`}</Kbd>
               </CommandItem>
               <CommandItem onSelect={() => dialogAction('share')}>
                 <Share2 />
@@ -116,8 +146,31 @@ export function CommandPalette({
               <CommandItem onSelect={() => dialogAction('shortcuts')}>
                 <Keyboard />
                 {t('editor.keyboardShortcuts')}
+                <Kbd>?</Kbd>
               </CommandItem>
             </CommandGroup>
+
+            <CommandSeparator />
+
+            <CommandGroup heading={t('palette.groups.appearance')}>
+              {THEME_OPTIONS.map(({ value, icon: Icon, labelKey }) => (
+                <CommandItem
+                  key={value}
+                  value={`theme ${t(labelKey)}`}
+                  onSelect={() => run(() => setTheme(value))}
+                >
+                  <Icon />
+                  {t(labelKey)}
+                  {theme === value && (
+                    <span className="ml-auto text-xs text-muted-foreground">
+                      {t('palette.active')}
+                    </span>
+                  )}
+                </CommandItem>
+              ))}
+            </CommandGroup>
+
+            <CommandSeparator />
 
             <CommandGroup heading={t('palette.groups.resumes')}>
               <CommandItem
@@ -165,6 +218,8 @@ export function CommandPalette({
                 ))}
             </CommandGroup>
 
+            <CommandSeparator />
+
             <CommandGroup heading={t('palette.groups.sections')}>
               {tabs.map((tab) => (
                 <CommandItem
@@ -178,6 +233,27 @@ export function CommandPalette({
             </CommandGroup>
           </CommandList>
         </Command>
+
+        <div className="flex items-center gap-3 border-t border-border px-3 py-2 text-[11px] text-muted-foreground">
+          <span className="flex items-center gap-1">
+            <kbd className="rounded border border-border bg-muted px-1 py-0.5 font-mono text-[10px]">
+              ↑↓
+            </kbd>
+            {t('palette.footerNavigate')}
+          </span>
+          <span className="flex items-center gap-1">
+            <kbd className="rounded border border-border bg-muted px-1 py-0.5 font-mono text-[10px]">
+              ↵
+            </kbd>
+            {t('palette.footerSelect')}
+          </span>
+          <span className="flex items-center gap-1">
+            <kbd className="rounded border border-border bg-muted px-1 py-0.5 font-mono text-[10px]">
+              esc
+            </kbd>
+            {t('palette.footerClose')}
+          </span>
+        </div>
       </DialogContent>
     </Dialog>
   );
