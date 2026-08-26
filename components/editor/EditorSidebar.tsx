@@ -16,6 +16,7 @@ import {
   ListOrdered,
   Loader2,
   Redo2,
+  Search,
   Undo2,
 } from 'lucide-react';
 import { useEffect, useMemo, useRef, useState } from 'react';
@@ -243,6 +244,14 @@ export function EditorSidebar({
         </div>
 
         <div className="flex items-center gap-1">
+          <TooltipIconButton
+            label={t('editor.commandPalette')}
+            aria-keyshortcuts="Control+k Meta+k"
+            onClick={() => setDialog('palette', true)}
+          >
+            <Search className="size-4" />
+          </TooltipIconButton>
+
           <TooltipIconButton
             label={t('editor.undo')}
             aria-keyshortcuts="Control+z Meta+z"

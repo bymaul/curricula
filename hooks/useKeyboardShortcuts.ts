@@ -8,6 +8,7 @@ interface KeyboardShortcutHandlers {
   onSave: () => void;
   onPrint: () => void;
   onShowShortcuts?: () => void;
+  onTogglePalette?: () => void;
 }
 
 export function useKeyboardShortcuts({
@@ -16,9 +17,21 @@ export function useKeyboardShortcuts({
   onSave,
   onPrint,
   onShowShortcuts,
+  onTogglePalette,
 }: KeyboardShortcutHandlers) {
   useEffect(() => {
     const onKeyDown = (event: KeyboardEvent) => {
+      const mod = event.ctrlKey || event.metaKey;
+      const key = event.key.toLowerCase();
+
+      // Checked before the typing guard so Cmd/Ctrl+K also closes the
+      // command palette from its own search input.
+      if (mod && key === 'k' && onTogglePalette) {
+        event.preventDefault();
+        onTogglePalette();
+        return;
+      }
+
       const target = event.target as HTMLElement | null;
       const isTyping =
         !!target &&
@@ -27,8 +40,6 @@ export function useKeyboardShortcuts({
           target.tagName === 'SELECT' ||
           target.isContentEditable);
       if (isTyping) return;
-
-      const mod = event.ctrlKey || event.metaKey;
 
       if (!mod && event.key === '?') {
         if (onShowShortcuts) {
@@ -39,8 +50,6 @@ export function useKeyboardShortcuts({
       }
 
       if (!mod) return;
-
-      const key = event.key.toLowerCase();
 
       if (key === 'z') {
         event.preventDefault();
@@ -67,5 +76,5 @@ export function useKeyboardShortcuts({
 
     window.addEventListener('keydown', onKeyDown);
     return () => window.removeEventListener('keydown', onKeyDown);
-  }, [onUndo, onRedo, onSave, onPrint, onShowShortcuts]);
+  }, [onUndo, onRedo, onSave, onPrint, onShowShortcuts, onTogglePalette]);
 }

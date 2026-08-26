@@ -44,6 +44,10 @@ export function ShortcutsDialog({
 
   const rows: ShortcutRow[] = [
     {
+      keys: [mod, 'K'],
+      labelKey: 'editor.shortcutLabels.palette',
+    },
+    {
       keys: isApple ? ['⌘', 'Z'] : ['Ctrl', 'Z'],
       labelKey: 'editor.shortcutLabels.undo',
     },

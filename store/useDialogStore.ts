@@ -8,7 +8,8 @@ export type DialogKey =
   | 'history'
   | 'share'
   | 'backup'
-  | 'shortcuts';
+  | 'shortcuts'
+  | 'palette';
 
 interface DialogState {
   dialogs: Record<DialogKey, boolean>;
@@ -25,6 +26,7 @@ const INITIAL_DIALOGS: Record<DialogKey, boolean> = {
   share: false,
   backup: false,
   shortcuts: false,
+  palette: false,
 };
 
 export const useDialogStore = create<DialogState>()((set) => ({

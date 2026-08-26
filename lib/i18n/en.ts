@@ -103,9 +103,11 @@ const en = {
     storageFullWarning:
       'Browser storage is full — recent changes may not be saved. Export a backup and free up space.',
     keyboardShortcuts: 'Keyboard shortcuts',
+    commandPalette: 'Command palette',
     shortcutsTitle: 'Keyboard shortcuts',
     shortcutsDescription: 'Work faster in the editor with these shortcuts.',
     shortcutLabels: {
+      palette: 'Command palette',
       undo: 'Undo',
       redo: 'Redo',
       save: 'Save now',
@@ -265,6 +267,16 @@ const en = {
     phoneRequired: 'Phone number is required',
     summaryMinLength: 'Summary must be at least 10 characters',
     sectionTitleRequired: 'Section title is required',
+  },
+  palette: {
+    placeholder: 'Type a command or search…',
+    noResults: 'No results found.',
+    switchTo: 'Switch to "{title}"',
+    groups: {
+      actions: 'Actions',
+      resumes: 'Resumes',
+      sections: 'Go to section',
+    },
   },
   resumes: {
     title: 'Resumes',
