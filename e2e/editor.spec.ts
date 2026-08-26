@@ -14,6 +14,10 @@ const nameInput = (page: Page) => page.getByPlaceholder(NAME_PLACEHOLDER);
 
 const preview = (page: Page) => page.locator('[data-template-id]');
 
+const editorPane = (page: Page) => page.locator('[data-pane="edit"]');
+
+const previewPane = (page: Page) => page.locator('[data-pane="preview"]');
+
 async function expectSaved(page: Page): Promise<void> {
   await expect(page.getByText('Saved', { exact: false })).toBeVisible();
 }
@@ -215,13 +219,17 @@ test('toggles the preview pane on mobile', async ({ page, isMobile }) => {
   test.skip(!isMobile, 'mobile-only edit/preview toggle');
   await freshEditor(page);
 
-  await expect(preview(page)).toBeHidden();
+  await expect(preview(page)).toBeVisible();
+  await expect(previewPane(page)).toHaveAttribute('inert');
 
   await page.getByRole('tab', { name: 'Preview' }).click();
   await expect(preview(page)).toBeVisible();
+  await expect(previewPane(page)).not.toHaveAttribute('inert');
+  await expect(editorPane(page)).toHaveAttribute('inert');
 
   await page.getByRole('tab', { name: 'Edit' }).click();
-  await expect(preview(page)).toBeHidden();
+  await expect(previewPane(page)).toHaveAttribute('inert');
+  await expect(editorPane(page)).not.toHaveAttribute('inert');
 });
 
 test('print stylesheet hides editor chrome and keeps the CV', async ({

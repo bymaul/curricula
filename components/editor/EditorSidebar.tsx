@@ -165,7 +165,7 @@ export function EditorSidebar({
   return (
     <section
       className={cn(
-        'w-full lg:w-[35%] xl:w-[30%] flex-col border border-border bg-card rounded-xl shadow-lg overflow-hidden shrink-0 print:hidden',
+        'flex w-full shrink-0 flex-col lg:w-[35%] xl:w-[30%] border border-border bg-card rounded-xl shadow-lg overflow-hidden print:hidden',
         className,
       )}
     >
