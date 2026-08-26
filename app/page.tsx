@@ -10,9 +10,9 @@ import { CVImportPreviewDialog } from '@/components/import/CVImportPreviewDialog
 import { useCVAutoSave } from '@/hooks/useCVAutoSave';
 import { useCVImportExport } from '@/hooks/useCVImportExport';
 import { useCVPrint } from '@/hooks/useCVPrint';
-import { useHorizontalSwipe } from '@/hooks/useHorizontalSwipe';
 import { useKeyboardShortcuts } from '@/hooks/useKeyboardShortcuts';
 import { useMediaQuery } from '@/hooks/useMediaQuery';
+import { useMobileSlider } from '@/hooks/useMobileSlider';
 import { useShareLinkImport } from '@/hooks/useShareLinkImport';
 import {
   DESKTOP_MEDIA_QUERY,
@@ -68,12 +68,8 @@ export default function Home() {
   });
 
   const [mobileView, setMobileView] = useState<'edit' | 'preview'>('edit');
-  const [paneDirection, setPaneDirection] = useState<'forward' | 'back'>(
-    'forward',
-  );
 
   const switchMobileView = useCallback((next: 'edit' | 'preview') => {
-    setPaneDirection(next === 'preview' ? 'forward' : 'back');
     setMobileView((current) => (current === next ? current : next));
   }, []);
 
@@ -123,62 +119,73 @@ export default function Home() {
     [isLargeScreen, switchMobileView],
   );
 
-  const swipeHandlers = useHorizontalSwipe((direction) => {
-    if (direction === 'left') {
-      switchMobileView('preview');
-    } else {
-      switchMobileView('edit');
-    }
+  const {
+    trackRef,
+    stripRef,
+    handlers: sliderHandlers,
+  } = useMobileSlider({
+    enabled: !isLargeScreen,
+    view: mobileView,
+    onViewChange: switchMobileView,
   });
-
-  // Mobile-only, direction-aware transition when a pane becomes visible.
-  // The animation class is absent while the pane is hidden, so re-adding it
-  // on every switch replays the entrance.
-  const paneMotion = isLargeScreen
-    ? ''
-    : paneDirection === 'back'
-      ? 'motion-safe:animate-in motion-safe:fade-in motion-safe:slide-in-from-left-6 motion-safe:duration-200 motion-safe:ease-out'
-      : 'motion-safe:animate-in motion-safe:fade-in motion-safe:slide-in-from-right-6 motion-safe:duration-200 motion-safe:ease-out';
 
   if (!mounted || !storesHydrated) return <EditorSkeleton />;
 
   return (
     <FormProvider {...methods}>
       <main
-        {...swipeHandlers}
+        {...sliderHandlers}
         className="h-dvh w-full bg-background text-foreground flex flex-col lg:p-6 overflow-hidden print:h-auto print:block print:p-0 print:overflow-visible print:bg-white"
       >
         <Header value={mobileView} onChange={switchMobileView} />
 
         <div className="flex-1 min-h-0 w-full flex flex-col lg:flex-row gap-4 lg:gap-6 px-4 pb-4 lg:px-0 lg:pb-0 print:p-0 print:block">
-          <EditorSidebar
-            className={cn(
-              'h-full',
-              mobileView === 'edit' ? 'flex' : 'hidden',
-              'lg:flex',
-              paneMotion,
-            )}
-            pdfInputRef={pdfInputRef}
-            fileActions={{
-              handlePrintClick,
-              onImportPDF: handleImportPDF,
-            }}
-            saveStatus={saveStatus}
-            lastSavedAt={lastSavedAt}
-          />
+          <div
+            ref={trackRef}
+            className="relative flex-1 min-h-0 overflow-hidden lg:contents print:contents"
+          >
+            <div
+              ref={stripRef}
+              className="flex h-full w-[200%] motion-safe:transition-transform motion-safe:will-change-transform lg:contents"
+              style={{ transform: 'translate3d(0, 0, 0)' }}
+            >
+              <div
+                data-pane="edit"
+                inert={!isLargeScreen && mobileView !== 'edit'}
+                aria-hidden={!isLargeScreen && mobileView !== 'edit'}
+                className="h-full w-1/2 shrink-0 lg:contents print:contents"
+              >
+                <EditorSidebar
+                  className={cn('h-full', 'shrink-0')}
+                  pdfInputRef={pdfInputRef}
+                  fileActions={{
+                    handlePrintClick,
+                    onImportPDF: handleImportPDF,
+                  }}
+                  saveStatus={saveStatus}
+                  lastSavedAt={lastSavedAt}
+                />
+              </div>
 
-          <ResumePreview
-            printRef={printRef}
-            sectionOrder={activeResume?.sectionOrder}
-            hiddenSections={activeResume?.hiddenSections}
-            language={activeResume?.language}
-            photo={activeResume?.photo}
-            design={activeResume?.design}
-            templateId={activeResume?.templateId}
-            mobileActive={mobileView === 'preview'}
-            className={paneMotion}
-            onSectionClick={handleSectionClick}
-          />
+              <div
+                data-pane="preview"
+                inert={!isLargeScreen && mobileView !== 'preview'}
+                aria-hidden={!isLargeScreen && mobileView !== 'preview'}
+                className="h-full w-1/2 shrink-0 lg:contents print:contents"
+              >
+                <ResumePreview
+                  printRef={printRef}
+                  sectionOrder={activeResume?.sectionOrder}
+                  hiddenSections={activeResume?.hiddenSections}
+                  language={activeResume?.language}
+                  photo={activeResume?.photo}
+                  design={activeResume?.design}
+                  templateId={activeResume?.templateId}
+                  onSectionClick={handleSectionClick}
+                />
+              </div>
+            </div>
+          </div>
         </div>
       </main>
 

@@ -3,14 +3,9 @@
 import { useI18n } from '@/components/I18nProvider';
 import { TEMPLATE_COMPONENTS } from '@/components/resume/registry';
 import { ScrollArea, ScrollBar } from '@/components/ui/scroll-area';
-import { useMediaQuery } from '@/hooks/useMediaQuery';
 import { usePageScale } from '@/hooks/usePageScale';
 import { usePinchZoom } from '@/hooks/usePinchZoom';
-import {
-  DESKTOP_MEDIA_QUERY,
-  getSectionIdFromTab,
-  SectionId,
-} from '@/lib/consts';
+import { getSectionIdFromTab, SectionId } from '@/lib/consts';
 import { DesignSettings } from '@/lib/design';
 import { computePageCount, getPageDimensions } from '@/lib/pagination';
 import { CVData } from '@/lib/schema';
@@ -81,8 +76,6 @@ interface ResumePreviewProps {
   photo?: string;
   design?: DesignSettings;
   templateId?: TemplateId;
-  mobileActive: boolean;
-  className?: string;
   onSectionClick?: (sectionId: SectionId) => void;
 }
 
@@ -94,13 +87,8 @@ function ResumePreviewImpl({
   photo,
   design,
   templateId = 'harvard',
-  mobileActive,
-  className,
   onSectionClick,
 }: ResumePreviewProps) {
-  const isLargeScreen = useMediaQuery(DESKTOP_MEDIA_QUERY);
-  const isVisible = isLargeScreen || mobileActive;
-
   const page = getPageDimensions(design?.pageSize);
   const frameWidthPx = page.width + GUTTER_PX * 2;
 
@@ -117,7 +105,7 @@ function ResumePreviewImpl({
     maxScale,
   } = usePageScale({
     frameWidthPx,
-    isVisible,
+    isVisible: true,
   });
 
   const anchorRef = useRef<{
@@ -239,7 +227,6 @@ function ResumePreviewImpl({
   const { t } = useI18n();
 
   useEffect(() => {
-    if (!isVisible) return;
     const sectionId = getSectionIdFromTab(activeTab);
     if (!sectionId) return;
     const panel = panelRef.current;
@@ -257,17 +244,14 @@ function ResumePreviewImpl({
         scale -
       SCROLL_OFFSET_PX;
     viewport.scrollTo({ top: viewport.scrollTop + delta, behavior: 'smooth' });
-  }, [activeTab, isVisible, scale, panelRef]);
+  }, [activeTab, scale, panelRef]);
 
   return (
     <section
       ref={setPanelRef}
       data-template-id={templateId}
       className={cn(
-        'flex-1 w-full bg-muted/10 border border-border rounded-xl shadow-inner flex-col h-full relative overflow-hidden touch-pan-x touch-pan-y print:border-none print:shadow-none print:bg-transparent print:overflow-visible',
-        mobileActive ? 'flex' : 'hidden',
-        'lg:flex',
-        className,
+        'flex-1 w-full bg-muted/10 border border-border rounded-xl shadow-inner flex flex-col h-full relative overflow-hidden touch-pan-x touch-pan-y print:border-none print:shadow-none print:bg-transparent print:overflow-visible',
       )}
     >
       <ZoomControls
