@@ -1,7 +1,14 @@
 'use client';
 
 import { useI18n } from '@/components/I18nProvider';
-import { ACCENT_COLORS, AccentColorId, DensityId, FontId } from '@/lib/design';
+import {
+  ACCENT_COLORS,
+  AccentColorId,
+  DensityId,
+  FontId,
+  PAGE_SIZE_IDS,
+  PageSizeId,
+} from '@/lib/design';
 import { TranslationKey } from '@/lib/i18n';
 import { cn } from '@/lib/utils';
 
@@ -36,6 +43,11 @@ const DENSITY_LABEL_KEYS: Record<DensityId, TranslationKey> = {
   compact: 'personalDetails.designDensityCompact',
   normal: 'personalDetails.designDensityNormal',
   relaxed: 'personalDetails.designDensityRelaxed',
+};
+
+const PAGE_SIZE_LABEL_KEYS: Record<PageSizeId, TranslationKey> = {
+  a4: 'personalDetails.designPageSizeA4',
+  letter: 'personalDetails.designPageSizeLetter',
 };
 
 function Segmented<T extends string>({
@@ -144,6 +156,23 @@ export function DensityPicker({
     <Segmented
       options={['compact', 'normal', 'relaxed'] as const}
       labelKeys={DENSITY_LABEL_KEYS}
+      value={value}
+      onChange={onChange}
+    />
+  );
+}
+
+export function PageSizePicker({
+  value,
+  onChange,
+}: {
+  value: PageSizeId;
+  onChange: (value: PageSizeId) => void;
+}) {
+  return (
+    <Segmented
+      options={PAGE_SIZE_IDS}
+      labelKeys={PAGE_SIZE_LABEL_KEYS}
       value={value}
       onChange={onChange}
     />

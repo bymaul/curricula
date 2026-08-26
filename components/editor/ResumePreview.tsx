@@ -12,11 +12,7 @@ import {
   SectionId,
 } from '@/lib/consts';
 import { DesignSettings } from '@/lib/design';
-import {
-  PAGE_HEIGHT_PX,
-  PAGE_WIDTH_PX,
-  computePageCount,
-} from '@/lib/pagination';
+import { computePageCount, getPageDimensions } from '@/lib/pagination';
 import { CVData } from '@/lib/schema';
 import { ResumeLanguage } from '@/lib/i18n/languages';
 import { TemplateId } from '@/lib/templates';
@@ -36,7 +32,6 @@ import { useFormContext, useWatch } from 'react-hook-form';
 import { ZoomControls } from './ZoomControls';
 
 const GUTTER_PX = 32;
-const FRAME_WIDTH_PX = PAGE_WIDTH_PX + GUTTER_PX * 2;
 const SCROLL_OFFSET_PX = 16;
 
 interface LiveTemplateProps {
@@ -104,6 +99,9 @@ function ResumePreviewImpl({
   const isLargeScreen = useMediaQuery(DESKTOP_MEDIA_QUERY);
   const isVisible = isLargeScreen || mobileActive;
 
+  const page = getPageDimensions(design?.pageSize);
+  const frameWidthPx = page.width + GUTTER_PX * 2;
+
   const {
     panelRef,
     frameRef,
@@ -116,7 +114,7 @@ function ResumePreviewImpl({
     minScale,
     maxScale,
   } = usePageScale({
-    frameWidthPx: FRAME_WIDTH_PX,
+    frameWidthPx,
     isVisible,
   });
 
@@ -222,16 +220,16 @@ function ResumePreviewImpl({
     const el = printRef.current;
     if (!el) return;
     const update = () => {
-      setPageCount(computePageCount(el.scrollHeight, PAGE_HEIGHT_PX));
+      setPageCount(computePageCount(el.scrollHeight, page.height));
     };
     update();
     const ro = new ResizeObserver(update);
     ro.observe(el);
     return () => ro.disconnect();
-  }, [printRef]);
+  }, [printRef, page.height]);
 
   const pageBreaks = Array.from({ length: pageCount - 1 }, (_, i) => ({
-    top: (i + 1) * PAGE_HEIGHT_PX,
+    top: (i + 1) * page.height,
     label: i + 2,
   }));
 
@@ -296,13 +294,13 @@ function ResumePreviewImpl({
         <ScrollArea className="h-full w-full print:h-auto print:overflow-visible">
           <div className="min-h-full py-8 lg:py-16 print:p-0 print:py-0 print:block">
             <div
-              style={{ width: FRAME_WIDTH_PX * scale, height: frameHeight }}
+              style={{ width: frameWidthPx * scale, height: frameHeight }}
               className="relative shrink-0 mx-auto print:w-full! print:h-auto!"
             >
               <div
                 ref={frameRef}
                 style={{
-                  width: FRAME_WIDTH_PX,
+                  width: frameWidthPx,
                   padding: `0 ${GUTTER_PX}px`,
                   boxSizing: 'border-box',
                   transform: `scale(${scale})`,
@@ -311,7 +309,7 @@ function ResumePreviewImpl({
                 className="absolute top-0 left-0 print:p-0! print:w-full! print:static! print:transform-none!"
               >
                 <div
-                  style={{ width: PAGE_WIDTH_PX }}
+                  style={{ width: page.width }}
                   className="relative bg-white text-black shadow-2xl print:w-full! print:shadow-none"
                 >
                   <div className="overflow-hidden print:overflow-visible">

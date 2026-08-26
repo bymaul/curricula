@@ -537,6 +537,7 @@ describe('useResumeStore language, photo & template', () => {
       accentColor: 'teal',
       fontFamily: 'serif',
       density: 'relaxed',
+      pageSize: 'letter',
     } as const;
 
     getState().importResumeData(
@@ -556,6 +557,7 @@ describe('useResumeStore language, photo & template', () => {
       accentColor: 'blue',
       fontFamily: 'serif',
       density: 'compact',
+      pageSize: 'letter',
     });
 
     expect(activeResume().design.accentColor).toBe('blue');

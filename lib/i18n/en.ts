@@ -162,6 +162,9 @@ const en = {
     designDensityCompact: 'Compact',
     designDensityNormal: 'Normal',
     designDensityRelaxed: 'Relaxed',
+    designPageSizeLabel: 'Page Size',
+    designPageSizeA4: 'A4',
+    designPageSizeLetter: 'US Letter',
   },
   workExperience: {
     title: 'Work Experience',

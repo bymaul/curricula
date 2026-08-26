@@ -278,7 +278,7 @@ export const ModernTemplate = forwardRef<HTMLDivElement, TemplateProps>(
         style={{ ...styleVars, fontFamily: 'var(--cv-font)' }}
         className="mx-auto shadow-2xl print:shadow-none bg-white"
       >
-        <PrintStyle />
+        <PrintStyle pageSize={design?.pageSize} />
 
         <table className="w-full border-collapse">
           <thead>

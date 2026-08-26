@@ -3,7 +3,7 @@
 import { useI18n } from '@/components/I18nProvider';
 import { TEMPLATE_COMPONENTS } from '@/components/resume/registry';
 import { DesignSettings } from '@/lib/design';
-import { PAGE_WIDTH_PX } from '@/lib/pagination';
+import { getPageDimensions } from '@/lib/pagination';
 import { CVData } from '@/lib/schema';
 import { ResumeLanguage } from '@/lib/i18n/languages';
 import { TEMPLATES, TemplateId } from '@/lib/templates';
@@ -80,19 +80,19 @@ export function TemplatePicker({
   );
 }
 
-function usePreviewScale() {
+function usePreviewScale(pageWidthPx: number) {
   const ref = useRef<HTMLDivElement | null>(null);
   const [scale, setScale] = useState(0);
 
   useEffect(() => {
     const el = ref.current;
     if (!el) return;
-    const update = () => setScale(el.clientWidth / PAGE_WIDTH_PX);
+    const update = () => setScale(el.clientWidth / pageWidthPx);
     update();
     const observer = new ResizeObserver(update);
     observer.observe(el);
     return () => observer.disconnect();
-  }, []);
+  }, [pageWidthPx]);
 
   return { ref, scale };
 }
@@ -121,7 +121,8 @@ function TemplateCard({
   design,
 }: TemplateCardProps) {
   const { t } = useI18n();
-  const { ref, scale } = usePreviewScale();
+  const page = getPageDimensions(design?.pageSize);
+  const { ref, scale } = usePreviewScale(page.width);
   const Preview = TEMPLATE_COMPONENTS[template.id];
 
   return (
@@ -142,13 +143,14 @@ function TemplateCard({
     >
       <div
         ref={ref}
-        className="relative aspect-[794/1123] w-full overflow-hidden rounded-md border border-border bg-white"
+        className="relative w-full overflow-hidden rounded-md border border-border bg-white"
+        style={{ aspectRatio: `${page.width} / ${page.height}` }}
       >
         <div
           aria-hidden="true"
           className="pointer-events-none absolute top-0 left-0 origin-top-left select-none text-black"
           style={{
-            width: PAGE_WIDTH_PX,
+            width: page.width,
             transform: `scale(${scale})`,
             visibility: scale > 0 ? 'visible' : 'hidden',
           }}

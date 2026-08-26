@@ -1,6 +1,14 @@
-export const PRINT_CSS = `
+import { PageSizeId } from '@/lib/design';
+
+const PAGE_SIZES: Record<PageSizeId, string> = {
+  a4: 'A4',
+  letter: 'Letter',
+};
+
+export function printCss(pageSize: PageSizeId = 'a4'): string {
+  return `
   @page {
-    size: A4;
+    size: ${PAGE_SIZES[pageSize]};
     margin: 0mm;
   }
 
@@ -19,3 +27,4 @@ export const PRINT_CSS = `
     widows: 3;
   }
 `;
+}
