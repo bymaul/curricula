@@ -1,6 +1,7 @@
 'use client';
 
 import dynamic from 'next/dynamic';
+import { Loader2 } from 'lucide-react';
 import { EditorSidebar } from '@/components/editor/EditorSidebar';
 import { EditorSkeleton } from '@/components/editor/EditorSkeleton';
 import { ResumePreview } from '@/components/editor/ResumePreview';
@@ -28,21 +29,33 @@ import type { CVData } from '@/lib/schema';
 import { cvSchema, initialCVState } from '@/lib/schema';
 import { Header } from '@/components/Header';
 
+function DialogLoader() {
+  return (
+    <div
+      role="status"
+      className="fixed inset-0 z-50 flex items-center justify-center bg-background/60"
+    >
+      <Loader2 className="size-5 animate-spin text-muted-foreground" />
+      <span className="sr-only">Loading</span>
+    </div>
+  );
+}
+
 const AIAdjustDialog = dynamic(
   () => import('@/components/ai/AIAdjustDialog').then((m) => m.AIAdjustDialog),
-  { ssr: false },
+  { ssr: false, loading: DialogLoader },
 );
 
 const AISettingsDialog = dynamic(
   () =>
     import('@/components/ai/AISettingsDialog').then((m) => m.AISettingsDialog),
-  { ssr: false },
+  { ssr: false, loading: DialogLoader },
 );
 
 const ResumesDialog = dynamic(
   () =>
     import('@/components/editor/ResumesDialog').then((m) => m.ResumesDialog),
-  { ssr: false },
+  { ssr: false, loading: DialogLoader },
 );
 
 export default function Home() {
@@ -67,7 +80,7 @@ export default function Home() {
     };
   }, []);
 
-  const { dialogs, setDialog } = useDialogStore();
+  const { dialogs, everOpened, setDialog } = useDialogStore();
 
   const { mounted, saveStatus, lastSavedAt, saveNow } = useCVAutoSave(methods);
   const { pdfInputRef, handleImportPDF } = useCVImportExport();
@@ -80,6 +93,7 @@ export default function Home() {
     onRedo: redo,
     onSave: saveNow,
     onPrint: handlePrintClick,
+    onShowShortcuts: () => setDialog('shortcuts', true),
   });
 
   const isLargeScreen = useMediaQuery(DESKTOP_MEDIA_QUERY);
@@ -132,20 +146,26 @@ export default function Home() {
         </div>
       </main>
 
-      <AIAdjustDialog
-        open={dialogs.aiAdjust}
-        onOpenChange={(open) => setDialog('aiAdjust', open)}
-      />
+      {everOpened.aiAdjust && (
+        <AIAdjustDialog
+          open={dialogs.aiAdjust}
+          onOpenChange={(open) => setDialog('aiAdjust', open)}
+        />
+      )}
 
-      <AISettingsDialog
-        open={dialogs.aiSettings}
-        onOpenChange={(open) => setDialog('aiSettings', open)}
-      />
+      {everOpened.aiSettings && (
+        <AISettingsDialog
+          open={dialogs.aiSettings}
+          onOpenChange={(open) => setDialog('aiSettings', open)}
+        />
+      )}
 
-      <ResumesDialog
-        open={dialogs.resumes}
-        onOpenChange={(open) => setDialog('resumes', open)}
-      />
+      {everOpened.resumes && (
+        <ResumesDialog
+          open={dialogs.resumes}
+          onOpenChange={(open) => setDialog('resumes', open)}
+        />
+      )}
 
       <CVImportPreviewDialog />
     </FormProvider>

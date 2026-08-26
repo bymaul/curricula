@@ -1,6 +1,6 @@
 'use client';
 
-import { useRef, useState } from 'react';
+import { useRef } from 'react';
 import {
   Field,
   FieldDescription,
@@ -14,12 +14,11 @@ import { Button } from '@/components/ui/button';
 import { toast } from '@/components/ui/toast';
 import { useI18n } from '@/components/I18nProvider';
 import { CVData } from '@/lib/schema';
-import { SAMPLE_CV_DATA } from '@/lib/sampleCv';
 import { translateValidationMessage } from '@/lib/i18n';
 import { SUPPORTED_IMAGE_TYPES, resizeSquarePhoto } from '@/lib/imageFiles';
 import { useResumeStore } from '@/store/useResumeStore';
-import { useFieldArray, useFormContext, useWatch } from 'react-hook-form';
-import { Sparkles, UserRound } from 'lucide-react';
+import { useFieldArray, useFormContext } from 'react-hook-form';
+import { UserRound } from 'lucide-react';
 import { FormField } from '../ui/form-field';
 import { AddItemButton, ItemRemoveButton, SectionHeading } from './shared';
 
@@ -27,7 +26,6 @@ export const PersonalForm = () => {
   const {
     register,
     control,
-    reset,
     formState: { errors },
   } = useFormContext<CVData>();
   const { t } = useI18n();
@@ -47,21 +45,6 @@ export const PersonalForm = () => {
 
   const errorFor = (message: string | undefined) =>
     translateValidationMessage(t, message);
-
-  const cvValues = useWatch({ control }) as CVData;
-  const isEmptyResume =
-    !cvValues.name &&
-    !cvValues.email &&
-    !cvValues.phone &&
-    !cvValues.summary &&
-    cvValues.experience.length === 0;
-  const [sampleDismissed, setSampleDismissed] = useState(false);
-  const showSampleCta = isEmptyResume && !sampleDismissed;
-
-  const loadSample = () => {
-    reset(SAMPLE_CV_DATA);
-    setSampleDismissed(true);
-  };
 
   const handlePhotoChange = async (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0];
@@ -110,33 +93,6 @@ export const PersonalForm = () => {
           description={t('personalDetails.description')}
         />
       </div>
-
-      {showSampleCta && (
-        <div className="mb-4 flex items-start gap-3 rounded-lg border border-primary/30 bg-primary/5 p-3">
-          <Sparkles className="size-4 mt-0.5 text-primary shrink-0" />
-          <div className="min-w-0 flex-1">
-            <p className="text-sm font-medium">
-              {t('personalDetails.sampleCtaTitle')}
-            </p>
-            <p className="text-xs text-muted-foreground mt-0.5">
-              {t('personalDetails.sampleCtaDescription')}
-            </p>
-            <div className="flex gap-2 mt-2.5">
-              <Button type="button" size="sm" onClick={loadSample}>
-                {t('personalDetails.sampleCtaLoad')}
-              </Button>
-              <Button
-                type="button"
-                size="sm"
-                variant="ghost"
-                onClick={() => setSampleDismissed(true)}
-              >
-                {t('common.cancel')}
-              </Button>
-            </div>
-          </div>
-        </div>
-      )}
 
       <FieldGroup>
         <FieldSet>

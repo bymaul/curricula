@@ -31,8 +31,10 @@ import { ScrollArea } from '../ui/scroll-area';
 import { TooltipIconButton } from '../ui/tooltip-icon-button';
 import { ActionsDropdown } from './ActionsDropdown';
 import { BackupDialog } from './BackupDialog';
+import { EditorEmptyState } from './EditorEmptyState';
 import { SectionsOrderDialog } from './SectionsOrderDialog';
 import { ShareDialog } from './ShareDialog';
+import { ShortcutsDialog } from './ShortcutsDialog';
 import { VersionHistoryDialog } from './VersionHistoryDialog';
 
 export interface EditorFileActions {
@@ -126,6 +128,15 @@ export function EditorSidebar({
   const activeCustomSection =
     customSections.find((s) => s.id === activeTab) ?? null;
 
+  const data = activeResume?.data;
+  const isEmptyResume =
+    !!data &&
+    !data.name &&
+    !data.email &&
+    !data.phone &&
+    !data.summary &&
+    data.experience.length === 0;
+
   useEffect(() => {
     if (activeTab === 'personal' || activeTab === 'design') return;
     if (customSections.some((s) => s.id === activeTab)) return;
@@ -159,6 +170,7 @@ export function EditorSidebar({
     >
       <div className="flex-1 min-h-0">
         <ScrollArea key={activeTab} className="h-full">
+          {isEmptyResume && <EditorEmptyState />}
           <form
             onSubmit={(e) => e.preventDefault()}
             className="space-y-6 pt-4 pb-6"
@@ -290,6 +302,11 @@ export function EditorSidebar({
       <BackupDialog
         open={dialogs.backup}
         onOpenChange={(open) => setDialog('backup', open)}
+      />
+
+      <ShortcutsDialog
+        open={dialogs.shortcuts}
+        onOpenChange={(open) => setDialog('shortcuts', open)}
       />
     </section>
   );

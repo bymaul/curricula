@@ -102,14 +102,24 @@ const en = {
     },
     storageFullWarning:
       'Browser storage is full — recent changes may not be saved. Export a backup and free up space.',
+    keyboardShortcuts: 'Keyboard shortcuts',
+    shortcutsTitle: 'Keyboard shortcuts',
+    shortcutsDescription: 'Work faster in the editor with these shortcuts.',
+    shortcutLabels: {
+      undo: 'Undo',
+      redo: 'Redo',
+      save: 'Save now',
+      print: 'Print / PDF',
+    },
+    emptyStateTitle: 'This CV is empty',
+    emptyStateDescription:
+      'Fill it with example content you can edit, or start from scratch.',
+    emptyStateLoadExample: 'Load example data',
+    emptyStateStartBlank: 'Start blank',
   },
   personalDetails: {
     title: 'Personal Details',
     description: 'Get started with your contact information and summary.',
-    sampleCtaTitle: 'This CV is empty',
-    sampleCtaDescription:
-      'Fill it with example content you can edit, or start from scratch below.',
-    sampleCtaLoad: 'Load example data',
     resumeSettings: 'Resume',
     contactInformation: 'Contact Information',
     fullName: 'Full Name',

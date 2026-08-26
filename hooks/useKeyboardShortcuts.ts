@@ -7,6 +7,7 @@ interface KeyboardShortcutHandlers {
   onRedo: () => void;
   onSave: () => void;
   onPrint: () => void;
+  onShowShortcuts?: () => void;
 }
 
 export function useKeyboardShortcuts({
@@ -14,6 +15,7 @@ export function useKeyboardShortcuts({
   onRedo,
   onSave,
   onPrint,
+  onShowShortcuts,
 }: KeyboardShortcutHandlers) {
   useEffect(() => {
     const onKeyDown = (event: KeyboardEvent) => {
@@ -27,6 +29,15 @@ export function useKeyboardShortcuts({
       if (isTyping) return;
 
       const mod = event.ctrlKey || event.metaKey;
+
+      if (!mod && event.key === '?') {
+        if (onShowShortcuts) {
+          event.preventDefault();
+          onShowShortcuts();
+        }
+        return;
+      }
+
       if (!mod) return;
 
       const key = event.key.toLowerCase();
@@ -56,5 +67,5 @@ export function useKeyboardShortcuts({
 
     window.addEventListener('keydown', onKeyDown);
     return () => window.removeEventListener('keydown', onKeyDown);
-  }, [onUndo, onRedo, onSave, onPrint]);
+  }, [onUndo, onRedo, onSave, onPrint, onShowShortcuts]);
 }

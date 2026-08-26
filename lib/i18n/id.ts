@@ -104,14 +104,25 @@ const id: Dictionary = {
     },
     storageFullWarning:
       'Penyimpanan browser penuh — perubahan terbaru mungkin tidak tersimpan. Ekspor cadangan dan kosongkan ruang.',
+    keyboardShortcuts: 'Pintasan keyboard',
+    shortcutsTitle: 'Pintasan keyboard',
+    shortcutsDescription:
+      'Bekerja lebih cepat di editor dengan pintasan berikut.',
+    shortcutLabels: {
+      undo: 'Urungkan',
+      redo: 'Ulangi',
+      save: 'Simpan sekarang',
+      print: 'Cetak / PDF',
+    },
+    emptyStateTitle: 'CV ini masih kosong',
+    emptyStateDescription:
+      'Isi dengan konten contoh yang bisa Anda edit, atau mulai dari awal.',
+    emptyStateLoadExample: 'Muat data contoh',
+    emptyStateStartBlank: 'Mulai dari awal',
   },
   personalDetails: {
     title: 'Detail Pribadi',
     description: 'Mulai dengan informasi kontak dan ringkasan Anda.',
-    sampleCtaTitle: 'CV ini masih kosong',
-    sampleCtaDescription:
-      'Isi dengan konten contoh yang bisa Anda edit, atau mulai dari awal di bawah.',
-    sampleCtaLoad: 'Muat data contoh',
     resumeSettings: 'CV',
     contactInformation: 'Informasi Kontak',
     fullName: 'Nama Lengkap',
