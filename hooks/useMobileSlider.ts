@@ -32,9 +32,7 @@ interface MobileSliderOptions {
   enabled: boolean;
   view: 'edit' | 'preview';
   onViewChange: (view: 'edit' | 'preview') => void;
-  /** Called when a drag engages so the pane gap can be revealed. */
   onEngage?: () => void;
-  /** Called when the strip settles back or commits so the gap can close. */
   onSettle?: () => void;
 }
 
@@ -72,9 +70,6 @@ export function useMobileSlider({
     return view === 'preview' ? -width : 0;
   }, [view]);
 
-  // While a drag is engaged, cancel the browser's own interpretation of the
-  // gesture (back/forward edge swipes, pull-to-refresh). React attaches
-  // touchmove listeners passively, so this needs a native non-passive one.
   useEffect(() => {
     const blockBrowserGesture = (event: TouchEvent) => {
       if (gesture.current.engaged) event.preventDefault();
@@ -85,8 +80,6 @@ export function useMobileSlider({
     return () => window.removeEventListener('touchmove', blockBrowserGesture);
   }, []);
 
-  // Keep the strip in sync when the view changes from outside the drag
-  // (header tabs, command palette, section clicks).
   useEffect(() => {
     apply(enabled ? baseOffset() : 0, enabled);
   }, [enabled, view, apply, baseOffset]);

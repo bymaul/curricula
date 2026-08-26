@@ -124,7 +124,6 @@ export default function Home() {
 
   const closeGapAfterSettle = useCallback(() => {
     if (gapTimerRef.current !== null) window.clearTimeout(gapTimerRef.current);
-    // Keep the seam visible while the strip settles, then collapse it.
     gapTimerRef.current = window.setTimeout(() => {
       gapTimerRef.current = null;
       setPaneGapOpen(false);
