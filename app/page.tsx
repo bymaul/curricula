@@ -23,7 +23,6 @@ import { useDialogStore } from '@/store/useDialogStore';
 import { usePhotoStore } from '@/store/usePhotoStore';
 import { useResumeStore } from '@/store/useResumeStore';
 import { useUIStore } from '@/store/useUIStore';
-import { cn } from '@/lib/utils';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { useCallback, useEffect, useState } from 'react';
 import { FormProvider, useForm } from 'react-hook-form';
@@ -156,7 +155,7 @@ export default function Home() {
                 className="h-full w-1/2 shrink-0 lg:contents print:contents"
               >
                 <EditorSidebar
-                  className={cn('h-full', 'shrink-0')}
+                  className="h-full"
                   pdfInputRef={pdfInputRef}
                   fileActions={{
                     handlePrintClick,
