@@ -105,10 +105,12 @@ const id: Dictionary = {
     storageFullWarning:
       'Penyimpanan browser penuh — perubahan terbaru mungkin tidak tersimpan. Ekspor cadangan dan kosongkan ruang.',
     keyboardShortcuts: 'Pintasan keyboard',
+    commandPalette: 'Palet perintah',
     shortcutsTitle: 'Pintasan keyboard',
     shortcutsDescription:
       'Bekerja lebih cepat di editor dengan pintasan berikut.',
     shortcutLabels: {
+      palette: 'Palet perintah',
       undo: 'Urungkan',
       redo: 'Ulangi',
       save: 'Simpan sekarang',
@@ -270,6 +272,16 @@ const id: Dictionary = {
     phoneRequired: 'Nomor telepon wajib diisi',
     summaryMinLength: 'Ringkasan minimal 10 karakter',
     sectionTitleRequired: 'Judul bagian wajib diisi',
+  },
+  palette: {
+    placeholder: 'Ketik perintah atau cari…',
+    noResults: 'Tidak ada hasil.',
+    switchTo: 'Beralih ke "{title}"',
+    groups: {
+      actions: 'Tindakan',
+      resumes: 'Resum',
+      sections: 'Menuju bagian',
+    },
   },
   resumes: {
     title: 'Resum',

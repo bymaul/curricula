@@ -3,6 +3,7 @@
 import dynamic from 'next/dynamic';
 import { Loader2 } from 'lucide-react';
 import { EditorSidebar } from '@/components/editor/EditorSidebar';
+import { CommandPalette } from '@/components/editor/CommandPalette';
 import { EditorSkeleton } from '@/components/editor/EditorSkeleton';
 import { ResumePreview } from '@/components/editor/ResumePreview';
 import { CVImportPreviewDialog } from '@/components/import/CVImportPreviewDialog';
@@ -94,6 +95,10 @@ export default function Home() {
     onSave: saveNow,
     onPrint: handlePrintClick,
     onShowShortcuts: () => setDialog('shortcuts', true),
+    onTogglePalette: () => {
+      const open = useDialogStore.getState().dialogs.palette;
+      setDialog('palette', !open);
+    },
   });
 
   const isLargeScreen = useMediaQuery(DESKTOP_MEDIA_QUERY);
@@ -166,6 +171,13 @@ export default function Home() {
           onOpenChange={(open) => setDialog('resumes', open)}
         />
       )}
+
+      <CommandPalette
+        open={dialogs.palette}
+        onOpenChange={(open) => setDialog('palette', open)}
+        fileActions={{ handlePrintClick, onImportPDF: handleImportPDF }}
+        pdfInputRef={pdfInputRef}
+      />
 
       <CVImportPreviewDialog />
     </FormProvider>
