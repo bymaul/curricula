@@ -11,6 +11,7 @@ import {
   DatabaseBackup,
   EllipsisVertical,
   FileText,
+  Keyboard,
   Languages,
   Printer,
   Settings2,
@@ -123,6 +124,13 @@ export function ActionsDropdown({
         >
           <DatabaseBackup className="size-4 text-muted-foreground" />
           {t('editor.backupRestore')}
+        </DropdownMenuItem>
+        <DropdownMenuItem
+          onClick={() => setDialog('shortcuts', true)}
+          className={DROPDOWN_ITEM_CLASS}
+        >
+          <Keyboard className="size-4 text-muted-foreground" />
+          {t('editor.keyboardShortcuts')}
         </DropdownMenuItem>
         <DropdownMenuSeparator />
         <DropdownMenuSub>

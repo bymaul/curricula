@@ -7,10 +7,12 @@ export type DialogKey =
   | 'sections'
   | 'history'
   | 'share'
-  | 'backup';
+  | 'backup'
+  | 'shortcuts';
 
 interface DialogState {
   dialogs: Record<DialogKey, boolean>;
+  everOpened: Record<DialogKey, boolean>;
   setDialog: (key: DialogKey, isOpen: boolean) => void;
 }
 
@@ -22,12 +24,17 @@ const INITIAL_DIALOGS: Record<DialogKey, boolean> = {
   history: false,
   share: false,
   backup: false,
+  shortcuts: false,
 };
 
 export const useDialogStore = create<DialogState>()((set) => ({
   dialogs: INITIAL_DIALOGS,
+  everOpened: { ...INITIAL_DIALOGS },
   setDialog: (key, isOpen) =>
     set((state) => ({
       dialogs: { ...state.dialogs, [key]: isOpen },
+      everOpened: isOpen
+        ? { ...state.everOpened, [key]: true }
+        : state.everOpened,
     })),
 }));

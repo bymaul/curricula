@@ -9,15 +9,18 @@ const ALL_KEYS: DialogKey[] = [
   'history',
   'share',
   'backup',
+  'shortcuts',
 ];
 
+function allFalse(): Record<DialogKey, boolean> {
+  return Object.fromEntries(ALL_KEYS.map((key) => [key, false])) as Record<
+    DialogKey,
+    boolean
+  >;
+}
+
 beforeEach(() => {
-  useDialogStore.setState({
-    dialogs: Object.fromEntries(ALL_KEYS.map((key) => [key, false])) as Record<
-      DialogKey,
-      boolean
-    >,
-  });
+  useDialogStore.setState({ dialogs: allFalse(), everOpened: allFalse() });
 });
 
 describe('useDialogStore', () => {
@@ -42,5 +45,21 @@ describe('useDialogStore', () => {
     for (const key of ALL_KEYS) {
       expect(dialogs[key]).toBe(key === 'aiAdjust');
     }
+  });
+
+  it('records everOpened when a dialog opens and keeps it after closing', () => {
+    expect(useDialogStore.getState().everOpened.resumes).toBe(false);
+
+    useDialogStore.getState().setDialog('resumes', true);
+    expect(useDialogStore.getState().everOpened.resumes).toBe(true);
+
+    useDialogStore.getState().setDialog('resumes', false);
+    expect(useDialogStore.getState().dialogs.resumes).toBe(false);
+    expect(useDialogStore.getState().everOpened.resumes).toBe(true);
+  });
+
+  it('does not change everOpened when closing an unopened dialog', () => {
+    useDialogStore.getState().setDialog('share', false);
+    expect(useDialogStore.getState().everOpened).toEqual(allFalse());
   });
 });
