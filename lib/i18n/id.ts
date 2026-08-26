@@ -164,6 +164,9 @@ const id: Dictionary = {
     designDensityCompact: 'Padat',
     designDensityNormal: 'Normal',
     designDensityRelaxed: 'Lega',
+    designPageSizeLabel: 'Ukuran Halaman',
+    designPageSizeA4: 'A4',
+    designPageSizeLetter: 'Letter AS',
   },
   workExperience: {
     title: 'Pengalaman Kerja',

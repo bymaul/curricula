@@ -1,11 +1,11 @@
 'use client';
 
 import React from 'react';
-import { DesignSettings } from '@/lib/design';
+import { DesignSettings, PageSizeId } from '@/lib/design';
 import { BuiltinSectionId, SectionId } from '@/lib/consts';
 import { TranslationKey } from '@/lib/i18n';
 import { ResumeLanguage } from '@/lib/i18n/languages';
-import { PRINT_CSS } from '@/lib/print';
+import { printCss } from '@/lib/print';
 import { CVData, CustomSectionItem } from '@/lib/schema';
 
 export interface TemplateProps {
@@ -144,10 +144,10 @@ export function ItemSub({
   );
 }
 
-export function PrintStyle() {
+export function PrintStyle({ pageSize }: { pageSize?: PageSizeId }) {
   return (
     <style type="text/css" media="print">
-      {PRINT_CSS}
+      {printCss(pageSize ?? 'a4')}
     </style>
   );
 }

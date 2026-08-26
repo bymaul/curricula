@@ -19,22 +19,28 @@ export type FontId = (typeof FONT_IDS)[number];
 export const DENSITY_IDS = ['compact', 'normal', 'relaxed'] as const;
 export type DensityId = (typeof DENSITY_IDS)[number];
 
+export const PAGE_SIZE_IDS = ['a4', 'letter'] as const;
+export type PageSizeId = (typeof PAGE_SIZE_IDS)[number];
+
 export interface DesignSettings {
   accentColor: AccentColorId;
   fontFamily: FontId;
   density: DensityId;
+  pageSize: PageSizeId;
 }
 
 export const DEFAULT_DESIGN: DesignSettings = {
   accentColor: 'default',
   fontFamily: 'default',
   density: 'normal',
+  pageSize: 'a4',
 };
 
 export const designSchema = z.object({
   accentColor: z.enum(ACCENT_COLORS.map((c) => c.id)).catch('default'),
   fontFamily: z.enum(FONT_IDS).catch('default'),
   density: z.enum(DENSITY_IDS).catch('normal'),
+  pageSize: z.enum(PAGE_SIZE_IDS).catch('a4'),
 });
 
 const ACCENT_HEX: Record<

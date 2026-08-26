@@ -100,16 +100,20 @@ describe('share payload', () => {
 
   it('round-trips the design option', async () => {
     const data = makeData();
-    const payload = await buildSharePayload(data, {
-      design: { accentColor: 'teal', fontFamily: 'sans', density: 'relaxed' },
-    });
+    const design = {
+      accentColor: 'teal',
+      fontFamily: 'sans',
+      density: 'relaxed',
+      pageSize: 'letter',
+    } as const;
+    const payload = await buildSharePayload(data, { design });
 
     expect(await parseSharePayload(payload)).toEqual({
       data,
       language: 'en',
       photo: '',
       template: 'harvard',
-      design: { accentColor: 'teal', fontFamily: 'sans', density: 'relaxed' },
+      design,
     });
   });
 

@@ -6,7 +6,7 @@ import { TEMPLATE_COMPONENTS } from '@/components/resume/registry';
 import { Button } from '@/components/ui/button';
 import { TranslationKey, translate } from '@/lib/i18n';
 import { ResumeLanguage } from '@/lib/i18n/languages';
-import { PAGE_WIDTH_PX } from '@/lib/pagination';
+import { getPageDimensions } from '@/lib/pagination';
 import { matchShareHash, parseSharePayload, ShareResult } from '@/lib/share';
 import { Loader2, Pencil, Printer, TriangleAlert } from 'lucide-react';
 
@@ -84,6 +84,7 @@ export function CvViewer() {
   const { result, payload } = view;
   const { data, photo, template, design } = result;
   const ResumeTemplate = TEMPLATE_COMPONENTS[template];
+  const page = getPageDimensions(design?.pageSize);
 
   return (
     <div className="min-h-dvh bg-muted/10 text-foreground print:min-h-0 print:bg-white">
@@ -110,7 +111,7 @@ export function CvViewer() {
           <div className="mx-auto w-full print:w-full!">
             <div
               className="mx-auto bg-white text-black shadow-2xl print:shadow-none"
-              style={{ width: PAGE_WIDTH_PX }}
+              style={{ width: page.width }}
             >
               <ResumeTemplate
                 cvData={data}

@@ -75,6 +75,7 @@ describe('backup', () => {
         accentColor: 'burgundy',
         fontFamily: 'serif',
         density: 'compact',
+        pageSize: 'a4',
       },
     });
     const parsed = parseBackup(serializeBackup([record], 'r1'));
@@ -83,6 +84,7 @@ describe('backup', () => {
       accentColor: 'burgundy',
       fontFamily: 'serif',
       density: 'compact',
+      pageSize: 'a4',
     });
   });
 

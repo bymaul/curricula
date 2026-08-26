@@ -237,7 +237,7 @@ export const MinimalTemplate = forwardRef<HTMLDivElement, TemplateProps>(
         style={{ ...styleVars, fontFamily: 'var(--cv-font)' }}
         className="mx-auto shadow-2xl print:shadow-none bg-white"
       >
-        <PrintStyle />
+        <PrintStyle pageSize={design?.pageSize} />
 
         <div className="px-[1.4cm] pt-[1cm] pb-[1cm]">
           <div

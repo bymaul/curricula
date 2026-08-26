@@ -13,6 +13,7 @@ describe('designSchema', () => {
       accentColor: 'blue',
       fontFamily: 'serif',
       density: 'compact',
+      pageSize: 'letter',
     };
     expect(designSchema.parse(design)).toEqual(design);
   });
@@ -23,8 +24,16 @@ describe('designSchema', () => {
 
   it('falls back per-field on unknown values instead of failing', () => {
     expect(
-      designSchema.parse({ accentColor: 'hot-pink', fontFamily: 'comic' }),
-    ).toEqual({ ...DEFAULT_DESIGN, fontFamily: 'default' });
+      designSchema.parse({
+        accentColor: 'hot-pink',
+        fontFamily: 'comic',
+        pageSize: 'tabloid',
+      }),
+    ).toEqual({
+      ...DEFAULT_DESIGN,
+      fontFamily: 'default',
+      pageSize: 'a4',
+    });
   });
 });
 
@@ -34,6 +43,7 @@ describe('normalizeDesign', () => {
       accentColor: 'teal',
       fontFamily: 'sans',
       density: 'relaxed',
+      pageSize: 'letter',
     };
     expect(normalizeDesign(design)).toEqual(design);
   });

@@ -27,6 +27,7 @@ import {
   AccentColorPicker,
   DensityPicker,
   FontFamilyPicker,
+  PageSizePicker,
 } from './DesignPicker';
 import { SectionHeading } from './shared';
 import { TemplatePicker } from './TemplatePicker';
@@ -130,6 +131,16 @@ export const DesignForm = () => {
               <DensityPicker
                 value={design.density}
                 onChange={(density) => updateDesign({ density })}
+              />
+            </Field>
+
+            <Field>
+              <FieldLabel>
+                {t('personalDetails.designPageSizeLabel')}
+              </FieldLabel>
+              <PageSizePicker
+                value={design.pageSize}
+                onChange={(pageSize) => updateDesign({ pageSize })}
               />
             </Field>
           </FieldGroup>

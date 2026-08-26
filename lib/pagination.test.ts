@@ -1,18 +1,27 @@
 import { describe, expect, it } from 'vitest';
 import {
-  PAGE_HEIGHT_PX,
-  PAGE_WIDTH_PX,
+  PAGE_DIMENSIONS_PX,
   computePageCount,
+  getPageDimensions,
 } from '@/lib/pagination';
 
-describe('pagination constants', () => {
+describe('getPageDimensions', () => {
   it('exposes A4 dimensions at 96dpi', () => {
-    expect(PAGE_WIDTH_PX).toBe(794);
-    expect(PAGE_HEIGHT_PX).toBe(1123);
+    expect(getPageDimensions('a4')).toEqual({ width: 794, height: 1123 });
+  });
+
+  it('exposes US Letter dimensions at 96dpi', () => {
+    expect(getPageDimensions('letter')).toEqual({ width: 816, height: 1056 });
+  });
+
+  it('falls back to A4 for a missing size', () => {
+    expect(getPageDimensions(undefined)).toEqual(PAGE_DIMENSIONS_PX.a4);
   });
 });
 
 describe('computePageCount', () => {
+  const { height: PAGE_HEIGHT_PX } = PAGE_DIMENSIONS_PX.a4;
+
   it('returns 1 for empty or zero content', () => {
     expect(computePageCount(0, PAGE_HEIGHT_PX)).toBe(1);
     expect(computePageCount(-10, PAGE_HEIGHT_PX)).toBe(1);
