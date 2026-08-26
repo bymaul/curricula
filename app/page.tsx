@@ -152,7 +152,7 @@ export default function Home() {
                 data-pane="edit"
                 inert={!isLargeScreen && mobileView !== 'edit'}
                 aria-hidden={!isLargeScreen && mobileView !== 'edit'}
-                className="h-full w-1/2 shrink-0 lg:contents print:contents"
+                className="h-full w-1/2 shrink-0 pr-3 lg:pr-0 lg:contents print:contents"
               >
                 <EditorSidebar
                   className="h-full"
@@ -170,7 +170,7 @@ export default function Home() {
                 data-pane="preview"
                 inert={!isLargeScreen && mobileView !== 'preview'}
                 aria-hidden={!isLargeScreen && mobileView !== 'preview'}
-                className="h-full w-1/2 shrink-0 lg:contents print:contents"
+                className="h-full w-1/2 shrink-0 pl-3 lg:pl-0 lg:contents print:contents"
               >
                 <ResumePreview
                   printRef={printRef}
