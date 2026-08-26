@@ -163,7 +163,7 @@ export default function Home() {
     <FormProvider {...methods}>
       <main
         {...sliderHandlers}
-        className="h-dvh w-full bg-background text-foreground flex flex-col lg:p-6 overflow-hidden print:h-auto print:block print:p-0 print:overflow-visible print:bg-white"
+        className="h-dvh w-full overscroll-x-none bg-background text-foreground flex flex-col lg:p-6 overflow-hidden print:h-auto print:block print:p-0 print:overflow-visible print:bg-white"
       >
         <Header value={mobileView} onChange={switchMobileView} />
 
