@@ -13,6 +13,31 @@ const geistMono = Geist_Mono({
   subsets: ['latin'],
 });
 
+const SITE_URL = process.env.NEXT_PUBLIC_SITE_URL ?? 'http://localhost:3000';
+
+const SITE_TITLE = 'Curricula | Free Offline Resume & CV Builder';
+
+const SITE_DESCRIPTION =
+  'Build professional resumes and CVs in your browser with Harvard-style print-safe templates, clean PDF output, AI import, and fully offline editing. No account needed.';
+
+const jsonLd = {
+  '@context': 'https://schema.org',
+  '@type': 'WebApplication',
+  name: 'Curricula',
+  url: SITE_URL,
+  applicationCategory: 'BusinessApplication',
+  operatingSystem: 'Any',
+  description: SITE_DESCRIPTION,
+  offers: { '@type': 'Offer', price: '0', priceCurrency: 'USD' },
+  featureList: [
+    'Harvard-style print-safe resume templates',
+    'Offline-first editing with autosave',
+    'AI CV parsing and adjustment',
+    'PDF import and browser printing',
+    'Multi-resume management with version history',
+  ],
+};
+
 export const viewport: Viewport = {
   themeColor: [
     { media: '(prefers-color-scheme: light)', color: '#ffffff' },
@@ -23,9 +48,12 @@ export const viewport: Viewport = {
 };
 
 export const metadata: Metadata = {
-  title: 'Curricula',
-  description:
-    'An offline-first, client-side CV builder with multiple print-safe templates and clean PDF generation.',
+  metadataBase: new URL(SITE_URL),
+  title: {
+    default: SITE_TITLE,
+    template: '%s | Curricula',
+  },
+  description: SITE_DESCRIPTION,
   applicationName: 'Curricula',
   keywords: [
     'CV builder',
@@ -36,23 +64,35 @@ export const metadata: Metadata = {
     'print-safe CV',
   ],
   authors: [{ name: 'Curricula Team' }],
+  creator: 'Curricula Team',
   manifest: '/manifest.json',
+  alternates: { canonical: '/' },
+  robots: {
+    index: true,
+    follow: true,
+    googleBot: {
+      index: true,
+      follow: true,
+      'max-image-preview': 'large',
+      'max-snippet': -1,
+    },
+  },
   icons: {
     icon: [{ url: '/icon-192x192.png' }, { url: '/icon-512x512.png' }],
     apple: '/apple-touch-icon.png',
   },
   openGraph: {
-    title: 'Curricula',
-    description:
-      'Create perfectly aligned, professional Harvard-style resumes with clean pagination and offline-ready editing.',
+    title: SITE_TITLE,
+    description: SITE_DESCRIPTION,
     type: 'website',
     siteName: 'Curricula',
+    locale: 'en_US',
+    url: '/',
   },
   twitter: {
     card: 'summary_large_image',
-    title: 'Curricula',
-    description:
-      'Create perfectly aligned, professional Harvard-style resumes with clean pagination and offline-ready editing.',
+    title: SITE_TITLE,
+    description: SITE_DESCRIPTION,
   },
 };
 
@@ -79,6 +119,11 @@ export default async function RootLayout({
         <script
           nonce={nonce}
           dangerouslySetInnerHTML={{ __html: THEME_BOOTSTRAP }}
+        />
+        <script
+          type="application/ld+json"
+          nonce={nonce}
+          dangerouslySetInnerHTML={{ __html: JSON.stringify(jsonLd) }}
         />
       </head>
       <body className="min-h-full flex flex-col">
