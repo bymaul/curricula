@@ -76,7 +76,7 @@ export function ThemeToggle() {
               value={value}
               className={cn(DROPDOWN_ITEM_CLASS, 'pr-8')}
             >
-              <Icon className="shrink-0 text-muted-foreground" />
+              <Icon className="text-muted-foreground shrink-0" />
               {t(labelKey)}
             </DropdownMenuRadioItem>
           ))}

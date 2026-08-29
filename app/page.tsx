@@ -35,9 +35,9 @@ function DialogLoader() {
   return (
     <div
       role="status"
-      className="fixed inset-0 z-50 flex items-center justify-center bg-background/60"
+      className="bg-background/60 fixed inset-0 z-50 flex items-center justify-center"
     >
-      <Loader2 className="size-5 animate-spin text-muted-foreground" />
+      <Loader2 className="text-muted-foreground size-5 animate-spin" />
       <span className="sr-only">Loading</span>
     </div>
   );
@@ -162,14 +162,14 @@ export default function Home() {
     <FormProvider {...methods}>
       <main
         {...sliderHandlers}
-        className="h-dvh w-full overscroll-x-none bg-background text-foreground flex flex-col lg:p-6 overflow-hidden print:h-auto print:block print:p-0 print:overflow-visible print:bg-white"
+        className="bg-background text-foreground flex h-dvh w-full flex-col overflow-hidden overscroll-x-none lg:p-6 print:block print:h-auto print:overflow-visible print:bg-white print:p-0"
       >
         <Header value={mobileView} onChange={switchMobileView} />
 
-        <div className="flex-1 min-h-0 w-full flex flex-col lg:flex-row gap-4 lg:gap-6 px-4 pb-4 lg:px-0 lg:pb-0 print:p-0 print:block">
+        <div className="flex min-h-0 w-full flex-1 flex-col gap-4 px-4 pb-4 lg:flex-row lg:gap-6 lg:px-0 lg:pb-0 print:block print:p-0">
           <div
             ref={trackRef}
-            className="relative flex-1 min-h-0 overflow-hidden lg:contents print:contents"
+            className="relative min-h-0 flex-1 overflow-hidden lg:contents print:contents"
           >
             <div
               ref={stripRef}
@@ -183,7 +183,7 @@ export default function Home() {
                 className={cn(
                   'h-full w-1/2 shrink-0 lg:contents print:contents',
                   !isLargeScreen &&
-                    '[transition-property:margin] motion-safe:ease-out motion-safe:duration-200',
+                    '[transition-property:margin] motion-safe:duration-200 motion-safe:ease-out',
                   !isLargeScreen && paneGapOpen && 'mr-3',
                 )}
               >
@@ -206,7 +206,7 @@ export default function Home() {
                 className={cn(
                   'h-full w-1/2 shrink-0 lg:contents print:contents',
                   !isLargeScreen &&
-                    '[transition-property:margin] motion-safe:ease-out motion-safe:duration-200',
+                    '[transition-property:margin] motion-safe:duration-200 motion-safe:ease-out',
                   !isLargeScreen && paneGapOpen && 'ml-3',
                 )}
               >

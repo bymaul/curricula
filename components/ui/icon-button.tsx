@@ -19,7 +19,7 @@ export function IconButton({
       variant={variant}
       size={size}
       className={cn(
-        'text-muted-foreground hover:text-foreground hover:bg-muted/50 disabled:pointer-events-none disabled:opacity-40 transition-colors',
+        'text-muted-foreground hover:text-foreground hover:bg-muted/50 transition-colors disabled:pointer-events-none disabled:opacity-40',
         className,
       )}
       {...props}

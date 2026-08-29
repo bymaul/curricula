@@ -105,21 +105,21 @@ function ResumeCard({
   const { ref, scale } = useResumeCardScale(page.width);
 
   return (
-    <div className="group relative flex min-w-0 flex-col rounded-lg border border-border p-2 transition-colors hover:bg-muted/30">
+    <div className="group border-border hover:bg-muted/30 relative flex min-w-0 flex-col rounded-lg border p-2 transition-colors">
       <button
         type="button"
         onClick={onSelect}
         aria-pressed={active}
-        className="relative w-full text-left outline-none focus-visible:ring-3 focus-visible:ring-ring/50 rounded-md"
+        className="focus-visible:ring-ring/50 relative w-full rounded-md text-left outline-none focus-visible:ring-3"
       >
         <div
           ref={ref}
-          className="relative w-full overflow-hidden rounded-md border border-border bg-white"
+          className="border-border relative w-full overflow-hidden rounded-md border bg-white"
           style={{ aspectRatio: `${page.width} / ${page.height}` }}
         >
           <div
             aria-hidden="true"
-            className="pointer-events-none absolute top-0 left-0 origin-top-left select-none text-black"
+            className="pointer-events-none absolute top-0 left-0 origin-top-left text-black select-none"
             style={{
               width: page.width,
               transform: `scale(${scale})`,
@@ -154,8 +154,8 @@ function ResumeCard({
                 className={cn(
                   'size-6 rounded-full transition-[opacity,background-color,color,box-shadow] [@media(hover:hover)]:opacity-0 [@media(hover:hover)]:group-hover:opacity-100 [@media(hover:hover)]:focus-visible:opacity-100',
                   resume.favorite
-                    ? 'bg-amber-500/15 text-amber-600 shadow-sm ring-1 ring-border hover:bg-amber-500/30 hover:text-amber-700 opacity-100 [@media(hover:hover)]:opacity-100'
-                    : 'bg-white/70 text-muted-foreground shadow-sm ring-1 ring-border hover:bg-white/90 hover:text-amber-600',
+                    ? 'ring-border bg-amber-500/15 text-amber-600 opacity-100 shadow-sm ring-1 hover:bg-amber-500/30 hover:text-amber-700 [@media(hover:hover)]:opacity-100'
+                    : 'text-muted-foreground ring-border bg-white/70 shadow-sm ring-1 hover:bg-white/90 hover:text-amber-600',
                 )}
               >
                 <Star className="size-3.5 fill-current" />
@@ -169,7 +169,7 @@ function ResumeCard({
           </TooltipContent>
         </Tooltip>
         {active && (
-          <span className="inline-flex items-center gap-1 rounded-full bg-primary px-2 py-0.5 text-[10px] font-semibold text-primary-foreground shadow-sm">
+          <span className="bg-primary text-primary-foreground inline-flex items-center gap-1 rounded-full px-2 py-0.5 text-[10px] font-semibold shadow-sm">
             <Check className="size-3" />
             {t('resumes.active')}
           </span>
@@ -188,7 +188,7 @@ function ResumeCard({
             onBlur={onCommitRename}
             autoFocus
             aria-label={t('resumes.titleInputAria')}
-            className="h-7 text-sm w-full"
+            className="h-7 w-full text-sm"
           />
         ) : (
           <button
@@ -199,7 +199,7 @@ function ResumeCard({
             <span className="truncate text-sm font-semibold">
               {resume.title}
             </span>
-            <span className="shrink-0 text-xs text-muted-foreground">
+            <span className="text-muted-foreground shrink-0 text-xs">
               {formatRelativeTime(resume.updatedAt, undefined, t)}
             </span>
           </button>
@@ -326,16 +326,16 @@ export function ResumesDialog({ open, onOpenChange }: ResumesDialogProps) {
   return (
     <>
       <Dialog open={open} onOpenChange={handleOpenChange}>
-        <DialogContent className="sm:max-w-4xl grid-rows-[auto_minmax(0,1fr)_auto] max-h-[calc(100dvh-2rem)] overflow-hidden">
+        <DialogContent className="max-h-[calc(100dvh-2rem)] grid-rows-[auto_minmax(0,1fr)_auto] overflow-hidden sm:max-w-4xl">
           <DialogHeader>
             <DialogTitle>{t('resumes.title')}</DialogTitle>
             <DialogDescription>{t('resumes.description')}</DialogDescription>
           </DialogHeader>
 
-          <div className="flex min-h-0 flex-col -mx-1">
+          <div className="-mx-1 flex min-h-0 flex-col">
             <div className="mb-6 flex min-w-0 flex-col gap-2 px-2 sm:flex-row sm:items-center">
               <div className="relative min-w-0 flex-1">
-                <Search className="absolute top-1/2 left-2.5 size-4 -translate-y-1/2 text-muted-foreground" />
+                <Search className="text-muted-foreground absolute top-1/2 left-2.5 size-4 -translate-y-1/2" />
                 <Input
                   value={query}
                   onChange={(e) => setQuery(e.target.value)}
@@ -372,7 +372,7 @@ export function ResumesDialog({ open, onOpenChange }: ResumesDialogProps) {
                     className="min-h-9 w-full flex-1 justify-between gap-1.5 px-2.5 sm:w-fit sm:flex-none"
                     aria-label={t('resumes.sortAria')}
                   >
-                    <ArrowUpDown className="size-3.5 text-muted-foreground" />
+                    <ArrowUpDown className="text-muted-foreground size-3.5" />
                     <SelectValue />
                   </SelectTrigger>
                   <SelectContent>
@@ -390,7 +390,7 @@ export function ResumesDialog({ open, onOpenChange }: ResumesDialogProps) {
               {visibleResumes.length === 0 ? (
                 favoriteOnly && !normalizedQuery ? (
                   <div className="flex flex-col items-center justify-center gap-3 py-12 text-center">
-                    <p className="text-sm text-muted-foreground">
+                    <p className="text-muted-foreground text-sm">
                       {t('resumes.noFavorites')}
                     </p>
                     <Button
@@ -403,7 +403,7 @@ export function ResumesDialog({ open, onOpenChange }: ResumesDialogProps) {
                   </div>
                 ) : (
                   <div className="flex flex-col items-center justify-center gap-3 py-12 text-center">
-                    <p className="text-sm text-muted-foreground">
+                    <p className="text-muted-foreground text-sm">
                       {t('resumes.noMatches')}
                     </p>
                     <Button variant="outline" onClick={() => setQuery('')}>
@@ -441,7 +441,7 @@ export function ResumesDialog({ open, onOpenChange }: ResumesDialogProps) {
             </ScrollArea>
           </div>
 
-          <DialogFooter className="items-stretch bg-muted sm:items-center">
+          <DialogFooter className="bg-muted items-stretch sm:items-center">
             <div className="flex flex-col gap-2 sm:flex-row">
               <Button onClick={handleCreate}>
                 <Plus className="size-4" />

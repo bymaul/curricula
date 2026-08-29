@@ -116,7 +116,7 @@ export function BackupDialog({ open, onOpenChange }: BackupDialogProps) {
 
           <div className="space-y-4">
             <div className="space-y-2">
-              <h3 className="text-xs font-semibold uppercase tracking-wider text-muted-foreground">
+              <h3 className="text-muted-foreground text-xs font-semibold tracking-wider uppercase">
                 {t('backup.allCvs')}
               </h3>
               <Button onClick={handleDownload} className="w-full">
@@ -134,7 +134,7 @@ export function BackupDialog({ open, onOpenChange }: BackupDialogProps) {
             </div>
 
             <div className="space-y-2">
-              <h3 className="text-xs font-semibold uppercase tracking-wider text-muted-foreground">
+              <h3 className="text-muted-foreground text-xs font-semibold tracking-wider uppercase">
                 {t('backup.currentCv')}
               </h3>
               <Button
@@ -191,15 +191,15 @@ export function BackupDialog({ open, onOpenChange }: BackupDialogProps) {
         }
         onConfirm={handleRestore}
       >
-        <ul className="max-h-48 overflow-auto rounded-lg border border-border divide-y divide-border">
+        <ul className="border-border divide-border max-h-48 divide-y overflow-auto rounded-lg border">
           {pendingRestore?.resumes.map((resume) => (
             <li key={resume.id} className="flex items-center gap-2 px-3 py-2">
-              <FileJson className="size-4 shrink-0 text-muted-foreground" />
+              <FileJson className="text-muted-foreground size-4 shrink-0" />
               <span className="min-w-0 truncate text-sm font-medium">
                 {resume.title}
               </span>
               {resume.id === pendingRestore.activeId && (
-                <span className="ml-auto shrink-0 text-xs text-muted-foreground">
+                <span className="text-muted-foreground ml-auto shrink-0 text-xs">
                   {t('backup.activeBadge')}
                 </span>
               )}

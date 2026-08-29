@@ -19,8 +19,8 @@ import type { CVData } from '@/lib/schema';
 
 function CountRow({ label, count }: { label: string; count: number }) {
   return (
-    <div className="flex items-center justify-between rounded-lg border border-border bg-muted/40 px-3 py-2">
-      <span className="text-sm text-muted-foreground">{label}</span>
+    <div className="border-border bg-muted/40 flex items-center justify-between rounded-lg border px-3 py-2">
+      <span className="text-muted-foreground text-sm">{label}</span>
       <span className="text-sm font-semibold tabular-nums">{count}</span>
     </div>
   );
@@ -55,16 +55,16 @@ export function CVImportPreviewDialog() {
             />
 
             <div className="space-y-0.5">
-              <p className="text-base font-semibold leading-tight">
+              <p className="text-base leading-tight font-semibold">
                 {cvData.name || t('importPreview.unnamed')}
               </p>
               {cvData.jobTitle && (
-                <p className="text-sm text-muted-foreground">
+                <p className="text-muted-foreground text-sm">
                   {cvData.jobTitle}
                 </p>
               )}
               {cvData.email && (
-                <p className="text-sm text-muted-foreground">{cvData.email}</p>
+                <p className="text-muted-foreground text-sm">{cvData.email}</p>
               )}
             </div>
 

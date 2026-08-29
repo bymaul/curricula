@@ -16,11 +16,11 @@ export function EditorEmptyState() {
   if (dismissed) return null;
 
   return (
-    <div className="mx-4 mt-4 flex items-start gap-3 rounded-lg border border-primary/30 bg-primary/5 p-3">
-      <Sparkles className="mt-0.5 size-4 shrink-0 text-primary" />
+    <div className="border-primary/30 bg-primary/5 mx-4 mt-4 flex items-start gap-3 rounded-lg border p-3">
+      <Sparkles className="text-primary mt-0.5 size-4 shrink-0" />
       <div className="min-w-0 flex-1">
         <p className="text-sm font-medium">{t('editor.emptyStateTitle')}</p>
-        <p className="mt-0.5 text-xs text-muted-foreground">
+        <p className="text-muted-foreground mt-0.5 text-xs">
           {t('editor.emptyStateDescription')}
         </p>
         <div className="mt-2.5 flex gap-2">

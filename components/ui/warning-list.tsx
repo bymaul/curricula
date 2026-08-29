@@ -15,15 +15,15 @@ export function WarningList({ title, warnings, className }: WarningListProps) {
     <div
       role="alert"
       className={cn(
-        'rounded-lg border border-warning/40 bg-warning/10 px-3 py-2.5',
+        'border-warning/40 bg-warning/10 rounded-lg border px-3 py-2.5',
         className,
       )}
     >
-      <div className="mb-1 flex items-center gap-2 text-sm font-medium text-warning">
+      <div className="text-warning mb-1 flex items-center gap-2 text-sm font-medium">
         <TriangleAlertIcon className="size-4 shrink-0" aria-hidden="true" />
         {title}
       </div>
-      <ul className="space-y-0.5 text-sm text-muted-foreground">
+      <ul className="text-muted-foreground space-y-0.5 text-sm">
         {warnings.map((warning) => (
           <li key={warning}>- {warning}</li>
         ))}

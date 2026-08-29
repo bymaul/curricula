@@ -78,7 +78,7 @@ export function ActionsDropdown({
               onClick={() => setDialog('resumes', true)}
               className={DROPDOWN_ITEM_CLASS}
             >
-              <FileText className="size-4 text-muted-foreground" />
+              <FileText className="text-muted-foreground size-4" />
               {t('editor.manageResumes')}
             </DropdownMenuItem>
             <DropdownMenuSeparator />
@@ -88,7 +88,7 @@ export function ActionsDropdown({
           onClick={handlePrintClick}
           className={DROPDOWN_ITEM_CLASS}
         >
-          <Printer className="size-4 text-muted-foreground" />
+          <Printer className="text-muted-foreground size-4" />
           {t('editor.printPdf')}
           <DropdownMenuShortcut>{mod}P</DropdownMenuShortcut>
         </DropdownMenuItem>
@@ -96,7 +96,7 @@ export function ActionsDropdown({
           onClick={() => setDialog('share', true)}
           className={DROPDOWN_ITEM_CLASS}
         >
-          <Share2 className="size-4 text-muted-foreground" />
+          <Share2 className="text-muted-foreground size-4" />
           {t('editor.shareLink')}
         </DropdownMenuItem>
         <DropdownMenuSeparator />
@@ -104,14 +104,14 @@ export function ActionsDropdown({
           onClick={handleImportPDFClick}
           className={DROPDOWN_ITEM_CLASS}
         >
-          <Upload className="size-4 text-muted-foreground" />
+          <Upload className="text-muted-foreground size-4" />
           {t('editor.importPdf')}
         </DropdownMenuItem>
         <DropdownMenuItem
           onClick={() => setDialog('aiAdjust', true)}
           className={DROPDOWN_ITEM_CLASS}
         >
-          <Sparkles className="size-4 text-primary" />
+          <Sparkles className="text-primary size-4" />
           {t('editor.aiAdjust')}
         </DropdownMenuItem>
         <DropdownMenuSeparator />
@@ -119,13 +119,13 @@ export function ActionsDropdown({
           onClick={() => setDialog('backup', true)}
           className={DROPDOWN_ITEM_CLASS}
         >
-          <DatabaseBackup className="size-4 text-muted-foreground" />
+          <DatabaseBackup className="text-muted-foreground size-4" />
           {t('editor.backupRestore')}
         </DropdownMenuItem>
         <DropdownMenuSeparator />
         <DropdownMenuSub>
           <DropdownMenuSubTrigger className={DROPDOWN_ITEM_CLASS}>
-            <Languages className="size-4 text-muted-foreground" />
+            <Languages className="text-muted-foreground size-4" />
             {t('common.language')}
           </DropdownMenuSubTrigger>
           <DropdownMenuSubContent className="w-44">

@@ -19,7 +19,7 @@ interface ShortcutRow {
 
 function Kbd({ children }: { children: string }) {
   return (
-    <kbd className="inline-flex min-w-7 items-center justify-center rounded-md border border-border bg-muted px-1.5 py-0.5 font-mono text-xs font-medium text-foreground">
+    <kbd className="border-border bg-muted text-foreground inline-flex min-w-7 items-center justify-center rounded-md border px-1.5 py-0.5 font-mono text-xs font-medium">
       {children}
     </kbd>
   );
@@ -74,7 +74,7 @@ export function ShortcutsDialog({
           </DialogDescription>
         </DialogHeader>
 
-        <ul className="divide-y divide-border">
+        <ul className="divide-border divide-y">
           {rows.map((row, index) => (
             <li
               key={`${row.labelKey}-${index}`}

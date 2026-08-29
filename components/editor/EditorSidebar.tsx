@@ -72,7 +72,7 @@ function SaveStatus({
   if (saveStatus === 'saving') {
     return (
       <>
-        <Loader2 className="size-4 text-warning animate-spin" />
+        <Loader2 className="text-warning size-4 animate-spin" />
         <span className={labelClass}>{t('editor.saveStatus.saving')}</span>
       </>
     );
@@ -80,7 +80,7 @@ function SaveStatus({
 
   return (
     <>
-      <CheckCircle2 className="size-4 text-success" />
+      <CheckCircle2 className="text-success size-4" />
       {lastSavedAt && (
         <span className={labelClass}>
           {t('editor.saveStatus.saved', {
@@ -164,11 +164,11 @@ export function EditorSidebar({
   return (
     <section
       className={cn(
-        'flex w-full shrink-0 flex-col lg:w-[35%] xl:w-[30%] border border-border bg-card rounded-xl shadow-lg overflow-hidden print:hidden',
+        'border-border bg-card flex w-full shrink-0 flex-col overflow-hidden rounded-xl border shadow-lg lg:w-[35%] xl:w-[30%] print:hidden',
         className,
       )}
     >
-      <div className="flex-1 min-h-0">
+      <div className="min-h-0 flex-1">
         <ScrollArea key={activeTab} className="h-full">
           {isEmptyResume && <EditorEmptyState />}
           <form
@@ -191,11 +191,11 @@ export function EditorSidebar({
 
       <nav
         ref={navRef}
-        className="border-t border-border bg-muted/30 shrink-0 overflow-hidden flex items-stretch"
+        className="border-border bg-muted/30 flex shrink-0 items-stretch overflow-hidden border-t"
         aria-label={t('editor.cvSectionsAriaLabel')}
       >
-        <ScrollArea orientation="horizontal" className="min-w-0 flex-1 h-14">
-          <div className="flex items-stretch gap-1 w-max h-full px-4">
+        <ScrollArea orientation="horizontal" className="h-14 min-w-0 flex-1">
+          <div className="flex h-full w-max items-stretch gap-1 px-4">
             {navTabs.map((tab) => {
               const active = activeTab === tab;
               return (
@@ -205,9 +205,9 @@ export function EditorSidebar({
                   onClick={() => setActiveTab(tab)}
                   aria-current={active ? 'page' : undefined}
                   className={cn(
-                    'relative shrink-0 flex items-center px-2.5 text-sm font-semibold transition-colors',
+                    'relative flex shrink-0 items-center px-2.5 text-sm font-semibold transition-colors',
                     active
-                      ? 'text-foreground after:absolute after:inset-x-2 after:bottom-2 after:h-0.5 after:rounded-full after:bg-primary'
+                      ? 'text-foreground after:bg-primary after:absolute after:inset-x-2 after:bottom-2 after:h-0.5 after:rounded-full'
                       : 'text-muted-foreground hover:text-foreground',
                   )}
                 >
@@ -221,7 +221,7 @@ export function EditorSidebar({
         <TooltipIconButton
           label={t('editor.reorderSections')}
           onClick={() => setDialog('sections', true)}
-          className="h-full w-12 rounded-none border-0 border-l border-border"
+          className="border-border h-full w-12 rounded-none border-0 border-l"
         >
           <ListOrdered className="size-5" />
         </TooltipIconButton>
@@ -230,15 +230,15 @@ export function EditorSidebar({
       {storageError && (
         <div
           role="alert"
-          className="px-4 py-2 border-t border-border bg-warning/10 text-warning text-xs flex items-center gap-2 shrink-0"
+          className="border-border bg-warning/10 text-warning flex shrink-0 items-center gap-2 border-t px-4 py-2 text-xs"
         >
           <AlertTriangle className="size-4 shrink-0" />
           <span>{t('editor.storageFullWarning')}</span>
         </div>
       )}
 
-      <footer className="px-4 py-2.5 border-t border-border bg-muted/30 flex items-center justify-between gap-2 shrink-0 z-10">
-        <div className="flex items-center gap-2 min-w-0" aria-live="polite">
+      <footer className="border-border bg-muted/30 z-10 flex shrink-0 items-center justify-between gap-2 border-t px-4 py-2.5">
+        <div className="flex min-w-0 items-center gap-2" aria-live="polite">
           <SaveStatus saveStatus={saveStatus} lastSavedAt={lastSavedAt} />
         </div>
 

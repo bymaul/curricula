@@ -23,7 +23,7 @@ export function ZoomControls({
 }: ZoomControlsProps) {
   const { t } = useI18n();
   return (
-    <div className="absolute bottom-3 right-3 z-20 flex items-center gap-1 bg-card border border-border rounded-lg shadow-md px-1.5 py-1 print:hidden">
+    <div className="bg-card border-border absolute right-3 bottom-3 z-20 flex items-center gap-1 rounded-lg border px-1.5 py-1 shadow-md print:hidden">
       <IconButton
         aria-label={t('preview.zoomOut')}
         onClick={onZoomOut}
@@ -32,7 +32,7 @@ export function ZoomControls({
       >
         <Minus className="size-4" />
       </IconButton>
-      <span className="w-11 text-center text-xs font-semibold tabular-nums text-muted-foreground">
+      <span className="text-muted-foreground w-11 text-center text-xs font-semibold tabular-nums">
         {Math.round(scale * 100)}%
       </span>
       <IconButton
@@ -43,7 +43,7 @@ export function ZoomControls({
       >
         <Plus className="size-4" />
       </IconButton>
-      <div className="w-px h-4 bg-border mx-0.5" />
+      <div className="bg-border mx-0.5 h-4 w-px" />
       <IconButton
         aria-label={t('preview.fitToWidth')}
         onClick={onReset}

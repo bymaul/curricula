@@ -147,34 +147,34 @@ export function AIAdjustDialog({ open, onOpenChange }: AIAdjustDialogProps) {
   if (pendingResult) {
     return (
       <Dialog open={open} onOpenChange={handleOpenChange}>
-        <DialogContent className="sm:max-w-lg grid-rows-[auto_minmax(0,1fr)_auto] max-h-[calc(100dvh-2rem)] overflow-hidden">
+        <DialogContent className="max-h-[calc(100dvh-2rem)] grid-rows-[auto_minmax(0,1fr)_auto] overflow-hidden sm:max-w-lg">
           <DialogHeader>
             <DialogTitle>{t('aiAdjust.reviewTitle')}</DialogTitle>
             <DialogDescription>{t('import.reviewResult')}</DialogDescription>
           </DialogHeader>
 
-          <div className="flex min-h-0 flex-col gap-3 overflow-y-auto overscroll-contain p-2 -mx-1">
+          <div className="-mx-1 flex min-h-0 flex-col gap-3 overflow-y-auto overscroll-contain p-2">
             <WarningList
               title={t('importPreview.reviewFields')}
               warnings={pendingResult.warnings}
             />
 
             {changeSummary.length === 0 ? (
-              <p className="text-sm text-muted-foreground">
+              <p className="text-muted-foreground text-sm">
                 {t('aiAdjust.noChanges')}
               </p>
             ) : (
-              <ul className="divide-y divide-border rounded-lg border border-border">
+              <ul className="divide-border border-border divide-y rounded-lg border">
                 {changeSummary.map((item) => (
                   <li
                     key={item.labelKey}
                     className="flex items-center justify-between gap-2 px-3 py-2.5"
                   >
-                    <span className="flex items-center gap-2 text-sm font-medium min-w-0">
-                      <FilePenLine className="size-4 text-primary shrink-0" />
+                    <span className="flex min-w-0 items-center gap-2 text-sm font-medium">
+                      <FilePenLine className="text-primary size-4 shrink-0" />
                       <span className="truncate">{t(item.labelKey)}</span>
                     </span>
-                    <span className="text-sm text-muted-foreground shrink-0">
+                    <span className="text-muted-foreground shrink-0 text-sm">
                       {t(item.detailKey, item.params)}
                     </span>
                   </li>
@@ -196,13 +196,13 @@ export function AIAdjustDialog({ open, onOpenChange }: AIAdjustDialogProps) {
 
   return (
     <Dialog open={open} onOpenChange={handleOpenChange}>
-      <DialogContent className="sm:max-w-lg grid-rows-[auto_minmax(0,1fr)_auto] max-h-[calc(100dvh-2rem)] overflow-hidden">
+      <DialogContent className="max-h-[calc(100dvh-2rem)] grid-rows-[auto_minmax(0,1fr)_auto] overflow-hidden sm:max-w-lg">
         <DialogHeader>
           <DialogTitle>{t('aiAdjust.title')}</DialogTitle>
           <DialogDescription>{t('aiAdjust.description')}</DialogDescription>
         </DialogHeader>
 
-        <div className="flex min-h-0 flex-col gap-3 overflow-y-auto overscroll-contain p-2 -mx-1">
+        <div className="-mx-1 flex min-h-0 flex-col gap-3 overflow-y-auto overscroll-contain p-2">
           <Field>
             <FieldLabel>{t('aiAdjust.scopeLabel')}</FieldLabel>
             <FieldDescription>
@@ -242,7 +242,7 @@ export function AIAdjustDialog({ open, onOpenChange }: AIAdjustDialogProps) {
               value={jobDescription}
               onChange={(e) => setJobDescription(e.target.value)}
               placeholder={t('aiAdjust.jobDescriptionPlaceholder')}
-              className="min-h-32 sm:min-h-40 max-h-40 sm:max-h-60 resize-y"
+              className="max-h-40 min-h-32 resize-y sm:max-h-60 sm:min-h-40"
               aria-invalid={!!effectiveError}
             />
           </Field>
@@ -286,7 +286,7 @@ export function AIAdjustDialog({ open, onOpenChange }: AIAdjustDialogProps) {
                 void processFiles(e.dataTransfer.files);
               }}
               className={cn(
-                'flex w-full cursor-pointer flex-col items-center justify-center gap-2 rounded-lg border-2 border-dashed px-4 py-6 text-center text-sm text-muted-foreground border-border transition-colors',
+                'text-muted-foreground border-border flex w-full cursor-pointer flex-col items-center justify-center gap-2 rounded-lg border-2 border-dashed px-4 py-6 text-center text-sm transition-colors',
                 isDragging ? 'bg-primary/10 text-primary' : 'hover:bg-muted',
               )}
             >
@@ -311,7 +311,7 @@ export function AIAdjustDialog({ open, onOpenChange }: AIAdjustDialogProps) {
                           alt={t('aiAdjust.imageAlt', {
                             index: index + 1,
                           })}
-                          className="h-16 w-16 rounded-lg border border-border object-cover"
+                          className="border-border h-16 w-16 rounded-lg border object-cover"
                         />
                         <button
                           type="button"
@@ -322,7 +322,7 @@ export function AIAdjustDialog({ open, onOpenChange }: AIAdjustDialogProps) {
                           aria-label={t('aiAdjust.imageRemoveAria', {
                             index: index + 1,
                           })}
-                          className="absolute -top-2 -right-2 flex h-6 w-6 items-center justify-center rounded-full bg-background text-muted-foreground shadow-sm border border-border transition-colors hover:text-foreground"
+                          className="bg-background text-muted-foreground border-border hover:text-foreground absolute -top-2 -right-2 flex h-6 w-6 items-center justify-center rounded-full border shadow-sm transition-colors"
                         >
                           <X className="size-3.5" aria-hidden="true" />
                         </button>

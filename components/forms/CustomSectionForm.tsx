@@ -70,7 +70,7 @@ export const CustomSectionForm = ({ section }: CustomSectionFormProps) => {
               <h2 className="truncate text-xl font-bold tracking-tight">
                 {section.title}
               </h2>
-              <p className="mt-1 text-sm text-muted-foreground">
+              <p className="text-muted-foreground mt-1 text-sm">
                 {t('customSection.description')}
               </p>
             </div>

@@ -44,7 +44,7 @@ interface CommandPaletteProps {
 
 function Kbd({ children }: { children: string }) {
   return (
-    <kbd className="ml-auto inline-flex min-w-5 items-center justify-center rounded border border-border bg-muted px-1 py-0.5 font-mono text-[10px] font-medium text-muted-foreground">
+    <kbd className="border-border bg-muted text-muted-foreground ml-auto inline-flex min-w-5 items-center justify-center rounded border px-1 py-0.5 font-mono text-[10px] font-medium">
       {children}
     </kbd>
   );
@@ -203,21 +203,21 @@ export function CommandPalette({
           </CommandList>
         </Command>
 
-        <div className="flex items-center gap-3 border-t border-border px-3 py-2 text-[11px] text-muted-foreground">
+        <div className="border-border text-muted-foreground flex items-center gap-3 border-t px-3 py-2 text-[11px]">
           <span className="flex items-center gap-1">
-            <kbd className="rounded border border-border bg-muted px-1 py-0.5 font-mono text-[10px]">
+            <kbd className="border-border bg-muted rounded border px-1 py-0.5 font-mono text-[10px]">
               ↑↓
             </kbd>
             {t('palette.footerNavigate')}
           </span>
           <span className="flex items-center gap-1">
-            <kbd className="rounded border border-border bg-muted px-1 py-0.5 font-mono text-[10px]">
+            <kbd className="border-border bg-muted rounded border px-1 py-0.5 font-mono text-[10px]">
               ↵
             </kbd>
             {t('palette.footerSelect')}
           </span>
           <span className="flex items-center gap-1">
-            <kbd className="rounded border border-border bg-muted px-1 py-0.5 font-mono text-[10px]">
+            <kbd className="border-border bg-muted rounded border px-1 py-0.5 font-mono text-[10px]">
               esc
             </kbd>
             {t('palette.footerClose')}

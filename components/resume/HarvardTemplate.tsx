@@ -238,7 +238,7 @@ export const HarvardTemplate = forwardRef<HTMLDivElement, TemplateProps>(
       <div
         ref={ref}
         style={styleVars}
-        className="mx-auto shadow-2xl print:shadow-none bg-white"
+        className="mx-auto bg-white shadow-2xl print:shadow-none"
       >
         <PrintStyle pageSize={design?.pageSize} />
 
@@ -254,7 +254,7 @@ export const HarvardTemplate = forwardRef<HTMLDivElement, TemplateProps>(
           <tbody>
             <tr>
               <td
-                className={`${SPACE.pageMargin} align-top text-black leading-snug`}
+                className={`${SPACE.pageMargin} align-top leading-snug text-black`}
                 style={{ fontFamily: 'var(--cv-font)' }}
               >
                 <div
@@ -267,7 +267,7 @@ export const HarvardTemplate = forwardRef<HTMLDivElement, TemplateProps>(
                         })
                       : undefined
                   }
-                  className={`text-center mb-4 ${onSectionClick ? INTERACTIVE_CLASSES : ''}`}
+                  className={`mb-4 text-center ${onSectionClick ? INTERACTIVE_CLASSES : ''}`}
                 >
                   {photo ? (
                     // eslint-disable-next-line @next/next/no-img-element
