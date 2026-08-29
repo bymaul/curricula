@@ -19,7 +19,7 @@ import { DEFAULT_SECTION_ORDER, TabName } from '@/lib/consts';
 import { isApplePlatform } from '@/lib/platform';
 import { useDialogStore, DialogKey } from '@/store/useDialogStore';
 import { useResumeStore } from '@/store/useResumeStore';
-import { ThemeMode, useUIStore } from '@/store/useUIStore';
+import { useUIStore } from '@/store/useUIStore';
 import type { EditorFileActions } from './EditorSidebar';
 import {
   ArrowLeftRight,
@@ -27,13 +27,10 @@ import {
   FilePlus2,
   FolderOpen,
   Keyboard,
-  Monitor,
-  Moon,
   Printer,
   Settings2,
   Share2,
   Sparkles,
-  Sun,
   Upload,
   Wand2,
 } from 'lucide-react';
@@ -44,16 +41,6 @@ interface CommandPaletteProps {
   fileActions: EditorFileActions;
   pdfInputRef: React.RefObject<HTMLInputElement | null>;
 }
-
-const THEME_OPTIONS: {
-  value: ThemeMode;
-  icon: typeof Sun;
-  labelKey: 'header.themeSystem' | 'header.themeLight' | 'header.themeDark';
-}[] = [
-  { value: 'system', icon: Monitor, labelKey: 'header.themeSystem' },
-  { value: 'light', icon: Sun, labelKey: 'header.themeLight' },
-  { value: 'dark', icon: Moon, labelKey: 'header.themeDark' },
-];
 
 function Kbd({ children }: { children: string }) {
   return (
@@ -72,8 +59,6 @@ export function CommandPalette({
   const { t } = useI18n();
   const setDialog = useDialogStore((state) => state.setDialog);
   const setActiveTab = useUIStore((state) => state.setActiveTab);
-  const theme = useUIStore((state) => state.theme);
-  const setTheme = useUIStore((state) => state.setTheme);
   const activeId = useResumeStore((state) => state.activeId);
   const resumes = useResumeStore((state) => state.resumes);
   const sectionOrder =
@@ -152,26 +137,6 @@ export function CommandPalette({
                 {t('editor.keyboardShortcuts')}
                 <Kbd>?</Kbd>
               </CommandItem>
-            </CommandGroup>
-
-            <CommandSeparator />
-
-            <CommandGroup heading={t('palette.groups.appearance')}>
-              {THEME_OPTIONS.map(({ value, icon: Icon, labelKey }) => (
-                <CommandItem
-                  key={value}
-                  value={`theme ${t(labelKey)}`}
-                  onSelect={() => run(() => setTheme(value))}
-                >
-                  <Icon />
-                  {t(labelKey)}
-                  {theme === value && (
-                    <span className="ml-auto text-xs text-muted-foreground">
-                      {t('palette.active')}
-                    </span>
-                  )}
-                </CommandItem>
-              ))}
             </CommandGroup>
 
             <CommandSeparator />

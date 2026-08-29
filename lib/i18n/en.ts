@@ -272,13 +272,11 @@ const en = {
     placeholder: 'Type a command or search…',
     noResults: 'No results found.',
     switchTo: 'Switch to "{title}"',
-    active: 'active',
     footerNavigate: 'Navigate',
     footerSelect: 'Select',
     footerClose: 'Close',
     groups: {
       actions: 'Actions',
-      appearance: 'Appearance',
       resumes: 'Resumes',
       sections: 'Go to section',
     },
