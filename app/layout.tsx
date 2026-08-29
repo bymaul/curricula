@@ -15,7 +15,7 @@ const geistMono = Geist_Mono({
 
 const SITE_URL = process.env.NEXT_PUBLIC_SITE_URL ?? 'http://localhost:3000';
 
-const SITE_TITLE = 'Curricula';
+const SITE_TITLE = 'Curricula | Free Offline Resume & CV Builder';
 
 const SITE_DESCRIPTION =
   'Build professional resumes and CVs in your browser with Harvard-style print-safe templates, clean PDF output, AI import, and fully offline editing. No account needed.';

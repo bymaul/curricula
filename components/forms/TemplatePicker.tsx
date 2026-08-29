@@ -134,7 +134,7 @@ function TemplateCard({
       tabIndex={selected ? 0 : -1}
       onClick={onSelect}
       className={cn(
-        'flex min-w-0 cursor-pointer flex-col items-center gap-1 rounded-lg p-1 text-left outline-none transition-colors',
+        'flex min-w-0 cursor-pointer flex-col items-center gap-1 rounded-lg p-1 outline-none transition-colors',
         'focus-visible:ring-3 focus-visible:ring-ring/50',
         selected
           ? 'bg-primary/10 ring-2 ring-primary/50'

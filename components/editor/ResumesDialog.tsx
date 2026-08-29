@@ -11,12 +11,7 @@ import {
 } from '@/components/ui/dialog';
 import { ConfirmDialog } from '@/components/ui/confirm-dialog';
 import { Input } from '@/components/ui/input';
-import { TooltipIconButton } from '@/components/ui/tooltip-icon-button';
-import {
-  Tooltip,
-  TooltipContent,
-  TooltipTrigger,
-} from '@/components/ui/tooltip';
+import { IconButton } from '@/components/ui/icon-button';
 import { ScrollArea } from '@/components/ui/scroll-area';
 import {
   Select,
@@ -38,11 +33,11 @@ import {
   Pencil,
   Plus,
   Search,
-  Star,
   Trash2,
-  X,
 } from 'lucide-react';
-import { useEffect, useRef, useState } from 'react';
+import { useState } from 'react';
+
+const THUMB_WIDTH_PX = 56;
 
 type SortMode = 'recent' | 'name';
 
@@ -51,184 +46,32 @@ interface ResumesDialogProps {
   onOpenChange: (open: boolean) => void;
 }
 
-function useResumeCardScale(pageWidthPx: number) {
-  const ref = useRef<HTMLDivElement | null>(null);
-  const [scale, setScale] = useState(0);
-
-  useEffect(() => {
-    const el = ref.current;
-    if (!el) return;
-    const update = () => setScale(el.clientWidth / pageWidthPx);
-    update();
-    const observer = new ResizeObserver(update);
-    observer.observe(el);
-    return () => observer.disconnect();
-  }, [pageWidthPx]);
-
-  return { ref, scale };
-}
-
-interface ResumeCardProps {
-  resume: ResumeRecord;
-  active: boolean;
-  editing: boolean;
-  draft: string;
-  canDelete: boolean;
-  onDraftChange: (value: string) => void;
-  onCommitRename: () => void;
-  onCancelRename: () => void;
-  onSelect: () => void;
-  onStartRename: () => void;
-  onDuplicate: () => void;
-  onDelete: () => void;
-  onToggleFavorite: () => void;
-}
-
-function ResumeCard({
-  resume,
-  active,
-  editing,
-  draft,
-  canDelete,
-  onDraftChange,
-  onCommitRename,
-  onCancelRename,
-  onSelect,
-  onStartRename,
-  onDuplicate,
-  onDelete,
-  onToggleFavorite,
-}: ResumeCardProps) {
-  const { t } = useI18n();
-  const page = getPageDimensions(resume.design.pageSize);
+function ResumeThumb({ resume }: { resume: ResumeRecord }) {
   const Preview = TEMPLATE_COMPONENTS[resume.templateId];
-  const { ref, scale } = useResumeCardScale(page.width);
+  const page = getPageDimensions(resume.design.pageSize);
+  const height = THUMB_WIDTH_PX * (page.height / page.width);
 
   return (
-    <div className="group relative flex min-w-0 flex-col rounded-lg border border-border p-2 transition-colors hover:bg-muted/30">
-      <button
-        type="button"
-        onClick={onSelect}
-        aria-pressed={active}
-        className="relative w-full text-left outline-none focus-visible:ring-3 focus-visible:ring-ring/50 rounded-md"
+    <div
+      aria-hidden="true"
+      className="relative shrink-0 overflow-hidden rounded-md border border-border bg-white"
+      style={{ width: THUMB_WIDTH_PX, height }}
+    >
+      <div
+        className="pointer-events-none absolute top-0 left-0 origin-top-left select-none"
+        style={{
+          width: page.width,
+          transform: `scale(${THUMB_WIDTH_PX / page.width})`,
+        }}
       >
-        <div
-          ref={ref}
-          className="relative w-full overflow-hidden rounded-md border border-border bg-white"
-          style={{ aspectRatio: `${page.width} / ${page.height}` }}
-        >
-          <div
-            aria-hidden="true"
-            className="pointer-events-none absolute top-0 left-0 origin-top-left select-none text-black"
-            style={{
-              width: page.width,
-              transform: `scale(${scale})`,
-              visibility: scale > 0 ? 'visible' : 'hidden',
-            }}
-          >
-            <Preview
-              cvData={resume.data}
-              sectionOrder={resume.sectionOrder}
-              hiddenSections={resume.hiddenSections}
-              language={resume.language}
-              photo={resume.photo}
-              design={resume.design}
-            />
-          </div>
-        </div>
-      </button>
-
-      <div className="absolute top-2.5 right-2.5 left-2.5 z-10 flex items-center justify-between">
-        <Tooltip>
-          <TooltipTrigger
-            render={
-              <Button
-                type="button"
-                size="icon-sm"
-                aria-label={
-                  resume.favorite
-                    ? t('resumes.unfavoriteAria', { title: resume.title })
-                    : t('resumes.favoriteAria', { title: resume.title })
-                }
-                onClick={onToggleFavorite}
-                className={cn(
-                  'size-6 rounded-full transition-[opacity,background-color,color,box-shadow] [@media(hover:hover)]:opacity-0 [@media(hover:hover)]:group-hover:opacity-100 [@media(hover:hover)]:focus-visible:opacity-100',
-                  resume.favorite
-                    ? 'bg-amber-500/15 text-amber-600 shadow-sm ring-1 ring-border hover:bg-amber-500/30 hover:text-amber-700 opacity-100 [@media(hover:hover)]:opacity-100'
-                    : 'bg-white/70 text-muted-foreground shadow-sm ring-1 ring-border hover:bg-white/90 hover:text-amber-600',
-                )}
-              >
-                <Star className="size-3.5 fill-current" />
-              </Button>
-            }
-          />
-          <TooltipContent>
-            {resume.favorite
-              ? t('resumes.unfavoriteAria', { title: resume.title })
-              : t('resumes.favoriteAria', { title: resume.title })}
-          </TooltipContent>
-        </Tooltip>
-        {active && (
-          <span className="inline-flex items-center gap-1 rounded-full bg-primary px-2 py-0.5 text-[10px] font-semibold text-primary-foreground shadow-sm">
-            <Check className="size-3" />
-            {t('resumes.active')}
-          </span>
-        )}
-      </div>
-
-      <div className="mt-2 min-w-0">
-        {editing ? (
-          <Input
-            value={draft}
-            onChange={(e) => onDraftChange(e.target.value)}
-            onKeyDown={(e) => {
-              if (e.key === 'Enter') onCommitRename();
-              if (e.key === 'Escape') onCancelRename();
-            }}
-            onBlur={onCommitRename}
-            autoFocus
-            aria-label={t('resumes.titleInputAria')}
-            className="h-7 text-sm w-full"
-          />
-        ) : (
-          <button
-            type="button"
-            onClick={onSelect}
-            className="flex w-full items-center justify-between gap-2 text-left"
-          >
-            <span className="truncate text-sm font-semibold">
-              {resume.title}
-            </span>
-            <span className="shrink-0 text-xs text-muted-foreground">
-              {formatRelativeTime(resume.updatedAt, undefined, t)}
-            </span>
-          </button>
-        )}
-
-        {!editing && (
-          <div className="mt-1.5 flex items-center gap-0.5">
-            <TooltipIconButton
-              label={t('resumes.renameAria', { title: resume.title })}
-              onClick={onStartRename}
-            >
-              <Pencil className="size-4" />
-            </TooltipIconButton>
-            <TooltipIconButton
-              label={t('resumes.duplicateAria', { title: resume.title })}
-              onClick={onDuplicate}
-            >
-              <Copy className="size-4" />
-            </TooltipIconButton>
-            <TooltipIconButton
-              label={t('resumes.deleteAria', { title: resume.title })}
-              onClick={onDelete}
-              disabled={!canDelete}
-              className="hover:text-destructive hover:bg-destructive/10"
-            >
-              <Trash2 className="size-4" />
-            </TooltipIconButton>
-          </div>
-        )}
+        <Preview
+          cvData={resume.data}
+          sectionOrder={resume.sectionOrder}
+          hiddenSections={resume.hiddenSections}
+          language={resume.language}
+          photo={resume.photo}
+          design={resume.design}
+        />
       </div>
     </div>
   );
@@ -243,7 +86,6 @@ export function ResumesDialog({ open, onOpenChange }: ResumesDialogProps) {
   const duplicateResume = useResumeStore((state) => state.duplicateResume);
   const deleteResume = useResumeStore((state) => state.deleteResume);
   const renameResume = useResumeStore((state) => state.renameResume);
-  const toggleFavorite = useResumeStore((state) => state.toggleFavorite);
   const { t } = useI18n();
 
   const [editingId, setEditingId] = useState<string | null>(null);
@@ -254,23 +96,19 @@ export function ResumesDialog({ open, onOpenChange }: ResumesDialogProps) {
   } | null>(null);
   const [query, setQuery] = useState('');
   const [sort, setSort] = useState<SortMode>('recent');
-  const [favoriteOnly, setFavoriteOnly] = useState(false);
 
   const normalizedQuery = query.trim().toLowerCase();
   const visibleResumes = resumes
-    .filter((resume) => {
-      const matchesQuery = `${resume.title} ${resume.data.name ?? ''}`
+    .filter((resume) =>
+      `${resume.title} ${resume.data.name ?? ''}`
         .toLowerCase()
-        .includes(normalizedQuery);
-      const matchesFavorite = favoriteOnly ? !!resume.favorite : true;
-      return matchesQuery && matchesFavorite;
-    })
-    .sort((a, b) => {
-      if (!!a.favorite !== !!b.favorite) return a.favorite ? -1 : 1;
-      return sort === 'name'
+        .includes(normalizedQuery),
+    )
+    .sort((a, b) =>
+      sort === 'name'
         ? a.title.localeCompare(b.title)
-        : b.updatedAt - a.updatedAt;
-    });
+        : b.updatedAt - a.updatedAt,
+    );
 
   const startRename = (id: string, title: string) => {
     setEditingId(id);
@@ -313,7 +151,6 @@ export function ResumesDialog({ open, onOpenChange }: ResumesDialogProps) {
     if (!next) {
       setQuery('');
       setSort('recent');
-      setFavoriteOnly(false);
     }
     onOpenChange(next);
   };
@@ -326,14 +163,14 @@ export function ResumesDialog({ open, onOpenChange }: ResumesDialogProps) {
   return (
     <>
       <Dialog open={open} onOpenChange={handleOpenChange}>
-        <DialogContent className="sm:max-w-4xl grid-rows-[auto_minmax(0,1fr)_auto] max-h-[calc(100dvh-2rem)] overflow-hidden">
+        <DialogContent className="sm:max-w-2xl grid-rows-[auto_minmax(0,1fr)_auto] max-h-[calc(100dvh-2rem)] overflow-hidden">
           <DialogHeader>
             <DialogTitle>{t('resumes.title')}</DialogTitle>
             <DialogDescription>{t('resumes.description')}</DialogDescription>
           </DialogHeader>
 
-          <div className="flex min-h-0 flex-col -mx-1">
-            <div className="mb-6 flex min-w-0 flex-col gap-2 px-2 sm:flex-row sm:items-center">
+          <div className="min-h-0 -mx-1">
+            <div className="mb-2 flex gap-2 px-2">
               <div className="relative min-w-0 flex-1">
                 <Search className="absolute top-1/2 left-2.5 size-4 -translate-y-1/2 text-muted-foreground" />
                 <Input
@@ -341,109 +178,129 @@ export function ResumesDialog({ open, onOpenChange }: ResumesDialogProps) {
                   onChange={(e) => setQuery(e.target.value)}
                   placeholder={t('resumes.searchPlaceholder')}
                   aria-label={t('resumes.searchAria')}
-                  className="h-9 w-full pl-8 text-sm"
+                  className="h-9 pl-8 text-sm"
                 />
               </div>
-              <div className="flex w-full min-w-0 flex-wrap items-center justify-between gap-2 sm:ml-auto sm:w-auto sm:justify-start">
-                <Button
-                  type="button"
-                  aria-label={t('resumes.filterFavorites')}
-                  aria-pressed={favoriteOnly}
-                  onClick={() => setFavoriteOnly((v) => !v)}
-                  variant={favoriteOnly ? 'default' : 'outline'}
-                  className="min-h-9 min-w-9 gap-1.5 px-2.5"
+              <Select
+                items={[...sortOptions]}
+                value={sort}
+                onValueChange={(value) => setSort(value as SortMode)}
+              >
+                <SelectTrigger
+                  className="w-fit gap-1.5 px-2.5 min-h-9"
+                  aria-label={t('resumes.sortAria')}
                 >
-                  <Star
-                    className={cn(
-                      'size-4',
-                      favoriteOnly ? 'fill-current' : 'text-muted-foreground',
-                    )}
-                  />
-                  <span className="max-sm:hidden">
-                    {t('resumes.filterFavorites')}
-                  </span>
-                </Button>
-                <Select
-                  items={[...sortOptions]}
-                  value={sort}
-                  onValueChange={(value) => setSort(value as SortMode)}
-                >
-                  <SelectTrigger
-                    className="min-h-9 w-full flex-1 justify-between gap-1.5 px-2.5 sm:w-fit sm:flex-none"
-                    aria-label={t('resumes.sortAria')}
-                  >
-                    <ArrowUpDown className="size-3.5 text-muted-foreground" />
-                    <SelectValue />
-                  </SelectTrigger>
-                  <SelectContent>
-                    {sortOptions.map((option) => (
-                      <SelectItem key={option.value} value={option.value}>
-                        {option.label}
-                      </SelectItem>
-                    ))}
-                  </SelectContent>
-                </Select>
-              </div>
+                  <ArrowUpDown className="size-3.5 text-muted-foreground" />
+                  <SelectValue />
+                </SelectTrigger>
+                <SelectContent>
+                  {sortOptions.map((option) => (
+                    <SelectItem key={option.value} value={option.value}>
+                      {option.label}
+                    </SelectItem>
+                  ))}
+                </SelectContent>
+              </Select>
             </div>
 
-            <ScrollArea className="min-h-0 flex-1 px-2 pt-0">
-              {visibleResumes.length === 0 ? (
-                favoriteOnly && !normalizedQuery ? (
-                  <div className="flex flex-col items-center justify-center gap-3 py-12 text-center">
-                    <p className="text-sm text-muted-foreground">
-                      {t('resumes.noFavorites')}
-                    </p>
-                    <Button
-                      variant="outline"
-                      onClick={() => setFavoriteOnly(false)}
+            <ScrollArea className="h-full p-2 pt-0">
+              <div className="space-y-2">
+                {visibleResumes.length === 0 && (
+                  <p className="py-8 text-center text-sm text-muted-foreground">
+                    {t('resumes.noMatches')}
+                  </p>
+                )}
+                {visibleResumes.map((r) => {
+                  const active = r.id === activeId;
+                  const editing = editingId === r.id;
+                  return (
+                    <div
+                      key={r.id}
+                      className={cn(
+                        'group grid grid-cols-[auto_minmax(0,1fr)_auto] items-center gap-3 rounded-lg border border-border p-2.5 w-full min-w-0 transition-colors',
+                        active
+                          ? 'bg-muted/40 border-primary/40'
+                          : 'hover:bg-muted/30',
+                      )}
                     >
-                      <Star className="size-4" />
-                      {t('resumes.showAll')}
-                    </Button>
-                  </div>
-                ) : (
-                  <div className="flex flex-col items-center justify-center gap-3 py-12 text-center">
-                    <p className="text-sm text-muted-foreground">
-                      {t('resumes.noMatches')}
-                    </p>
-                    <Button variant="outline" onClick={() => setQuery('')}>
-                      <X className="size-4" />
-                      {t('resumes.clearSearch')}
-                    </Button>
-                  </div>
-                )
-              ) : (
-                <div className="grid grid-cols-2 gap-3 pb-4 sm:grid-cols-3 lg:grid-cols-4">
-                  {visibleResumes.map((r) => {
-                    const active = r.id === activeId;
-                    const editing = editingId === r.id;
-                    return (
-                      <ResumeCard
-                        key={r.id}
-                        resume={r}
-                        active={active}
-                        editing={editing}
-                        draft={draft}
-                        canDelete={resumes.length > 1}
-                        onDraftChange={setDraft}
-                        onCommitRename={commitRename}
-                        onCancelRename={() => setEditingId(null)}
-                        onSelect={() => handleSelect(r.id)}
-                        onStartRename={() => startRename(r.id, r.title)}
-                        onDuplicate={() => duplicateResume(r.id)}
-                        onDelete={() => handleDelete(r.id, r.title)}
-                        onToggleFavorite={() => toggleFavorite(r.id)}
-                      />
-                    );
-                  })}
-                </div>
-              )}
+                      <ResumeThumb resume={r} />
+
+                      {editing ? (
+                        <Input
+                          value={draft}
+                          onChange={(e) => setDraft(e.target.value)}
+                          onKeyDown={(e) => {
+                            if (e.key === 'Enter') commitRename();
+                            if (e.key === 'Escape') setEditingId(null);
+                          }}
+                          onBlur={commitRename}
+                          autoFocus
+                          aria-label={t('resumes.titleInputAria')}
+                          className="h-8 text-sm w-full"
+                        />
+                      ) : (
+                        <button
+                          type="button"
+                          onClick={() => handleSelect(r.id)}
+                          className="flex min-w-0 flex-1 items-start justify-between gap-2 text-left"
+                        >
+                          <span className="min-w-0">
+                            <span className="block text-sm font-semibold truncate">
+                              {r.title}
+                            </span>
+                            <span className="block text-xs text-muted-foreground truncate">
+                              {formatRelativeTime(r.updatedAt, undefined, t)}
+                            </span>
+                          </span>
+                        </button>
+                      )}
+
+                      <div className="flex items-center gap-0.5 shrink-0 self-start">
+                        {!editing && (
+                          <div className="flex items-center gap-0.5 opacity-100 lg:opacity-0 lg:group-hover:opacity-100 lg:focus-within:opacity-100 transition-opacity">
+                            <IconButton
+                              aria-label={t('resumes.renameAria', {
+                                title: r.title,
+                              })}
+                              onClick={() => startRename(r.id, r.title)}
+                            >
+                              <Pencil className="size-4" />
+                            </IconButton>
+                            <IconButton
+                              aria-label={t('resumes.duplicateAria', {
+                                title: r.title,
+                              })}
+                              onClick={() => duplicateResume(r.id)}
+                            >
+                              <Copy className="size-4" />
+                            </IconButton>
+                            <IconButton
+                              aria-label={t('resumes.deleteAria', {
+                                title: r.title,
+                              })}
+                              onClick={() => handleDelete(r.id, r.title)}
+                              disabled={resumes.length <= 1}
+                              className="hover:text-destructive hover:bg-destructive/10"
+                            >
+                              <Trash2 className="size-4" />
+                            </IconButton>
+                          </div>
+                        )}
+
+                        {active && (
+                          <Check className="size-4 mx-1 text-primary shrink-0" />
+                        )}
+                      </div>
+                    </div>
+                  );
+                })}
+              </div>
             </ScrollArea>
           </div>
 
-          <DialogFooter className="items-stretch bg-muted sm:items-center">
+          <DialogFooter className="items-stretch sm:items-center">
             <div className="flex flex-col gap-2 sm:flex-row">
-              <Button onClick={handleCreate}>
+              <Button variant="outline" onClick={handleCreate}>
                 <Plus className="size-4" />
                 {t('resumes.newCv')}
               </Button>
@@ -451,7 +308,7 @@ export function ResumesDialog({ open, onOpenChange }: ResumesDialogProps) {
                 {t('resumes.newFromExample')}
               </Button>
             </div>
-            <Button variant="outline" onClick={() => onOpenChange(false)}>
+            <Button onClick={() => onOpenChange(false)}>
               {t('common.done')}
             </Button>
           </DialogFooter>
