@@ -19,7 +19,6 @@ import {
   memo,
   useCallback,
   useEffect,
-  useLayoutEffect,
   useRef,
   useState,
 } from 'react';
@@ -96,11 +95,13 @@ function ResumePreviewImpl({
     panelRef,
     frameRef,
     scale,
-    frameHeight,
+    contentHeight,
     zoomTo,
     zoomIn,
     zoomOut,
     zoomReset,
+    setAnchor,
+    commitScale,
     minScale,
     maxScale,
   } = usePageScale({
@@ -108,25 +109,18 @@ function ResumePreviewImpl({
     isVisible: true,
   });
 
-  const anchorRef = useRef<{
-    docX: number;
-    docY: number;
-    viewX: number;
-    viewY: number;
-  } | null>(null);
-
   const anchoredZoom = useCallback(
-    (next: number, clientX?: number, clientY?: number) => {
+    (next: number, clientX?: number, clientY?: number, immediate?: boolean) => {
       const panel = panelRef.current;
       if (!panel || clientX == null || clientY == null) {
-        zoomTo(next);
+        zoomTo(next, immediate);
         return;
       }
       const viewport = panel.querySelector<HTMLElement>(
         '[data-slot="scroll-area-viewport"]',
       );
       if (!viewport) {
-        zoomTo(next);
+        zoomTo(next, immediate);
         return;
       }
       const rect = viewport.getBoundingClientRect();
@@ -134,10 +128,10 @@ function ResumePreviewImpl({
       const vy = clientY - rect.top;
       const docX = (viewport.scrollLeft + vx) / scale;
       const docY = (viewport.scrollTop + vy) / scale;
-      anchorRef.current = { docX, docY, viewX: vx, viewY: vy };
-      zoomTo(next);
+      setAnchor({ docX, docY, viewX: vx, viewY: vy });
+      zoomTo(next, immediate);
     },
-    [scale, zoomTo, panelRef],
+    [scale, zoomTo, setAnchor, panelRef],
   );
 
   const { containerRef } = usePinchZoom({
@@ -145,6 +139,7 @@ function ResumePreviewImpl({
     minScale,
     maxScale,
     onZoomChange: anchoredZoom,
+    onGestureEnd: commitScale,
   });
 
   const setPanelRef = (node: HTMLDivElement | null) => {
@@ -152,24 +147,11 @@ function ResumePreviewImpl({
     containerRef.current = node;
   };
 
-  useLayoutEffect(() => {
-    if (!anchorRef.current) return;
-    const { docX, docY, viewX, viewY } = anchorRef.current;
-    anchorRef.current = null;
-    const panel = panelRef.current;
-    if (!panel) return;
-    const viewport = panel.querySelector<HTMLElement>(
-      '[data-slot="scroll-area-viewport"]',
-    );
-    if (!viewport) return;
-    viewport.scrollLeft = docX * scale - viewX;
-    viewport.scrollTop = docY * scale - viewY;
-  }, [scale, panelRef]);
-
   const handleZoomIn = useCallback(() => {
     const panel = panelRef.current;
     if (!panel) {
       zoomIn();
+      commitScale();
       return;
     }
     const viewport = panel.querySelector<HTMLElement>(
@@ -177,18 +159,21 @@ function ResumePreviewImpl({
     );
     if (!viewport) {
       zoomIn();
+      commitScale();
       return;
     }
     const rect = viewport.getBoundingClientRect();
     const current = scale;
     const next = Math.min(maxScale, +(current + 0.1).toFixed(2));
     anchoredZoom(next, rect.left + rect.width / 2, rect.top + rect.height / 2);
-  }, [scale, maxScale, zoomIn, anchoredZoom, panelRef]);
+    commitScale();
+  }, [scale, maxScale, zoomIn, anchoredZoom, commitScale, panelRef]);
 
   const handleZoomOut = useCallback(() => {
     const panel = panelRef.current;
     if (!panel) {
       zoomOut();
+      commitScale();
       return;
     }
     const viewport = panel.querySelector<HTMLElement>(
@@ -196,13 +181,15 @@ function ResumePreviewImpl({
     );
     if (!viewport) {
       zoomOut();
+      commitScale();
       return;
     }
     const rect = viewport.getBoundingClientRect();
     const current = scale;
     const next = Math.max(minScale, +(current - 0.1).toFixed(2));
     anchoredZoom(next, rect.left + rect.width / 2, rect.top + rect.height / 2);
-  }, [scale, minScale, zoomOut, anchoredZoom, panelRef]);
+    commitScale();
+  }, [scale, minScale, zoomOut, anchoredZoom, commitScale, panelRef]);
 
   const [pageCount, setPageCount] = useState(1);
 
@@ -226,6 +213,11 @@ function ResumePreviewImpl({
   const activeTab = useUIStore((state) => state.activeTab);
   const { t } = useI18n();
 
+  const scaleRef = useRef(scale);
+  useEffect(() => {
+    scaleRef.current = scale;
+  }, [scale]);
+
   useEffect(() => {
     const sectionId = getSectionIdFromTab(activeTab);
     if (!sectionId) return;
@@ -241,10 +233,10 @@ function ResumePreviewImpl({
     const delta =
       (target.getBoundingClientRect().top -
         viewport.getBoundingClientRect().top) /
-        scale -
+        scaleRef.current -
       SCROLL_OFFSET_PX;
     viewport.scrollTo({ top: viewport.scrollTop + delta, behavior: 'smooth' });
-  }, [activeTab, scale, panelRef]);
+  }, [activeTab, panelRef]);
 
   return (
     <section
@@ -281,7 +273,10 @@ function ResumePreviewImpl({
         <ScrollArea className="h-full w-full print:h-auto print:overflow-visible">
           <div className="min-h-full py-8 lg:py-16 print:p-0 print:py-0 print:block">
             <div
-              style={{ width: frameWidthPx * scale, height: frameHeight }}
+              style={{
+                width: frameWidthPx * scale,
+                height: contentHeight * scale,
+              }}
               className="relative shrink-0 mx-auto print:w-full! print:h-auto!"
             >
               <div
