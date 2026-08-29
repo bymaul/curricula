@@ -19,6 +19,7 @@ export interface ResumeRecord {
   templateId: TemplateId;
   design: DesignSettings;
   autoTitle: boolean;
+  favorite?: boolean;
   updatedAt: number;
 }
 
@@ -52,6 +53,7 @@ export interface ResumeState {
   duplicateResume: (id: string) => void;
   deleteResume: (id: string) => void;
   renameResume: (id: string, title: string) => void;
+  toggleFavorite: (id: string) => void;
   setActiveResume: (id: string) => void;
   importResumeData: (
     data: CVData,
@@ -120,6 +122,7 @@ function makeResume(
     templateId: options.template ?? DEFAULT_TEMPLATE_ID,
     design: normalizeDesign(options.design),
     autoTitle: true,
+    favorite: false,
     updatedAt: now(),
   };
 }
@@ -143,6 +146,7 @@ function normalizeResume(record: ResumeRecord): ResumeRecord {
     photo: record.photo ?? '',
     templateId: record.templateId ?? DEFAULT_TEMPLATE_ID,
     design: normalizeDesign(record.design),
+    favorite: !!record.favorite,
   };
 }
 
@@ -157,6 +161,7 @@ function withoutPhoto(record: ResumeRecord): Omit<ResumeRecord, 'photo'> {
     templateId: record.templateId,
     design: record.design,
     autoTitle: record.autoTitle,
+    favorite: record.favorite,
     updatedAt: record.updatedAt,
   };
 }
@@ -418,6 +423,13 @@ export const useResumeStore = create<ResumeState>()(
             autoTitle: false,
           });
         }),
+
+      toggleFavorite: (id) =>
+        set((state) => ({
+          resumes: state.resumes.map((r) =>
+            r.id === id ? { ...r, favorite: !r.favorite } : r,
+          ),
+        })),
 
       setActiveResume: (id) =>
         set((state) => {
