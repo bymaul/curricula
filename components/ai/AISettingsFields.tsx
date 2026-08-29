@@ -62,7 +62,7 @@ export function AISettingsFields({
   return (
     <>
       {statusError && (
-        <div className="rounded-lg border border-destructive/40 bg-destructive/10 px-3 py-2 text-sm text-destructive">
+        <div className="border-destructive/40 bg-destructive/10 text-destructive rounded-lg border px-3 py-2 text-sm">
           {t('aiSettings.statusError')}
         </div>
       )}

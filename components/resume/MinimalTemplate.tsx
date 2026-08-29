@@ -183,7 +183,7 @@ const SECTION_RENDERERS: Record<BuiltinSectionId, SectionRenderer> = {
         {cvData.certifications.map((cert, index) => (
           <div
             key={index}
-            className={`${SPACE.itemGap} text-[9.5pt] break-inside-avoid`}
+            className={`${SPACE.itemGap} break-inside-avoid text-[9.5pt]`}
           >
             <div className="flex justify-between">
               <span className="font-semibold text-slate-900">{cert.name}</span>
@@ -235,7 +235,7 @@ export const MinimalTemplate = forwardRef<HTMLDivElement, TemplateProps>(
       <div
         ref={ref}
         style={{ ...styleVars, fontFamily: 'var(--cv-font)' }}
-        className="mx-auto shadow-2xl print:shadow-none bg-white"
+        className="mx-auto bg-white shadow-2xl print:shadow-none"
       >
         <PrintStyle pageSize={design?.pageSize} />
 

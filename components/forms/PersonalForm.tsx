@@ -102,7 +102,7 @@ export const PersonalForm = () => {
             <Field className="sm:col-span-2">
               <FieldLabel>{t('personalDetails.photoLabel')}</FieldLabel>
               <div className="flex items-center gap-4">
-                <div className="flex h-20 w-20 shrink-0 items-center justify-center overflow-hidden rounded-full border border-border bg-muted">
+                <div className="border-border bg-muted flex h-20 w-20 shrink-0 items-center justify-center overflow-hidden rounded-full border">
                   {photo ? (
                     // eslint-disable-next-line @next/next/no-img-element
                     <img
@@ -111,7 +111,7 @@ export const PersonalForm = () => {
                       className="h-full w-full object-cover"
                     />
                   ) : (
-                    <UserRound className="h-8 w-8 text-muted-foreground" />
+                    <UserRound className="text-muted-foreground h-8 w-8" />
                   )}
                 </div>
                 <div className="flex flex-col gap-2">
@@ -204,9 +204,9 @@ export const PersonalForm = () => {
             {fields.map((field, index) => (
               <div
                 key={field.id}
-                className="bg-card p-3.5 rounded-xl border border-border shadow-sm"
+                className="bg-card border-border rounded-xl border p-3.5 shadow-sm"
               >
-                <div className="flex gap-3 items-end">
+                <div className="flex items-end gap-3">
                   <FormField
                     name={`links.${index}.url` as const}
                     label={t('personalDetails.linkUrlLabel')}

@@ -65,7 +65,7 @@ function Segmented<T extends string>({
   return (
     <div
       role="radiogroup"
-      className="inline-flex w-full items-stretch gap-0.5 rounded-lg border border-border bg-muted/30 p-0.5 sm:w-fit"
+      className="border-border bg-muted/30 inline-flex w-full items-stretch gap-0.5 rounded-lg border p-0.5 sm:w-fit"
     >
       {options.map((option) => {
         const selected = option === value;
@@ -78,7 +78,7 @@ function Segmented<T extends string>({
             onClick={() => onChange(option)}
             className={cn(
               'flex-1 cursor-pointer rounded-md px-3 py-1.5 text-xs font-medium transition-colors outline-none sm:flex-none',
-              'focus-visible:ring-3 focus-visible:ring-ring/50',
+              'focus-visible:ring-ring/50 focus-visible:ring-3',
               selected
                 ? 'bg-background text-foreground shadow-sm'
                 : 'text-muted-foreground hover:text-foreground',
@@ -115,10 +115,10 @@ export function AccentColorPicker({
             title={label}
             onClick={() => onChange(color.id)}
             className={cn(
-              'size-8 cursor-pointer rounded-full border border-border transition-shadow outline-none',
-              'focus-visible:ring-3 focus-visible:ring-ring/50',
+              'border-border size-8 cursor-pointer rounded-full border transition-shadow outline-none',
+              'focus-visible:ring-ring/50 focus-visible:ring-3',
               selected &&
-                'ring-2 ring-ring ring-offset-2 ring-offset-background',
+                'ring-ring ring-offset-background ring-2 ring-offset-2',
             )}
             style={{ background: ACCENT_SWATCH[color.id] }}
           />

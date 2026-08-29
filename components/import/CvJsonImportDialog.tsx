@@ -101,7 +101,7 @@ export function CvJsonImportDialog({
           <button
             type="button"
             onClick={() => fileInputRef.current?.click()}
-            className="flex w-full cursor-pointer items-center justify-center gap-2 rounded-lg border border-dashed border-border px-3 py-2.5 text-sm text-muted-foreground transition-colors outline-none hover:border-ring hover:text-foreground focus-visible:ring-3 focus-visible:ring-ring/50"
+            className="border-border text-muted-foreground hover:border-ring hover:text-foreground focus-visible:ring-ring/50 flex w-full cursor-pointer items-center justify-center gap-2 rounded-lg border border-dashed px-3 py-2.5 text-sm transition-colors outline-none focus-visible:ring-3"
           >
             <FileUp className="size-4" />
             {t('backup.importJsonChooseFile')}

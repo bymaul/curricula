@@ -36,7 +36,7 @@ export function VersionHistoryDialog({
 
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
-      <DialogContent className="sm:max-w-md grid-rows-[auto_minmax(0,1fr)_auto] max-h-[calc(100dvh-2rem)] overflow-hidden">
+      <DialogContent className="max-h-[calc(100dvh-2rem)] grid-rows-[auto_minmax(0,1fr)_auto] overflow-hidden sm:max-w-md">
         <DialogHeader>
           <DialogTitle>{t('versionHistory.title')}</DialogTitle>
           <DialogDescription>
@@ -44,20 +44,20 @@ export function VersionHistoryDialog({
           </DialogDescription>
         </DialogHeader>
 
-        <div className="min-h-0 -mx-1">
+        <div className="-mx-1 min-h-0">
           <ScrollArea className="h-full p-2">
             {reversed.length === 0 ? (
               <div className="flex flex-col items-center gap-2 px-1 py-10 text-center">
                 <History
-                  className="size-5 text-muted-foreground"
+                  className="text-muted-foreground size-5"
                   aria-hidden="true"
                 />
-                <p className="max-w-xs text-sm text-muted-foreground">
+                <p className="text-muted-foreground max-w-xs text-sm">
                   {t('versionHistory.empty')}
                 </p>
               </div>
             ) : (
-              <ul className="divide-y divide-border">
+              <ul className="divide-border divide-y">
                 {reversed.map((entry, i) => {
                   const index = entries.length - 1 - i;
                   const isCurrent = index === cursor;
@@ -67,18 +67,18 @@ export function VersionHistoryDialog({
                     <li
                       key={index}
                       className={cn(
-                        'flex items-center justify-between gap-3 py-2.5 px-1',
+                        'flex items-center justify-between gap-3 px-1 py-2.5',
                         !isCurrent && 'opacity-80',
                       )}
                     >
                       <div className="min-w-0">
-                        <p className="flex items-center gap-2 text-sm font-semibold truncate">
+                        <p className="flex items-center gap-2 truncate text-sm font-semibold">
                           {isCurrent && (
-                            <History className="size-4 shrink-0 text-muted-foreground" />
+                            <History className="text-muted-foreground size-4 shrink-0" />
                           )}
                           <span className="truncate">{title}</span>
                         </p>
-                        <p className="text-xs text-muted-foreground">
+                        <p className="text-muted-foreground text-xs">
                           {formatRelativeTime(entry.at, undefined, t)}
                         </p>
                       </div>

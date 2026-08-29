@@ -39,7 +39,7 @@ export function DragHandle({
     <div
       {...props}
       className={cn(
-        'cursor-grab touch-none text-muted-foreground hover:text-foreground transition-colors p-1.5 -m-0.5',
+        'text-muted-foreground hover:text-foreground -m-0.5 cursor-grab touch-none p-1.5 transition-colors',
         className,
       )}
     >
@@ -84,7 +84,7 @@ export function SectionHeading({
   return (
     <div>
       <h2 className="text-xl font-bold tracking-tight">{title}</h2>
-      <p className="text-sm text-muted-foreground mt-1">{description}</p>
+      <p className="text-muted-foreground mt-1 text-sm">{description}</p>
     </div>
   );
 }
@@ -107,7 +107,7 @@ export function AddItemButton({
       size={size}
       onClick={onClick}
       className={cn(
-        'w-full border-dashed gap-2',
+        'w-full gap-2 border-dashed',
         size === 'default' && 'py-5',
         className,
       )}
@@ -173,7 +173,7 @@ export function SortableCard({
     <div
       ref={setNodeRef}
       style={style}
-      className="mb-4 p-4 border border-border rounded-xl bg-card shadow-sm relative space-y-4"
+      className="border-border bg-card relative mb-4 space-y-4 rounded-xl border p-4 shadow-sm"
     >
       <ItemRemoveButton
         onClick={onRemove}
@@ -181,9 +181,9 @@ export function SortableCard({
         className="absolute top-2.5 right-2.5 h-8 w-8"
       />
 
-      <div className="flex items-center gap-2 border-b border-border pb-3 pr-10">
+      <div className="border-border flex items-center gap-2 border-b pr-10 pb-3">
         <DragHandle {...attributes} {...listeners} />
-        <span className="text-xs font-semibold text-muted-foreground uppercase tracking-wider">
+        <span className="text-muted-foreground text-xs font-semibold tracking-wider uppercase">
           {label}
         </span>
       </div>
@@ -215,7 +215,7 @@ export function SortableRow({
       ref={setNodeRef}
       style={style}
       className={cn(
-        'mb-4 p-4 border border-border rounded-xl bg-card shadow-sm relative flex items-end gap-3',
+        'border-border bg-card relative mb-4 flex items-end gap-3 rounded-xl border p-4 shadow-sm',
         className,
       )}
     >
@@ -316,11 +316,11 @@ export function SectionFieldArray({
           <div className="mb-4 flex flex-col items-center gap-2 rounded-xl border border-dashed px-4 py-10 text-center">
             {EmptyIcon && (
               <EmptyIcon
-                className="size-5 text-muted-foreground"
+                className="text-muted-foreground size-5"
                 aria-hidden="true"
               />
             )}
-            <p className="max-w-xs text-sm text-muted-foreground">
+            <p className="text-muted-foreground max-w-xs text-sm">
               {t('common.emptySection', { label: itemLabel ?? name })}
             </p>
           </div>
@@ -351,7 +351,7 @@ export function SectionFieldArray({
               onRemove={() => remove(index)}
               removeTitle={removeTitle}
             >
-              <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+              <div className="grid grid-cols-1 gap-3 sm:grid-cols-2">
                 {body}
               </div>
             </SortableCard>

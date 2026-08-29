@@ -5,36 +5,36 @@ export function EditorSkeleton() {
     <main
       aria-busy="true"
       aria-live="polite"
-      className="h-dvh w-full bg-background flex flex-col lg:p-6 overflow-hidden"
+      className="bg-background flex h-dvh w-full flex-col overflow-hidden lg:p-6"
     >
-      <div className="p-4 lg:p-0 flex items-center justify-between shrink-0 lg:mb-6">
-        <div className="h-6 w-24 rounded-md bg-muted animate-pulse" />
+      <div className="flex shrink-0 items-center justify-between p-4 lg:mb-6 lg:p-0">
+        <div className="bg-muted h-6 w-24 animate-pulse rounded-md" />
         <div className="flex items-center gap-2">
-          <div className="h-9 w-9 rounded-lg bg-muted animate-pulse" />
-          <div className="h-9 w-40 rounded-lg bg-muted animate-pulse hidden lg:block" />
+          <div className="bg-muted h-9 w-9 animate-pulse rounded-lg" />
+          <div className="bg-muted hidden h-9 w-40 animate-pulse rounded-lg lg:block" />
         </div>
       </div>
 
-      <div className="flex-1 min-h-0 w-full flex flex-col lg:flex-row gap-4 lg:gap-6 px-4 pb-4 lg:px-0 lg:pb-0">
-        <div className="w-full lg:w-[35%] xl:w-[30%] h-full rounded-xl border border-border bg-card shadow-lg shrink-0 p-4 space-y-4 overflow-hidden">
-          <div className="h-7 w-1/3 rounded-md bg-muted animate-pulse" />
+      <div className="flex min-h-0 w-full flex-1 flex-col gap-4 px-4 pb-4 lg:flex-row lg:gap-6 lg:px-0 lg:pb-0">
+        <div className="border-border bg-card h-full w-full shrink-0 space-y-4 overflow-hidden rounded-xl border p-4 shadow-lg lg:w-[35%] xl:w-[30%]">
+          <div className="bg-muted h-7 w-1/3 animate-pulse rounded-md" />
           <div className="space-y-3">
             {[0, 1, 2].map((row) => (
               <div key={row} className="space-y-1.5">
                 <div
                   className={cn(
-                    'h-4 rounded bg-muted animate-pulse',
+                    'bg-muted h-4 animate-pulse rounded',
                     row === 1 ? 'w-2/3' : 'w-1/4',
                   )}
                 />
-                <div className="h-9 rounded-lg bg-muted/60 animate-pulse" />
+                <div className="bg-muted/60 h-9 animate-pulse rounded-lg" />
               </div>
             ))}
           </div>
         </div>
 
-        <div className="flex-1 min-h-0 rounded-xl border border-border bg-muted/10 shadow-inner hidden lg:flex items-start justify-center pt-8">
-          <div className="w-[40%] aspect-[794/1123] rounded-md bg-muted/50 animate-pulse" />
+        <div className="border-border bg-muted/10 hidden min-h-0 flex-1 items-start justify-center rounded-xl border pt-8 shadow-inner lg:flex">
+          <div className="bg-muted/50 aspect-[794/1123] w-[40%] animate-pulse rounded-md" />
         </div>
       </div>
     </main>

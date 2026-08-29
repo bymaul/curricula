@@ -79,7 +79,7 @@ export function SectionsOrderDialog({
 
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
-      <DialogContent className="sm:max-w-xl grid-rows-[auto_minmax(0,1fr)_auto] max-h-[calc(100dvh-2rem)] overflow-hidden">
+      <DialogContent className="max-h-[calc(100dvh-2rem)] grid-rows-[auto_minmax(0,1fr)_auto] overflow-hidden sm:max-w-xl">
         <DialogHeader>
           <DialogTitle>{t('sectionsOrder.title')}</DialogTitle>
           <DialogDescription>
@@ -87,7 +87,7 @@ export function SectionsOrderDialog({
           </DialogDescription>
         </DialogHeader>
 
-        <div className="min-h-0 -mx-1">
+        <div className="-mx-1 min-h-0">
           <ScrollArea className="h-full p-2">
             <SortableList ids={sectionOrder} onMove={moveSection}>
               {sectionOrder.map((id) => {
@@ -194,7 +194,7 @@ function AddSectionControl({ onAdd }: { onAdd: (title: string) => void }) {
           className={DROPDOWN_ITEM_CLASS}
           onClick={() => setCustomMode(true)}
         >
-          <ListPlus className="size-4 text-muted-foreground" />
+          <ListPlus className="text-muted-foreground size-4" />
           {t('sectionsOrder.customSection')}
         </DropdownMenuItem>
       </DropdownMenuContent>

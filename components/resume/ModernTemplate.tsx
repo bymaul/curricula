@@ -72,7 +72,7 @@ function MainSection({
       className={`${SPACE.sectionGap} ${onClick ? INTERACTIVE_CLASSES : ''}`}
     >
       <h2
-        className={`${TYPE.mainTitle} border-b border-slate-300 pb-[2pt] mb-[6pt] break-after-avoid`}
+        className={`${TYPE.mainTitle} mb-[6pt] break-after-avoid border-b border-slate-300 pb-[2pt]`}
       >
         {title}
       </h2>
@@ -102,7 +102,7 @@ function SidebarSection({
       className={`${SPACE.sectionGap} ${onClick ? INTERACTIVE_CLASSES : ''}`}
     >
       <h2
-        className={`${TYPE.sidebarTitle} border-b border-slate-300 pb-[2pt] mb-[3pt]`}
+        className={`${TYPE.sidebarTitle} mb-[3pt] border-b border-slate-300 pb-[2pt]`}
       >
         {title}
       </h2>
@@ -264,7 +264,7 @@ export const ModernTemplate = forwardRef<HTMLDivElement, TemplateProps>(
                   <div className="text-slate-600">{cert.issuer}</div>
                 )}
                 {cert.date && (
-                  <div className="text-slate-500 text-[8.5pt]">{cert.date}</div>
+                  <div className="text-[8.5pt] text-slate-500">{cert.date}</div>
                 )}
               </div>
             ))}
@@ -276,7 +276,7 @@ export const ModernTemplate = forwardRef<HTMLDivElement, TemplateProps>(
       <div
         ref={ref}
         style={{ ...styleVars, fontFamily: 'var(--cv-font)' }}
-        className="mx-auto shadow-2xl print:shadow-none bg-white"
+        className="mx-auto bg-white shadow-2xl print:shadow-none"
       >
         <PrintStyle pageSize={design?.pageSize} />
 
@@ -295,7 +295,7 @@ export const ModernTemplate = forwardRef<HTMLDivElement, TemplateProps>(
                 <table className="w-full border-collapse">
                   <tbody>
                     <tr>
-                      <td className="w-[5.5cm] align-top bg-gray-100 px-[0.75cm] pt-[1cm] pb-[1cm]">
+                      <td className="w-[5.5cm] bg-gray-100 px-[0.75cm] pt-[1cm] pb-[1cm] align-top">
                         <div
                           data-section-id="summary"
                           {...headerClickProps(onSectionClick)}
@@ -306,7 +306,7 @@ export const ModernTemplate = forwardRef<HTMLDivElement, TemplateProps>(
                                 })
                               : undefined
                           }
-                          className={`text-center mb-5 ${onSectionClick ? INTERACTIVE_CLASSES : ''}`}
+                          className={`mb-5 text-center ${onSectionClick ? INTERACTIVE_CLASSES : ''}`}
                         >
                           {photo ? (
                             // eslint-disable-next-line @next/next/no-img-element
@@ -330,7 +330,7 @@ export const ModernTemplate = forwardRef<HTMLDivElement, TemplateProps>(
 
                         <div className="mb-4">
                           <h2
-                            className={`${TYPE.sidebarTitle} border-b border-slate-300 pb-[2pt] mb-[3pt]`}
+                            className={`${TYPE.sidebarTitle} mb-[3pt] border-b border-slate-300 pb-[2pt]`}
                           >
                             {t('template.contact')}
                           </h2>
@@ -366,7 +366,7 @@ export const ModernTemplate = forwardRef<HTMLDivElement, TemplateProps>(
                         )}
                       </td>
 
-                      <td className="align-top px-[1cm] pt-[1cm] pb-[1cm]">
+                      <td className="px-[1cm] pt-[1cm] pb-[1cm] align-top">
                         {resolveTemplateOrder(mainOrder, cvData).map((id) => {
                           const builtin = isBuiltinSection(id)
                             ? MAIN_SECTION_RENDERERS[id as MainSectionId]?.(

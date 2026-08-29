@@ -62,7 +62,7 @@ export function CvViewer() {
 
   if (view.status === 'loading') {
     return (
-      <div className="flex min-h-dvh items-center justify-center gap-2 text-sm text-muted-foreground print:hidden">
+      <div className="text-muted-foreground flex min-h-dvh items-center justify-center gap-2 text-sm print:hidden">
         <Loader2 className="size-4 animate-spin" />
         {t('cvViewer.loading')}
       </div>
@@ -72,8 +72,8 @@ export function CvViewer() {
   if (view.status === 'error') {
     return (
       <div className="flex min-h-dvh flex-col items-center justify-center gap-4 px-4 text-center print:hidden">
-        <TriangleAlert className="size-8 text-muted-foreground" />
-        <p className="text-sm text-muted-foreground">{t('cvViewer.invalid')}</p>
+        <TriangleAlert className="text-muted-foreground size-8" />
+        <p className="text-muted-foreground text-sm">{t('cvViewer.invalid')}</p>
         <Button onClick={() => router.push('/')}>
           {t('cvViewer.invalidAction')}
         </Button>
@@ -87,8 +87,8 @@ export function CvViewer() {
   const page = getPageDimensions(design?.pageSize);
 
   return (
-    <div className="min-h-dvh bg-muted/10 text-foreground print:min-h-0 print:bg-white">
-      <header className="sticky top-0 z-10 border-b border-border bg-background/95 backdrop-blur print:hidden">
+    <div className="bg-muted/10 text-foreground min-h-dvh print:min-h-0 print:bg-white">
+      <header className="border-border bg-background/95 sticky top-0 z-10 border-b backdrop-blur print:hidden">
         <div className="mx-auto flex w-full max-w-5xl items-center justify-between gap-3 px-4 py-3">
           <div className="truncate text-sm font-semibold">
             {data.name?.trim() || t('template.yourName')}

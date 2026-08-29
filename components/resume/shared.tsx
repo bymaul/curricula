@@ -40,10 +40,10 @@ export function renderFormattedText(text: string, textClassName = '') {
     elements.push(
       <ul
         key={`ul-${key}`}
-        className={`list-disc list-outside ml-5 mt-1 ${textClassName}`}
+        className={`mt-1 ml-5 list-outside list-disc ${textClassName}`}
       >
         {currentBullets.map((bullet, idx) => (
-          <li key={idx} className="pl-1 mb-0.5">
+          <li key={idx} className="mb-0.5 pl-1">
             {bullet}
           </li>
         ))}
@@ -137,7 +137,7 @@ export function ItemSub({
 }) {
   if (!left && !right) return null;
   return (
-    <div className={`flex justify-between mb-[2pt] ${className}`}>
+    <div className={`mb-[2pt] flex justify-between ${className}`}>
       <span>{left}</span>
       <span>{right}</span>
     </div>

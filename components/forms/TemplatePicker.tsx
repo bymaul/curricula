@@ -134,21 +134,21 @@ function TemplateCard({
       tabIndex={selected ? 0 : -1}
       onClick={onSelect}
       className={cn(
-        'flex min-w-0 cursor-pointer flex-col items-center gap-1 rounded-lg p-1 text-left outline-none transition-colors',
-        'focus-visible:ring-3 focus-visible:ring-ring/50',
+        'flex min-w-0 cursor-pointer flex-col items-center gap-1 rounded-lg p-1 text-left transition-colors outline-none',
+        'focus-visible:ring-ring/50 focus-visible:ring-3',
         selected
-          ? 'bg-primary/10 ring-2 ring-primary/50'
+          ? 'bg-primary/10 ring-primary/50 ring-2'
           : 'hover:bg-muted focus-visible:rounded-lg',
       )}
     >
       <div
         ref={ref}
-        className="relative w-full overflow-hidden rounded-md border border-border bg-white"
+        className="border-border relative w-full overflow-hidden rounded-md border bg-white"
         style={{ aspectRatio: `${page.width} / ${page.height}` }}
       >
         <div
           aria-hidden="true"
-          className="pointer-events-none absolute top-0 left-0 origin-top-left select-none text-black"
+          className="pointer-events-none absolute top-0 left-0 origin-top-left text-black select-none"
           style={{
             width: page.width,
             transform: `scale(${scale})`,

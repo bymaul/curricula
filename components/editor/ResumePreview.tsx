@@ -243,7 +243,7 @@ function ResumePreviewImpl({
       ref={setPanelRef}
       data-template-id={templateId}
       className={cn(
-        'flex-1 w-full bg-muted/10 border border-border rounded-xl shadow-inner flex flex-col h-full relative overflow-hidden touch-pan-x touch-pan-y print:border-none print:shadow-none print:bg-transparent print:overflow-visible',
+        'bg-muted/10 border-border relative flex h-full w-full flex-1 touch-pan-x touch-pan-y flex-col overflow-hidden rounded-xl border shadow-inner print:overflow-visible print:border-none print:bg-transparent print:shadow-none',
       )}
     >
       <ZoomControls
@@ -256,28 +256,28 @@ function ResumePreviewImpl({
       />
 
       <div
-        className="absolute top-3 left-3 z-20 flex items-center gap-1.5 bg-card border border-border rounded-lg shadow-md px-2.5 py-1 print:hidden"
+        className="bg-card border-border absolute top-3 left-3 z-20 flex items-center gap-1.5 rounded-lg border px-2.5 py-1 shadow-md print:hidden"
         aria-label={
           pageCount === 1
             ? t('preview.pageCountAriaOne', { count: pageCount })
             : t('preview.pageCountAriaMany', { count: pageCount })
         }
       >
-        <FileText className="size-3.5 text-muted-foreground" />
-        <span className="text-xs font-semibold tabular-nums text-muted-foreground">
+        <FileText className="text-muted-foreground size-3.5" />
+        <span className="text-muted-foreground text-xs font-semibold tabular-nums">
           {pageCount} {pageCount === 1 ? t('preview.page') : t('preview.pages')}
         </span>
       </div>
 
-      <div className="flex-1 min-h-0 print:overflow-visible">
+      <div className="min-h-0 flex-1 print:overflow-visible">
         <ScrollArea className="h-full w-full print:h-auto print:overflow-visible">
-          <div className="min-h-full py-8 lg:py-16 print:p-0 print:py-0 print:block">
+          <div className="min-h-full py-8 lg:py-16 print:block print:p-0 print:py-0">
             <div
               style={{
                 width: frameWidthPx * scale,
                 height: contentHeight * scale,
               }}
-              className="relative shrink-0 mx-auto print:w-full! print:h-auto!"
+              className="relative mx-auto shrink-0 print:h-auto! print:w-full!"
             >
               <div
                 ref={frameRef}
@@ -288,7 +288,7 @@ function ResumePreviewImpl({
                   transform: `scale(${scale})`,
                   transformOrigin: 'top left',
                 }}
-                className="absolute top-0 left-0 print:p-0! print:w-full! print:static! print:transform-none!"
+                className="absolute top-0 left-0 print:static! print:w-full! print:transform-none! print:p-0!"
               >
                 <div
                   style={{ width: page.width }}
@@ -309,16 +309,16 @@ function ResumePreviewImpl({
 
                   <div
                     aria-hidden="true"
-                    className="absolute inset-0 pointer-events-none print:hidden"
+                    className="pointer-events-none absolute inset-0 print:hidden"
                   >
                     {pageBreaks.map(({ top, label }) => (
                       <div
                         key={top}
                         style={{ top }}
-                        className="absolute left-0 right-0 -translate-y-1/2 z-10 flex items-center"
+                        className="absolute right-0 left-0 z-10 flex -translate-y-1/2 items-center"
                       >
-                        <div className="w-full border-t-2 border-dashed border-destructive/60" />
-                        <span className="absolute left-3 -translate-y-1/2 rounded-md bg-destructive/10 px-1.5 py-0.5 text-[10px] font-semibold text-destructive">
+                        <div className="border-destructive/60 w-full border-t-2 border-dashed" />
+                        <span className="bg-destructive/10 text-destructive absolute left-3 -translate-y-1/2 rounded-md px-1.5 py-0.5 text-[10px] font-semibold">
                           {t('preview.pageBreak', { number: label })}
                         </span>
                       </div>
