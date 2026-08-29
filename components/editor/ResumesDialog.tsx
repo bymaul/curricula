@@ -163,7 +163,7 @@ export function ResumesDialog({ open, onOpenChange }: ResumesDialogProps) {
   return (
     <>
       <Dialog open={open} onOpenChange={handleOpenChange}>
-        <DialogContent className="sm:max-w-xl grid-rows-[auto_minmax(0,1fr)_auto] max-h-[calc(100dvh-2rem)] overflow-hidden">
+        <DialogContent className="sm:max-w-2xl grid-rows-[auto_minmax(0,1fr)_auto] max-h-[calc(100dvh-2rem)] overflow-hidden">
           <DialogHeader>
             <DialogTitle>{t('resumes.title')}</DialogTitle>
             <DialogDescription>{t('resumes.description')}</DialogDescription>
@@ -187,8 +187,7 @@ export function ResumesDialog({ open, onOpenChange }: ResumesDialogProps) {
                 onValueChange={(value) => setSort(value as SortMode)}
               >
                 <SelectTrigger
-                  size="sm"
-                  className="w-fit gap-1.5 px-2.5"
+                  className="w-fit gap-1.5 px-2.5 min-h-9"
                   aria-label={t('resumes.sortAria')}
                 >
                   <ArrowUpDown className="size-3.5 text-muted-foreground" />
