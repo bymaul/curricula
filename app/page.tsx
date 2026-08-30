@@ -25,7 +25,7 @@ import { useResumeStore } from '@/store/useResumeStore';
 import { useUIStore } from '@/store/useUIStore';
 import { cn } from '@/lib/utils';
 import { zodResolver } from '@hookform/resolvers/zod';
-import { useCallback, useEffect, useRef, useState } from 'react';
+import { useCallback, useEffect, useState } from 'react';
 import { FormProvider, useForm } from 'react-hook-form';
 import type { CVData } from '@/lib/schema';
 import { cvSchema, initialCVState } from '@/lib/schema';
@@ -119,51 +119,16 @@ export default function Home() {
     [isLargeScreen, switchMobileView],
   );
 
-  const [paneGapOpen, setPaneGapOpen] = useState(false);
-  const gapTimerRef = useRef<number | null>(null);
-
-  const closeGapAfterSettle = useCallback(() => {
-    if (gapTimerRef.current !== null) window.clearTimeout(gapTimerRef.current);
-    gapTimerRef.current = window.setTimeout(() => {
-      gapTimerRef.current = null;
-      setPaneGapOpen(false);
-    }, 300);
-  }, []);
-
-  const {
-    trackRef,
-    stripRef,
-    handlers: sliderHandlers,
-  } = useMobileSlider({
+  const { trackRef, stripRef } = useMobileSlider({
     enabled: !isLargeScreen,
     view: mobileView,
-    onViewChange: switchMobileView,
-    onEngage: () => {
-      if (gapTimerRef.current !== null) {
-        window.clearTimeout(gapTimerRef.current);
-        gapTimerRef.current = null;
-      }
-      setPaneGapOpen(true);
-    },
-    onSettle: closeGapAfterSettle,
   });
-
-  useEffect(
-    () => () => {
-      if (gapTimerRef.current !== null)
-        window.clearTimeout(gapTimerRef.current);
-    },
-    [],
-  );
 
   if (!mounted || !storesHydrated) return <EditorSkeleton />;
 
   return (
     <FormProvider {...methods}>
-      <main
-        {...sliderHandlers}
-        className="bg-background text-foreground flex h-dvh w-full flex-col overflow-hidden overscroll-x-none lg:p-6 print:block print:h-auto print:overflow-visible print:bg-white print:p-0"
-      >
+      <main className="bg-background text-foreground flex h-dvh w-full flex-col overflow-hidden overscroll-x-none lg:p-6 print:block print:h-auto print:overflow-visible print:bg-white print:p-0">
         <Header value={mobileView} onChange={switchMobileView} />
 
         <div className="flex min-h-0 w-full flex-1 flex-col gap-4 px-4 pb-4 lg:flex-row lg:gap-6 lg:px-0 lg:pb-0 print:block print:p-0">
@@ -182,9 +147,6 @@ export default function Home() {
                 aria-hidden={!isLargeScreen && mobileView !== 'edit'}
                 className={cn(
                   'h-full w-1/2 shrink-0 lg:contents print:contents',
-                  !isLargeScreen &&
-                    '[transition-property:margin] motion-safe:duration-200 motion-safe:ease-out',
-                  !isLargeScreen && paneGapOpen && 'mr-3',
                 )}
               >
                 <EditorSidebar
@@ -205,9 +167,6 @@ export default function Home() {
                 aria-hidden={!isLargeScreen && mobileView !== 'preview'}
                 className={cn(
                   'h-full w-1/2 shrink-0 lg:contents print:contents',
-                  !isLargeScreen &&
-                    '[transition-property:margin] motion-safe:duration-200 motion-safe:ease-out',
-                  !isLargeScreen && paneGapOpen && 'ml-3',
                 )}
               >
                 <ResumePreview

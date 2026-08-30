@@ -7,11 +7,15 @@ export function EditorSkeleton() {
       aria-live="polite"
       className="bg-background flex h-dvh w-full flex-col overflow-hidden lg:p-6"
     >
-      <div className="flex shrink-0 items-center justify-between p-4 lg:mb-6 lg:p-0">
-        <div className="bg-muted h-6 w-24 animate-pulse rounded-md" />
-        <div className="flex items-center gap-2">
-          <div className="bg-muted h-9 w-9 animate-pulse rounded-lg" />
-          <div className="bg-muted hidden h-9 w-40 animate-pulse rounded-lg lg:block" />
+      <div className="flex shrink-0 items-center justify-between gap-2 p-3 sm:p-4 lg:mb-6 lg:p-0">
+        <div className="bg-muted h-6 w-20 shrink-0 animate-pulse rounded-md" />
+        <div className="flex h-5 items-center gap-1.5 sm:gap-2">
+          <div className="bg-muted h-9 w-9 shrink-0 animate-pulse rounded-lg" />
+          <div className="bg-border w-px shrink-0 self-stretch" />
+          <div className="bg-muted h-9 w-9 shrink-0 animate-pulse rounded-lg" />
+          <div className="bg-border w-px shrink-0 self-stretch" />
+          <div className="bg-muted h-8 w-24 shrink-0 animate-pulse rounded-lg lg:hidden" />
+          <div className="bg-muted hidden h-9 w-40 shrink-0 animate-pulse rounded-lg lg:block" />
         </div>
       </div>
 
@@ -34,7 +38,7 @@ export function EditorSkeleton() {
         </div>
 
         <div className="border-border bg-muted/10 hidden min-h-0 flex-1 items-start justify-center rounded-xl border pt-8 shadow-inner lg:flex">
-          <div className="bg-muted/50 aspect-[794/1123] w-[40%] animate-pulse rounded-md" />
+          <div className="bg-muted/50 aspect-794/1123 w-[40%] animate-pulse rounded-md" />
         </div>
       </div>
     </main>
