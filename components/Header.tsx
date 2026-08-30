@@ -29,7 +29,7 @@ export function Header({ value, onChange }: HeaderProps) {
   const activeResumeTitle = activeResume?.title ?? t('header.untitledCv');
 
   return (
-    <header className="flex shrink-0 items-center justify-between gap-2 p-3 sm:p-4 lg:mb-6 lg:p-0 print:hidden">
+    <header className="flex shrink-0 items-center justify-between gap-2 p-3 sm:p-4 md:mb-6 md:p-0 print:hidden">
       <h1 className="shrink-0 text-base font-bold tracking-tight sm:text-lg">
         {t('brand.name')}
       </h1>
@@ -51,7 +51,7 @@ export function Header({ value, onChange }: HeaderProps) {
         <Tabs
           value={value}
           onValueChange={(v) => onChange(v)}
-          className="flex lg:hidden"
+          className="flex md:hidden"
         >
           <TabsList>
             {OPTIONS.map(({ value, labelKey }) => (
@@ -66,7 +66,7 @@ export function Header({ value, onChange }: HeaderProps) {
           variant="secondary"
           type="button"
           onClick={() => setDialog('resumes', true)}
-          className="hidden lg:inline-flex"
+          className="hidden md:inline-flex"
         >
           <FileText className="size-4" data-icon="inline-start" />
           <span className="truncate">{activeResumeTitle}</span>

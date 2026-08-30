@@ -128,17 +128,17 @@ export default function Home() {
 
   return (
     <FormProvider {...methods}>
-      <main className="bg-background text-foreground flex h-dvh w-full flex-col overflow-hidden overscroll-x-none lg:p-6 print:block print:h-auto print:overflow-visible print:bg-white print:p-0">
+      <main className="bg-background text-foreground flex h-dvh w-full flex-col overflow-hidden overscroll-x-none md:p-6 print:block print:h-auto print:overflow-visible print:bg-white print:p-0">
         <Header value={mobileView} onChange={switchMobileView} />
 
-        <div className="flex min-h-0 w-full flex-1 flex-col gap-4 px-4 pb-4 lg:flex-row lg:gap-6 lg:px-0 lg:pb-0 print:block print:p-0">
+        <div className="flex min-h-0 w-full flex-1 flex-col gap-4 px-4 pb-4 md:flex-row md:gap-6 md:px-0 md:pb-0 print:block print:p-0">
           <div
             ref={trackRef}
-            className="relative min-h-0 flex-1 overflow-hidden lg:contents print:contents"
+            className="relative min-h-0 flex-1 overflow-hidden md:contents print:contents"
           >
             <div
               ref={stripRef}
-              className="flex h-full w-[200%] motion-safe:transition-transform motion-safe:will-change-transform lg:contents"
+              className="flex h-full w-[200%] motion-safe:transition-transform motion-safe:will-change-transform md:contents print:contents"
               style={{ transform: 'translate3d(0, 0, 0)' }}
             >
               <div
@@ -146,7 +146,7 @@ export default function Home() {
                 inert={!isLargeScreen && mobileView !== 'edit'}
                 aria-hidden={!isLargeScreen && mobileView !== 'edit'}
                 className={cn(
-                  'h-full w-1/2 shrink-0 lg:contents print:contents',
+                  'h-full w-1/2 shrink-0 md:contents print:contents',
                 )}
               >
                 <EditorSidebar
@@ -166,7 +166,7 @@ export default function Home() {
                 inert={!isLargeScreen && mobileView !== 'preview'}
                 aria-hidden={!isLargeScreen && mobileView !== 'preview'}
                 className={cn(
-                  'h-full w-1/2 shrink-0 lg:contents print:contents',
+                  'h-full w-1/2 shrink-0 md:contents print:contents',
                 )}
               >
                 <ResumePreview

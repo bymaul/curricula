@@ -441,16 +441,14 @@ export function ResumesDialog({ open, onOpenChange }: ResumesDialogProps) {
             </ScrollArea>
           </div>
 
-          <DialogFooter className="bg-muted items-stretch sm:items-center">
-            <div className="flex flex-col gap-2 sm:flex-row">
-              <Button onClick={handleCreate}>
-                <Plus className="size-4" />
-                {t('resumes.newCv')}
-              </Button>
-              <Button variant="outline" onClick={handleCreateFromSample}>
-                {t('resumes.newFromExample')}
-              </Button>
-            </div>
+          <DialogFooter className="bg-muted flex-col items-stretch sm:items-center">
+            <Button onClick={handleCreate}>
+              <Plus className="size-4" />
+              {t('resumes.newCv')}
+            </Button>
+            <Button variant="outline" onClick={handleCreateFromSample}>
+              {t('resumes.newFromExample')}
+            </Button>
             <Button variant="outline" onClick={() => onOpenChange(false)}>
               {t('common.done')}
             </Button>

@@ -64,7 +64,7 @@ export function ActionsDropdown({
           <Button
             variant="ghost"
             size="icon-sm"
-            className={cn('size-9 lg:size-8', triggerClassName)}
+            className={cn('size-9 md:size-8', triggerClassName)}
             aria-label={t('common.actions')}
           >
             <EllipsisVertical className="size-4" />

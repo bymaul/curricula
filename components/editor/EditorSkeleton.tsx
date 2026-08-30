@@ -5,22 +5,22 @@ export function EditorSkeleton() {
     <main
       aria-busy="true"
       aria-live="polite"
-      className="bg-background flex h-dvh w-full flex-col overflow-hidden lg:p-6"
+      className="bg-background flex h-dvh w-full flex-col overflow-hidden md:p-6"
     >
-      <div className="flex shrink-0 items-center justify-between gap-2 p-3 sm:p-4 lg:mb-6 lg:p-0">
+      <div className="flex shrink-0 items-center justify-between gap-2 p-3 sm:p-4 md:mb-6 md:p-0">
         <div className="bg-muted h-6 w-20 shrink-0 animate-pulse rounded-md" />
         <div className="flex h-5 items-center gap-1.5 sm:gap-2">
           <div className="bg-muted h-9 w-9 shrink-0 animate-pulse rounded-lg" />
           <div className="bg-border w-px shrink-0 self-stretch" />
           <div className="bg-muted h-9 w-9 shrink-0 animate-pulse rounded-lg" />
           <div className="bg-border w-px shrink-0 self-stretch" />
-          <div className="bg-muted h-8 w-24 shrink-0 animate-pulse rounded-lg lg:hidden" />
-          <div className="bg-muted hidden h-9 w-40 shrink-0 animate-pulse rounded-lg lg:block" />
+          <div className="bg-muted h-8 w-24 shrink-0 animate-pulse rounded-lg md:hidden" />
+          <div className="bg-muted hidden h-9 w-40 shrink-0 animate-pulse rounded-lg md:block" />
         </div>
       </div>
 
-      <div className="flex min-h-0 w-full flex-1 flex-col gap-4 px-4 pb-4 lg:flex-row lg:gap-6 lg:px-0 lg:pb-0">
-        <div className="border-border bg-card h-full w-full shrink-0 space-y-4 overflow-hidden rounded-xl border p-4 shadow-lg lg:w-[35%] xl:w-[30%]">
+      <div className="flex min-h-0 w-full flex-1 flex-col gap-4 px-4 pb-4 md:flex-row md:gap-6 md:px-0 md:pb-0">
+        <div className="border-border bg-card h-full w-full shrink-0 space-y-4 overflow-hidden rounded-xl border p-4 shadow-lg md:w-[40%] xl:w-[30%]">
           <div className="bg-muted h-7 w-1/3 animate-pulse rounded-md" />
           <div className="space-y-3">
             {[0, 1, 2].map((row) => (
@@ -37,7 +37,7 @@ export function EditorSkeleton() {
           </div>
         </div>
 
-        <div className="border-border bg-muted/10 hidden min-h-0 flex-1 items-start justify-center rounded-xl border pt-8 shadow-inner lg:flex">
+        <div className="border-border bg-muted/10 hidden min-h-0 flex-1 items-start justify-center rounded-xl border pt-8 shadow-inner md:flex">
           <div className="bg-muted/50 aspect-794/1123 w-[40%] animate-pulse rounded-md" />
         </div>
       </div>

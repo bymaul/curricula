@@ -124,17 +124,15 @@ export function SectionsOrderDialog({
           </ScrollArea>
         </div>
 
-        <DialogFooter className="items-stretch sm:items-center">
+        <DialogFooter className="flex-col items-stretch sm:items-center">
           <AddSectionControl onAdd={addCustomSection} />
-          <div className="flex flex-col gap-2 sm:flex-row">
-            <Button variant="outline" onClick={resetSectionOrder}>
-              <RotateCcw className="size-4" />
-              {t('sectionsOrder.resetOrder')}
-            </Button>
-            <Button onClick={() => onOpenChange(false)}>
-              {t('common.done')}
-            </Button>
-          </div>
+          <Button variant="outline" onClick={resetSectionOrder}>
+            <RotateCcw className="size-4" />
+            {t('sectionsOrder.resetOrder')}
+          </Button>
+          <Button onClick={() => onOpenChange(false)}>
+            {t('common.done')}
+          </Button>
         </DialogFooter>
       </DialogContent>
     </Dialog>

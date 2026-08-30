@@ -54,7 +54,7 @@ export function ItemRemoveButton({
   className,
 }: {
   onClick: () => void;
-  title: string;
+  title?: string;
   className?: string;
 }) {
   return (
@@ -195,6 +195,9 @@ export function SortableCard({
 
 interface SortableRowProps {
   id: string;
+  label?: string;
+  onRemove?: () => void;
+  removeTitle?: string;
   className?: string;
   handleClassName?: string;
   children: ReactNode;
@@ -202,6 +205,9 @@ interface SortableRowProps {
 
 export function SortableRow({
   id,
+  label,
+  onRemove,
+  removeTitle,
   className,
   handleClassName,
   children,
@@ -210,21 +216,58 @@ export function SortableRow({
     useSortable({ id });
   const style = { transform: CSS.Transform.toString(transform), transition };
 
+  const isFormRow = Boolean(onRemove || label);
+
   return (
     <div
       ref={setNodeRef}
       style={style}
       className={cn(
-        'border-border bg-card relative mb-4 flex items-end gap-3 rounded-xl border p-4 shadow-sm',
+        'border-border bg-card relative mb-4 rounded-xl border p-3 shadow-sm transition-all',
+        isFormRow
+          ? 'flex flex-col gap-3 @[400px]/sidebar:flex-row @[400px]/sidebar:items-center'
+          : 'flex items-center gap-3',
         className,
       )}
     >
-      <DragHandle
-        {...attributes}
-        {...listeners}
-        className={cn('mb-2', handleClassName)}
-      />
-      {children}
+      {isFormRow ? (
+        <>
+          <div className="border-border flex items-center justify-between border-b pb-2.5 @[400px]/sidebar:contents @[400px]/sidebar:border-b-0 @[400px]/sidebar:pb-0">
+            <div className="flex items-center gap-2">
+              <DragHandle
+                {...attributes}
+                {...listeners}
+                className={handleClassName}
+              />
+              {label && (
+                <span className="text-muted-foreground text-xs font-semibold tracking-wider uppercase @[400px]/sidebar:hidden">
+                  {label}
+                </span>
+              )}
+            </div>
+            {onRemove && (
+              <ItemRemoveButton
+                onClick={onRemove}
+                title={removeTitle}
+                className="h-8 w-8 @[400px]/sidebar:order-last"
+              />
+            )}
+          </div>
+
+          <div className="grid flex-1 grid-cols-1 gap-3 @[400px]/sidebar:flex @[400px]/sidebar:items-center">
+            {children}
+          </div>
+        </>
+      ) : (
+        <>
+          <DragHandle
+            {...attributes}
+            {...listeners}
+            className={handleClassName}
+          />
+          {children}
+        </>
+      )}
     </div>
   );
 }
@@ -340,28 +383,32 @@ export function SectionFieldArray({
             />
           ));
 
+          const currentItemLabel = t('common.itemNumber', {
+            label: itemLabel ?? name,
+            index: index + 1,
+          });
+
           return variant === 'card' ? (
             <SortableCard
               key={row.id}
               id={row.id}
-              label={t('common.itemNumber', {
-                label: itemLabel ?? name,
-                index: index + 1,
-              })}
+              label={currentItemLabel}
               onRemove={() => remove(index)}
               removeTitle={removeTitle}
             >
-              <div className="grid grid-cols-1 gap-3 sm:grid-cols-2">
+              <div className="grid grid-cols-1 gap-3 @[400px]/sidebar:grid-cols-2">
                 {body}
               </div>
             </SortableCard>
           ) : (
-            <SortableRow key={row.id} id={row.id}>
+            <SortableRow
+              key={row.id}
+              id={row.id}
+              label={currentItemLabel}
+              onRemove={() => remove(index)}
+              removeTitle={removeTitle}
+            >
               {body}
-              <ItemRemoveButton
-                onClick={() => remove(index)}
-                title={removeTitle}
-              />
             </SortableRow>
           );
         })}

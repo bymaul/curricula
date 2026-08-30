@@ -98,8 +98,8 @@ export const PersonalForm = () => {
         <FieldSet>
           <FieldLegend>{t('personalDetails.resumeSettings')}</FieldLegend>
 
-          <FieldGroup className="grid grid-cols-1 sm:grid-cols-2">
-            <Field className="sm:col-span-2">
+          <FieldGroup>
+            <Field>
               <FieldLabel>{t('personalDetails.photoLabel')}</FieldLabel>
               <div className="flex items-center gap-4">
                 <div className="border-border bg-muted flex h-20 w-20 shrink-0 items-center justify-center overflow-hidden rounded-full border">
@@ -156,7 +156,7 @@ export const PersonalForm = () => {
         <FieldSet>
           <FieldLegend>{t('personalDetails.contactInformation')}</FieldLegend>
 
-          <FieldGroup className="grid grid-cols-1 sm:grid-cols-2">
+          <FieldGroup className="grid grid-cols-1 @[400px]/sidebar:grid-cols-2">
             <FormField
               name="name"
               label={t('personalDetails.fullName')}
@@ -191,7 +191,7 @@ export const PersonalForm = () => {
               label={t('personalDetails.location')}
               placeholder={t('personalDetails.locationPlaceholder')}
               register={register}
-              className="sm:col-span-2"
+              className="@[400px]/sidebar:col-span-2"
             />
           </FieldGroup>
         </FieldSet>

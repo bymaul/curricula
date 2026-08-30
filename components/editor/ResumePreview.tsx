@@ -271,7 +271,7 @@ function ResumePreviewImpl({
 
       <div className="min-h-0 flex-1 print:overflow-visible">
         <ScrollArea className="h-full w-full print:h-auto print:overflow-visible">
-          <div className="min-h-full py-8 lg:py-16 print:block print:p-0 print:py-0">
+          <div className="min-h-full py-8 md:py-16 print:block print:p-0 print:py-0">
             <div
               style={{
                 width: frameWidthPx * scale,

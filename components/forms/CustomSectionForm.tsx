@@ -139,7 +139,7 @@ export const CustomSectionForm = ({ section }: CustomSectionFormProps) => {
           {
             name: 'description',
             as: 'textarea',
-            className: 'sm:col-span-2',
+            className: '@[400px]/sidebar:col-span-2',
             label: t('customSection.descriptionLabel'),
           },
         ]}

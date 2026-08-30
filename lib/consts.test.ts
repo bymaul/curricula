@@ -36,7 +36,7 @@ describe('AI_PROVIDERS', () => {
 
 describe('DESKTOP_MEDIA_QUERY', () => {
   it('matches the desktop breakpoint', () => {
-    expect(DESKTOP_MEDIA_QUERY).toBe('(min-width: 1024px)');
+    expect(DESKTOP_MEDIA_QUERY).toBe('(min-width: 768px)');
   });
 });
 

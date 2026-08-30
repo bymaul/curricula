@@ -1,6 +1,6 @@
 import { CVData } from './schema';
 
-export const DESKTOP_MEDIA_QUERY = '(min-width: 1024px)';
+export const DESKTOP_MEDIA_QUERY = '(min-width: 768px)';
 
 export const AI_PROVIDERS = [
   { value: 'openai', label: 'OpenAI', defaultModel: 'gpt-5.6-luna' },
