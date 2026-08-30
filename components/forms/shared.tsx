@@ -306,7 +306,7 @@ export function SectionFieldArray({
     `${name}.${index}.${fieldName}` as FieldPath<CVData>;
 
   return (
-    <div className="space-y-4 px-4 py-2">
+    <div className={cn('space-y-4 px-4 py-2', !showHeading && 'p-0')}>
       {showHeading && (
         <SectionHeading title={title} description={description} />
       )}
