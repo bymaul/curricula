@@ -1,7 +1,7 @@
 'use client';
 
 import { Button } from '@/components/ui/button';
-import { useI18n } from '@/components/I18nProvider';
+import { useI18n } from '@/hooks/useI18n';
 import { SAMPLE_CV_DATA } from '@/lib/sampleCv';
 import { Sparkles } from 'lucide-react';
 import { useState } from 'react';

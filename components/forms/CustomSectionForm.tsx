@@ -2,7 +2,7 @@
 
 import { useState } from 'react';
 import { ConfirmDialog } from '@/components/ui/confirm-dialog';
-import { useI18n } from '@/components/I18nProvider';
+import { useI18n } from '@/hooks/useI18n';
 import type { CustomSection } from '@/lib/schema';
 import { useResumeStore } from '@/store/useResumeStore';
 import { Pencil, Trash2 } from 'lucide-react';
@@ -52,7 +52,7 @@ export const CustomSectionForm = ({ section }: CustomSectionFormProps) => {
               <FieldLabel htmlFor="custom-section-title">
                 {t('customSection.rename')}
               </FieldLabel>
-              <div className="flex gap-2">
+              <div className="flex items-center gap-2">
                 <Input
                   id="custom-section-title"
                   value={draftTitle}
@@ -60,7 +60,7 @@ export const CustomSectionForm = ({ section }: CustomSectionFormProps) => {
                   onKeyDown={(e) => e.key === 'Enter' && commitRename()}
                   autoFocus
                 />
-                <Button type="button" size="sm" onClick={commitRename}>
+                <Button type="button" onClick={commitRename}>
                   {t('sectionsOrder.add')}
                 </Button>
               </div>
@@ -103,7 +103,6 @@ export const CustomSectionForm = ({ section }: CustomSectionFormProps) => {
           </div>
         )}
       </div>
-
       <SectionFieldArray
         name={itemsName}
         title={section.title}
@@ -145,7 +144,6 @@ export const CustomSectionForm = ({ section }: CustomSectionFormProps) => {
           },
         ]}
       />
-
       <ConfirmDialog
         open={confirmDelete}
         onOpenChange={setConfirmDelete}

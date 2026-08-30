@@ -10,7 +10,7 @@ import {
   DialogTitle,
 } from '@/components/ui/dialog';
 import { toast } from '@/components/ui/toast';
-import { useI18n } from '@/components/I18nProvider';
+import { useI18n } from '@/hooks/useI18n';
 import { CvJsonImportDialog } from '@/components/import/CvJsonImportDialog';
 import { BackupFile, parseBackup, serializeBackup } from '@/lib/backup';
 import { CVData } from '@/lib/schema';

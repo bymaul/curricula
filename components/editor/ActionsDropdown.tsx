@@ -1,7 +1,7 @@
 'use client';
 
 import { useMediaQuery } from '@/hooks/useMediaQuery';
-import { useI18n } from '@/components/I18nProvider';
+import { useI18n } from '@/hooks/useI18n';
 import { UI_LANGUAGES, Language } from '@/lib/i18n/languages';
 import { DESKTOP_MEDIA_QUERY } from '@/lib/consts';
 import { cn } from '@/lib/utils';

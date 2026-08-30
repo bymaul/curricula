@@ -1,5 +1,5 @@
 import { toast } from '@/components/ui/toast';
-import { useI18n } from '@/components/I18nProvider';
+import { useI18n } from '@/hooks/useI18n';
 import { SECTIONS, SectionId, TabName } from '@/lib/consts';
 import { tabKey } from '@/lib/i18n';
 import type { CVData } from '@/lib/schema';

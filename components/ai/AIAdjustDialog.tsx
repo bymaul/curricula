@@ -25,7 +25,7 @@ import {
 } from '@/components/ui/select';
 import { Textarea } from '@/components/ui/textarea';
 import { toast } from '@/components/ui/toast';
-import { useI18n } from '@/components/I18nProvider';
+import { useI18n } from '@/hooks/useI18n';
 import { useAIAdjustCV } from '@/hooks/useAIAdjustCV';
 import { stripInvisibleChars } from '@/lib/cleanText';
 import { getStoredAIAPIKey } from '@/lib/consts';

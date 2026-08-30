@@ -12,7 +12,7 @@ import {
 } from '@/components/ui/field';
 import { Button } from '@/components/ui/button';
 import { toast } from '@/components/ui/toast';
-import { useI18n } from '@/components/I18nProvider';
+import { useI18n } from '@/hooks/useI18n';
 import { CVData } from '@/lib/schema';
 import { translateValidationMessage } from '@/lib/i18n';
 import { SUPPORTED_IMAGE_TYPES, resizeSquarePhoto } from '@/lib/imageFiles';

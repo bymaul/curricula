@@ -9,7 +9,7 @@ import {
   DialogHeader,
   DialogTitle,
 } from '@/components/ui/dialog';
-import { useI18n } from '@/components/I18nProvider';
+import { useI18n } from '@/hooks/useI18n';
 import { BuiltinTabName, getSectionTabName } from '@/lib/consts';
 import { TAB_KEYS } from '@/lib/i18n';
 import { useImportStore } from '@/store/useImportStore';

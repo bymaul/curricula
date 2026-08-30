@@ -1,7 +1,7 @@
 'use client';
 
 import { IconButton } from '@/components/ui/icon-button';
-import { useI18n } from '@/components/I18nProvider';
+import { useI18n } from '@/hooks/useI18n';
 import { Maximize2, Minus, Plus } from 'lucide-react';
 
 interface ZoomControlsProps {

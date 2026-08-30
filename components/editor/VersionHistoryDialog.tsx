@@ -9,7 +9,7 @@ import {
   DialogTitle,
 } from '@/components/ui/dialog';
 import { ScrollArea } from '@/components/ui/scroll-area';
-import { useI18n } from '@/components/I18nProvider';
+import { useI18n } from '@/hooks/useI18n';
 import { useResumeStore } from '@/store/useResumeStore';
 import { cn, formatRelativeTime } from '@/lib/utils';
 import { History } from 'lucide-react';

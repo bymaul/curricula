@@ -18,7 +18,7 @@ import {
   SelectValue,
 } from '@/components/ui/select';
 import { AIProvider, AI_PROVIDERS } from '@/lib/consts';
-import { useI18n } from '@/components/I18nProvider';
+import { useI18n } from '@/hooks/useI18n';
 
 interface AISettingsFieldsProps {
   provider: AIProvider;

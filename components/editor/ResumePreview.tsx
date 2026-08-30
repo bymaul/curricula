@@ -1,6 +1,6 @@
 'use client';
 
-import { useI18n } from '@/components/I18nProvider';
+import { useI18n } from '@/hooks/useI18n';
 import { TEMPLATE_COMPONENTS } from '@/components/resume/registry';
 import { ScrollArea, ScrollBar } from '@/components/ui/scroll-area';
 import { usePageScale } from '@/hooks/usePageScale';

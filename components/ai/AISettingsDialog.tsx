@@ -12,7 +12,7 @@ import {
 } from '@/components/ui/dialog';
 import { useAISettings } from '@/hooks/useAISettings';
 import { useAIStatus } from '@/hooks/useAIStatus';
-import { useI18n } from '@/components/I18nProvider';
+import { useI18n } from '@/hooks/useI18n';
 
 interface AISettingsDialogProps {
   open: boolean;

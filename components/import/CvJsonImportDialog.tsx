@@ -9,7 +9,7 @@ import {
   DialogHeader,
   DialogTitle,
 } from '@/components/ui/dialog';
-import { useI18n } from '@/components/I18nProvider';
+import { useI18n } from '@/hooks/useI18n';
 import { WarningList } from '@/components/ui/warning-list';
 import { parseCvJson } from '@/lib/cvImport';
 import type { CVData } from '@/lib/schema';

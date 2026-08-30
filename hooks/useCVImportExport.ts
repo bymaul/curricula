@@ -1,6 +1,6 @@
 import { useRef } from 'react';
 import { toast } from '@/components/ui/toast';
-import { useI18n } from '@/components/I18nProvider';
+import { useI18n } from '@/hooks/useI18n';
 import { extractTextFromPDF, parseCVWithAI } from '@/hooks/useCVImportPDF';
 import { getStoredAIAPIKey } from '@/lib/consts';
 import { getPDFImportErrorInfo } from '@/lib/pdfImportErrors';

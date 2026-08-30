@@ -1,7 +1,7 @@
 'use client';
 
 import { ChevronsUpDown, FileText, Search } from 'lucide-react';
-import { useI18n } from './I18nProvider';
+import { useI18n } from '@/hooks/useI18n';
 import { ThemeToggle } from './ThemeToggle';
 import { Button } from './ui/button';
 import { Separator } from './ui/separator';

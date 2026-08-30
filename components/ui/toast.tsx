@@ -5,7 +5,7 @@ import { Toast as ToastPrimitive } from '@base-ui/react/toast';
 
 import { cn } from '@/lib/utils';
 import { Button } from '@/components/ui/button';
-import { useI18n } from '@/components/I18nProvider';
+import { useI18n } from '@/hooks/useI18n';
 import {
   XIcon,
   CircleCheckIcon,

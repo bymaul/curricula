@@ -16,7 +16,7 @@ import {
   SelectTrigger,
   SelectValue,
 } from '@/components/ui/select';
-import { useI18n } from '@/components/I18nProvider';
+import { useI18n } from '@/hooks/useI18n';
 import { CVData } from '@/lib/schema';
 import { UI_LANGUAGES } from '@/lib/i18n/languages';
 import { DEFAULT_DESIGN } from '@/lib/design';

@@ -1,7 +1,7 @@
 'use client';
 
 import { useMemo } from 'react';
-import { useI18n } from '@/components/I18nProvider';
+import { useI18n } from '@/hooks/useI18n';
 import { navTabLabel } from '@/lib/i18n';
 import {
   Command,

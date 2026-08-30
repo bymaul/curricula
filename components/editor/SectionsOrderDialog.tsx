@@ -14,7 +14,7 @@ import { SortableList, SortableRow } from '@/components/forms/shared';
 import { ScrollArea } from '@/components/ui/scroll-area';
 import { IconButton } from '@/components/ui/icon-button';
 import { Input } from '@/components/ui/input';
-import { useI18n } from '@/components/I18nProvider';
+import { useI18n } from '@/hooks/useI18n';
 import { SectionId } from '@/lib/consts';
 import { getCustomSections } from '@/lib/schema';
 import type { TranslationKey } from '@/lib/i18n';

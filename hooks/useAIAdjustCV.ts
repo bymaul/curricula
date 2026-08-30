@@ -1,5 +1,5 @@
 import { useRef, useState } from 'react';
-import { useI18n } from '@/components/I18nProvider';
+import { useI18n } from '@/hooks/useI18n';
 import { CVData } from '@/lib/schema';
 import { AIAdjustScope, AIProvider } from '@/lib/consts';
 import type { CVImagePart } from '@/lib/cvParsing';

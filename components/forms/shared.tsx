@@ -20,7 +20,7 @@ import {
 import { CSS } from '@dnd-kit/utilities';
 import { GripVertical, Plus, Trash2 } from 'lucide-react';
 import { ComponentType, ReactNode } from 'react';
-import { useI18n } from '@/components/I18nProvider';
+import { useI18n } from '@/hooks/useI18n';
 import { FormField } from '@/components/ui/form-field';
 import { CVData } from '@/lib/schema';
 import { translateValidationMessage } from '@/lib/i18n';

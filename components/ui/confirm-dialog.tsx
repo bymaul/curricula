@@ -2,7 +2,7 @@
 
 import { ReactNode } from 'react';
 import { Button } from '@/components/ui/button';
-import { useI18n } from '@/components/I18nProvider';
+import { useI18n } from '@/hooks/useI18n';
 import {
   Dialog,
   DialogContent,
