@@ -18,7 +18,16 @@ import {
   verticalListSortingStrategy,
 } from '@dnd-kit/sortable';
 import { CSS } from '@dnd-kit/utilities';
-import { GripVertical, Plus, Trash2 } from 'lucide-react';
+import {
+  Award,
+  Briefcase,
+  FolderGit2,
+  GraduationCap,
+  GripVertical,
+  Plus,
+  Trash2,
+  Wrench,
+} from 'lucide-react';
 import { ComponentType, ReactNode } from 'react';
 import { useI18n } from '@/hooks/useI18n';
 import { FormField } from '@/components/ui/form-field';
@@ -158,6 +167,17 @@ interface SortableCardProps {
   children: ReactNode;
 }
 
+function useSortableStyle(id: string) {
+  const { attributes, listeners, setNodeRef, transform, transition } =
+    useSortable({ id });
+  return {
+    attributes,
+    listeners,
+    setNodeRef,
+    style: { transform: CSS.Transform.toString(transform), transition },
+  };
+}
+
 export function SortableCard({
   id,
   label,
@@ -165,9 +185,7 @@ export function SortableCard({
   removeTitle,
   children,
 }: SortableCardProps) {
-  const { attributes, listeners, setNodeRef, transform, transition } =
-    useSortable({ id });
-  const style = { transform: CSS.Transform.toString(transform), transition };
+  const { attributes, listeners, setNodeRef, style } = useSortableStyle(id);
 
   return (
     <div
@@ -212,9 +230,7 @@ export function SortableRow({
   handleClassName,
   children,
 }: SortableRowProps) {
-  const { attributes, listeners, setNodeRef, transform, transition } =
-    useSortable({ id });
-  const style = { transform: CSS.Transform.toString(transform), transition };
+  const { attributes, listeners, setNodeRef, style } = useSortableStyle(id);
 
   const isFormRow = Boolean(onRemove || label);
 
@@ -304,6 +320,15 @@ interface SectionFieldArrayProps {
   showHeading?: boolean;
 }
 
+function getIn(obj: unknown, path: string[]): unknown {
+  let branch: unknown = obj;
+  for (const segment of path) {
+    branch = (branch as Record<string, unknown> | undefined)?.[segment];
+    if (branch === undefined) break;
+  }
+  return branch;
+}
+
 export function SectionFieldArray({
   name,
   title,
@@ -334,16 +359,9 @@ export function SectionFieldArray({
   });
 
   const resolveErrors = (index: number, fieldName: string) => {
-    let branch: unknown = errors;
-    for (const segment of name.split('.')) {
-      branch = (branch as Record<string, unknown>)?.[segment];
-    }
-    branch = (branch as unknown[])?.[index];
-    return translateValidationMessage(
-      t,
-      (branch as Record<string, { message?: string } | undefined>)?.[fieldName]
-        ?.message,
-    );
+    const branch = getIn(errors, name.split('.')) as
+      Array<Record<string, { message?: string } | undefined>> | undefined;
+    return translateValidationMessage(t, branch?.[index]?.[fieldName]?.message);
   };
   const pathFor = (index: number, fieldName: string) =>
     `${name}.${index}.${fieldName}` as FieldPath<CVData>;
@@ -419,4 +437,200 @@ export function SectionFieldArray({
       </AddItemButton>
     </div>
   );
+}
+
+export type BuiltinFormSection =
+  'experience' | 'projects' | 'education' | 'skills' | 'certifications';
+
+type TFn = ReturnType<typeof useI18n>['t'];
+
+function getSectionConfig(
+  section: BuiltinFormSection,
+  t: TFn,
+): Omit<SectionFieldArrayProps, 'name'> & {
+  name: FieldArrayPath<CVData>;
+} {
+  switch (section) {
+    case 'experience':
+      return {
+        name: 'experience',
+        emptyIcon: Briefcase,
+        title: t('workExperience.title'),
+        description: t('workExperience.description'),
+        addLabel: t('workExperience.add'),
+        variant: 'card',
+        itemLabel: t('workExperience.itemLabel'),
+        removeTitle: t('workExperience.remove'),
+        newItem: () => ({
+          role: '',
+          company: '',
+          date: '',
+          location: '',
+          description: '',
+        }),
+        fields: [
+          {
+            name: 'role',
+            label: t('workExperience.roleLabel'),
+            placeholder: t('workExperience.rolePlaceholder'),
+          },
+          {
+            name: 'company',
+            label: t('workExperience.companyLabel'),
+            placeholder: t('workExperience.companyPlaceholder'),
+          },
+          {
+            name: 'location',
+            label: t('workExperience.locationLabel'),
+            placeholder: t('workExperience.locationPlaceholder'),
+          },
+          {
+            name: 'date',
+            label: t('workExperience.datesLabel'),
+            placeholder: t('workExperience.datesPlaceholder'),
+          },
+          {
+            name: 'description',
+            as: 'textarea',
+            className: '@[400px]/sidebar:col-span-2',
+            label: t('workExperience.descriptionLabel'),
+            placeholder: t('workExperience.descriptionPlaceholder'),
+          },
+        ],
+      };
+    case 'education':
+      return {
+        name: 'education',
+        emptyIcon: GraduationCap,
+        title: t('education.title'),
+        description: t('education.description'),
+        addLabel: t('education.add'),
+        variant: 'card',
+        itemLabel: t('education.itemLabel'),
+        removeTitle: t('education.remove'),
+        newItem: () => ({
+          degree: '',
+          institution: '',
+          date: '',
+          location: '',
+          description: '',
+        }),
+        fields: [
+          {
+            name: 'institution',
+            label: t('education.institutionLabel'),
+            placeholder: t('education.institutionPlaceholder'),
+          },
+          {
+            name: 'degree',
+            label: t('education.degreeLabel'),
+            placeholder: t('education.degreePlaceholder'),
+          },
+          {
+            name: 'location',
+            label: t('education.locationLabel'),
+            placeholder: t('education.locationPlaceholder'),
+          },
+          {
+            name: 'date',
+            label: t('education.datesLabel'),
+            placeholder: t('education.datesPlaceholder'),
+          },
+          {
+            name: 'description',
+            as: 'textarea',
+            className: '@[400px]/sidebar:col-span-2',
+            label: t('education.summaryLabel'),
+            placeholder: t('education.summaryPlaceholder'),
+          },
+        ],
+      };
+    case 'projects':
+      return {
+        name: 'projects',
+        emptyIcon: FolderGit2,
+        title: t('projects.title'),
+        description: t('projects.description'),
+        addLabel: t('projects.add'),
+        variant: 'card',
+        itemLabel: t('projects.itemLabel'),
+        removeTitle: t('projects.remove'),
+        newItem: () => ({ name: '', date: '', description: '' }),
+        fields: [
+          {
+            name: 'name',
+            label: t('projects.nameLabel'),
+            placeholder: t('projects.namePlaceholder'),
+          },
+          {
+            name: 'date',
+            label: t('projects.datesLabel'),
+            placeholder: t('projects.datesPlaceholder'),
+          },
+          {
+            name: 'description',
+            as: 'textarea',
+            className: '@[400px]/sidebar:col-span-2',
+            label: t('projects.descriptionLabel'),
+            placeholder: t('projects.descriptionPlaceholder'),
+          },
+        ],
+      };
+    case 'skills':
+      return {
+        name: 'skills',
+        emptyIcon: Wrench,
+        title: t('skills.title'),
+        description: t('skills.description'),
+        addLabel: t('skills.addCategory'),
+        variant: 'row',
+        removeTitle: t('skills.removeCategory'),
+        newItem: () => ({ category: '', items: '' }),
+        fields: [
+          {
+            name: 'category',
+            label: t('skills.categoryLabel'),
+            placeholder: t('skills.categoryPlaceholder'),
+          },
+          {
+            name: 'items',
+            label: t('skills.itemsLabel'),
+            placeholder: t('skills.itemsPlaceholder'),
+          },
+        ],
+      };
+    case 'certifications':
+      return {
+        name: 'certifications',
+        emptyIcon: Award,
+        title: t('certifications.title'),
+        description: t('certifications.description'),
+        addLabel: t('certifications.add'),
+        variant: 'row',
+        removeTitle: t('certifications.remove'),
+        newItem: () => ({ name: '', issuer: '', date: '' }),
+        fields: [
+          {
+            name: 'name',
+            label: t('certifications.nameLabel'),
+            placeholder: t('certifications.namePlaceholder'),
+          },
+          {
+            name: 'issuer',
+            label: t('certifications.issuerLabel'),
+            placeholder: t('certifications.issuerPlaceholder'),
+          },
+          {
+            name: 'date',
+            label: t('certifications.dateLabel'),
+            placeholder: t('certifications.datePlaceholder'),
+          },
+        ],
+      };
+  }
+}
+
+export function SectionForm({ section }: { section: BuiltinFormSection }) {
+  const { t } = useI18n();
+  return <SectionFieldArray {...getSectionConfig(section, t)} />;
 }

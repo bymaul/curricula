@@ -8,6 +8,7 @@ import {
   useState,
 } from 'react';
 import { useUIStore } from '@/store/useUIStore';
+import { clampScale } from '@/lib/utils';
 
 const MIN_SCALE = 0.3;
 const MAX_SCALE = 1.5;
@@ -153,10 +154,7 @@ export function usePageScale({ frameWidthPx, isVisible }: UsePageScaleOptions) {
   const zoomTo = useCallback(
     (next: number, immediate = false) => {
       manualRef.current = true;
-      targetRef.current = Math.min(
-        MAX_SCALE,
-        Math.max(MIN_SCALE, +(+next).toFixed(2)),
-      );
+      targetRef.current = clampScale(+(+next).toFixed(2), MIN_SCALE, MAX_SCALE);
       if (immediate) {
         applyAnchor(targetRef.current);
         dispRef.current = targetRef.current;
@@ -170,18 +168,20 @@ export function usePageScale({ frameWidthPx, isVisible }: UsePageScaleOptions) {
 
   const zoomIn = useCallback(() => {
     manualRef.current = true;
-    targetRef.current = Math.min(
-      MAX_SCALE,
+    targetRef.current = clampScale(
       +(targetRef.current + 0.1).toFixed(2),
+      MIN_SCALE,
+      MAX_SCALE,
     );
     requestAnimate();
   }, [requestAnimate]);
 
   const zoomOut = useCallback(() => {
     manualRef.current = true;
-    targetRef.current = Math.max(
-      MIN_SCALE,
+    targetRef.current = clampScale(
       +(targetRef.current - 0.1).toFixed(2),
+      MIN_SCALE,
+      MAX_SCALE,
     );
     requestAnimate();
   }, [requestAnimate]);

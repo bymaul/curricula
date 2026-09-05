@@ -1,6 +1,7 @@
 'use client';
 
 import { useEffect, useRef } from 'react';
+import { clampScale } from '@/lib/utils';
 
 const WHEEL_GAIN = 0.002;
 const WHEEL_IDLE_MS = 150;
@@ -51,7 +52,7 @@ export function usePinchZoom<T extends HTMLElement>({
 
     const clamp = (value: number) => {
       const { minScale, maxScale } = optionsRef.current;
-      return Math.min(maxScale, Math.max(minScale, value));
+      return clampScale(value, minScale, maxScale);
     };
 
     const endGesture = () => {

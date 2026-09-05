@@ -4,8 +4,7 @@ import { useMediaQuery } from '@/hooks/useMediaQuery';
 import { useI18n } from '@/hooks/useI18n';
 import { UI_LANGUAGES, Language } from '@/lib/i18n/languages';
 import { DESKTOP_MEDIA_QUERY } from '@/lib/consts';
-import { cn } from '@/lib/utils';
-import { isApplePlatform } from '@/lib/platform';
+import { cn, isApplePlatform } from '@/lib/utils';
 import { useDialogStore } from '@/store/useDialogStore';
 import { useUIStore } from '@/store/useUIStore';
 import {

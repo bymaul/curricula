@@ -151,19 +151,9 @@ function normalizeResume(record: ResumeRecord): ResumeRecord {
 }
 
 function withoutPhoto(record: ResumeRecord): Omit<ResumeRecord, 'photo'> {
-  return {
-    id: record.id,
-    title: record.title,
-    data: record.data,
-    sectionOrder: record.sectionOrder,
-    hiddenSections: record.hiddenSections,
-    language: record.language,
-    templateId: record.templateId,
-    design: record.design,
-    autoTitle: record.autoTitle,
-    favorite: record.favorite,
-    updatedAt: record.updatedAt,
-  };
+  // eslint-disable-next-line @typescript-eslint/no-unused-vars
+  const { photo, ...rest } = record;
+  return rest;
 }
 
 function parseLegacyData(raw: string | null): CVData | null {
@@ -217,15 +207,43 @@ function seedHistory(record: ResumeRecord): ResumeHistory {
 
 function nextStateEqual(a: HistoryState, b: HistoryState): boolean {
   return (
-    JSON.stringify([a.data, a.sectionOrder, a.hiddenSections]) ===
-      JSON.stringify([b.data, b.sectionOrder, b.hiddenSections]) &&
+    isJsonEqual(
+      [a.data, a.sectionOrder, a.hiddenSections],
+      [b.data, b.sectionOrder, b.hiddenSections],
+    ) &&
     a.title === b.title &&
     a.autoTitle === b.autoTitle &&
     a.language === b.language &&
     a.photo === b.photo &&
     a.templateId === b.templateId &&
-    JSON.stringify(a.design) === JSON.stringify(b.design)
+    isJsonEqual(a.design, b.design)
   );
+}
+
+function isJsonEqual(a: unknown, b: unknown): boolean {
+  return JSON.stringify(a) === JSON.stringify(b);
+}
+
+function commitPatch(
+  state: ResumeState,
+  id: string,
+  patch: Partial<ResumeRecord>,
+  isUnchanged: (record: ResumeRecord, next: ResumeRecord) => boolean,
+  bumpRevision: boolean,
+): Partial<ResumeState> {
+  const record = state.resumes.find((r) => r.id === id);
+  if (!record) return {};
+  const next: ResumeRecord = { ...record, ...patch };
+  if (isUnchanged(record, next)) return {};
+  const partial: Partial<ResumeState> = {
+    resumes: state.resumes.map((r) => (r.id === id ? next : r)),
+    histories: {
+      ...state.histories,
+      [id]: commitHistory(state.histories[id], historyState(next), now()),
+    },
+  };
+  if (bumpRevision) partial.revision = state.revision + 1;
+  return partial;
 }
 
 function commitHistory(
@@ -309,21 +327,17 @@ function commitResumeChange(
     Pick<ResumeRecord, 'data' | 'sectionOrder' | 'hiddenSections'>
   >,
 ): Partial<ResumeState> {
-  const record = state.resumes.find((r) => r.id === id);
-  if (!record) return {};
-  const next: ResumeRecord = { ...record, ...patch };
-  const unchanged =
-    JSON.stringify([next.data, next.sectionOrder, next.hiddenSections]) ===
-    JSON.stringify([record.data, record.sectionOrder, record.hiddenSections]);
-  if (unchanged) return {};
-  return {
-    resumes: state.resumes.map((r) => (r.id === id ? next : r)),
-    histories: {
-      ...state.histories,
-      [id]: commitHistory(state.histories[id], historyState(next), now()),
-    },
-    revision: state.revision + 1,
-  };
+  return commitPatch(
+    state,
+    id,
+    patch,
+    (record, next) =>
+      isJsonEqual(
+        [next.data, next.sectionOrder, next.hiddenSections],
+        [record.data, record.sectionOrder, record.hiddenSections],
+      ),
+    true,
+  );
 }
 
 function commitMetadataChange(
@@ -336,24 +350,19 @@ function commitMetadataChange(
     >
   >,
 ): Partial<ResumeState> {
-  const record = state.resumes.find((r) => r.id === id);
-  if (!record) return {};
-  const next: ResumeRecord = { ...record, ...patch };
-  const unchanged =
-    next.title === record.title &&
-    next.autoTitle === record.autoTitle &&
-    next.language === record.language &&
-    next.photo === record.photo &&
-    next.templateId === record.templateId &&
-    JSON.stringify(next.design) === JSON.stringify(record.design);
-  if (unchanged) return {};
-  return {
-    resumes: state.resumes.map((r) => (r.id === id ? next : r)),
-    histories: {
-      ...state.histories,
-      [id]: commitHistory(state.histories[id], historyState(next), now()),
-    },
-  };
+  return commitPatch(
+    state,
+    id,
+    patch,
+    (record, next) =>
+      next.title === record.title &&
+      next.autoTitle === record.autoTitle &&
+      next.language === record.language &&
+      next.photo === record.photo &&
+      next.templateId === record.templateId &&
+      isJsonEqual(next.design, record.design),
+    false,
+  );
 }
 
 export const useResumeStore = create<ResumeState>()(
@@ -503,7 +512,7 @@ export const useResumeStore = create<ResumeState>()(
         set((state) => {
           const record = state.resumes.find((r) => r.id === id);
           if (!record) return {};
-          if (JSON.stringify(record.data) === JSON.stringify(data)) return {};
+          if (isJsonEqual(record.data, data)) return {};
           const updated: ResumeRecord = {
             ...record,
             data,

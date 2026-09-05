@@ -14,6 +14,7 @@ import {
   rateLimitResponse,
   rateLimitStatus,
 } from '@/lib/rateLimit';
+import { safeParseJSON } from '@/lib/utils';
 
 const supportedMimeTypes = new Set(['image/jpeg', 'image/png', 'image/webp']);
 
@@ -149,12 +150,11 @@ export async function handleAIRequest<Schema extends z.ZodType<ProviderConfig>>(
       );
     }
 
-    let body: unknown;
-    try {
-      body = text.length > 0 ? JSON.parse(text) : {};
-    } catch {
+    const parsed = text.length > 0 ? safeParseJSON(text) : {};
+    if (parsed === null && text.length > 0) {
       return Response.json({ error: 'Invalid payload' }, { status: 400 });
     }
+    const body: unknown = parsed;
 
     const parsedBody = schema.safeParse(body);
     if (!parsedBody.success) {

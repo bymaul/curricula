@@ -1,6 +1,17 @@
+'use client';
+
+import { useEffect } from 'react';
 import { SerwistProvider } from '@serwist/turbopack/react';
-import { LanguageSync } from '@/components/LanguageSync';
 import { TooltipProvider } from '@/components/ui/tooltip';
+import { useUIStore } from '@/store/useUIStore';
+
+function LanguageSync() {
+  const lang = useUIStore((state) => state.uiLanguage);
+  useEffect(() => {
+    document.documentElement.lang = lang;
+  }, [lang]);
+  return null;
+}
 
 export function Provider({ ...props }) {
   return (

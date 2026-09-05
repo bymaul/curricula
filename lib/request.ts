@@ -1,3 +1,5 @@
+import { safeParseJSON } from '@/lib/utils';
+
 interface ErrorPayload {
   error?: unknown;
 }
@@ -32,12 +34,7 @@ function readRetryAfter(response: Response): number {
 export async function parseResponseJSON<T>(response: Response): Promise<T> {
   const text = await response.text();
 
-  let data: unknown = null;
-  try {
-    data = text ? JSON.parse(text) : null;
-  } catch {
-    data = null;
-  }
+  const data: unknown = safeParseJSON(text);
 
   if (response.status === 429) {
     throw new RateLimitError(readRetryAfter(response));

@@ -91,6 +91,22 @@ function isRecord(value: unknown): value is Record<string, unknown> {
   return !!value && typeof value === 'object' && !Array.isArray(value);
 }
 
+function parseStringArray<T extends Record<string, string>>(
+  obj: Record<string, unknown>,
+  key: string,
+  fields: (keyof T & string)[],
+): T[] {
+  const value = obj[key];
+  if (!Array.isArray(value)) return [];
+  return value
+    .filter(isRecord)
+    .map((entry) =>
+      Object.fromEntries(
+        fields.map((field) => [field, asString(entry[field])]),
+      ),
+    ) as T[];
+}
+
 export function normalizeCVText(text: string): string {
   const collapsed = text.replace(/\n{3,}/g, '\n\n').trim();
   if (collapsed.length <= MAX_CV_TEXT_CHARS) return collapsed;
@@ -142,52 +158,47 @@ export function extractJSON(text: string): unknown | null {
 export function normalizeCVOutput(raw: unknown): CVParseResult {
   const obj = isRecord(raw) ? raw : {};
 
-  const links = Array.isArray(obj.links)
-    ? obj.links.filter(isRecord).map((l) => ({ url: asString(l.url) }))
-    : [];
+  const links = parseStringArray<{ url: string }>(obj, 'links', ['url']);
 
-  const experience = Array.isArray(obj.experience)
-    ? obj.experience.filter(isRecord).map((e) => ({
-        role: asString(e.role),
-        company: asString(e.company),
-        date: asString(e.date),
-        location: asString(e.location),
-        description: asString(e.description),
-      }))
-    : [];
+  const experience = parseStringArray<{
+    role: string;
+    company: string;
+    date: string;
+    location: string;
+    description: string;
+  }>(obj, 'experience', ['role', 'company', 'date', 'location', 'description']);
 
-  const projects = Array.isArray(obj.projects)
-    ? obj.projects.filter(isRecord).map((p) => ({
-        name: asString(p.name),
-        date: asString(p.date),
-        description: asString(p.description),
-      }))
-    : [];
+  const projects = parseStringArray<{
+    name: string;
+    date: string;
+    description: string;
+  }>(obj, 'projects', ['name', 'date', 'description']);
 
-  const education = Array.isArray(obj.education)
-    ? obj.education.filter(isRecord).map((e) => ({
-        degree: asString(e.degree),
-        institution: asString(e.institution),
-        date: asString(e.date),
-        location: asString(e.location),
-        description: asString(e.description),
-      }))
-    : [];
+  const education = parseStringArray<{
+    degree: string;
+    institution: string;
+    date: string;
+    location: string;
+    description: string;
+  }>(obj, 'education', [
+    'degree',
+    'institution',
+    'date',
+    'location',
+    'description',
+  ]);
 
-  const skills = Array.isArray(obj.skills)
-    ? obj.skills.filter(isRecord).map((s) => ({
-        category: asString(s.category),
-        items: asString(s.items),
-      }))
-    : [];
+  const skills = parseStringArray<{ category: string; items: string }>(
+    obj,
+    'skills',
+    ['category', 'items'],
+  );
 
-  const certifications = Array.isArray(obj.certifications)
-    ? obj.certifications.filter(isRecord).map((c) => ({
-        name: asString(c.name),
-        issuer: asString(c.issuer),
-        date: asString(c.date),
-      }))
-    : [];
+  const certifications = parseStringArray<{
+    name: string;
+    issuer: string;
+    date: string;
+  }>(obj, 'certifications', ['name', 'issuer', 'date']);
 
   const summary = asString(obj.summary);
 
@@ -396,21 +407,7 @@ function buildAdjustPrompt(
   return `Rewrite ONLY the ${sectionName} section of the CV to match the job description. Return the complete adjusted CV as a single JSON object matching the requested schema, with every other field byte-for-byte identical to the source CV.\n\n${input}`;
 }
 
-const ADJUST_SCOPE_FIELD: Record<
-  Exclude<AIAdjustScope, 'full'>,
-  keyof CVData
-> = {
-  summary: 'summary',
-  experience: 'experience',
-  projects: 'projects',
-  education: 'education',
-  skills: 'skills',
-};
-
-function scopeFieldHasValue(
-  field: keyof CVData,
-  value: CVData[typeof field],
-): boolean {
+function scopeFieldHasValue(value: unknown): boolean {
   if (Array.isArray(value)) return value.length > 0;
   return typeof value === 'string' ? value.trim().length > 0 : value != null;
 }
@@ -420,10 +417,10 @@ function applyScope(
   cvData: CVData,
   result: CVParseResult,
 ): CVParseResult {
-  const field = ADJUST_SCOPE_FIELD[scope];
+  const field = scope as keyof CVData;
   const candidate = result.data[field];
 
-  if (!scopeFieldHasValue(field, candidate)) {
+  if (!scopeFieldHasValue(candidate)) {
     const title =
       RENDERABLE_SECTIONS.find((section) => section.id === scope)?.title ??
       scope;

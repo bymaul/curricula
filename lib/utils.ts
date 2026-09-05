@@ -68,3 +68,21 @@ export function downloadFile(content: string, filename: string) {
   link.click();
   URL.revokeObjectURL(url);
 }
+
+export function isApplePlatform(): boolean {
+  if (typeof navigator === 'undefined') return false;
+  return /Mac|iPhone|iPad|iPod/i.test(navigator.userAgent);
+}
+
+export function safeParseJSON(text: string): unknown | null {
+  if (!text) return null;
+  try {
+    return JSON.parse(text);
+  } catch {
+    return null;
+  }
+}
+
+export function clampScale(value: number, min: number, max: number): number {
+  return Math.min(max, Math.max(min, value));
+}

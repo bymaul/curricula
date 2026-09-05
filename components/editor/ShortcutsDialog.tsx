@@ -10,7 +10,7 @@ import {
 } from '@/components/ui/dialog';
 import { useMemo } from 'react';
 import type { TranslationKey } from '@/lib/i18n';
-import { isApplePlatform } from '@/lib/platform';
+import { isApplePlatform } from '@/lib/utils';
 
 interface ShortcutRow {
   keys: string[];
