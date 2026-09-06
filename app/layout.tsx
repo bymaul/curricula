@@ -78,7 +78,11 @@ export const metadata: Metadata = {
     },
   },
   icons: {
-    icon: [{ url: '/icon-192x192.png' }, { url: '/icon-512x512.png' }],
+    icon: [
+      { url: '/icon.svg', type: 'image/svg+xml' },
+      { url: '/icon-192x192.png' },
+      { url: '/icon-512x512.png' },
+    ],
     apple: '/apple-touch-icon.png',
   },
   openGraph: {
