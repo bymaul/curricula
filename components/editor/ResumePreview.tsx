@@ -13,7 +13,7 @@ import { ResumeLanguage } from '@/lib/i18n/languages';
 import { TemplateId } from '@/lib/templates';
 import { cn } from '@/lib/utils';
 import { useUIStore } from '@/store/useUIStore';
-import { FileText } from 'lucide-react';
+import { FileText, Pencil } from 'lucide-react';
 import {
   RefObject,
   memo,
@@ -23,6 +23,7 @@ import {
   useState,
 } from 'react';
 import { useFormContext, useWatch } from 'react-hook-form';
+import { IconButton } from '@/components/ui/icon-button';
 import { ZoomControls } from './ZoomControls';
 
 const GUTTER_PX = 32;
@@ -76,6 +77,7 @@ interface ResumePreviewProps {
   design?: DesignSettings;
   templateId?: TemplateId;
   onSectionClick?: (sectionId: SectionId) => void;
+  onEdit?: () => void;
 }
 
 function ResumePreviewImpl({
@@ -87,6 +89,7 @@ function ResumePreviewImpl({
   design,
   templateId = 'harvard',
   onSectionClick,
+  onEdit,
 }: ResumePreviewProps) {
   const page = getPageDimensions(design?.pageSize);
   const frameWidthPx = page.width + GUTTER_PX * 2;
@@ -254,6 +257,17 @@ function ResumePreviewImpl({
         onZoomOut={handleZoomOut}
         onReset={zoomReset}
       />
+      {onEdit && (
+        <div className="bg-card border-border absolute right-3 bottom-14 z-20 flex items-center gap-1 rounded-lg border shadow-md md:hidden print:hidden">
+          <IconButton
+            aria-label={t('header.viewEdit')}
+            onClick={onEdit}
+            className="size-8"
+          >
+            <Pencil className="size-3.5" />
+          </IconButton>
+        </div>
+      )}
 
       <div
         className="bg-card border-border absolute top-3 left-3 z-20 flex items-center gap-1.5 rounded-lg border px-2.5 py-1 shadow-md print:hidden"

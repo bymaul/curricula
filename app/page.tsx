@@ -129,7 +129,7 @@ export default function Home() {
   return (
     <FormProvider {...methods}>
       <main className="bg-background text-foreground flex h-dvh w-full flex-col overflow-hidden overscroll-x-none md:p-6 print:block print:h-auto print:overflow-visible print:bg-white print:p-0">
-        <Header value={mobileView} onChange={switchMobileView} />
+        <Header />
 
         <div className="flex min-h-0 w-full flex-1 flex-col gap-4 px-4 pb-4 md:flex-row md:gap-6 md:px-0 md:pb-0 print:block print:p-0">
           <div
@@ -158,6 +158,7 @@ export default function Home() {
                   }}
                   saveStatus={saveStatus}
                   lastSavedAt={lastSavedAt}
+                  onPreview={() => switchMobileView('preview')}
                 />
               </div>
 
@@ -178,6 +179,7 @@ export default function Home() {
                   design={activeResume?.design}
                   templateId={activeResume?.templateId}
                   onSectionClick={handleSectionClick}
+                  onEdit={() => switchMobileView('edit')}
                 />
               </div>
             </div>

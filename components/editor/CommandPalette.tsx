@@ -26,6 +26,7 @@ import {
   DatabaseBackup,
   FilePlus2,
   FolderOpen,
+  History,
   Keyboard,
   Printer,
   Settings2,
@@ -123,6 +124,10 @@ export function CommandPalette({
               <CommandItem onSelect={() => dialogAction('backup')}>
                 <DatabaseBackup />
                 {t('editor.backupRestore')}
+              </CommandItem>
+              <CommandItem onSelect={() => dialogAction('history')}>
+                <History />
+                {t('editor.versionHistory')}
               </CommandItem>
               <CommandItem onSelect={() => dialogAction('aiAdjust')}>
                 <Sparkles />

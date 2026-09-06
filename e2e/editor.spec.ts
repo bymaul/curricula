@@ -222,14 +222,19 @@ test('toggles the preview pane on mobile', async ({ page, isMobile }) => {
   await expect(preview(page)).toBeVisible();
   await expect(previewPane(page)).toHaveAttribute('inert');
 
-  await page.getByRole('tab', { name: 'Preview' }).click();
+  await page.getByRole('button', { name: 'Preview' }).click();
   await expect(preview(page)).toBeVisible();
   await expect(previewPane(page)).not.toHaveAttribute('inert');
   await expect(editorPane(page)).toHaveAttribute('inert');
 
-  await page.getByRole('tab', { name: 'Edit' }).click();
+  await page.getByRole('button', { name: 'Edit' }).click();
   await expect(previewPane(page)).toHaveAttribute('inert');
   await expect(editorPane(page)).not.toHaveAttribute('inert');
+
+  await page.getByRole('button', { name: 'Actions' }).click();
+  await expect(
+    page.getByRole('menuitem', { name: 'Version history' }),
+  ).toBeVisible();
 });
 
 test('print stylesheet hides editor chrome and keeps the CV', async ({

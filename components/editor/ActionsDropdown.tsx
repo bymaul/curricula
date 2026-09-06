@@ -11,6 +11,7 @@ import {
   DatabaseBackup,
   EllipsisVertical,
   FileText,
+  History,
   Languages,
   Printer,
   Share2,
@@ -120,6 +121,13 @@ export function ActionsDropdown({
         >
           <DatabaseBackup className="text-muted-foreground size-4" />
           {t('editor.backupRestore')}
+        </DropdownMenuItem>
+        <DropdownMenuItem
+          onClick={() => setDialog('history', true)}
+          className={DROPDOWN_ITEM_CLASS}
+        >
+          <History className="text-muted-foreground size-4" />
+          {t('editor.versionHistory')}
         </DropdownMenuItem>
         <DropdownMenuSeparator />
         <DropdownMenuSub>

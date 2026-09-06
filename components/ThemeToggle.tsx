@@ -55,12 +55,7 @@ export function ThemeToggle() {
     <DropdownMenu>
       <DropdownMenuTrigger
         render={
-          <Button
-            variant="ghost"
-            size="icon-sm"
-            className="size-9"
-            aria-label={t('common.theme')}
-          >
+          <Button variant="ghost" size="icon" aria-label={t('common.theme')}>
             <ActiveIcon className="size-4" />
           </Button>
         }

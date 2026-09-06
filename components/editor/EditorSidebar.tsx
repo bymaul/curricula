@@ -12,7 +12,7 @@ import { useStorageError } from '@/hooks/useStorageError';
 import {
   AlertTriangle,
   CheckCircle2,
-  History,
+  Eye,
   ListOrdered,
   Loader2,
   Redo2,
@@ -48,6 +48,7 @@ interface EditorSidebarProps {
   fileActions: EditorFileActions;
   saveStatus: 'saving' | 'saved';
   lastSavedAt: number | null;
+  onPreview: () => void;
 }
 
 function SaveStatus({
@@ -67,7 +68,7 @@ function SaveStatus({
   }, [saveStatus]);
 
   const labelClass =
-    'text-xs font-semibold uppercase tracking-wider text-muted-foreground';
+    'sr-only text-xs font-semibold tracking-wider text-muted-foreground uppercase sm:not-sr-only';
 
   if (saveStatus === 'saving') {
     return (
@@ -98,6 +99,7 @@ export function EditorSidebar({
   fileActions,
   saveStatus,
   lastSavedAt,
+  onPreview,
 }: EditorSidebarProps) {
   const { activeTab, setActiveTab } = useUIStore();
   const { t } = useI18n();
@@ -262,10 +264,11 @@ export function EditorSidebar({
           </TooltipIconButton>
 
           <TooltipIconButton
-            label={t('editor.versionHistory')}
-            onClick={() => setDialog('history', true)}
+            label={t('header.viewPreview')}
+            onClick={onPreview}
+            className="md:hidden"
           >
-            <History className="size-4" />
+            <Eye className="size-4" />
           </TooltipIconButton>
 
           <input

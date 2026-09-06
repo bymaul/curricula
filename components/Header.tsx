@@ -7,19 +7,8 @@ import { Button } from './ui/button';
 import { Separator } from './ui/separator';
 import { useResumeStore } from '@/store/useResumeStore';
 import { useDialogStore } from '@/store/useDialogStore';
-import { Tabs, TabsList, TabsTrigger } from './ui/tabs';
 
-interface HeaderProps {
-  value: 'edit' | 'preview';
-  onChange: (view: 'edit' | 'preview') => void;
-}
-
-const OPTIONS = [
-  { value: 'edit', labelKey: 'header.viewEdit' },
-  { value: 'preview', labelKey: 'header.viewPreview' },
-] as const;
-
-export function Header({ value, onChange }: HeaderProps) {
+export function Header() {
   const { t } = useI18n();
   const { setDialog } = useDialogStore();
   const activeResume = useResumeStore((state) =>
@@ -37,8 +26,7 @@ export function Header({ value, onChange }: HeaderProps) {
       <div className="flex h-5 items-center gap-1.5 sm:gap-2">
         <Button
           variant="ghost"
-          size="icon-sm"
-          className="size-9"
+          size="icon"
           aria-label={t('editor.commandPalette')}
           aria-keyshortcuts="Control+k Meta+k"
           onClick={() => setDialog('palette', true)}
@@ -47,21 +35,8 @@ export function Header({ value, onChange }: HeaderProps) {
         </Button>
         <Separator orientation="vertical" />
         <ThemeToggle />
-        <Separator orientation="vertical" />
-        <Tabs
-          value={value}
-          onValueChange={(v) => onChange(v)}
-          className="flex md:hidden"
-        >
-          <TabsList>
-            {OPTIONS.map(({ value, labelKey }) => (
-              <TabsTrigger key={value} value={value}>
-                {t(labelKey)}
-              </TabsTrigger>
-            ))}
-          </TabsList>
-        </Tabs>
 
+        <Separator orientation="vertical" className="hidden md:inline-flex" />
         <Button
           variant="secondary"
           type="button"
