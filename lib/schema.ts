@@ -55,7 +55,6 @@ export const customSectionSchema = z.object(customSectionShape);
 
 export type CustomSection = z.infer<typeof customSectionSchema>;
 export type CustomSectionItem = CustomSection['items'][number];
-export type CustomSectionsRecord = Record<string, CustomSection>;
 
 export const cvSchema = z.object({
   name: z.string().min(1, 'validation.fullNameRequired'),
