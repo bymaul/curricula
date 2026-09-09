@@ -1,3 +1,5 @@
+'use client';
+
 import { DEFAULT_SECTION_ORDER, SECTION_IDS } from '@/lib/consts';
 import { DesignSettings, normalizeDesign } from '@/lib/design';
 import { ResumeLanguage } from '@/lib/i18n/languages';

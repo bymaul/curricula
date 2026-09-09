@@ -1,3 +1,5 @@
+'use client';
+
 import { useRef, useState } from 'react';
 import { useI18n } from '@/hooks/useI18n';
 import { CVData } from '@/lib/schema';

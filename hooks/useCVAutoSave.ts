@@ -1,3 +1,5 @@
+'use client';
+
 import { CVData } from '@/lib/schema';
 import { useResumeStore } from '@/store/useResumeStore';
 import {

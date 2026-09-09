@@ -1,3 +1,5 @@
+'use client';
+
 import { toast } from '@/components/ui/toast';
 import { useI18n } from '@/hooks/useI18n';
 import { SECTIONS, SectionId, TabName } from '@/lib/consts';

@@ -1,3 +1,5 @@
+'use client';
+
 import { create } from 'zustand';
 import { persist } from 'zustand/middleware';
 import { DEFAULT_SECTION_ORDER, SectionId } from '@/lib/consts';

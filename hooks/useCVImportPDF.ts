@@ -1,3 +1,5 @@
+'use client';
+
 import { CVData } from '@/lib/schema';
 import { AIProvider } from '@/lib/consts';
 import { stripInvisibleChars } from '@/lib/cleanText';

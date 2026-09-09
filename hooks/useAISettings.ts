@@ -1,3 +1,5 @@
+'use client';
+
 import { useState } from 'react';
 import {
   AI_API_KEY_STORAGE_KEY,
