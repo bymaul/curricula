@@ -1,12 +1,26 @@
 import { create } from 'zustand';
 import { persist } from 'zustand/middleware';
-import { DEFAULT_SECTION_ORDER, SECTION_IDS, SectionId } from '@/lib/consts';
-import { DesignSettings, normalizeDesign } from '@/lib/design';
+import { DEFAULT_SECTION_ORDER, SectionId } from '@/lib/consts';
+import { DesignSettings } from '@/lib/design';
 import { ResumeLanguage } from '@/lib/i18n/languages';
-import { CVData, cvDataStoredSchema, initialCVState } from '@/lib/schema';
+import { CVData } from '@/lib/schema';
 import { createIdbStorage } from '@/lib/idbStorage';
-import { DEFAULT_TEMPLATE_ID, TemplateId } from '@/lib/templates';
+import { TemplateId } from '@/lib/templates';
 import { usePhotoStore } from '@/store/usePhotoStore';
+import {
+  makeId,
+  makeResume,
+  normalizeResume,
+  now,
+  seedResumes,
+  withoutPhoto,
+} from './resumeFactory';
+import {
+  commitHistory,
+  historyState,
+  isJsonEqual,
+  seedHistory,
+} from './resumeHistory';
 
 export interface ResumeRecord {
   id: string;
@@ -40,9 +54,6 @@ export interface ResumeHistory {
   entries: HistorySnapshot[];
   cursor: number;
 }
-
-const COALESCE_MS = 2_000;
-const MAX_HISTORY_ENTRIES = 100;
 
 export interface ResumeState {
   resumes: ResumeRecord[];
@@ -82,147 +93,12 @@ export interface ResumeState {
   restoreHistory: (id: string, index: number) => void;
 }
 
-const LEGACY_KEY = 'curricula-data';
 const STORAGE_KEY = 'curricula-resumes';
 
 type PersistedResumeState = {
   resumes: Array<Omit<ResumeRecord, 'photo'>>;
   activeId: string | null;
 };
-
-const now = () => Date.now();
-
-function makeId(): string {
-  if (typeof crypto !== 'undefined' && 'randomUUID' in crypto)
-    return crypto.randomUUID();
-  return `${now()}-${Math.random().toString(36).slice(2)}`;
-}
-
-function makeResume(
-  data: CVData = initialCVState,
-  title?: string,
-  options: {
-    language?: ResumeLanguage;
-    photo?: string;
-    template?: TemplateId;
-    design?: DesignSettings;
-  } = {},
-): ResumeRecord {
-  return {
-    id: makeId(),
-    title: title?.trim() || data.name?.trim() || 'Untitled CV',
-    data,
-    sectionOrder: [
-      ...DEFAULT_SECTION_ORDER,
-      ...Object.keys(data.customSections ?? {}),
-    ],
-    hiddenSections: [],
-    language: options.language ?? 'en',
-    photo: options.photo ?? '',
-    templateId: options.template ?? DEFAULT_TEMPLATE_ID,
-    design: normalizeDesign(options.design),
-    autoTitle: true,
-    favorite: false,
-    updatedAt: now(),
-  };
-}
-
-function normalizeResume(record: ResumeRecord): ResumeRecord {
-  const customIds = Object.keys(record.data?.customSections ?? {});
-  const validIds = new Set<string>([...SECTION_IDS, ...customIds]);
-  const sectionOrder = (
-    record.sectionOrder ?? [...DEFAULT_SECTION_ORDER]
-  ).filter((id) => validIds.has(id));
-  for (const id of customIds) {
-    if (!sectionOrder.includes(id)) sectionOrder.push(id);
-  }
-  return {
-    ...record,
-    sectionOrder,
-    hiddenSections: (record.hiddenSections ?? []).filter((id) =>
-      validIds.has(id),
-    ),
-    language: record.language ?? 'en',
-    photo: record.photo ?? '',
-    templateId: record.templateId ?? DEFAULT_TEMPLATE_ID,
-    design: normalizeDesign(record.design),
-    favorite: !!record.favorite,
-  };
-}
-
-function withoutPhoto(record: ResumeRecord): Omit<ResumeRecord, 'photo'> {
-  // eslint-disable-next-line @typescript-eslint/no-unused-vars
-  const { photo, ...rest } = record;
-  return rest;
-}
-
-function parseLegacyData(raw: string | null): CVData | null {
-  if (!raw) return null;
-  try {
-    const parsed = JSON.parse(raw);
-    const result = cvDataStoredSchema.safeParse(parsed);
-    if (!result.success) return null;
-    return { ...initialCVState, ...result.data };
-  } catch {
-    return null;
-  }
-}
-
-function seedResumes(): ResumeRecord[] {
-  const legacy = parseLegacyData(localStorage.getItem(LEGACY_KEY));
-  if (legacy) {
-    localStorage.removeItem(LEGACY_KEY);
-    return [makeResume(legacy)];
-  }
-  return [makeResume()];
-}
-
-type HistoryState = Omit<HistorySnapshot, 'at'>;
-
-function historyState(record: ResumeRecord): HistoryState {
-  return {
-    data: structuredClone(record.data),
-    sectionOrder: [...record.sectionOrder],
-    hiddenSections: [...record.hiddenSections],
-    title: record.title,
-    autoTitle: record.autoTitle,
-    language: record.language,
-    photo: record.photo,
-    templateId: record.templateId,
-    design: { ...record.design },
-  };
-}
-
-function snapshot(state: HistoryState, at: number): HistorySnapshot {
-  return { ...state, at };
-}
-
-function snapshotFromRecord(record: ResumeRecord): HistorySnapshot {
-  return snapshot(historyState(record), now());
-}
-
-function seedHistory(record: ResumeRecord): ResumeHistory {
-  return { entries: [snapshotFromRecord(record)], cursor: 0 };
-}
-
-function nextStateEqual(a: HistoryState, b: HistoryState): boolean {
-  return (
-    isJsonEqual(
-      [a.data, a.sectionOrder, a.hiddenSections],
-      [b.data, b.sectionOrder, b.hiddenSections],
-    ) &&
-    a.title === b.title &&
-    a.autoTitle === b.autoTitle &&
-    a.language === b.language &&
-    a.photo === b.photo &&
-    a.templateId === b.templateId &&
-    isJsonEqual(a.design, b.design)
-  );
-}
-
-function isJsonEqual(a: unknown, b: unknown): boolean {
-  return JSON.stringify(a) === JSON.stringify(b);
-}
 
 function commitPatch(
   state: ResumeState,
@@ -244,37 +120,6 @@ function commitPatch(
   };
   if (bumpRevision) partial.revision = state.revision + 1;
   return partial;
-}
-
-function commitHistory(
-  history: ResumeHistory | undefined,
-  next: HistoryState,
-  at: number,
-): ResumeHistory {
-  const truncated = !!(history && history.cursor < history.entries.length - 1);
-  if (truncated && history) {
-    history = {
-      entries: history.entries.slice(0, history.cursor + 1),
-      cursor: history.cursor,
-    };
-  }
-  const tip = history?.entries[history.entries.length - 1];
-  if (tip && nextStateEqual(tip, next)) {
-    return history ?? { entries: [], cursor: -1 };
-  }
-  const entries = history ? [...history.entries] : [];
-  const last = entries[entries.length - 1];
-  const canCoalesce =
-    !truncated && last && entries.length > 1 && at - last.at < COALESCE_MS;
-  if (canCoalesce) {
-    entries[entries.length - 1] = snapshot(next, at);
-  } else {
-    entries.push(snapshot(next, at));
-  }
-  if (entries.length > MAX_HISTORY_ENTRIES) {
-    entries.splice(0, entries.length - MAX_HISTORY_ENTRIES);
-  }
-  return { entries, cursor: entries.length - 1 };
 }
 
 function applySnapshot(
