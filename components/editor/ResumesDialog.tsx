@@ -11,6 +11,7 @@ import {
   DialogTitle,
 } from '@/components/ui/dialog';
 import { ConfirmDialog } from '@/components/ui/confirm-dialog';
+import { RenameDialog } from '@/components/ui/rename-dialog';
 import {
   DROPDOWN_ITEM_CLASS,
   DropdownMenu,
@@ -79,15 +80,10 @@ function useResumeCardScale(pageWidthPx: number) {
 interface ResumeCardProps {
   resume: ResumeRecord;
   active: boolean;
-  editing: boolean;
-  draft: string;
   canDelete: boolean;
   duplicatePending: boolean;
-  onDraftChange: (value: string) => void;
-  onCommitRename: () => void;
-  onCancelRename: () => void;
   onSelect: () => void;
-  onStartRename: () => void;
+  onRename: () => void;
   onDuplicate: () => void;
   onDelete: () => void;
   onToggleFavorite: () => void;
@@ -96,15 +92,10 @@ interface ResumeCardProps {
 function ResumeCard({
   resume,
   active,
-  editing,
-  draft,
   canDelete,
   duplicatePending,
-  onDraftChange,
-  onCommitRename,
-  onCancelRename,
   onSelect,
-  onStartRename,
+  onRename,
   onDuplicate,
   onDelete,
   onToggleFavorite,
@@ -158,89 +149,76 @@ function ResumeCard({
       </div>
 
       <div className="mt-2 min-w-0">
-        {editing ? (
-          <Input
-            value={draft}
-            onChange={(e) => onDraftChange(e.target.value)}
-            onKeyDown={(e) => {
-              if (e.key === 'Enter') onCommitRename();
-              if (e.key === 'Escape') onCancelRename();
-            }}
-            onBlur={onCommitRename}
-            autoFocus
-            aria-label={t('resumes.titleInputAria')}
-            className="h-7 w-full text-sm"
-          />
-        ) : (
-          <div className="flex w-full items-center gap-1">
-            <button
-              type="button"
-              onClick={onSelect}
-              className="flex min-w-0 flex-1 items-center justify-between gap-2 text-left"
-            >
-              <span className="truncate text-sm font-semibold">
-                {resume.title}
-              </span>
-              <span className="text-muted-foreground shrink-0 text-xs">
-                {formatRelativeTime(resume.updatedAt, undefined, t)}
-              </span>
-            </button>
-            <DropdownMenu>
-              <DropdownMenuTrigger
-                render={
-                  <IconButton
-                    aria-label={t('resumes.cardMenuAria', {
-                      title: resume.title,
-                    })}
-                    className="-mr-1.5 size-7 shrink-0"
-                  >
-                    <Ellipsis className="size-4" />
-                  </IconButton>
-                }
-              />
-              <DropdownMenuContent
-                align="end"
-                side="top"
-                className="w-44 p-1.5"
+        <div className="flex w-full items-center gap-1">
+          <button
+            type="button"
+            onClick={onSelect}
+            className="flex min-w-0 flex-1 items-center justify-between gap-2 text-left"
+          >
+            <span className="truncate text-sm font-semibold">
+              {resume.title}
+            </span>
+
+            <span className="text-muted-foreground shrink-0 text-xs">
+              {formatRelativeTime(resume.updatedAt, undefined, t)}
+            </span>
+          </button>
+
+          <DropdownMenu>
+            <DropdownMenuTrigger
+              render={
+                <IconButton
+                  aria-label={t('resumes.cardMenuAria', {
+                    title: resume.title,
+                  })}
+                  className="-mr-1.5 size-7 shrink-0"
+                >
+                  <Ellipsis className="size-4" />
+                </IconButton>
+              }
+            />
+
+            <DropdownMenuContent align="end" side="top" className="w-44 p-1.5">
+              <DropdownMenuCheckboxItem
+                className={DROPDOWN_ITEM_CLASS}
+                onClick={onToggleFavorite}
+                checked={resume.favorite}
               >
-                <DropdownMenuCheckboxItem
-                  className={DROPDOWN_ITEM_CLASS}
-                  onClick={onToggleFavorite}
-                  checked={resume.favorite}
-                >
-                  <Star className="text-muted-foreground size-4" />
-                  {t('resumes.favorite')}
-                </DropdownMenuCheckboxItem>
-                <DropdownMenuItem
-                  className={DROPDOWN_ITEM_CLASS}
-                  onClick={onStartRename}
-                >
-                  <Pencil className="text-muted-foreground size-4" />
-                  {t('resumes.rename')}
-                </DropdownMenuItem>
-                <DropdownMenuItem
-                  className={DROPDOWN_ITEM_CLASS}
-                  onClick={onDuplicate}
-                  disabled={duplicatePending}
-                >
-                  <Copy className="text-muted-foreground size-4" />
-                  {t('resumes.duplicate')}
-                </DropdownMenuItem>
-                <DropdownMenuItem
-                  className={cn(
-                    DROPDOWN_ITEM_CLASS,
-                    'text-destructive hover:text-destructive',
-                  )}
-                  onClick={onDelete}
-                  disabled={!canDelete}
-                >
-                  <Trash2 className="size-4" />
-                  {t('common.delete')}
-                </DropdownMenuItem>
-              </DropdownMenuContent>
-            </DropdownMenu>
-          </div>
-        )}
+                <Star className="text-muted-foreground size-4" />
+                {t('resumes.favorite')}
+              </DropdownMenuCheckboxItem>
+
+              <DropdownMenuItem
+                className={DROPDOWN_ITEM_CLASS}
+                onClick={onRename}
+              >
+                <Pencil className="text-muted-foreground size-4" />
+                {t('resumes.rename')}
+              </DropdownMenuItem>
+
+              <DropdownMenuItem
+                className={DROPDOWN_ITEM_CLASS}
+                onClick={onDuplicate}
+                disabled={duplicatePending}
+              >
+                <Copy className="text-muted-foreground size-4" />
+                {t('resumes.duplicate')}
+              </DropdownMenuItem>
+
+              <DropdownMenuItem
+                className={cn(
+                  DROPDOWN_ITEM_CLASS,
+                  'text-destructive hover:text-destructive',
+                )}
+                onClick={onDelete}
+                disabled={!canDelete}
+              >
+                <Trash2 className="size-4" />
+                {t('common.delete')}
+              </DropdownMenuItem>
+            </DropdownMenuContent>
+          </DropdownMenu>
+        </div>
       </div>
     </div>
   );
@@ -258,12 +236,16 @@ export function ResumesDialog({ open, onOpenChange }: ResumesDialogProps) {
   const toggleFavorite = useResumeStore((state) => state.toggleFavorite);
   const { t } = useI18n();
 
-  const [editingId, setEditingId] = useState<string | null>(null);
-  const [draft, setDraft] = useState('');
   const [deleteTarget, setDeleteTarget] = useState<{
     id: string;
     title: string;
   } | null>(null);
+
+  const [renameTarget, setRenameTarget] = useState<{
+    id: string;
+    title: string;
+  } | null>(null);
+
   const [query, setQuery] = useState('');
   const [sort, setSort] = useState<SortMode>('recent');
   const [favoriteOnly, setFavoriteOnly] = useState(false);
@@ -287,20 +269,23 @@ export function ResumesDialog({ open, onOpenChange }: ResumesDialogProps) {
       return matchesQuery && matchesFavorite;
     })
     .sort((a, b) => {
-      if (!!a.favorite !== !!b.favorite) return a.favorite ? -1 : 1;
+      if (!!a.favorite !== !!b.favorite) {
+        return a.favorite ? -1 : 1;
+      }
       return sort === 'name'
         ? a.title.localeCompare(b.title)
         : b.updatedAt - a.updatedAt;
     });
 
-  const startRename = (id: string, title: string) => {
-    setEditingId(id);
-    setDraft(title);
+  const handleRename = (id: string, title: string) => {
+    setRenameTarget({ id, title });
   };
 
-  const commitRename = () => {
-    if (editingId) renameResume(editingId, draft);
-    setEditingId(null);
+  const confirmRename = (title: string) => {
+    if (!renameTarget) return;
+
+    renameResume(renameTarget.id, title);
+    setRenameTarget(null);
   };
 
   const handleCreate = () => {
@@ -338,7 +323,6 @@ export function ResumesDialog({ open, onOpenChange }: ResumesDialogProps) {
   const confirmDelete = () => {
     if (!deleteTarget) return;
     deleteResume(deleteTarget.id);
-    if (editingId === deleteTarget.id) setEditingId(null);
     setDeleteTarget(null);
   };
 
@@ -347,6 +331,7 @@ export function ResumesDialog({ open, onOpenChange }: ResumesDialogProps) {
       setQuery('');
       setSort('recent');
       setFavoriteOnly(false);
+      setRenameTarget(null);
     }
     onOpenChange(next);
   };
@@ -451,31 +436,22 @@ export function ResumesDialog({ open, onOpenChange }: ResumesDialogProps) {
                 )
               ) : (
                 <div className="grid grid-cols-2 gap-3 pb-4 sm:grid-cols-3 lg:grid-cols-4">
-                  {visibleResumes.map((r) => {
-                    const active = r.id === activeId;
-                    const editing = editingId === r.id;
-                    return (
-                      <ResumeCard
-                        key={r.id}
-                        resume={r}
-                        active={active}
-                        editing={editing}
-                        draft={draft}
-                        canDelete={resumes.length > 1}
-                        duplicatePending={
-                          isDuplicating && duplicatingId === r.id
-                        }
-                        onDraftChange={setDraft}
-                        onCommitRename={commitRename}
-                        onCancelRename={() => setEditingId(null)}
-                        onSelect={() => handleSelect(r.id)}
-                        onStartRename={() => startRename(r.id, r.title)}
-                        onDuplicate={() => handleDuplicate(r.id)}
-                        onDelete={() => handleDelete(r.id, r.title)}
-                        onToggleFavorite={() => toggleFavorite(r.id)}
-                      />
-                    );
-                  })}
+                  {visibleResumes.map((resume) => (
+                    <ResumeCard
+                      key={resume.id}
+                      resume={resume}
+                      active={resume.id === activeId}
+                      canDelete={resumes.length > 1}
+                      duplicatePending={
+                        isDuplicating && duplicatingId === resume.id
+                      }
+                      onSelect={() => handleSelect(resume.id)}
+                      onRename={() => handleRename(resume.id, resume.title)}
+                      onDuplicate={() => handleDuplicate(resume.id)}
+                      onDelete={() => handleDelete(resume.id, resume.title)}
+                      onToggleFavorite={() => toggleFavorite(resume.id)}
+                    />
+                  ))}
                 </div>
               )}
             </ScrollArea>
@@ -527,9 +503,21 @@ export function ResumesDialog({ open, onOpenChange }: ResumesDialogProps) {
         </DialogContent>
       </Dialog>
 
+      <RenameDialog
+        open={renameTarget !== null}
+        onOpenChange={(next) => {
+          if (!next) setRenameTarget(null);
+        }}
+        title={t('resumes.rename')}
+        value={renameTarget?.title ?? ''}
+        onRename={confirmRename}
+      />
+
       <ConfirmDialog
         open={deleteTarget !== null}
-        onOpenChange={(next) => !next && setDeleteTarget(null)}
+        onOpenChange={(next) => {
+          if (!next) setDeleteTarget(null);
+        }}
         title={t('resumes.confirmDeleteTitle')}
         description={
           deleteTarget

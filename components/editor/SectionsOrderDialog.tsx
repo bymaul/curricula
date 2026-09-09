@@ -131,9 +131,6 @@ export function SectionsOrderDialog({
             <RotateCcw className="size-4" />
             {t('sectionsOrder.resetOrder')}
           </Button>
-          <Button onClick={() => onOpenChange(false)}>
-            {t('common.done')}
-          </Button>
         </DialogFooter>
       </DialogContent>
     </Dialog>
