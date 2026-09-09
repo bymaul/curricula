@@ -1,6 +1,7 @@
 'use client';
 
 import { Button } from '@/components/ui/button';
+import { ButtonGroup } from '@/components/ui/button-group';
 import {
   Dialog,
   DialogContent,
@@ -10,13 +11,16 @@ import {
   DialogTitle,
 } from '@/components/ui/dialog';
 import { ConfirmDialog } from '@/components/ui/confirm-dialog';
-import { Input } from '@/components/ui/input';
-import { TooltipIconButton } from '@/components/ui/tooltip-icon-button';
 import {
-  Tooltip,
-  TooltipContent,
-  TooltipTrigger,
-} from '@/components/ui/tooltip';
+  DROPDOWN_ITEM_CLASS,
+  DropdownMenu,
+  DropdownMenuCheckboxItem,
+  DropdownMenuContent,
+  DropdownMenuItem,
+  DropdownMenuTrigger,
+} from '@/components/ui/dropdown-menu';
+import { IconButton } from '@/components/ui/icon-button';
+import { Input } from '@/components/ui/input';
 import { ScrollArea } from '@/components/ui/scroll-area';
 import {
   Select,
@@ -35,12 +39,15 @@ import { cn, formatRelativeTime } from '@/lib/utils';
 import {
   ArrowUpDown,
   Check,
+  ChevronDown,
   Copy,
+  Ellipsis,
   Pencil,
   Plus,
   Search,
   Star,
   Trash2,
+  Wand2,
   X,
 } from 'lucide-react';
 import { useEffect, useRef, useState } from 'react';
@@ -141,36 +148,7 @@ function ResumeCard({
         </div>
       </button>
 
-      <div className="absolute top-2.5 right-2.5 left-2.5 z-10 flex items-center justify-between">
-        <Tooltip>
-          <TooltipTrigger
-            render={
-              <Button
-                type="button"
-                size="icon-sm"
-                aria-label={
-                  resume.favorite
-                    ? t('resumes.unfavoriteAria', { title: resume.title })
-                    : t('resumes.favoriteAria', { title: resume.title })
-                }
-                onClick={onToggleFavorite}
-                className={cn(
-                  'size-6 rounded-full transition-[opacity,background-color,color,box-shadow] [@media(hover:hover)]:opacity-0 [@media(hover:hover)]:group-hover:opacity-100 [@media(hover:hover)]:focus-visible:opacity-100',
-                  resume.favorite
-                    ? 'ring-border bg-amber-500/15 text-amber-600 opacity-100 shadow-sm ring-1 hover:bg-amber-500/30 hover:text-amber-700 [@media(hover:hover)]:opacity-100'
-                    : 'text-muted-foreground ring-border bg-white/70 shadow-sm ring-1 hover:bg-white/90 hover:text-amber-600',
-                )}
-              >
-                <Star className="size-3.5 fill-current" />
-              </Button>
-            }
-          />
-          <TooltipContent>
-            {resume.favorite
-              ? t('resumes.unfavoriteAria', { title: resume.title })
-              : t('resumes.favoriteAria', { title: resume.title })}
-          </TooltipContent>
-        </Tooltip>
+      <div className="absolute top-3 left-3 z-10">
         {active && (
           <span className="bg-primary text-primary-foreground inline-flex items-center gap-1 rounded-full px-2 py-0.5 text-[10px] font-semibold shadow-sm">
             <Check className="size-3" />
@@ -194,43 +172,73 @@ function ResumeCard({
             className="h-7 w-full text-sm"
           />
         ) : (
-          <button
-            type="button"
-            onClick={onSelect}
-            className="flex w-full items-center justify-between gap-2 text-left"
-          >
-            <span className="truncate text-sm font-semibold">
-              {resume.title}
-            </span>
-            <span className="text-muted-foreground shrink-0 text-xs">
-              {formatRelativeTime(resume.updatedAt, undefined, t)}
-            </span>
-          </button>
-        )}
-
-        {!editing && (
-          <div className="mt-1.5 flex items-center gap-0.5">
-            <TooltipIconButton
-              label={t('resumes.renameAria', { title: resume.title })}
-              onClick={onStartRename}
+          <div className="flex w-full items-center gap-1">
+            <button
+              type="button"
+              onClick={onSelect}
+              className="flex min-w-0 flex-1 items-center justify-between gap-2 text-left"
             >
-              <Pencil className="size-4" />
-            </TooltipIconButton>
-            <TooltipIconButton
-              label={t('resumes.duplicateAria', { title: resume.title })}
-              onClick={onDuplicate}
-              disabled={duplicatePending}
-            >
-              <Copy className="size-4" />
-            </TooltipIconButton>
-            <TooltipIconButton
-              label={t('resumes.deleteAria', { title: resume.title })}
-              onClick={onDelete}
-              disabled={!canDelete}
-              className="hover:text-destructive hover:bg-destructive/10"
-            >
-              <Trash2 className="size-4" />
-            </TooltipIconButton>
+              <span className="truncate text-sm font-semibold">
+                {resume.title}
+              </span>
+              <span className="text-muted-foreground shrink-0 text-xs">
+                {formatRelativeTime(resume.updatedAt, undefined, t)}
+              </span>
+            </button>
+            <DropdownMenu>
+              <DropdownMenuTrigger
+                render={
+                  <IconButton
+                    aria-label={t('resumes.cardMenuAria', {
+                      title: resume.title,
+                    })}
+                    className="-mr-1.5 size-7 shrink-0"
+                  >
+                    <Ellipsis className="size-4" />
+                  </IconButton>
+                }
+              />
+              <DropdownMenuContent
+                align="end"
+                side="top"
+                className="w-44 p-1.5"
+              >
+                <DropdownMenuCheckboxItem
+                  className={DROPDOWN_ITEM_CLASS}
+                  onClick={onToggleFavorite}
+                  checked={resume.favorite}
+                >
+                  <Star className="text-muted-foreground size-4" />
+                  {t('resumes.favorite')}
+                </DropdownMenuCheckboxItem>
+                <DropdownMenuItem
+                  className={DROPDOWN_ITEM_CLASS}
+                  onClick={onStartRename}
+                >
+                  <Pencil className="text-muted-foreground size-4" />
+                  {t('resumes.rename')}
+                </DropdownMenuItem>
+                <DropdownMenuItem
+                  className={DROPDOWN_ITEM_CLASS}
+                  onClick={onDuplicate}
+                  disabled={duplicatePending}
+                >
+                  <Copy className="text-muted-foreground size-4" />
+                  {t('resumes.duplicate')}
+                </DropdownMenuItem>
+                <DropdownMenuItem
+                  className={cn(
+                    DROPDOWN_ITEM_CLASS,
+                    'text-destructive hover:text-destructive',
+                  )}
+                  onClick={onDelete}
+                  disabled={!canDelete}
+                >
+                  <Trash2 className="size-4" />
+                  {t('common.delete')}
+                </DropdownMenuItem>
+              </DropdownMenuContent>
+            </DropdownMenu>
           </div>
         )}
       </div>
@@ -350,7 +358,11 @@ export function ResumesDialog({ open, onOpenChange }: ResumesDialogProps) {
 
   return (
     <>
-      <Dialog open={open} onOpenChange={handleOpenChange}>
+      <Dialog
+        open={open}
+        onOpenChange={handleOpenChange}
+        disablePointerDismissal
+      >
         <DialogContent className="max-h-[calc(100dvh-2rem)] grid-rows-[auto_minmax(0,1fr)_auto] overflow-hidden sm:max-w-4xl">
           <DialogHeader>
             <DialogTitle>{t('resumes.title')}</DialogTitle>
@@ -470,20 +482,47 @@ export function ResumesDialog({ open, onOpenChange }: ResumesDialogProps) {
           </div>
 
           <DialogFooter className="bg-muted flex-col items-stretch sm:items-center">
-            <Button onClick={handleCreate} disabled={isCreating}>
-              <Plus className="size-4" />
-              {t('resumes.newCv')}
-            </Button>
-            <Button
-              variant="outline"
-              onClick={handleCreateFromSample}
-              disabled={isCreating}
-            >
-              {t('resumes.newFromExample')}
-            </Button>
-            <Button variant="outline" onClick={() => onOpenChange(false)}>
-              {t('common.done')}
-            </Button>
+            <ButtonGroup className="w-full sm:w-auto">
+              <Button
+                variant="outline"
+                onClick={handleCreate}
+                disabled={isCreating}
+                className="flex-1 sm:flex-none sm:px-6"
+              >
+                <Plus className="size-4" />
+                {t('resumes.newCv')}
+              </Button>
+              <DropdownMenu>
+                <DropdownMenuTrigger
+                  render={
+                    <Button
+                      variant="outline"
+                      aria-label={t('common.actions')}
+                      disabled={isCreating}
+                      size="icon"
+                    >
+                      <ChevronDown className="size-4" />
+                    </Button>
+                  }
+                />
+                <DropdownMenuContent align="end" className="w-52 p-1.5">
+                  <DropdownMenuItem
+                    className={DROPDOWN_ITEM_CLASS}
+                    onClick={handleCreate}
+                  >
+                    <Plus className="text-muted-foreground size-4" />
+                    {t('resumes.newBlank')}
+                  </DropdownMenuItem>
+                  <DropdownMenuItem
+                    className={DROPDOWN_ITEM_CLASS}
+                    onClick={handleCreateFromSample}
+                  >
+                    <Wand2 className="text-muted-foreground size-4" />
+                    {t('resumes.newFromExample')}
+                  </DropdownMenuItem>
+                </DropdownMenuContent>
+              </DropdownMenu>
+            </ButtonGroup>
           </DialogFooter>
         </DialogContent>
       </Dialog>
