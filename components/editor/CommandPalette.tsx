@@ -1,6 +1,6 @@
 'use client';
 
-import { useMemo } from 'react';
+import { useEffect, useMemo, useRef } from 'react';
 import { useI18n } from '@/hooks/useI18n';
 import { navTabLabel } from '@/lib/i18n';
 import {
@@ -75,8 +75,15 @@ export function CommandPalette({
   const mod = isApple ? '⌘' : 'Ctrl';
 
   const close = () => onOpenChange(false);
+  const ranRef = useRef(false);
+
+  useEffect(() => {
+    if (open) ranRef.current = false;
+  }, [open]);
 
   const run = (action: () => void) => {
+    if (ranRef.current) return;
+    ranRef.current = true;
     close();
     action();
   };

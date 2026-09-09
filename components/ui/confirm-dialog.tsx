@@ -1,8 +1,9 @@
 'use client';
 
-import { ReactNode } from 'react';
+import { ReactNode, useEffect } from 'react';
 import { Button } from '@/components/ui/button';
 import { useI18n } from '@/hooks/useI18n';
+import { useOnceAction } from '@/hooks/useOnceAction';
 import {
   Dialog,
   DialogContent,
@@ -38,6 +39,15 @@ export function ConfirmDialog({
   children,
 }: ConfirmDialogProps) {
   const { t } = useI18n();
+  const [runConfirmOnce, isConfirming, resetConfirm] = useOnceAction();
+
+  useEffect(() => {
+    if (open) resetConfirm();
+  }, [open, resetConfirm]);
+
+  const handleConfirm = () => {
+    runConfirmOnce(onConfirm);
+  };
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
       <DialogContent className="sm:max-w-sm">
@@ -51,6 +61,7 @@ export function ConfirmDialog({
         <DialogFooter>
           <Button
             variant="outline"
+            disabled={isConfirming}
             onClick={() => {
               onCancel?.();
               onOpenChange(false);
@@ -60,7 +71,8 @@ export function ConfirmDialog({
           </Button>
           <Button
             variant={destructive ? 'destructive' : 'default'}
-            onClick={onConfirm}
+            disabled={isConfirming}
+            onClick={handleConfirm}
           >
             {confirmLabel}
           </Button>

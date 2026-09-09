@@ -26,6 +26,7 @@ import {
   SelectValue,
 } from '@/components/ui/select';
 import { useI18n } from '@/hooks/useI18n';
+import { useOnceAction } from '@/hooks/useOnceAction';
 import { TEMPLATE_COMPONENTS } from '@/components/resume/registry';
 import { SAMPLE_CV_DATA } from '@/lib/sampleCv';
 import { getPageDimensions } from '@/lib/pagination';
@@ -74,6 +75,7 @@ interface ResumeCardProps {
   editing: boolean;
   draft: string;
   canDelete: boolean;
+  duplicatePending: boolean;
   onDraftChange: (value: string) => void;
   onCommitRename: () => void;
   onCancelRename: () => void;
@@ -90,6 +92,7 @@ function ResumeCard({
   editing,
   draft,
   canDelete,
+  duplicatePending,
   onDraftChange,
   onCommitRename,
   onCancelRename,
@@ -216,6 +219,7 @@ function ResumeCard({
             <TooltipIconButton
               label={t('resumes.duplicateAria', { title: resume.title })}
               onClick={onDuplicate}
+              disabled={duplicatePending}
             >
               <Copy className="size-4" />
             </TooltipIconButton>
@@ -255,6 +259,30 @@ export function ResumesDialog({ open, onOpenChange }: ResumesDialogProps) {
   const [query, setQuery] = useState('');
   const [sort, setSort] = useState<SortMode>('recent');
   const [favoriteOnly, setFavoriteOnly] = useState(false);
+  const [runCreateOnce, isCreating, resetCreateGuard] = useOnceAction();
+  const [duplicatingId, setDuplicatingId] = useState<string | null>(null);
+  const duplicateBusyRef = useRef(false);
+  const duplicateTimerRef = useRef<number | null>(null);
+
+  useEffect(() => {
+    if (open) {
+      resetCreateGuard();
+      duplicateBusyRef.current = false;
+      if (duplicateTimerRef.current !== null) {
+        window.clearTimeout(duplicateTimerRef.current);
+        duplicateTimerRef.current = null;
+      }
+    }
+  }, [open, resetCreateGuard]);
+
+  useEffect(
+    () => () => {
+      if (duplicateTimerRef.current !== null) {
+        window.clearTimeout(duplicateTimerRef.current);
+      }
+    },
+    [],
+  );
 
   const normalizedQuery = query.trim().toLowerCase();
   const visibleResumes = resumes
@@ -283,13 +311,33 @@ export function ResumesDialog({ open, onOpenChange }: ResumesDialogProps) {
   };
 
   const handleCreate = () => {
-    createResume();
-    onOpenChange(false);
+    runCreateOnce(() => {
+      createResume();
+      onOpenChange(false);
+    });
   };
 
   const handleCreateFromSample = () => {
-    importResumeData(SAMPLE_CV_DATA, t('resumes.sampleTitle'));
-    onOpenChange(false);
+    const title = t('resumes.sampleTitle');
+    runCreateOnce(() => {
+      importResumeData(SAMPLE_CV_DATA, title);
+      onOpenChange(false);
+    });
+  };
+
+  const handleDuplicate = (id: string) => {
+    if (duplicateBusyRef.current) return;
+    duplicateBusyRef.current = true;
+    setDuplicatingId(id);
+    duplicateResume(id);
+    if (duplicateTimerRef.current !== null) {
+      window.clearTimeout(duplicateTimerRef.current);
+    }
+    duplicateTimerRef.current = window.setTimeout(() => {
+      duplicateBusyRef.current = false;
+      setDuplicatingId((current) => (current === id ? null : current));
+      duplicateTimerRef.current = null;
+    }, 800);
   };
 
   const handleSelect = (id: string) => {
@@ -425,12 +473,13 @@ export function ResumesDialog({ open, onOpenChange }: ResumesDialogProps) {
                         editing={editing}
                         draft={draft}
                         canDelete={resumes.length > 1}
+                        duplicatePending={duplicatingId === r.id}
                         onDraftChange={setDraft}
                         onCommitRename={commitRename}
                         onCancelRename={() => setEditingId(null)}
                         onSelect={() => handleSelect(r.id)}
                         onStartRename={() => startRename(r.id, r.title)}
-                        onDuplicate={() => duplicateResume(r.id)}
+                        onDuplicate={() => handleDuplicate(r.id)}
                         onDelete={() => handleDelete(r.id, r.title)}
                         onToggleFavorite={() => toggleFavorite(r.id)}
                       />
@@ -442,11 +491,15 @@ export function ResumesDialog({ open, onOpenChange }: ResumesDialogProps) {
           </div>
 
           <DialogFooter className="bg-muted flex-col items-stretch sm:items-center">
-            <Button onClick={handleCreate}>
+            <Button onClick={handleCreate} disabled={isCreating}>
               <Plus className="size-4" />
               {t('resumes.newCv')}
             </Button>
-            <Button variant="outline" onClick={handleCreateFromSample}>
+            <Button
+              variant="outline"
+              onClick={handleCreateFromSample}
+              disabled={isCreating}
+            >
               {t('resumes.newFromExample')}
             </Button>
             <Button variant="outline" onClick={() => onOpenChange(false)}>
