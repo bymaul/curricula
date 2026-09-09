@@ -106,3 +106,49 @@ export function designCssVars(
     '--cv-item-gap': `${gaps.item}pt`,
   };
 }
+
+export const PAGE_DIMENSIONS_PX = {
+  a4: { width: 794, height: 1123 },
+  letter: { width: 816, height: 1056 },
+} as const;
+
+export function getPageDimensions(pageSize: PageSizeId = 'a4') {
+  return PAGE_DIMENSIONS_PX[pageSize] ?? PAGE_DIMENSIONS_PX.a4;
+}
+
+export function computePageCount(
+  contentHeightPx: number,
+  pageHeightPx: number,
+): number {
+  if (contentHeightPx <= 0 || pageHeightPx <= 0) return 1;
+  return Math.max(1, Math.ceil(contentHeightPx / pageHeightPx));
+}
+
+const PAGE_SIZES: Record<PageSizeId, string> = {
+  a4: 'A4',
+  letter: 'Letter',
+};
+
+export function printCss(pageSize: PageSizeId = 'a4'): string {
+  return `
+  @page {
+    size: ${PAGE_SIZES[pageSize]};
+    margin: 0mm;
+  }
+
+  html, body {
+    -webkit-print-color-adjust: exact;
+    print-color-adjust: exact;
+  }
+
+  thead { display: table-header-group; }
+  tfoot { display: table-footer-group; }
+
+  div { background-image: none !important; }
+
+  h1, h2, h3, p, li {
+    orphans: 3;
+    widows: 3;
+  }
+`;
+}

@@ -6,7 +6,7 @@ import { TEMPLATE_COMPONENTS } from '@/components/resume/registry';
 import { Button } from '@/components/ui/button';
 import { TranslationKey, translate } from '@/lib/i18n';
 import { ResumeLanguage } from '@/lib/i18n/languages';
-import { getPageDimensions } from '@/lib/pagination';
+import { getPageDimensions } from '@/lib/design';
 import { matchShareHash, parseSharePayload, ShareResult } from '@/lib/share';
 import { Loader2, Pencil, Printer, TriangleAlert } from 'lucide-react';
 

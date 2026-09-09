@@ -1,11 +1,10 @@
 'use client';
 
 import React from 'react';
-import { DesignSettings, PageSizeId } from '@/lib/design';
+import { DesignSettings, PageSizeId, printCss } from '@/lib/design';
 import { BuiltinSectionId, SectionId } from '@/lib/consts';
 import { TranslationKey, translate } from '@/lib/i18n';
 import { ResumeLanguage } from '@/lib/i18n/languages';
-import { printCss } from '@/lib/print';
 import { CVData, CustomSectionItem } from '@/lib/schema';
 
 export interface TemplateProps {

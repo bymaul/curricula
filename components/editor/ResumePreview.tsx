@@ -6,8 +6,11 @@ import { ScrollArea, ScrollBar } from '@/components/ui/scroll-area';
 import { usePageScale } from '@/hooks/usePageScale';
 import { usePinchZoom } from '@/hooks/usePinchZoom';
 import { getSectionIdFromTab, SectionId } from '@/lib/consts';
-import { DesignSettings } from '@/lib/design';
-import { computePageCount, getPageDimensions } from '@/lib/pagination';
+import {
+  DesignSettings,
+  computePageCount,
+  getPageDimensions,
+} from '@/lib/design';
 import { CVData } from '@/lib/schema';
 import { ResumeLanguage } from '@/lib/i18n/languages';
 import { TemplateId } from '@/lib/templates';

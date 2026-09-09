@@ -2,8 +2,7 @@
 
 import { useI18n } from '@/hooks/useI18n';
 import { TEMPLATE_COMPONENTS } from '@/components/resume/registry';
-import { DesignSettings } from '@/lib/design';
-import { getPageDimensions } from '@/lib/pagination';
+import { DesignSettings, getPageDimensions } from '@/lib/design';
 import { CVData } from '@/lib/schema';
 import { ResumeLanguage } from '@/lib/i18n/languages';
 import { TEMPLATES, TemplateId } from '@/lib/templates';

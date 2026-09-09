@@ -29,7 +29,7 @@ import { useI18n } from '@/hooks/useI18n';
 import { useOnceAction } from '@/hooks/useOnceAction';
 import { TEMPLATE_COMPONENTS } from '@/components/resume/registry';
 import { SAMPLE_CV_DATA } from '@/lib/sampleCv';
-import { getPageDimensions } from '@/lib/pagination';
+import { getPageDimensions } from '@/lib/design';
 import { useResumeStore, ResumeRecord } from '@/store/useResumeStore';
 import { cn, formatRelativeTime } from '@/lib/utils';
 import {
