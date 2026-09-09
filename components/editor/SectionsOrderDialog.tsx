@@ -16,7 +16,7 @@ import { ScrollArea } from '@/components/ui/scroll-area';
 import { IconButton } from '@/components/ui/icon-button';
 import { Input } from '@/components/ui/input';
 import { useI18n } from '@/hooks/useI18n';
-import { SectionId } from '@/lib/consts';
+import { SectionId } from '@/lib/sections';
 import { getCustomSections } from '@/lib/schema';
 import type { TranslationKey } from '@/lib/i18n';
 import { useResumeStore } from '@/store/useResumeStore';

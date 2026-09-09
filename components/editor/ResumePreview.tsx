@@ -5,7 +5,7 @@ import { TEMPLATE_COMPONENTS } from '@/components/resume/registry';
 import { ScrollArea, ScrollBar } from '@/components/ui/scroll-area';
 import { usePageScale } from '@/hooks/usePageScale';
 import { usePinchZoom } from '@/hooks/usePinchZoom';
-import { getSectionIdFromTab, SectionId } from '@/lib/consts';
+import { getSectionIdFromTab, SectionId } from '@/lib/sections';
 import {
   DesignSettings,
   computePageCount,

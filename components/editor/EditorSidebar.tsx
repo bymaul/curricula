@@ -1,7 +1,7 @@
 'use client';
 
 import { useI18n } from '@/hooks/useI18n';
-import { DEFAULT_SECTION_ORDER, SectionId, TabName } from '@/lib/consts';
+import { DEFAULT_SECTION_ORDER, SectionId, TabName } from '@/lib/sections';
 import { getCustomSections } from '@/lib/schema';
 import { navTabLabel } from '@/lib/i18n';
 import { cn, formatRelativeTime } from '@/lib/utils';

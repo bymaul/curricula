@@ -1,7 +1,7 @@
 import { createAnthropic } from '@ai-sdk/anthropic';
 import { createGoogleGenerativeAI } from '@ai-sdk/google';
 import { createOpenAI } from '@ai-sdk/openai';
-import { AIProvider, AI_PROVIDERS } from '@/lib/consts';
+import { AIProvider, AI_PROVIDERS } from '@/lib/aiProviders';
 import { stripInvisibleChars } from '@/lib/cleanText';
 import { parseEnv } from '@/lib/env';
 

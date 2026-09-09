@@ -1,6 +1,6 @@
 import { describe, expect, it } from 'vitest';
 import { parseBackup, serializeBackup } from '@/lib/backup';
-import { DEFAULT_SECTION_ORDER, SectionId } from '@/lib/consts';
+import { DEFAULT_SECTION_ORDER, SectionId } from '@/lib/sections';
 import { DEFAULT_DESIGN } from '@/lib/design';
 import { CVData } from '@/lib/schema';
 import type { ResumeRecord } from '@/store/useResumeStore';

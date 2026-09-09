@@ -1,7 +1,7 @@
 'use client';
 
 import React, { forwardRef } from 'react';
-import { BuiltinSectionId, DEFAULT_SECTION_ORDER } from '@/lib/consts';
+import { BuiltinSectionId, DEFAULT_SECTION_ORDER } from '@/lib/sections';
 import { DEFAULT_DESIGN, designCssVars } from '@/lib/design';
 import { CVData } from '@/lib/schema';
 import {

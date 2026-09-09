@@ -11,14 +11,10 @@ import { useCVAutoSave } from '@/hooks/useCVAutoSave';
 import { useCVImportExport } from '@/hooks/useCVImportExport';
 import { useCVPrint } from '@/hooks/useCVPrint';
 import { useKeyboardShortcuts } from '@/hooks/useKeyboardShortcuts';
-import { useMediaQuery } from '@/hooks/useMediaQuery';
+import { DESKTOP_MEDIA_QUERY, useMediaQuery } from '@/hooks/useMediaQuery';
 import { useMobileSlider } from '@/hooks/useMobileSlider';
 import { useShareLinkImport } from '@/hooks/useShareLinkImport';
-import {
-  DESKTOP_MEDIA_QUERY,
-  getSectionTabName,
-  SectionId,
-} from '@/lib/consts';
+import { getSectionTabName, SectionId } from '@/lib/sections';
 import { useDialogStore } from '@/store/useDialogStore';
 import { usePhotoStore } from '@/store/usePhotoStore';
 import { useResumeStore } from '@/store/useResumeStore';

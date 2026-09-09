@@ -1,7 +1,8 @@
 import { generateText, NoObjectGeneratedError, Output } from 'ai';
 import type { LanguageModel } from 'ai';
 import { z } from 'zod';
-import { AIAdjustScope, RENDERABLE_SECTIONS } from '@/lib/consts';
+import { AIAdjustScope } from '@/lib/aiProviders';
+import { RENDERABLE_SECTIONS } from '@/lib/sections';
 import { CVData, initialCVState } from '@/lib/schema';
 
 export const MAX_CV_TEXT_CHARS = 12_000;

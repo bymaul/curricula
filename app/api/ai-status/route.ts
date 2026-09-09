@@ -1,4 +1,4 @@
-import { AI_PROVIDERS } from '@/lib/consts';
+import { AI_PROVIDERS } from '@/lib/aiProviders';
 import { parseEnv } from '@/lib/env';
 
 export const runtime = 'nodejs';

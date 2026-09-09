@@ -5,7 +5,7 @@ import {
   resolveAIKey,
   resolveAIModel,
 } from '@/lib/ai';
-import { AI_PROVIDERS, AIProvider } from '@/lib/consts';
+import { AI_PROVIDERS, AIProvider } from '@/lib/aiProviders';
 import { MAX_CV_IMAGE_BASE64_CHARS } from '@/lib/cvParsing';
 import { parseEnv } from '@/lib/env';
 import {

@@ -2,7 +2,7 @@
 
 import React from 'react';
 import { DesignSettings, PageSizeId, printCss } from '@/lib/design';
-import { BuiltinSectionId, SectionId } from '@/lib/consts';
+import { BuiltinSectionId, SectionId } from '@/lib/sections';
 import { TranslationKey, translate } from '@/lib/i18n';
 import { ResumeLanguage } from '@/lib/i18n/languages';
 import { CVData, CustomSectionItem } from '@/lib/schema';

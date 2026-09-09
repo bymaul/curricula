@@ -5,7 +5,7 @@ import {
   AI_API_KEY_STORAGE_KEY,
   AIProvider,
   getStoredAIAPIKey,
-} from '@/lib/consts';
+} from '@/lib/aiProviders';
 import { useUIStore } from '@/store/useUIStore';
 
 export function useAISettings() {

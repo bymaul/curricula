@@ -9,7 +9,8 @@ import {
   TranslationKey,
 } from '@/lib/i18n';
 import { Language } from '@/lib/i18n/languages';
-import { AIAdjustScope, BuiltinTabName } from '@/lib/consts';
+import { AIAdjustScope } from '@/lib/aiProviders';
+import { BuiltinTabName } from '@/lib/sections';
 import { cvSchema } from '@/lib/schema';
 
 function leafKeys(value: unknown): string[] {

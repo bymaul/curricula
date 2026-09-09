@@ -2,7 +2,7 @@
 
 import { create } from 'zustand';
 import { persist } from 'zustand/middleware';
-import { DEFAULT_SECTION_ORDER, SectionId } from '@/lib/consts';
+import { DEFAULT_SECTION_ORDER, SectionId } from '@/lib/sections';
 import { DesignSettings } from '@/lib/design';
 import { ResumeLanguage } from '@/lib/i18n/languages';
 import { CVData } from '@/lib/schema';

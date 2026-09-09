@@ -1,5 +1,5 @@
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
-import { DEFAULT_SECTION_ORDER } from '@/lib/consts';
+import { DEFAULT_SECTION_ORDER } from '@/lib/sections';
 import { DEFAULT_DESIGN } from '@/lib/design';
 import { CVData } from '@/lib/schema';
 import { resetStorageStateForTests } from '@/lib/storage';

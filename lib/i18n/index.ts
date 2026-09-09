@@ -1,7 +1,8 @@
 import en, { Dictionary } from './en';
 import id from './id';
 import { Language, ResumeLanguage } from './languages';
-import { AIAdjustScope, BuiltinTabName, TabName } from '@/lib/consts';
+import { AIAdjustScope } from '@/lib/aiProviders';
+import { BuiltinTabName, TabName } from '@/lib/sections';
 
 export type { Language, ResumeLanguage } from './languages';
 export { UI_LANGUAGES, RESUME_LANGUAGES } from './languages';

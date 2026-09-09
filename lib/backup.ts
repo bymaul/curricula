@@ -1,5 +1,5 @@
 import { z } from 'zod';
-import { SECTION_IDS } from '@/lib/consts';
+import { SECTION_IDS } from '@/lib/sections';
 import { DEFAULT_DESIGN, designSchema } from '@/lib/design';
 import { RESUME_LANGUAGES } from '@/lib/i18n/languages';
 import { cvDataStoredSchema } from '@/lib/schema';

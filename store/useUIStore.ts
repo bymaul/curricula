@@ -2,7 +2,8 @@
 
 import { create } from 'zustand';
 import { persist } from 'zustand/middleware';
-import { AIProvider, TabName } from '@/lib/consts';
+import { AIProvider } from '@/lib/aiProviders';
+import { TabName } from '@/lib/sections';
 import { Language } from '@/lib/i18n/languages';
 import { createQuotaAwareStorage } from '@/lib/storage';
 

@@ -4,7 +4,7 @@ import { useRef } from 'react';
 import { toast } from '@/components/ui/toast';
 import { useI18n } from '@/hooks/useI18n';
 import { extractTextFromPDF, parseCVWithAI } from '@/hooks/useCVImportPDF';
-import { getStoredAIAPIKey } from '@/lib/consts';
+import { getStoredAIAPIKey } from '@/lib/aiProviders';
 import { getPDFImportErrorInfo } from '@/lib/pdfImportErrors';
 import { RateLimitError, RequestTimeoutError } from '@/lib/request';
 import { useImportStore } from '@/store/useImportStore';

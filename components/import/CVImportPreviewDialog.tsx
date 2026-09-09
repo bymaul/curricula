@@ -10,7 +10,7 @@ import {
   DialogTitle,
 } from '@/components/ui/dialog';
 import { useI18n } from '@/hooks/useI18n';
-import { BuiltinTabName, getSectionTabName } from '@/lib/consts';
+import { BuiltinTabName, getSectionTabName } from '@/lib/sections';
 import { TAB_KEYS } from '@/lib/i18n';
 import { useImportStore } from '@/store/useImportStore';
 import { WarningList } from '@/components/ui/warning-list';

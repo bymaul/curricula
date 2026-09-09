@@ -1,7 +1,7 @@
 'use client';
 
 import { CVData } from '@/lib/schema';
-import { AIProvider } from '@/lib/consts';
+import { AIProvider } from '@/lib/aiProviders';
 import { stripInvisibleChars } from '@/lib/cleanText';
 import type { CVImagePart } from '@/lib/cvParsing';
 import { ScannedPDFError } from '@/lib/pdfImportErrors';

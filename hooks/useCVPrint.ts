@@ -2,7 +2,7 @@
 
 import { toast } from '@/components/ui/toast';
 import { useI18n } from '@/hooks/useI18n';
-import { SECTIONS, SectionId, TabName } from '@/lib/consts';
+import { SECTIONS, SectionId, TabName } from '@/lib/sections';
 import { tabKey } from '@/lib/i18n';
 import type { CVData } from '@/lib/schema';
 import { useResumeStore } from '@/store/useResumeStore';

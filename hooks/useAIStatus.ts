@@ -1,7 +1,7 @@
 'use client';
 
 import { useEffect, useState } from 'react';
-import { AIProvider } from '@/lib/consts';
+import { AIProvider } from '@/lib/aiProviders';
 
 export interface AIStatus {
   hasBundledKey: boolean;

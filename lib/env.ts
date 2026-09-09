@@ -2,7 +2,7 @@ import 'server-only';
 
 import { z } from 'zod';
 import { stripInvisibleChars } from '@/lib/cleanText';
-import { AIProvider } from '@/lib/consts';
+import { AIProvider } from '@/lib/aiProviders';
 
 const envSchema = z.object({
   AI_API_KEY: z

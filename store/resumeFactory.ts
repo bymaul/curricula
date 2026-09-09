@@ -1,6 +1,6 @@
 'use client';
 
-import { DEFAULT_SECTION_ORDER, SECTION_IDS } from '@/lib/consts';
+import { DEFAULT_SECTION_ORDER, SECTION_IDS } from '@/lib/sections';
 import { DesignSettings, normalizeDesign } from '@/lib/design';
 import { ResumeLanguage } from '@/lib/i18n/languages';
 import { CVData, cvDataStoredSchema, initialCVState } from '@/lib/schema';

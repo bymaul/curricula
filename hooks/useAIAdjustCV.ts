@@ -3,7 +3,7 @@
 import { useRef, useState } from 'react';
 import { useI18n } from '@/hooks/useI18n';
 import { CVData } from '@/lib/schema';
-import { AIAdjustScope, AIProvider } from '@/lib/consts';
+import { AIAdjustScope, AIProvider } from '@/lib/aiProviders';
 import type { CVImagePart } from '@/lib/cvParsing';
 import { parseResponseJSON, RateLimitError } from '@/lib/request';
 

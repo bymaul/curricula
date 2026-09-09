@@ -7,7 +7,7 @@ import { CVData } from '@/lib/schema';
 import { ResumeLanguage } from '@/lib/i18n/languages';
 import { TEMPLATES, TemplateId } from '@/lib/templates';
 import { cn } from '@/lib/utils';
-import { SectionId } from '@/lib/consts';
+import { SectionId } from '@/lib/sections';
 import { KeyboardEvent, useEffect, useRef, useState } from 'react';
 
 interface TemplatePickerProps {

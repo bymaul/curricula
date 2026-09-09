@@ -5,7 +5,7 @@ import {
 } from '@/lib/api-request';
 import { sanitizeJSON, stripInvisibleChars } from '@/lib/cleanText';
 import { MAX_ADJUST_IMAGES, adjustCVWithRepair } from '@/lib/cvParsing';
-import { AI_ADJUST_SCOPES, AIAdjustScope } from '@/lib/consts';
+import { AI_ADJUST_SCOPES, AIAdjustScope } from '@/lib/aiProviders';
 import { cvSchema } from '@/lib/schema';
 import z from 'zod';
 

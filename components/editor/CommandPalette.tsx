@@ -15,7 +15,7 @@ import {
 import { Dialog, DialogContent, DialogTitle } from '@/components/ui/dialog';
 import { getCustomSections } from '@/lib/schema';
 import { SAMPLE_CV_DATA } from '@/lib/sampleCv';
-import { DEFAULT_SECTION_ORDER, TabName } from '@/lib/consts';
+import { DEFAULT_SECTION_ORDER, TabName } from '@/lib/sections';
 import { isApplePlatform } from '@/lib/utils';
 import { useDialogStore, DialogKey } from '@/store/useDialogStore';
 import { useResumeStore } from '@/store/useResumeStore';
