@@ -26,7 +26,7 @@ import {
   SelectValue,
 } from '@/components/ui/select';
 import { useI18n } from '@/hooks/useI18n';
-import { useOnceAction } from '@/hooks/useOnceAction';
+import { useOnceAction, useCooldownAction } from '@/hooks/useOnceAction';
 import { TEMPLATE_COMPONENTS } from '@/components/resume/registry';
 import { SAMPLE_CV_DATA } from '@/lib/sampleCv';
 import { getPageDimensions } from '@/lib/design';
@@ -260,29 +260,14 @@ export function ResumesDialog({ open, onOpenChange }: ResumesDialogProps) {
   const [sort, setSort] = useState<SortMode>('recent');
   const [favoriteOnly, setFavoriteOnly] = useState(false);
   const [runCreateOnce, isCreating, resetCreateGuard] = useOnceAction();
+  const [runDuplicate, isDuplicating] = useCooldownAction();
   const [duplicatingId, setDuplicatingId] = useState<string | null>(null);
-  const duplicateBusyRef = useRef(false);
-  const duplicateTimerRef = useRef<number | null>(null);
 
   useEffect(() => {
     if (open) {
       resetCreateGuard();
-      duplicateBusyRef.current = false;
-      if (duplicateTimerRef.current !== null) {
-        window.clearTimeout(duplicateTimerRef.current);
-        duplicateTimerRef.current = null;
-      }
     }
   }, [open, resetCreateGuard]);
-
-  useEffect(
-    () => () => {
-      if (duplicateTimerRef.current !== null) {
-        window.clearTimeout(duplicateTimerRef.current);
-      }
-    },
-    [],
-  );
 
   const normalizedQuery = query.trim().toLowerCase();
   const visibleResumes = resumes
@@ -326,18 +311,10 @@ export function ResumesDialog({ open, onOpenChange }: ResumesDialogProps) {
   };
 
   const handleDuplicate = (id: string) => {
-    if (duplicateBusyRef.current) return;
-    duplicateBusyRef.current = true;
-    setDuplicatingId(id);
-    duplicateResume(id);
-    if (duplicateTimerRef.current !== null) {
-      window.clearTimeout(duplicateTimerRef.current);
-    }
-    duplicateTimerRef.current = window.setTimeout(() => {
-      duplicateBusyRef.current = false;
-      setDuplicatingId((current) => (current === id ? null : current));
-      duplicateTimerRef.current = null;
-    }, 800);
+    runDuplicate(() => {
+      setDuplicatingId(id);
+      duplicateResume(id);
+    });
   };
 
   const handleSelect = (id: string) => {
@@ -473,7 +450,9 @@ export function ResumesDialog({ open, onOpenChange }: ResumesDialogProps) {
                         editing={editing}
                         draft={draft}
                         canDelete={resumes.length > 1}
-                        duplicatePending={duplicatingId === r.id}
+                        duplicatePending={
+                          isDuplicating && duplicatingId === r.id
+                        }
                         onDraftChange={setDraft}
                         onCommitRename={commitRename}
                         onCancelRename={() => setEditingId(null)}

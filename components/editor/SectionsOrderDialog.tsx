@@ -1,6 +1,7 @@
 'use client';
 
-import { useEffect, useRef, useState } from 'react';
+import { useState } from 'react';
+import { useCooldownAction } from '@/hooks/useOnceAction';
 import { Button } from '@/components/ui/button';
 import {
   Dialog,
@@ -143,30 +144,12 @@ function AddSectionControl({ onAdd }: { onAdd: (title: string) => void }) {
   const { t } = useI18n();
   const [customMode, setCustomMode] = useState(false);
   const [name, setName] = useState('');
-  const addingRef = useRef(false);
-  const addingTimerRef = useRef<number | null>(null);
-
-  useEffect(
-    () => () => {
-      if (addingTimerRef.current !== null) {
-        window.clearTimeout(addingTimerRef.current);
-      }
-    },
-    [],
-  );
+  const [runAdd] = useCooldownAction();
 
   const guardedAdd = (title: string) => {
     const trimmed = title.trim();
-    if (!trimmed || addingRef.current) return;
-    addingRef.current = true;
-    onAdd(trimmed);
-    if (addingTimerRef.current !== null) {
-      window.clearTimeout(addingTimerRef.current);
-    }
-    addingTimerRef.current = window.setTimeout(() => {
-      addingRef.current = false;
-      addingTimerRef.current = null;
-    }, 800);
+    if (!trimmed) return;
+    runAdd(() => onAdd(trimmed));
   };
 
   const submitCustom = () => {
