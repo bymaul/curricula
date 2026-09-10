@@ -52,9 +52,11 @@ describe('cvSchema', () => {
     expect(result.success).toBe(false);
   });
 
-  it('rejects a too-short summary', () => {
-    const result = cvSchema.safeParse({ ...validCV, summary: 'short' });
-    expect(result.success).toBe(false);
+  it('accepts an empty or short summary', () => {
+    expect(cvSchema.safeParse({ ...validCV, summary: '' }).success).toBe(true);
+    expect(cvSchema.safeParse({ ...validCV, summary: 'short' }).success).toBe(
+      true,
+    );
   });
 
   it('rejects a missing required scalar field', () => {

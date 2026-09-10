@@ -66,7 +66,7 @@ export const cvSchema = z.object({
   phone: z.string().min(1, 'validation.phoneRequired'),
   location: z.string().optional(),
   links: z.array(customLinkSchema),
-  summary: z.string().min(10, 'validation.summaryMinLength'),
+  summary: z.string(),
   experience: z.array(experienceSchema),
   projects: z.array(projectSchema),
   education: z.array(educationSchema),

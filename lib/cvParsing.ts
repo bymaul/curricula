@@ -223,8 +223,6 @@ export function normalizeCVOutput(raw: unknown): CVParseResult {
   if (!data.name.trim()) warnings.push('Name not found');
   if (!data.email.trim()) warnings.push('Email not found');
   if (!data.phone.trim()) warnings.push('Phone not found');
-  if (data.summary.trim().length < 10)
-    warnings.push('Summary is missing or too short');
   if (data.experience.length === 0 && data.projects.length === 0)
     warnings.push('No experience or projects found');
 
