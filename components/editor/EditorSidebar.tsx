@@ -149,18 +149,20 @@ export function EditorSidebar({
 
   const navRef = useRef<HTMLElement>(null);
   useEffect(() => {
-    const viewport = navRef.current?.querySelector<HTMLElement>(
-      '[data-slot="scroll-area-viewport"]',
-    );
-    if (!viewport) return;
+    const navEl = navRef.current;
+    if (!navEl) return;
     const onWheel = (event: WheelEvent) => {
+      const viewport = navEl.querySelector<HTMLElement>(
+        '[data-slot="scroll-area-viewport"]',
+      );
+      if (!viewport) return;
       if (Math.abs(event.deltaY) <= Math.abs(event.deltaX)) return;
       if (viewport.scrollWidth <= viewport.clientWidth) return;
       event.preventDefault();
       viewport.scrollLeft += event.deltaY;
     };
-    viewport.addEventListener('wheel', onWheel, { passive: false });
-    return () => viewport.removeEventListener('wheel', onWheel);
+    navEl.addEventListener('wheel', onWheel, { passive: false });
+    return () => navEl.removeEventListener('wheel', onWheel);
   }, []);
 
   return (
@@ -191,43 +193,45 @@ export function EditorSidebar({
         </ScrollArea>
       </div>
 
-      <nav
-        ref={navRef}
-        className="border-border bg-muted/30 flex shrink-0 items-stretch overflow-hidden border-t"
-        aria-label={t('editor.cvSectionsAriaLabel')}
-      >
-        <ScrollArea orientation="horizontal" className="h-14 min-w-0 flex-1">
-          <div className="flex h-full w-max items-stretch gap-1 px-4">
-            {navTabs.map((tab) => {
-              const active = activeTab === tab;
-              return (
-                <button
-                  key={tab}
-                  type="button"
-                  onClick={() => setActiveTab(tab)}
-                  aria-current={active ? 'page' : undefined}
-                  className={cn(
-                    'relative flex shrink-0 items-center px-2.5 text-sm font-semibold transition-colors',
-                    active
-                      ? 'text-foreground after:bg-primary after:absolute after:inset-x-2 after:bottom-2 after:h-0.5 after:rounded-full'
-                      : 'text-muted-foreground hover:text-foreground',
-                  )}
-                >
-                  {navTabLabel(tab, customSections, t)}
-                </button>
-              );
-            })}
-          </div>
-        </ScrollArea>
-
-        <TooltipIconButton
-          label={t('editor.reorderSections')}
-          onClick={() => setDialog('sections', true)}
-          className="border-border h-full w-12 rounded-none border-0 border-l"
+      <div className="border-border bg-muted/30 shrink-0 border-t">
+        <nav
+          ref={navRef}
+          className="flex h-14 items-stretch"
+          aria-label={t('editor.cvSectionsAriaLabel')}
         >
-          <ListOrdered className="size-5" />
-        </TooltipIconButton>
-      </nav>
+          <ScrollArea orientation="horizontal" className="min-w-0 flex-1">
+            <div className="flex h-full w-max items-stretch gap-1 px-4">
+              {navTabs.map((tab) => {
+                const active = activeTab === tab;
+                return (
+                  <button
+                    key={tab}
+                    type="button"
+                    onClick={() => setActiveTab(tab)}
+                    aria-current={active ? 'page' : undefined}
+                    className={cn(
+                      'relative flex shrink-0 items-center px-2.5 text-sm font-semibold transition-colors',
+                      active
+                        ? 'text-foreground after:bg-primary after:absolute after:inset-x-2 after:top-0 after:h-0.5 after:rounded-full'
+                        : 'text-muted-foreground hover:text-foreground',
+                    )}
+                  >
+                    {navTabLabel(tab, customSections, t)}
+                  </button>
+                );
+              })}
+            </div>
+          </ScrollArea>
+
+          <TooltipIconButton
+            label={t('editor.reorderSections')}
+            onClick={() => setDialog('sections', true)}
+            className="border-border h-full w-12 shrink-0 rounded-none border-0 border-l"
+          >
+            <ListOrdered className="size-5" />
+          </TooltipIconButton>
+        </nav>
+      </div>
 
       {storageError && (
         <div
