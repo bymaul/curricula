@@ -177,7 +177,7 @@ export function EditorSidebar({
           {isEmptyResume && <EditorEmptyState />}
           <form
             onSubmit={(e) => e.preventDefault()}
-            className="space-y-6 pt-4 pb-6"
+            className="space-y-4 pt-3 pb-4"
           >
             {activeTab === 'personal' && <PersonalForm />}
             {activeTab === 'design' && <DesignForm />}
@@ -196,11 +196,11 @@ export function EditorSidebar({
       <div className="border-border bg-muted/30 shrink-0 border-t">
         <nav
           ref={navRef}
-          className="flex h-14 items-stretch"
+          className="flex h-12 items-stretch"
           aria-label={t('editor.cvSectionsAriaLabel')}
         >
           <ScrollArea orientation="horizontal" className="min-w-0 flex-1">
-            <div className="flex h-full w-max items-stretch gap-1 px-4">
+            <div className="flex h-full w-max items-stretch gap-0.5 px-3">
               {navTabs.map((tab) => {
                 const active = activeTab === tab;
                 return (
@@ -236,14 +236,14 @@ export function EditorSidebar({
       {storageError && (
         <div
           role="alert"
-          className="border-border bg-warning/10 text-warning flex shrink-0 items-center gap-2 border-t px-4 py-2 text-xs"
+          className="border-border bg-warning/10 text-warning flex shrink-0 items-center gap-2 border-t px-3 py-2 text-xs"
         >
           <AlertTriangle className="size-4 shrink-0" />
           <span>{t('editor.storageFullWarning')}</span>
         </div>
       )}
 
-      <footer className="border-border bg-muted/30 z-10 flex shrink-0 items-center justify-between gap-2 border-t px-4 py-2.5">
+      <footer className="border-border bg-muted/30 z-10 flex shrink-0 items-center justify-between gap-2 border-t px-3 py-2">
         <div className="flex min-w-0 items-center gap-2" aria-live="polite">
           <SaveStatus saveStatus={saveStatus} lastSavedAt={lastSavedAt} />
         </div>

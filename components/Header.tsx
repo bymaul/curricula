@@ -18,12 +18,12 @@ export function Header() {
   const activeResumeTitle = activeResume?.title ?? t('header.untitledCv');
 
   return (
-    <header className="flex shrink-0 items-center justify-between gap-2 p-3 sm:p-4 md:mb-6 md:p-0 print:hidden">
+    <header className="flex shrink-0 items-center justify-between gap-2 px-4 py-2.5 md:mb-4 md:p-0 print:hidden">
       <h1 className="shrink-0 text-base font-bold tracking-tight sm:text-lg">
         {t('brand.name')}
       </h1>
 
-      <div className="flex h-5 items-center gap-1.5 sm:gap-2">
+      <div className="flex h-5 items-center gap-1.5">
         <Button
           variant="ghost"
           size="icon"

@@ -6,11 +6,11 @@ export function EditorSkeleton() {
     <main
       aria-busy="true"
       aria-live="polite"
-      className="bg-background text-foreground flex h-dvh w-full flex-col overflow-hidden overscroll-x-none md:p-6"
+      className="bg-background text-foreground flex h-dvh w-full flex-col overflow-hidden overscroll-x-none md:p-4"
     >
-      <div className="flex shrink-0 items-center justify-between gap-2 p-3 sm:p-4 md:mb-6 md:p-0">
+      <div className="flex shrink-0 items-center justify-between gap-2 px-4 py-2.5 md:mb-4 md:p-0">
         <Skeleton className="h-6 w-20 shrink-0 sm:h-7" />
-        <div className="flex h-5 items-center gap-1.5 sm:gap-2">
+        <div className="flex h-5 items-center gap-1.5">
           <Skeleton className="h-8 w-8 shrink-0 rounded-lg" />
           <div className="bg-border w-px shrink-0 self-stretch" />
           <Skeleton className="h-8 w-8 shrink-0 rounded-lg" />
@@ -19,9 +19,9 @@ export function EditorSkeleton() {
         </div>
       </div>
 
-      <div className="flex min-h-0 w-full flex-1 flex-col gap-4 px-4 pb-4 md:flex-row md:gap-6 md:px-0 md:pb-0">
+      <div className="flex min-h-0 w-full flex-1 flex-col gap-3 px-4 pb-4 md:flex-row md:gap-4 md:px-0 md:pb-0">
         <div className="border-border bg-card @container/sidebar flex h-full w-full shrink-0 flex-col overflow-hidden rounded-xl border shadow-lg md:w-[40%] xl:w-[30%]">
-          <div className="min-h-0 flex-1 space-y-4 px-4 pt-4 pb-6">
+          <div className="min-h-0 flex-1 space-y-4 px-3 pt-3 pb-4">
             <div>
               <Skeleton className="h-7 w-1/3" />
               <Skeleton className="mt-1 h-4 w-2/3" />
@@ -38,8 +38,8 @@ export function EditorSkeleton() {
             </div>
           </div>
 
-          <div className="border-border bg-muted/30 flex h-14 shrink-0 items-stretch overflow-hidden border-t">
-            <div className="flex min-w-0 flex-1 items-center gap-3 px-4">
+          <div className="border-border bg-muted/30 flex h-12 shrink-0 items-stretch overflow-hidden border-t">
+            <div className="flex min-w-0 flex-1 items-center gap-3 px-3">
               <Skeleton className="h-4 w-12 shrink-0" />
               <Skeleton className="h-4 w-16 shrink-0" />
               <Skeleton className="hidden h-4 w-20 shrink-0 sm:block" />
@@ -48,7 +48,7 @@ export function EditorSkeleton() {
             <Skeleton className="border-border h-full w-12 shrink-0 rounded-none border-0 border-l" />
           </div>
 
-          <div className="border-border bg-muted/30 flex shrink-0 items-center justify-between gap-2 border-t px-4 py-2.5">
+          <div className="border-border bg-muted/30 flex shrink-0 items-center justify-between gap-2 border-t px-3 py-2">
             <div className="flex min-w-0 items-center gap-2">
               <Skeleton className="h-4 w-4 shrink-0 rounded-full" />
               <Skeleton className="hidden h-4 w-24 shrink-0 sm:block" />

@@ -10,7 +10,6 @@ import {
   FieldSeparator,
   FieldSet,
 } from '@/components/ui/field';
-import { Button } from '@/components/ui/button';
 import { toast } from '@/components/ui/toast';
 import { useI18n } from '@/hooks/useI18n';
 import { CVData } from '@/lib/schema';
@@ -18,7 +17,7 @@ import { translateValidationMessage } from '@/lib/i18n';
 import { SUPPORTED_IMAGE_TYPES, resizeSquarePhoto } from '@/lib/imageFiles';
 import { useResumeStore } from '@/store/useResumeStore';
 import { useFieldArray, useFormContext } from 'react-hook-form';
-import { UserRound } from 'lucide-react';
+import { UserRound, X } from 'lucide-react';
 import { FormField } from '../ui/form-field';
 import { AddItemButton, ItemRemoveButton, SectionHeading } from './shared';
 
@@ -86,8 +85,8 @@ export const PersonalForm = () => {
   };
 
   return (
-    <div className="px-4 py-2">
-      <div className="mb-4">
+    <div className="px-3 py-2">
+      <div className="mb-3">
         <SectionHeading
           title={t('personalDetails.title')}
           description={t('personalDetails.description')}
@@ -101,48 +100,47 @@ export const PersonalForm = () => {
           <FieldGroup>
             <Field>
               <FieldLabel>{t('personalDetails.photoLabel')}</FieldLabel>
-              <div className="flex items-center gap-4">
-                <div className="border-border bg-muted flex h-20 w-20 shrink-0 items-center justify-center overflow-hidden rounded-full border">
-                  {photo ? (
-                    // eslint-disable-next-line @next/next/no-img-element
-                    <img
-                      src={photo}
-                      alt=""
-                      className="h-full w-full object-cover"
-                    />
-                  ) : (
-                    <UserRound className="text-muted-foreground h-8 w-8" />
-                  )}
-                </div>
-                <div className="flex flex-col gap-2">
-                  <Button
+              <div className="flex items-center gap-3">
+                <div className="relative shrink-0">
+                  <button
                     type="button"
-                    variant="outline"
-                    size="sm"
                     onClick={() => fileInputRef.current?.click()}
+                    aria-label={
+                      photo
+                        ? t('personalDetails.photoChange')
+                        : t('personalDetails.photoUpload')
+                    }
+                    className="border-border bg-muted focus-visible:border-ring focus-visible:ring-ring/50 flex h-24 w-24 items-center justify-center overflow-hidden rounded-full border outline-none focus-visible:ring-3"
                   >
-                    {photo
-                      ? t('personalDetails.photoChange')
-                      : t('personalDetails.photoUpload')}
-                  </Button>
-                  {photo ? (
-                    <Button
+                    {photo ? (
+                      // eslint-disable-next-line @next/next/no-img-element
+                      <img
+                        src={photo}
+                        alt=""
+                        className="h-full w-full object-cover"
+                      />
+                    ) : (
+                      <UserRound className="text-muted-foreground h-6 w-6" />
+                    )}
+                  </button>
+                  {photo && activeId ? (
+                    <button
                       type="button"
-                      variant="ghost"
-                      size="sm"
-                      onClick={() => activeId && setResumePhoto(activeId, '')}
+                      onClick={() => setResumePhoto(activeId, '')}
+                      aria-label={t('personalDetails.photoRemove')}
+                      className="border-border bg-card text-muted-foreground hover:text-destructive focus-visible:border-ring focus-visible:ring-ring/50 absolute right-1 bottom-1 flex size-5 items-center justify-center rounded-full border shadow-sm outline-none focus-visible:ring-3"
                     >
-                      {t('personalDetails.photoRemove')}
-                    </Button>
+                      <X className="size-3" />
+                    </button>
                   ) : null}
-                  <input
-                    ref={fileInputRef}
-                    type="file"
-                    accept="image/jpeg,image/png,image/webp"
-                    className="hidden"
-                    onChange={handlePhotoChange}
-                  />
                 </div>
+                <input
+                  ref={fileInputRef}
+                  type="file"
+                  accept="image/jpeg,image/png,image/webp"
+                  className="hidden"
+                  onChange={handlePhotoChange}
+                />
               </div>
               <FieldDescription>
                 {t('personalDetails.photoHint')}
@@ -204,7 +202,7 @@ export const PersonalForm = () => {
             {fields.map((field, index) => (
               <div
                 key={field.id}
-                className="bg-card border-border rounded-xl border p-3.5 shadow-sm"
+                className="bg-card border-border rounded-xl border p-3 shadow-sm"
               >
                 <div className="flex items-end gap-3">
                   <FormField

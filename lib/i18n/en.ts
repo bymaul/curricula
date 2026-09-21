@@ -143,8 +143,7 @@ const en = {
     summaryPlaceholder:
       'A brief overview of your professional background, key achievements, and core strengths...',
     photoLabel: 'Photo',
-    photoHint:
-      'Optional. A square headshot used in the template preview and share links.',
+    photoHint: 'Optional. Click the avatar to upload a square headshot.',
     photoUpload: 'Upload',
     photoChange: 'Change',
     photoRemove: 'Remove',

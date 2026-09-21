@@ -71,8 +71,8 @@ export const DesignForm = () => {
   };
 
   return (
-    <div className="px-4 py-2">
-      <div className="mb-4">
+    <div className="px-3 py-2">
+      <div className="mb-3">
         <SectionHeading
           title={t('appearance.title')}
           description={t('appearance.description')}

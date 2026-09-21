@@ -191,7 +191,7 @@ export function SortableCard({
     <div
       ref={setNodeRef}
       style={style}
-      className="border-border bg-card relative mb-4 space-y-4 rounded-xl border p-4 shadow-sm"
+      className="border-border bg-card relative mb-3 space-y-3 rounded-xl border p-3 shadow-sm"
     >
       <ItemRemoveButton
         onClick={onRemove}
@@ -199,7 +199,7 @@ export function SortableCard({
         className="absolute top-2.5 right-2.5 h-8 w-8"
       />
 
-      <div className="border-border flex items-center gap-2 border-b pr-10 pb-3">
+      <div className="border-border flex items-center gap-2 border-b pr-10 pb-2.5">
         <DragHandle {...attributes} {...listeners} />
         <span className="text-muted-foreground text-xs font-semibold tracking-wider uppercase">
           {label}
@@ -239,7 +239,7 @@ export function SortableRow({
       ref={setNodeRef}
       style={style}
       className={cn(
-        'border-border bg-card relative mb-4 rounded-xl border p-3 shadow-sm transition-all',
+        'border-border bg-card relative mb-3 rounded-xl border p-3 shadow-sm transition-all',
         isFormRow
           ? 'flex flex-col gap-3 @[400px]/sidebar:flex-row @[400px]/sidebar:items-center'
           : 'flex items-center gap-3',
@@ -367,74 +367,78 @@ export function SectionFieldArray({
     `${name}.${index}.${fieldName}` as FieldPath<CVData>;
 
   return (
-    <div className={cn('space-y-4 px-4 py-2', !showHeading && 'p-0')}>
+    <div className={cn('px-3 py-2', !showHeading && 'p-0')}>
       {showHeading && (
-        <SectionHeading title={title} description={description} />
+        <div className="mb-3">
+          <SectionHeading title={title} description={description} />
+        </div>
       )}
 
-      <SortableList ids={rows.map((f) => f.id)} onMove={move}>
-        {rows.length === 0 && (
-          <div className="mb-4 flex flex-col items-center gap-2 rounded-xl border border-dashed px-4 py-10 text-center">
-            {EmptyIcon && (
-              <EmptyIcon
-                className="text-muted-foreground size-5"
-                aria-hidden="true"
+      <div className="space-y-3">
+        <SortableList ids={rows.map((f) => f.id)} onMove={move}>
+          {rows.length === 0 && (
+            <div className="mb-3 flex flex-col items-center gap-2 rounded-xl border border-dashed px-3 py-8 text-center">
+              {EmptyIcon && (
+                <EmptyIcon
+                  className="text-muted-foreground size-5"
+                  aria-hidden="true"
+                />
+              )}
+              <p className="text-muted-foreground max-w-xs text-sm">
+                {t('common.emptySection', { label: itemLabel ?? name })}
+              </p>
+            </div>
+          )}
+          {rows.map((row, index) => {
+            const body = fields.map((def) => (
+              <FormField
+                key={def.name}
+                as={def.as}
+                className={def.className}
+                name={pathFor(index, def.name)}
+                label={def.label}
+                placeholder={def.placeholder}
+                register={register}
+                error={resolveErrors(index, def.name)}
+                textareaClassName={def.textareaClassName}
               />
-            )}
-            <p className="text-muted-foreground max-w-xs text-sm">
-              {t('common.emptySection', { label: itemLabel ?? name })}
-            </p>
-          </div>
-        )}
-        {rows.map((row, index) => {
-          const body = fields.map((def) => (
-            <FormField
-              key={def.name}
-              as={def.as}
-              className={def.className}
-              name={pathFor(index, def.name)}
-              label={def.label}
-              placeholder={def.placeholder}
-              register={register}
-              error={resolveErrors(index, def.name)}
-              textareaClassName={def.textareaClassName}
-            />
-          ));
+            ));
 
-          const currentItemLabel = t('common.itemNumber', {
-            label: itemLabel ?? name,
-            index: index + 1,
-          });
+            const currentItemLabel = t('common.itemNumber', {
+              label: itemLabel ?? name,
+              index: index + 1,
+            });
 
-          return variant === 'card' ? (
-            <SortableCard
-              key={row.id}
-              id={row.id}
-              label={currentItemLabel}
-              onRemove={() => remove(index)}
-              removeTitle={removeTitle}
-            >
-              <div className="grid grid-cols-1 gap-3 @[400px]/sidebar:grid-cols-2">
+            return variant === 'card' ? (
+              <SortableCard
+                key={row.id}
+                id={row.id}
+                label={currentItemLabel}
+                onRemove={() => remove(index)}
+                removeTitle={removeTitle}
+              >
+                <div className="grid grid-cols-1 gap-3 @[400px]/sidebar:grid-cols-2">
+                  {body}
+                </div>
+              </SortableCard>
+            ) : (
+              <SortableRow
+                key={row.id}
+                id={row.id}
+                label={currentItemLabel}
+                onRemove={() => remove(index)}
+                removeTitle={removeTitle}
+              >
                 {body}
-              </div>
-            </SortableCard>
-          ) : (
-            <SortableRow
-              key={row.id}
-              id={row.id}
-              label={currentItemLabel}
-              onRemove={() => remove(index)}
-              removeTitle={removeTitle}
-            >
-              {body}
-            </SortableRow>
-          );
-        })}
-      </SortableList>
+              </SortableRow>
+            );
+          })}
+        </SortableList>
 
-      <AddItemButton onClick={() => append(newItem())}>
-        {addLabel}
-      </AddItemButton>
+        <AddItemButton onClick={() => append(newItem())}>
+          {addLabel}
+        </AddItemButton>
+      </div>
     </div>
   );
 }

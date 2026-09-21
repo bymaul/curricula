@@ -146,8 +146,7 @@ const id: Dictionary = {
     summaryPlaceholder:
       'Gambaran singkat latar belakang profesional, pencapaian utama, dan keunggulan inti Anda...',
     photoLabel: 'Foto',
-    photoHint:
-      'Opsional. Foto kepala persegi yang dipakai di pratinjau templat dan tautan berbagi.',
+    photoHint: 'Opsional. Klik avatar untuk mengunggah foto persegi.',
     photoUpload: 'Unggah',
     photoChange: 'Ganti',
     photoRemove: 'Hapus',

@@ -38,8 +38,8 @@ export const CustomSectionForm = ({ section }: CustomSectionFormProps) => {
   };
 
   return (
-    <div className="px-4 py-2">
-      <div className="mb-4 flex items-start justify-between gap-2">
+    <div className="px-3 py-2">
+      <div className="mb-3 flex items-start justify-between gap-2">
         <div className="min-w-0 flex-1">
           <div>
             <h2 className="truncate text-xl font-bold tracking-tight">
@@ -51,7 +51,7 @@ export const CustomSectionForm = ({ section }: CustomSectionFormProps) => {
           </div>
         </div>
 
-        <div className="flex shrink-0 items-center gap-4">
+        <div className="flex shrink-0 items-center gap-1">
           <Button
             type="button"
             variant="ghost"
