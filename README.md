@@ -53,8 +53,7 @@ storage.
 - [Serwist](https://serwist.pages.dev) service worker
 - [AI SDK](https://ai-sdk.dev) with Google/OpenAI/Anthropic providers
 - [pdf.js](https://mozilla.github.io/pdf.js) for PDF text + page-image extraction
-- [Vitest](https://vitest.dev) for unit tests and
-  [Playwright](https://playwright.dev) for E2E tests (see [Testing](#testing))
+- [Vitest](https://vitest.dev) for unit tests (see [Testing](#testing))
 
 ## Getting started
 
@@ -99,16 +98,13 @@ pnpm format         # prettier --write
 pnpm format:check   # prettier --check
 pnpm test           # vitest run
 pnpm test:coverage  # vitest run with a coverage gate (lib/**)
-pnpm test:e2e       # playwright E2E tests
-pnpm test:e2e:ui    # playwright E2E tests in interactive UI mode
 ```
 
 ## Testing
 
 Unit tests live next to their modules (`lib/*.test.ts`, `store/*.test.ts`).
-E2E tests live in `e2e/` and run against a production build with Playwright
-(Chromium). The CI workflow runs lint, formatting, type check, unit tests, the
-coverage gate, a production build, and the E2E suite.
+The CI workflow runs lint, formatting, type check, unit tests, the
+coverage gate, and a production build.
 
 The coverage gate requires 80% lines/functions/statements and 70% branches
 across `lib/**`.
