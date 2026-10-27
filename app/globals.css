@@ -2,6 +2,36 @@
 @import 'tw-animate-css';
 @import 'shadcn/tailwind.css';
 
+@font-face {
+  font-family: 'CV Sans Embedded';
+  font-style: normal;
+  font-weight: 400;
+  font-display: swap;
+  src: url('/fonts/carlito-regular.woff2') format('woff2');
+}
+@font-face {
+  font-family: 'CV Sans Embedded';
+  font-style: normal;
+  font-weight: 700;
+  font-display: swap;
+  src: url('/fonts/carlito-bold.woff2') format('woff2');
+}
+
+@font-face {
+  font-family: 'CV Serif Embedded';
+  font-style: normal;
+  font-weight: 400;
+  font-display: swap;
+  src: url('/fonts/notoserif-regular.woff2') format('woff2');
+}
+@font-face {
+  font-family: 'CV Serif Embedded';
+  font-style: normal;
+  font-weight: 700;
+  font-display: swap;
+  src: url('/fonts/notoserif-bold.woff2') format('woff2');
+}
+
 @custom-variant dark (&:is(.dark *));
 
 @theme inline {

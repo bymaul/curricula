@@ -2,6 +2,7 @@ import { describe, expect, it } from 'vitest';
 import {
   ACCENT_COLORS,
   DEFAULT_DESIGN,
+  FONT_STACKS,
   PAGE_DIMENSIONS_PX,
   computePageCount,
   designCssVars,
@@ -118,6 +119,48 @@ describe('designCssVars', () => {
     expect(compact['--cv-item-gap']).toBe('5pt');
     expect(relaxed['--cv-section-gap']).toBe('13pt');
     expect(relaxed['--cv-item-gap']).toBe('10pt');
+  });
+});
+
+describe('FONT_STACKS font hardening', () => {
+  it('every stack starts with the embedded sans font before the generic', () => {
+    for (const [id, stack] of Object.entries(FONT_STACKS)) {
+      if (id === 'serif') continue;
+      expect(stack.startsWith("'CV Sans Embedded'")).toBe(true);
+      const genericIdx = stack.lastIndexOf(', sans-serif');
+      expect(genericIdx).toBeGreaterThan(0);
+    }
+  });
+
+  it('serif stack starts with the embedded serif font before the generic', () => {
+    const stack = FONT_STACKS.serif;
+    expect(stack.startsWith("'CV Serif Embedded'")).toBe(true);
+    const genericIdx = stack.lastIndexOf(', serif');
+    expect(genericIdx).toBeGreaterThan(0);
+  });
+
+  it('default fontFamily resolves to embedded sans stack', () => {
+    const vars = designCssVars(DEFAULT_DESIGN, {
+      accentFallback: '#000000',
+      fontFallback: 'sans',
+    });
+    expect(vars['--cv-font'].startsWith("'CV Sans Embedded'")).toBe(true);
+  });
+
+  it('serif fontFamily resolves to embedded serif stack', () => {
+    const vars = designCssVars(
+      { ...DEFAULT_DESIGN, fontFamily: 'serif' },
+      { accentFallback: '#000000', fontFallback: 'sans' },
+    );
+    expect(vars['--cv-font'].startsWith("'CV Serif Embedded'")).toBe(true);
+  });
+
+  it('sans fontFamily resolves to embedded sans stack', () => {
+    const vars = designCssVars(
+      { ...DEFAULT_DESIGN, fontFamily: 'sans' },
+      { accentFallback: '#000000', fontFallback: 'sans' },
+    );
+    expect(vars['--cv-font'].startsWith("'CV Sans Embedded'")).toBe(true);
   });
 });
 

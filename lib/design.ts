@@ -56,11 +56,12 @@ const ACCENT_HEX: Record<
   ).map((c) => [c.id, c.hex]),
 ) as Record<Exclude<AccentColorId, 'default'>, string>;
 
-const FONT_STACKS: Record<FontId, string> = {
+export const FONT_STACKS: Record<FontId, string> = {
   default:
-    "ui-sans-serif, system-ui, -apple-system, 'Segoe UI', Roboto, Arial, sans-serif",
-  serif: "ui-serif, Georgia, Cambria, 'Times New Roman', Times, serif",
-  sans: "ui-sans-serif, system-ui, -apple-system, 'Segoe UI', Roboto, Arial, sans-serif",
+    "'CV Sans Embedded', ui-sans-serif, system-ui, -apple-system, 'Segoe UI', Roboto, Arial, sans-serif",
+  serif:
+    "'CV Serif Embedded', ui-serif, Georgia, Cambria, 'Times New Roman', Times, serif",
+  sans: "'CV Sans Embedded', ui-sans-serif, system-ui, -apple-system, 'Segoe UI', Roboto, Arial, sans-serif",
 };
 
 const DENSITY_GAPS: Record<DensityId, { section: number; item: number }> = {
